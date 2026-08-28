@@ -80,23 +80,19 @@ product will never claim."** Nobody asked for that section.
 
 ## What it found in the file
 
-Building on this data turned up four things about the data itself, written up in
+Building on this data turned up things about the data itself, written up in
 [docs/FINDINGS.md](docs/FINDINGS.md) with the scripts to reproduce them.
 
-The first is the one worth reading. In a sample of 200 reports with a long
-narrative, **29 of them, 14.5%, carry a coded field that its own write-up
-contradicts**. A landing gear that would not come down, filed as a false warning.
-A part condition of `NO INDICATION` over a paragraph that says `HAS INDICATIONS`.
-Flaps filed under leading edge devices.
+The first one is a retraction, and it is left in on purpose. A pass over 200 long
+reports appeared to show that **14.5% carry a coded field their own narrative
+contradicts**. An adversarial check then cut that to 2.0%, and inspecting the check
+showed one of its three adjudicators had refuted every flag it ever saw, which
+makes it a constant rather than a judge. Neither number survives.
 
-That is not a query anyone can write. No filter expresses "the tick box disagrees
-with the paragraph", which is why nobody has ever counted it. It needs something
-that reads both halves of the form and compares them.
-
-The number is a reading from an uncalibrated gauge and is presented as one: the
-model's judgement is the instrument and no human has labelled the sample yet.
-
----
+What survives is four documented cases, including an engine recorded as shut down
+in flight when the aircraft was on the ground and it was the APU, and an
+unscheduled landing recorded over a narrative reading `CONTINUED TO DESTINATION`.
+The disagreements are real. The rate is unknown until a human labels the sample.
 
 ## How the model is used
 

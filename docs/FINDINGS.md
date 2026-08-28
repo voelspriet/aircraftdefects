@@ -5,104 +5,82 @@ reproducible from this repository.
 
 ---
 
-## F1. In 14.5% of long reports, the ticked box contradicts the paragraph
+## F1. Codes that contradict their own narrative exist. How often is not known.
 
-**Measured 29 August 2026.** Script: [`build/measure_tension.py`](../build/measure_tension.py).
-Raw results: [`build/tension-results.json`](../build/tension-results.json).
+**Measured 29 August 2026, then retracted the same day.**
+Scripts: [`build/measure_tension.py`](../build/measure_tension.py),
+[`build/validate.py`](../build/validate.py).
+Raw: [`build/tension-results.json`](../build/tension-results.json),
+[`build/validation-results.json`](../build/validation-results.json).
 
 A Service Difficulty Report has two halves. The filer ticks coded boxes, and the
-same filer writes a description. Nobody has ever checked whether the two agree,
-because there is no way to ask. No database query expresses "the tick box
-disagrees with the paragraph". It needs something that reads both and compares.
+same filer writes a description. Nobody has checked whether the two agree, because
+no database query expresses "the tick box disagrees with the paragraph".
 
-```
-sampled            200   drawn from 159,585 reports whose narrative runs past
-                         400 characters and whose stage code is a real value
-answered           200
-failed               0
-disagreements       29   14.5%
-high confidence     26   13.0%
-wall time         4m29s   at six concurrent requests
-```
+### What was claimed, and why it does not stand
 
-Which field disagreed:
+A first pass over 200 long reports flagged 29, and this document said **14.5%**.
+That number was published here for about an hour. It should not have been.
 
-| Field | n |
-|---|---|
-| Nature of condition | 8 |
-| Stage of operation | 6 |
-| How discovered | 5 |
-| What the crew did | 4 |
-| Part condition | 3 |
-| System | 1 |
-| Part | 1 |
-| Part and part condition together | 1 |
+Every flag was then put to three adjudicators, each told to refute it rather than
+confirm it, a flag surviving on two of three. Four survived. That would put the
+rate at 2.0%.
 
-### The ones that matter
+Neither number is trustworthy, and the reason is in how the three voted:
 
-**Nature of condition: `False warning`.** Record `ASOA01029`, 17 March 2001. The
-narrative describes the landing gear failing to come down when commanded, the crew
-executing an electric override, and a proximity switch being removed and replaced.
-That is a real malfunction filed under the code for a spurious alert. Anyone
-filtering this file for genuine failures would never see it.
+| Adjudicator | upheld | refuted |
+|---|---|---|
+| literal | 16 | 13 |
+| charitable | **0** | **29** |
+| sequence | 5 | 24 |
 
-**What the crew did: `Emergency descent`.** Record `USAASB96182`, 6 September 1996.
-The crew descended to 10,000 feet and returned to the field, and the write-up states
-in capitals `NO EMERGENCY WAS DELCARED`. The code overstates what the same person
-wrote two lines below it.
+**The charitable adjudicator refuted every single flag.** An instrument that always
+returns the same answer measures nothing. It was instructed that "if a defensible
+reading exists, the flag fails", and for a broad FAA code definition a defensible
+reading almost always exists. So a two-of-three rule silently became "literal and
+sequence must both agree", and the 2.0% is an artefact of a broken third vote.
 
-**Part condition: `NO INDICATION`.** Record `DALA2022070804785`, 7 July 2022. The
-narrative says the number 9 fastener hole `HAS INDICATIONS` at roughly the one
-o'clock and nine o'clock positions. The code says the opposite of the text.
+So: 14.5% was uncalibrated. 2.0% is calibrated with a gauge that has a stuck
+needle. **The honest position is that the rate is unknown**, and the range those
+two numbers bracket is wide enough to be useless.
 
-**System: `Leading Edge Devices`.** Record `20000622AP002`, 10 April 2000. The
-narrative describes flaps throughout, including a sheared bearing attach bolt on the
-left outboard flap. Flaps are trailing edge devices. Filed under the wrong end of
-the wing.
+### What does stand
 
-**Part: `NONE`.** Record `SWIA202163274`, 2 December 2021. No part recorded, while
-the text names an intercostal, part number SH670-31994-1, removed and replaced.
+Four flags survived a test designed to kill them, and they are not marginal:
 
-### What this is not
+**`Engine shut down in flight`** on `AALA202111165003`. The aircraft was on the
+ground during boarding with the jet bridge pulled away, and it was the APU that
+auto-shut-down before the crew could switch it off. Not an engine, not in flight.
 
-**It is a reading from an uncalibrated gauge.** The model's judgement is the
-instrument, and no human has labelled these 200. The rate could be materially
-wrong in either direction, and the fair thing to do with it is to hand-label the
-sample and publish the precision and recall before anyone quotes 14.5%. The design
-session's own Phase 4 demanded exactly that, at 200 to 300 records, before any
-extraction feature ships. That check has not been done.
+**`Unscheduled landing`** on `CA141106001`, over a narrative reading
+`CONTINUED TO DESTINATION`, landing normally. Nothing unscheduled occurred.
 
-**It is not evidence of anything being covered up.** Filing a report is voluntary
-work on top of the repair itself, the coded fields are a dropdown next to a free
-text box, and people are busy. Careless coding is the boring explanation and it is
-almost certainly the right one.
+**`Unknown`** as how-discovered on `QXEA2014050300368`, where the text says a
+flight attendant reported the aft passenger door handle was not seated.
 
-**It is not a measure of the whole file.** The sample is deliberately drawn from
-long narratives, because a one-line write-up has no sequence to contradict. Short
-reports are the majority and were not tested.
+**`Lost more than half of the electrical power`** on `CA121213002`, over a
+narrative describing an intermittent heading drift of 7 to 8 degrees on one
+display.
 
-**No count here is a rate.** Nothing in this file is divided by fleet size or
-flying hours, and it never can be.
+A recheck of 40 unflagged reports found 2 the first pass had missed, so the first
+pass was not only over-flagging: it was missing things as well.
 
-### Why it matters anyway
+### What would settle it
 
-The coded fields are how everyone searches this database, including the FAA's own
-query page and the parent tool. If roughly one in seven detailed reports is filed
-under a code its own narrative contradicts, then every filtered count over this
-file carries an error nobody has measured, and the write-ups are the only place the
-truth survives.
+A human labelling the 200 by hand. Not another model, and not another lens: the
+whole problem here is that every number so far came from the same kind of judge.
+Until someone does that, this stays a demonstration that the disagreements exist,
+with four documented examples, and no rate attached.
 
-That is an argument for reading the text, which is what 1.5 million people have
-not done because it was not readable.
+### The method lesson, which is the more useful finding
 
-### Reproducing it
+An adversarial check is only worth running if its verdicts vary. Three lenses were
+built to be independent, and one of them was written so strictly that it became a
+constant. It looked like rigour and it destroyed the measurement, in the direction
+that feels safe, which is the direction that is hardest to notice.
 
-```bash
-./.venv/bin/python build/measure_tension.py
-```
-
-The sample is deterministic, seeded on a hash of the record id, so the same 200
-reports come back every run.
+That is checkable in one line and it should be the first thing checked on any
+panel of judges: did each judge ever disagree with itself across the set?
 
 ---
 

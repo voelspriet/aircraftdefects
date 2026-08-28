@@ -1,0 +1,61 @@
+.rails{margin-top:9px;display:flex;flex-direction:column;gap:2px}
+.rail{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:start;
+.rail.open{cursor:default;padding:7px 0 8px}
+.rail .gut{min-width:0}
+.rail .gut .q{font:600 11px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em;color:var(--ink)}
+.rail .gut .pn{font-size:9.5px;color:var(--ash)}
+.rail .gut .val{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--rust);
+.rail .track{min-width:0;position:relative}
+.rail .track.two{display:grid;grid-template-columns:1fr 330px;gap:18px}
+.rail:not(.open) .mo{cursor:pointer}
+.zone{cursor:pointer;transition:stroke .1s}
+.zone:hover,.zone:focus-visible{stroke:var(--rust);stroke-width:2.2}
+.zone.lit{stroke:var(--rust);stroke-width:2.4}
+  .rail{grid-template-columns:1fr;gap:4px}
+  .rail .track.two{grid-template-columns:1fr}
+.rail:not(.open):hover .strip span{background:#c3bbac}
+.rail:not(.open){padding:5px 0}
+.rail.open[data-rail=when] .months{touch-action:none;user-select:none}
+.rail .gut.rest{display:flex;align-items:baseline;gap:8px}
+.rail .gut.rest .q{font:600 11px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em;color:var(--ink)}
+.rail .gut.rest .val{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--rust);
+.rail:not(.open){align-items:center;grid-template-columns:186px 1fr}
+tr.spine td{position:sticky;top:44px;z-index:5;background:#f2eee6;border-top:1px solid var(--rust);
+tr.spine b{font-weight:400;color:var(--ash);margin-left:10px}
+tr.spine.lit td{background:#fbe6dc}
+.zone:focus-visible{outline:none;filter:drop-shadow(0 0 0 2px var(--ink))}
+.zone:focus-visible{stroke:var(--ink);stroke-width:3}
+  .zone{stroke:CanvasText}
+.rail .gut .val,.rail .gut.rest .val,.magnote,.margin .rustnote,caption.cut .backup,
+.picker button.on .q,.hero .rustnote{color:var(--rust-text)}
+tr.spine b{color:#5f584f}
+tr.spine td{top:0}
+.rail[data-rail=forced].open .fblock{margin-bottom:7px}
+.zone.taken{stroke:var(--rust);stroke-width:2.6}
+.rail.open .gut .val{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zonenote{font-size:11.5px;color:#5f584f;line-height:1.45;margin-top:7px;padding-top:6px;
+.rail>.reading{grid-column:2}
+.rail.open[data-rail=when] .track{overflow-x:auto;overscroll-behavior-x:contain}
+.rail.open[data-rail=when] .months,
+.rail.open[data-rail=when] .axis{min-width:var(--mw,100%)}
+.rail.open[data-rail=when] .mo{min-width:5px}
+  document.querySelectorAll("tr.spine").forEach(r=>{
+    const m=ms.find(x=>x.m===r.dataset.spine);
+    const b=r.querySelector(".spinen"); if(b)b.textContent=m?`${num(m.n)} in this selection`:"";
+    const zs=(d.zones||[]).slice().sort((a,b)=>b.n-a.n);
+  const zs=d.zones||[], mx=Math.max(1,...zs.map(z=>z.n));
+  const wtr=document.querySelector(".rail.open[data-rail=when] .track");
+  const zs=d.zones||[], mx=Math.max(1,...zs.map(z=>z.n));
+  const wtr=document.querySelector(".rail.open[data-rail=when] .track");
+  (d.zones||[]).forEach(z=>out.push({label:z.label,take:"zone|"+z.code,n:z.n}));
+  const track=e.target.closest&&e.target.closest(".rail.open[data-rail=when] .months");
+  const track=document.querySelector(".rail.open[data-rail=when] .months"); if(!track)return;
+  const track=document.querySelector(".rail.open[data-rail=when] .months");
+    const z=(d.zones||[]).find(x=>x.code===key); if(!z)return "";
+    const placed=(d.zones||[]).reduce((a,x)=>a+x.n,0);
+  if(kind==="zone"){ const z=(d.zones||[]).find(x=>x.code===key);
+    const all=[...document.querySelectorAll(".rail.open .mo")];
+      const all=[...document.querySelectorAll(".rail.open .mo")];
+  document.querySelectorAll("tr.spine.lit").forEach(x=>x.classList.remove("lit"));
+  const m=row.dataset.month, z=row.dataset.zone;
+        document.querySelectorAll(`tr.spine[data-spine="${m}"]`).forEach(x=>x.classList.add("lit"))}

@@ -1,0 +1,634 @@
+{
+ "summary": {
+  "flags_tested": 29,
+  "survived": 4,
+  "unanimous": 0,
+  "precision_pct": 13.8,
+  "unflagged_rechecked": 40,
+  "missed_on_recheck": 2,
+  "first_pass_rate_pct": 14.5,
+  "calibrated_rate_pct": 2.0,
+  "note": "Each flag was put to three adjudicators told to refute it. A flag survives on two of three. The unflagged recheck estimates what the first pass missed."
+ },
+ "adjudicated": [
+  {
+   "id": "20000622AP002",
+   "field": "System",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 1,
+   "survives": false,
+   "code_says": "Leading Edge Devices",
+   "text_says": "The narrative repeatedly and plainly describes the flaps (flaps selected to landing position, differential flap lockout, left outboard flap with sheared inboard aft bearing attach bolt) \u2014 flaps are trailing edge devices, not leading edge devices"
+  },
+  {
+   "id": "ASOA01029",
+   "field": "Nature of condition",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 1,
+   "survives": false,
+   "code_says": "False warning",
+   "text_says": "The narrative describes a real malfunction: the gear would not come down when commanded and the crew had to execute an electric override; a proximity switch was removed and replaced"
+  },
+  {
+   "id": "CA120801004",
+   "field": "How discovered",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 1,
+   "survives": false,
+   "code_says": "Unknown",
+   "text_says": "The crew noticed the condition during the approach phase in flight (and reported it directly), which plainly states how the condition was discovered"
+  },
+  {
+   "id": "AALA2019120429015",
+   "field": "Stage of operation",
+   "votes": {
+    "literal": false,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 0,
+   "survives": false,
+   "code_says": "In cruise",
+   "text_says": "The pilot reported the odor during descent"
+  },
+  {
+   "id": "USAASB96182",
+   "field": "What the crew did",
+   "votes": {
+    "literal": false,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 0,
+   "survives": false,
+   "code_says": "Emergency descent",
+   "text_says": "The crew descended to 10,000 feet and returned to the field, and the report explicitly states 'NO EMERGENCY WAS DELCARED'"
+  },
+  {
+   "id": "CA121213002",
+   "field": "Nature of condition",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": true
+   },
+   "held": 2,
+   "survives": true,
+   "code_says": "Lost more than half of the electrical power",
+   "text_says": "The narrative describes an intermittent heading indication drift of 7-8 degrees on the left primary flight display, with the unit (ADAHRS) subsequently replaced; no loss of electrical power is described anywhere"
+  },
+  {
+   "id": "DALA2023060704628",
+   "field": "Stage of operation",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 1,
+   "survives": false,
+   "code_says": "On approach",
+   "text_says": "The event occurred at cruise altitude (FL340, Mach .80) with the crew staying outside RVSM airspace and beginning a descent to FL300 \u2014 i.e., cruise/level flight and descent, not approach"
+  },
+  {
+   "id": "REXA2012032700410",
+   "field": "Nature of condition",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 1,
+   "survives": false,
+   "code_says": "False warning",
+   "text_says": "Troubleshooting found the PX 13 sensor wire open (a real defect), the wire was repaired, and the door indication operational test passed \u2014 i.e., the PROX SYS FAULTED message reflected an actual damaged wire, not a false warning"
+  },
+  {
+   "id": "UALA2012010900174",
+   "field": "How discovered",
+   "votes": {
+    "literal": false,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 0,
+   "survives": false,
+   "code_says": "Unknown",
+   "text_says": "The discrepancy was discovered/reported by the flight crew \u2014 the narrative states 'NO LAND 3 DISP ON ASA WITH SYS ENGAGED IN CMD' and includes 'CREW COMMENTS: LEFT AP SAME THING', plainly attributing the report to the crew"
+  },
+  {
+   "id": "UPS07M48882",
+   "field": "How discovered",
+   "votes": {
+    "literal": false,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 0,
+   "survives": false,
+   "code_says": "Unknown",
+   "text_says": "The condition was found during a C-check inspection (\"INSPECTION TYPE:C ... FOUND CORROSION ON SUPPORT STRUCTURE AS MARKED\")"
+  },
+  {
+   "id": "CA141106001",
+   "field": "What the crew did",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": true
+   },
+   "held": 2,
+   "survives": true,
+   "code_says": "Unscheduled landing",
+   "text_says": "The crew 'CONTINUED TO DESTINATION' and landed normally; the narrative nowhere describes an unscheduled or precautionary landing."
+  },
+  {
+   "id": "CA120511004",
+   "field": "How discovered",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 1,
+   "survives": false,
+   "code_says": "Unknown",
+   "text_says": "The narrative plainly states how the condition was discovered: the flight crew observed the flaps stop and the flap drive caution light illuminate after landing, and maintenance then found the faulty flexible shaft assembly during troubleshooting."
+  },
+  {
+   "id": "CA030527010",
+   "field": "Nature of condition",
+   "votes": {
+    "literal": false,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 0,
+   "survives": false,
+   "code_says": "False warning",
+   "text_says": "The narrative describes a real malfunction, not a false warning: the static line had pulled out of the tee fitting, causing the No. 1 altimeter and airspeed indicators to rapidly move to zero \u2014 an actual failure of the static system feeding the instruments."
+  },
+  {
+   "id": "97FDEA00539",
+   "field": "Stage of operation",
+   "votes": {
+    "literal": false,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 0,
+   "survives": false,
+   "code_says": "Climbing",
+   "text_says": "AFTER T/O CRUISE ... 1012Z - 0+40 EN ROUTE \u2014 the event occurred during cruise, en route"
+  },
+  {
+   "id": "DALA2022070804785",
+   "field": "Part condition",
+   "votes": {
+    "literal": false,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 0,
+   "survives": false,
+   "code_says": "NO INDICATION",
+   "text_says": "#9 fastener hole HAS INDICATIONS at approx 1 o'clock and 9 o'clock positions (fwd looking aft)"
+  },
+  {
+   "id": "AALA201508199009",
+   "field": "What the crew did",
+   "votes": {
+    "literal": false,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 0,
+   "survives": false,
+   "code_says": "Oxygen masks dropped; System or circuit switched off",
+   "text_says": "The narrative describes the crew response as the forward flight attendant donning a PBE smoke hood and using a portable Halon fire extinguisher to put out the fire. It never mentions oxygen masks dropping, and it explicitly states 'THE BREAKERS DID NOT POP' with no mention of any circuit being switched off."
+  },
+  {
+   "id": "ASMF201611017",
+   "field": "Nature of condition",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 1,
+   "survives": false,
+   "code_says": "False warning",
+   "text_says": "The fire handle light was NOT illuminated during the fire detection test and loop B had a fault; an open line was found in the wiring and the harness was replaced \u2014 a failure to detect/indicate, not a false warning"
+  },
+  {
+   "id": "SWIA202163274",
+   "field": "Part",
+   "votes": {
+    "literal": false,
+    "charitable": false,
+    "sequence": true
+   },
+   "held": 1,
+   "survives": false,
+   "code_says": "NONE",
+   "text_says": "A specific part is identified and worked on: the intercostal, part number SH670-31994-1, which was removed and replaced with a new one of the same part number."
+  },
+  {
+   "id": "AALA202111165003",
+   "field": "What the crew did",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": true
+   },
+   "held": 2,
+   "survives": true,
+   "code_says": "Engine shut down in flight",
+   "text_says": "The aircraft was on the ground (during boarding, jet bridge pulled away) and the APU auto-shutdown before the crew could manually shut it down; no engine shutdown in flight occurred"
+  },
+  {
+   "id": "CHQA200900137",
+   "field": "Nature of condition",
+   "votes": {
+    "literal": false,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 0,
+   "survives": false,
+   "code_says": "False warning",
+   "text_says": "The narrative describes a genuine malfunction: a bad nose landing gear weight-on-wheels proximity switch harness that produced a real air/ground fail message, prevented the gear lever from being moved to up, and required replacement of the harness."
+  },
+  {
+   "id": "UIEA2021051801139",
+   "field": "Part condition",
+   "votes": {
+    "literal": false,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 0,
+   "survives": false,
+   "code_says": "DAMAGED",
+   "text_says": "Couplers were removed and replaced, but the narrative states 'NO DEFECTS NOTED' and both the ops check and voice calls were 'OPS CHECK GOOD'"
+  },
+  {
+   "id": "YENA2023112901488",
+   "field": "Part condition",
+   "votes": {
+    "literal": false,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 0,
+   "survives": false,
+   "code_says": "UNKNOWN",
+   "text_says": "The part condition is wear \u2014 the narrative plainly states 'WEAR BUSHING ON ATTACH FITTING HINGE #3'"
+  },
+  {
+   "id": "OZTA2013F00143",
+   "field": "Stage of operation",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 1,
+   "survives": false,
+   "code_says": "On the ground, in inspection or maintenance",
+   "text_says": "The event occurred during a takeoff from the East River and the loss was discovered upon arrival at the end of a flight; the narrative plainly describes in-flight operation, not ground inspection or maintenance"
+  },
+  {
+   "id": "CALA2025041603890",
+   "field": "Nature of condition",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 1,
+   "survives": false,
+   "code_says": "No test",
+   "text_says": "PERFORMED OPS CHECK OF THE EMERGENCY LIGHTS IAW BOEING 737-800 AMM 33-51-00. OPS CHECK GOOD."
+  },
+  {
+   "id": "DXTA2021111551910",
+   "field": "Part / Part condition",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 1,
+   "survives": false,
+   "code_says": "Part: NONE, Part condition: NONE (no part identified, no part condition)",
+   "text_says": "The mechanic found the NLG weight-on-wheels (WOW) switch out of rig, adjusted it per AMM 32-60-00, and noted defects found \u2014 plainly identifying a specific part with a defective condition that was corrected"
+  },
+  {
+   "id": "CA051219005",
+   "field": "Stage of operation",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 1,
+   "survives": false,
+   "code_says": "Taxiing or ground handling",
+   "text_says": "The narrative states the problem occurred and was investigated while in flight (\"COULD NOT BE CORRECTED ON ANY SYSTEM OR START-UP PAGE WHILE IN FLIGHT\"), and the report describes a post-flight discussion, indicating the flight had been conducted."
+  },
+  {
+   "id": "K11A2022080900153",
+   "field": "Nature of condition",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 1,
+   "survives": false,
+   "code_says": "A warning went off (a warning illuminated/activated)",
+   "text_says": "There was NO green indication of the nose landing gear when extended \u2014 the light failed to come on, the opposite of a warning activating"
+  },
+  {
+   "id": "QXEA2014050300368",
+   "field": "How discovered",
+   "votes": {
+    "literal": true,
+    "charitable": false,
+    "sequence": true
+   },
+   "held": 2,
+   "survives": true,
+   "code_says": "Unknown",
+   "text_says": "The narrative plainly states how it was discovered: a flight attendant reported the aft passenger door handle was not seated against the door, and the mechanic found the missing hardware after landing during inspection."
+  },
+  {
+   "id": "CALA2023081802569",
+   "field": "Stage of operation",
+   "votes": {
+    "literal": false,
+    "charitable": false,
+    "sequence": false
+   },
+   "held": 0,
+   "survives": false,
+   "code_says": "Descending",
+   "text_says": "The narrative plainly describes the takeoff roll (pulls left at 105 and 120 knots on takeoff roll) and taxi testing (taxi test, taxi down BWI runway 28, taxi to the gate) \u2014 a takeoff/taxi event, not a descent. The crew action code 'Emergency descent' is likewise contradicted; no descent, let alone an emergency descent, is described anywhere in the text."
+  }
+ ],
+ "recheck": [
+  {
+   "id": "SWAA2023101100703",
+   "missed": false,
+   "field": null,
+   "why": "The narrative confirms a cracked threshold, and every code (e.g., 'Unknown' for discovery) is at most vaguer than the text rather than contradicting it."
+  },
+  {
+   "id": "CALA2017091103127",
+   "missed": false,
+   "field": null,
+   "why": "None of the coded values are flatly contradicted \u2014 the EGT over red line supports 'Ran too hot,' the HPTACC (a valve) replacement supports 'VALVE / FAULTY,' and the narrative is silent on or consistent with the other codes."
+  },
+  {
+   "id": "DXTA200702223",
+   "missed": false,
+   "field": null,
+   "why": "All coded values are either consistent with the narrative (smoke/odour, controller inoperative) or merely more general than the text, with nothing the narrative directly contradicts."
+  },
+  {
+   "id": "UPS08M52138",
+   "missed": false,
+   "field": null,
+   "why": "All coded values are consistent with or vaguer than the narrative (e.g., 'Unknown' for discovery is less specific than, not contrary to, the described inspection finding), and no code directly conflicts with the written text."
+  },
+  {
+   "id": "2014FA0000031",
+   "missed": false,
+   "field": null,
+   "why": "Every coded value (ground inspection/maintenance, visual discovery, cylinder part, cracked condition) is consistent with the narrative; the pressure testing is additional detail, not a contradiction, and 'Other' for nature is vaguer, not conflicting."
+  },
+  {
+   "id": "FDEA202010292707",
+   "missed": false,
+   "field": null,
+   "why": "Every coded value is consistent with the narrative \u2014 the corrosion was found by visual inspection during ground maintenance on a fuselage seat track, and 'Nature of condition: Other' is merely a vaguer catch-all than the specific corrosion described, not a contradiction."
+  },
+  {
+   "id": "CA110406009",
+   "missed": false,
+   "field": null,
+   "why": "Every coded value is either directly supported by the narrative (cruise, emergency descent, outflow valve failed/unserviceable) or simply more general than the text (e.g., 'Other' for how discovered and nature of condition), so nothing flatly contradicts the description."
+  },
+  {
+   "id": "DHL2005742529",
+   "missed": false,
+   "field": null,
+   "why": "The coded values (corroded web discovered by visual inspection during ground maintenance) are consistent with the narrative describing corroded subdeck floor structure repaired during a maintenance action."
+  },
+  {
+   "id": "QXEA2012112501431",
+   "missed": false,
+   "field": null,
+   "why": "The narrative describes discovering and repairing a corroded frame flange during maintenance on the ground, which is consistent with all coded values, and the 'Other' codes are simply vaguer choices rather than contradictions."
+  },
+  {
+   "id": "SWAA2022100678802",
+   "missed": true,
+   "field": "How discovered",
+   "why": "The narrative states the crack was found via eddy current inspection using ET equipment (Nortec 600D) during a maintenance task, so 'Unknown' is flatly contradicted by the described discovery method."
+  },
+  {
+   "id": "DALA2022020200681",
+   "missed": false,
+   "field": null,
+   "why": "The narrative describes discovering a hole in fuselage skin and performing a repair during maintenance, which is consistent with the coded stage of operation, system, and 'Other' codes, and the NONE entries for Part and Part condition are non-assertions rather than statements the text flatly contradicts."
+  },
+  {
+   "id": "AALA201904199013",
+   "missed": false,
+   "field": null,
+   "why": "All coded values are consistent with or vaguer than the narrative (dual pressurization loss enroute, aft service door seal out of track, unscheduled landing), and no code flatly contradicts the written description."
+  },
+  {
+   "id": "WX0A2024072632125",
+   "missed": false,
+   "field": null,
+   "why": "All coded values are consistent with or vaguer than the narrative: the gouge was found on the external fuselage skin during a heavy maintenance visit, matching 'On the ground, in inspection or maintenance', 'Fuselage Main, Plate/Skin', 'SKIN', and 'GOUGED', with the 'Other' codes not contradicting anything."
+  },
+  {
+   "id": "QXEA2016041300246",
+   "missed": false,
+   "field": null,
+   "why": "Every coded value (wing skin cracked, discovered during maintenance on the ground) is consistent with the narrative describing repair of a cracked inboard closing rib on the left wing leading edge panel; no code directly contradicts the text."
+  },
+  {
+   "id": "CALA2024092602497",
+   "missed": false,
+   "field": null,
+   "why": "All coded values are consistent with the narrative: the crack in the wing lower skin was found during a visual inspection and confirmed via HFEC, matching on-ground maintenance, visual discovery, wing/skin part, and cracked condition."
+  },
+  {
+   "id": "CA121205010",
+   "missed": false,
+   "field": null,
+   "why": "All coded values are consistent with or vaguer than the narrative \u2014 the autopilot/MCP failure after takeoff, diversion for maintenance, and replacement of the failed control panel match the codes, and the 'lost more than half of the electrical power' nature code is not contradicted by any statement in the text."
+  },
+  {
+   "id": "WWQA04111",
+   "missed": false,
+   "field": null,
+   "why": "None of the coded values flatly contradict the narrative; the codes are consistent with or no more specific than the text describing a door seal leak discovered during cruise flight and an emergency descent."
+  },
+  {
+   "id": "SWAA2022101749302",
+   "missed": false,
+   "field": null,
+   "why": "All coded values are consistent with or compatible with the narrative \u2014 the corrosion finding matches 'Part condition: CORRODED', the support location matches the Part/System codes, and the narrative does not state how the condition was discovered or any other fact that flatly contradicts a coded value."
+  },
+  {
+   "id": "ASAA2021010133798",
+   "missed": false,
+   "field": null,
+   "why": "All coded values are consistent with or vaguer than the narrative (cruise flight, overheat warning addressed by replacing the WHCU), with no flat contradiction."
+  },
+  {
+   "id": "FDEA201606061855",
+   "missed": false,
+   "field": null,
+   "why": "All coded values (ground maintenance discovery, fuselage skin damage) are consistent with the narrative, and any imprecision like 'Nature of condition: Other' is merely vaguer than the text, not contradicted by it."
+  },
+  {
+   "id": "CA070828002",
+   "missed": false,
+   "field": null,
+   "why": "Every coded value (ground inspection during heavy check, visual discovery, hydraulic line chafed) is consistent with the narrative, and no code is directly contradicted by the text."
+  },
+  {
+   "id": "SWAA2024011627836",
+   "missed": false,
+   "field": null,
+   "why": "The narrative describes a cracked support angle in the fuselage structure found and repaired during maintenance, which is consistent with all coded values, and nothing in the text specifies how it was discovered to contradict 'Unknown'."
+  },
+  {
+   "id": "08FDEA00507",
+   "missed": false,
+   "field": null,
+   "why": "All coded values (maintenance stage, visual discovery, pylon fairing part, damaged condition) are consistent with the narrative of finding elongated fastener holes and performing a structural repair."
+  },
+  {
+   "id": "SWAA2021081291721",
+   "missed": false,
+   "field": null,
+   "why": "The coded values (fuselage skin cracked, found during ground maintenance) are consistent with the narrative of a crack indication found on the fuselage skin and subsequently repaired."
+  },
+  {
+   "id": "CALA2023111003326",
+   "missed": false,
+   "field": null,
+   "why": "Every coded value is consistent with or vaguer than the narrative (fuel cap missing, found by inspection, placarded and replaced), so no flat contradiction exists."
+  },
+  {
+   "id": "QXEA2012080800773",
+   "missed": false,
+   "field": null,
+   "why": "Every coded value (corroded stringer on the fuselage, discovered by visual inspection during ground maintenance) is consistent with the narrative describing corrosion on stringer 31S found and repaired."
+  },
+  {
+   "id": "J7SA2026072800501",
+   "missed": false,
+   "field": null,
+   "why": "Although the 'Independent Position Determining System' coding seems like a mismatch for an XM radio fault, the narrative describes a radio-driven fault causing CAS warnings and doesn't flatly contradict any coded value."
+  },
+  {
+   "id": "WX0A2020072073530",
+   "missed": false,
+   "field": null,
+   "why": "The coded values are consistent with the narrative\u2014the EPSU was confirmed bad (supporting 'FAILED') and the event occurred in flight\u2014so no coded value is flatly contradicted by the text."
+  },
+  {
+   "id": "GTIA2023090537458",
+   "missed": false,
+   "field": null,
+   "why": "The codes (wing skin damaged, discovered by visual inspection, on-ground maintenance) are all consistent with the narrative describing a hole cutout in the LH wing lower fuel tank panel skin that received a permanent repair."
+  },
+  {
+   "id": "YENA2023060600579",
+   "missed": false,
+   "field": null,
+   "why": "All coded values are consistent with or vaguer than the narrative (maintenance on the ground, visually found corrosion on fuselage structure), and the UNKNOWN/'Other' entries are less specific than the text rather than contradicting it."
+  },
+  {
+   "id": "CA120223006",
+   "missed": true,
+   "field": "Nature of condition",
+   "why": "The narrative describes a fractured cap discovered and examined during maintenance (with the part and fitting sent for fracture analysis, remaining attached), not anything separating from the aircraft in flight as the code asserts."
+  },
+  {
+   "id": "SWAA2022033073968",
+   "missed": false,
+   "field": null,
+   "why": "The coded values (cracked stringer on the fuselage, discovered during ground maintenance) are consistent with or merely vaguer than the narrative, which describes a cracked stringer at BS540 found via ultrasonic and eddy current inspection and repaired per the SRM."
+  },
+  {
+   "id": "SWIA2025040300314",
+   "missed": false,
+   "field": null,
+   "why": "The coded values (dented skin on the passenger door, on ground during maintenance) are consistent with the narrative describing a dent on the fuselage skin edge at the passenger door cutout found and repaired during inspection; 'Other' for discovery and condition is vaguer than the text but not contradictory."
+  },
+  {
+   "id": "QMLA2017030317024",
+   "missed": false,
+   "field": null,
+   "why": "All coded values are consistent with or vaguer than the narrative, which describes a climbing-phase governor issue discovered after takeoff, an unscheduled return and running landing, and a governor found out of adjustment."
+  },
+  {
+   "id": "DXTA2022011054890",
+   "missed": false,
+   "field": null,
+   "why": "All coded values are consistent with or vaguer than the narrative: the door system matches, 'Functional check' fits the opening/closing verification, 'Other' is suitably general for the handle defect, and the unreported part/condition fields are simply less specific, not contradictory."
+  },
+  {
+   "id": "SWIA2025051916",
+   "missed": false,
+   "field": null,
+   "why": "The narrative describes a dent on the fuselage skin requiring repair, which is consistent with every coded value, and none of the codes (ground maintenance, discovery by inspection, fuselage skin, dented part) is flatly contradicted by the text."
+  },
+  {
+   "id": "DALA2019040542226",
+   "missed": false,
+   "field": null,
+   "why": "All coded values are consistent with or compatible with the narrative of corrosion found on fuselage skin during panel removal; the 'Other' codes are merely vaguer, not contradictory."
+  },
+  {
+   "id": "FDEA202503140393",
+   "missed": false,
+   "field": null,
+   "why": "All coded values are either consistent with or merely vaguer than the narrative (e.g., 'Part: NONE' and 'Part condition: NONE' omit detail but don't contradict the described compliant repair)."
+  },
+  {
+   "id": "96ZZZM1276",
+   "missed": false,
+   "field": null,
+   "why": "None of the coded values are flatly contradicted by the narrative: the climb after takeoff, the return to BWI (an unscheduled landing), and the replaced water separator/coalescer bags are all consistent, and the unmentioned items (a warning, a dirty part) are omissions rather than contradictions."
+  },
+  {
+   "id": "CALA2020021600420",
+   "missed": false,
+   "field": null,
+   "why": "The coded values (skin cracked, found during inspection on the ground, nacelle/pylon location) are consistent with the narrative of an NDT inspection finding crack indications in the #2 pylon upper skin; 'Nature of condition: Other' is merely vaguer than 'cracked' and 'How discovered: Someone looked at it' reasonably covers an inspection, so no code flatly contradicts the text."
+  }
+ ]
+}

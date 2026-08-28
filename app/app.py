@@ -243,6 +243,8 @@ def gloss():
         return jsonify(error=str(e)[:200]), 502
     if not out:
         return jsonify(abstained=True, reason="no usable reply"), 200
+    if out.get("code_tension"):
+        log_conflict(d, out["code_tension"])
     return jsonify(plain=out.get("plain"), abstained=bool(out.get("abstained")),
                    reason=out.get("reason"), code_tension=out.get("code_tension"),
                    jargon=out.get("jargon") or [],
@@ -456,6 +458,12 @@ def health():
                            "9": "operator page"})
 
 
+@app.get("/z/conflicts")
+@app.get("/z/conflicts/")
+def conflicts_page():
+    return send_from_directory(app.static_folder, "conflicts.html")
+
+
 @app.get("/z/")
 @app.get("/z")
 def index():
@@ -635,3 +643,98 @@ def codes():
     want = ["nature", "precaution", "stage", "discovered", "part_location",
             "corrosion", "operator_type", "sdr_type", "submitter", "time_since"]
     return jsonify({t: code_list(t) for t in want})
+
+
+# ============================================================================
+# Conflicting reports: a ledger, not a rate.
+#
+# The measurement attempt failed twice. A first pass put the disagreement rate at
+# 14.5%, an adversarial check cut it to 2.0%, and the check turned out to have an
+# adjudicator that refuted every flag it ever saw, which makes it a constant
+# rather than a judge. See docs/FINDINGS.md. Neither number stands.
+#
+# So stop trying to produce a rate. A rate needs a denominator, a denominator needs
+# a calibrated instrument, and there isn't one. A ledger needs neither. Every time
+# a reader asks for a plain-English account and the model notices the ticked box
+# disagreeing with the paragraph, that case is written down with its record number,
+# and anyone can open the original and judge it.
+#
+# What accumulates is evidence, one document at a time, found by people reading.
+# Nothing here is a claim about how common this is.
+
+import sqlite3
+
+DB = os.path.join(HERE, "conflicts.db")
+
+
+def db():
+    c = sqlite3.connect(DB, timeout=20)
+    c.execute("""CREATE TABLE IF NOT EXISTS conflicts(
+        id TEXT PRIMARY KEY, tail TEXT, date TEXT, operator TEXT, field TEXT,
+        code_says TEXT, text_says TEXT, note TEXT, discrepancy TEXT,
+        found_at TEXT, confirmed INTEGER DEFAULT 0, disputed INTEGER DEFAULT 0)""")
+    return c
+
+
+def log_conflict(rec, note):
+    """Written when a reader's own lookup surfaces one. Keyed on the record number,
+    so the same report read a hundred times is one entry, not a hundred."""
+    if not rec.get("id") or not note:
+        return
+    try:
+        c = db()
+        c.execute("""INSERT OR IGNORE INTO conflicts
+            (id, tail, date, operator, field, code_says, text_says, note, discrepancy, found_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                  (rec.get("id"), rec.get("tail"), rec.get("date"),
+                   rec.get("operator") or rec.get("operator_code"), None, None, None,
+                   note, (rec.get("text") or "")[:2000],
+                   time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())))
+        c.commit(); c.close()
+    except Exception:
+        pass
+
+
+@app.get("/z/api/conflicts")
+def conflicts():
+    c = db()
+    rows = c.execute("""SELECT id, tail, date, operator, note, discrepancy, found_at,
+                               confirmed, disputed FROM conflicts
+                        ORDER BY found_at DESC LIMIT 500""").fetchall()
+    n = c.execute("SELECT COUNT(*) FROM conflicts").fetchone()[0]
+    c.close()
+    return jsonify(
+        total=n,
+        entries=[{"id": r[0], "tail": r[1], "date": r[2], "operator": r[3], "note": r[4],
+                  "discrepancy": r[5], "found_at": r[6], "confirmed": r[7], "disputed": r[8],
+                  "source_url": "https://aircraftdefects.com/?q=" + requests.utils.quote(
+                      (r[5] or "")[:60])} for r in rows],
+        what_this_is=(
+            "Reports where the coded box a filer ticked disagrees with the description the "
+            "same filer wrote underneath it. Each one was noticed while somebody was reading "
+            "that report, by the model that rephrased it. Nothing is added by a sweep."),
+        what_this_is_not=[
+            "Not a rate. There is no denominator here and there is not meant to be. Two "
+            "attempts to measure how often this happens both failed, and the failures are "
+            "written up in the repository rather than buried.",
+            "Not evidence of anything hidden. Filing is voluntary work on top of the repair, "
+            "the codes are a dropdown beside a free-text box, and careless coding is the "
+            "boring explanation and almost certainly the right one.",
+            "Not verified. A model noticed each of these. Open the record and judge it "
+            "yourself; the record number is on every row.",
+            "Not a safety signal about any operator or aircraft."])
+
+
+@app.post("/z/api/conflicts/<cid>/judge")
+def judge(cid):
+    """A reader who opened the record can say whether it holds. Both directions are
+    recorded, because a disputed entry is as useful as a confirmed one."""
+    v = (request.get_json(force=True, silent=True) or {}).get("verdict")
+    if v not in ("confirmed", "disputed"):
+        return jsonify(error="verdict must be confirmed or disputed"), 400
+    c = db()
+    c.execute("UPDATE conflicts SET %s = %s + 1 WHERE id = ?" % (v, v), (cid,))
+    c.commit()
+    row = c.execute("SELECT confirmed, disputed FROM conflicts WHERE id=?", (cid,)).fetchone()
+    c.close()
+    return jsonify(id=cid, confirmed=row[0] if row else 0, disputed=row[1] if row else 0)

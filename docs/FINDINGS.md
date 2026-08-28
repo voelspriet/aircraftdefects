@@ -72,6 +72,36 @@ whole problem here is that every number so far came from the same kind of judge.
 Until someone does that, this stays a demonstration that the disagreements exist,
 with four documented examples, and no rate attached.
 
+### What was built instead: a ledger
+
+Two attempts to produce a rate failed. So the tool stopped trying.
+
+**[aircraftdefects.com/z/conflicts](https://aircraftdefects.com/z/conflicts)** is a
+running list of individual cases rather than a percentage. A rate needs a
+denominator, a denominator needs a calibrated instrument, and there is not one. A
+ledger needs neither.
+
+It fills up from ordinary use. When a reader opens a report and presses *Say this
+in plain English*, the model rephrases the write-up, and if it notices the ticked
+box disagreeing with the paragraph it says so. That case is written down with its
+record number. Same report read a hundred times, one entry.
+
+Nothing sweeps the file. The ledger grows only where somebody looked, which means
+its size measures attention, not prevalence, and the page says so in the first
+paragraph.
+
+Each row carries two buttons: **I read it, this holds** and **I read it, this is
+wrong**. Both counts are kept and shown. A disputed entry is as useful as a
+confirmed one, because it marks a case where the model and a human disagree, and
+those are the rows worth studying.
+
+It opens with the four cases that survived the refutation test, so it does not
+start empty.
+
+The design follows from the failure rather than papering over it. The thing that
+could not be measured can still be documented, one record at a time, by the people
+reading them.
+
 ### The method lesson, which is the more useful finding
 
 An adversarial check is only worth running if its verdicts vary. Three lenses were

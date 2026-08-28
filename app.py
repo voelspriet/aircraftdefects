@@ -162,7 +162,10 @@ def airframe(tail):
             "A write-up is a defect that was found and recorded, usually during maintenance.",
             "A long list is not evidence of an unsafe aircraft, and a short one is not "
             "evidence of a safe one.",
-            "The file holds no flying hours per operator, so nothing here is a rate."])
+            "The file records an airframe's own total hours at the moment of a report, in "
+            "79% of records, but never how many hours a fleet flew. So the hours "
+            "between two write-ups on one aircraft can be measured, and no count "
+            "here can be turned into a rate."])
 
 
 # -------------------------------------------------------------------- build 2
@@ -175,18 +178,47 @@ def airframe(tail):
 GLOSS_RULES = """You are rewriting one aircraft maintenance write-up into plain English
 for someone who is not an aviation professional.
 
-Rules, all of them absolute:
+Keep the whole story, in the order it happened. These write-ups often describe a
+sequence: what the crew noticed, what they decided, what they asked for, what was
+ruled out, what was found afterwards, what was fixed. Every one of those steps
+matters and none may be dropped. A reader of your version alone must not come away
+with a different account of events from a reader of the original.
+
+Length follows the source. A one-line write-up gets one line. A write-up that
+describes eight things that happened gets all eight.
+
+Rules, all absolute:
 - Say only what the write-up and the decoded fields state. Add nothing.
 - Never say or imply why it happened. The record does not contain a cause.
 - Never say or imply anything about an accident, a crash, or danger.
-- Do not soften and do not dramatise. No adjectives that are not in the source.
+- Keep flight numbers, airports, part locations and manual references as written.
+- Expand trade abbreviations (T/E is trailing edge, MX is maintenance, IAW is in
+  accordance with, A/C is aircraft, AGL is above ground level, TSO is time since
+  overhaul, P/N and S/N are part and serial number) rather than repeating them.
+- Airport codes: keep the code in the account and do not silently swap in a name.
+- Do not soften and do not dramatise. No adjective that is not in the source.
 - If the text is too abbreviated to be sure what it means, abstain.
-- British English. One or two short sentences, maximum 40 words.
+- British English.
+
+Separately: you are given the codes the filer entered. Sometimes a filed code does
+not match the story the same person wrote. If that is clearly the case here, say so
+plainly in one sentence, naming both. If they agree, or you are unsure, return null.
+Never guess at this. It is a serious thing to say about someone's paperwork.
+
+Separately again: list every abbreviation, code or piece of trade shorthand in the
+write-up, with what it means. Two kinds, and the difference matters:
+  "record"  the meaning is derivable from the text or the decoded fields you were given
+  "outside" the meaning comes from your own knowledge and is not in this record at all,
+            such as an airport code, a manufacturer, or a regulation number
+Mark every entry. Never mark something "record" to make it look better sourced. If you
+are not confident an airport code is that airport, leave it out entirely.
 
 Return JSON only:
-{"plain": "<the sentence, or null if abstaining>",
+{"plain": "<the account, or null if abstaining>",
  "abstained": true|false,
- "reason": "<if abstained, why, in six words or fewer>"}"""
+ "reason": "<if abstained, why, in six words or fewer>",
+ "code_tension": "<one sentence naming the code and what the text says instead, or null>",
+ "jargon": [{"term": "GEG", "means": "Spokane International Airport", "source": "outside"}]}"""
 
 
 @app.post("/z/api/gloss")
@@ -197,16 +229,26 @@ def gloss():
         return jsonify(error="no text"), 400
     facts = {k: d.get(k) for k in ("system", "part", "condition", "nature",
                                    "stage", "discovered", "zone_label") if d.get(k)}
-    prompt = ("%s\n\nDecoded FAA fields for this record:\n%s\n\nThe write-up, verbatim:\n%s"
+    prompt = ("%s\n\nCodes the filer entered, decoded by the FAA's own tables:\n%s\n\n"
+              "The write-up, verbatim:\n%s"
               % (GLOSS_RULES, json.dumps(facts, ensure_ascii=False), text))
     try:
-        out = glm(prompt, schema=True, effort="low", max_tokens=700)
+        # Longer texts describe a sequence and need room for it. Effort rises with
+        # length too: a one-line write-up is transcription, an eight-step account
+        # is comprehension.
+        long_ = len(text) > 400
+        out = glm(prompt, schema=True, effort="high" if long_ else "low",
+                  max_tokens=2600 if long_ else 900)
     except Exception as e:
         return jsonify(error=str(e)[:200]), 502
     if not out:
         return jsonify(abstained=True, reason="no usable reply"), 200
+    if out.get("code_tension"):
+        log_conflict(d, out["code_tension"])
     return jsonify(plain=out.get("plain"), abstained=bool(out.get("abstained")),
-                   reason=out.get("reason"), model=MODEL, effort="low")
+                   reason=out.get("reason"), code_tension=out.get("code_tension"),
+                   jargon=out.get("jargon") or [],
+                   model=MODEL, effort="high" if long_ else "low")
 
 
 # -------------------------------------------------------------------- build 3
@@ -322,9 +364,11 @@ def operator(code):
                    systems=[{"name": k, "n": v} for k, v in sysc.most_common(12)],
                    records=rows[:60],
                    cannot_show=["This is a count of reports filed, not a rate and not a "
-                                "ranking. The file holds no fleet size and no flying hours, "
-                                "so no comparison between operators is possible from it. An "
-                                "operator that files more may simply be inspecting harder."])
+                                "ranking. Airframe hours are in the file, fleet flying hours "
+                                "are not, and the only aircraft with hours here are the ones "
+                                "that filed something. So no comparison between operators is "
+                                "possible. An operator that files more may simply be "
+                                "inspecting harder."])
 
 
 # ---------------------------------------------------------------- builds 6 + 7
@@ -414,6 +458,12 @@ def health():
                            "9": "operator page"})
 
 
+@app.get("/z/conflicts")
+@app.get("/z/conflicts/")
+def conflicts_page():
+    return send_from_directory(app.static_folder, "conflicts.html")
+
+
 @app.get("/z/")
 @app.get("/z")
 def index():
@@ -427,3 +477,264 @@ if __name__ == "__main__":
     except ImportError:
         pass
     app.run(host="127.0.0.1", port=8211, debug=False)
+
+
+# ============================================================================
+# The five questions, on any one thing.
+#
+# The parent tool answers "which reports match these filters". That is a lookup.
+# The question a reporter actually arrives with is about a thing: this tail, this
+# airline, this type of aircraft. So one entity in, five answers out, in the order
+# a person asks them:
+#
+#   WHEN            month by month, because a spike has a date
+#   WHERE           where on the airframe, zone and system
+#   WHO             which operator, and which aircraft
+#   WHAT            what was found
+#   WHAT IT FORCED  what the defect made the crew do
+#
+# The fifth is the one the FAA buries hardest and the only one that says a defect
+# had consequences in the air. It is a separate question, not a footnote to WHAT.
+
+KINDS = {"tail": "tail", "operator": "operator", "make": "make", "model": "model"}
+
+
+def code_list(table):
+    """Every code in a table with the FAA's own wording, so nothing on the page
+    is an abbreviation the reader has to go and look up somewhere else."""
+    out = {}
+    for k, v in (gloss_tables().get(table) or {}).items():
+        if isinstance(v, dict):
+            out[k] = {"label": v.get("label") or v.get("faa"), "faa": v.get("faa"),
+                      "note": v.get("note")}
+        else:
+            out[k] = {"label": v, "faa": v, "note": None}
+    return out
+
+
+def tally(rows, get, table=None):
+    """Count a coded field and hand back the FAA meaning beside every code."""
+    c = Counter()
+    for r in rows:
+        for v in get(r):
+            if v and str(v).strip():
+                c[str(v).strip().upper()] += 1
+    out = []
+    for code, n in c.most_common(40):
+        lab = dec(table, code) if table else code
+        out.append({"code": code, "label": lab or code, "n": n,
+                    "undecoded": bool(table) and not lab})
+    return out
+
+
+@app.get("/z/api/entity")
+def entity():
+    kind = (request.args.get("kind") or "").strip().lower()
+    val = (request.args.get("v") or "").strip()
+    model_ = (request.args.get("model") or "").strip()
+    if kind not in KINDS or not val:
+        return jsonify(error="need kind=tail|operator|make and v="), 400
+
+    params = {}
+    if kind == "tail":
+        params["tail"] = re.sub(r"[^A-Za-z0-9]", "", val).upper().lstrip("N")
+    elif kind == "operator":
+        params["operator"] = val.upper()
+    else:
+        params["make"] = val.upper()
+        if model_:
+            params["model"] = model_.upper()
+
+    d = api("/api/search", limit=400, **params)
+    rows = d.get("rows") or []
+    months = api("/api/trend", **params)
+    recs = [decorate(r) for r in rows]
+
+    # Some of these counts are complete and some are not, and the difference has
+    # to be visible. /api/breakdown aggregates the whole selection server-side for
+    # system, stage, discovery and operator. Nothing aggregates nature of
+    # condition, crew action, zone or tail, so those are counted from the sample
+    # that was actually read and are labelled as such. Blurring the two together
+    # would be the same error the parent tool exists to refuse.
+    def full(by=None):
+        try:
+            p = dict(params)
+            if by:
+                p["by"] = by
+            b = api("/api/breakdown", **p)
+            rws = b.get("rows") or []
+            if not rws:
+                return None
+            return {"complete": True, "counted": b.get("reports_in_categories"),
+                    "rows": [{"code": r.get("key"), "label": r.get("label"),
+                              "n": r.get("n"), "undecoded": False} for r in rws[:40]]}
+        except Exception:
+            return None
+
+    def sampled(rws):
+        return {"complete": False, "counted": len(rows), "rows": rws}
+
+    agg_system = full()
+    agg_stage = full("stage")
+    agg_disc = full("discovered")
+    agg_ops = full("operator")
+
+    # WHAT IT FORCED. Four columns hold it, and "none" is a real answer that has
+    # to be counted, or the page silently implies every defect had consequences.
+    forced = Counter()
+    forced_none = 0
+    for r in rows:
+        acts = [dec("precaution", r.get("PrecautionaryProcedure" + c)) for c in "ABCD"]
+        acts = [a for a in acts if a and a.lower() != "none"]
+        if acts:
+            for a in acts:
+                forced[a] += 1
+        else:
+            forced_none += 1
+
+    title = val.upper()
+    if kind == "tail":
+        title = "N" + params["tail"]
+    elif kind == "operator":
+        title = dec("operator", val.upper()) or val.upper()
+    elif model_:
+        title = "%s %s" % (val.upper(), model_.upper())
+
+    return jsonify(
+        kind=kind, value=val, title=title,
+        total=d.get("total"), analysed=len(rows),
+        capped=(d.get("total") or 0) > len(rows),
+        when={"months": months,
+              "first": months[0]["month"] if months else None,
+              "last": months[-1]["month"] if months else None,
+              "peak": max(months, key=lambda m: m["n"]) if months else None},
+        where={"zones": sampled(tally(rows, lambda r: [r.get("PartLocation")], "part_location")),
+               "systems": agg_system or sampled(tally(rows, lambda r: [r.get("JASCCode")], "jasc")),
+               "no_zone": sum(1 for r in rows if not (r.get("PartLocation") or "").strip())},
+        who={"operators": agg_ops or sampled(tally(rows, lambda r: [r.get("OperatorDesignator")], "operator")),
+             "aircraft": sampled(tally(rows, lambda r: [r.get("RegistryNNumber")])),
+             "types": sampled(tally(rows, lambda r: [((r.get("AircraftMake") or "") + " " +
+                                                      (r.get("AircraftModel") or "")).strip()]))},
+        what={"nature": sampled(tally(rows, lambda r: [r.get("NatureOfCondition" + c) for c in "ABC"], "nature")),
+              "condition": sampled(tally(rows, lambda r: [r.get("PartCondition")])),
+              "parts": sampled(tally(rows, lambda r: [r.get("PartName")])),
+              "found_by": agg_disc or sampled(tally(rows, lambda r: [r.get("HowDiscoveredCode")], "discovered")),
+              "stage": agg_stage or sampled(tally(rows, lambda r: [r.get("StageOfOperationCode")], "stage"))},
+        forced={"actions": [{"label": k, "n": v} for k, v in forced.most_common()],
+                "none": forced_none,
+                "with_action": len(rows) - forced_none,
+                "sentence": ("%d of the %d reports here record something the defect forced "
+                             "the crew to do. In %d, no listed action was taken."
+                             % (len(rows) - forced_none, len(rows), forced_none))},
+        framing=stage_framing(rows),
+        records=recs[:80],
+        cannot_show=[
+            "Counts of reports filed. The file carries an airframe's own hours at the "
+            "moment of a report, but no fleet size and no fleet flying hours, so "
+            "nothing here is a rate and nothing here ranks anyone. An aircraft that "
+            "flew for years and never had anything filed does not appear at all.",
+            "This file records no accidents and no causes.",
+            "A write-up is a defect that was found and recorded, usually during maintenance."])
+
+
+@app.get("/z/api/codes")
+def codes():
+    """Every FAA code table the page can show, decoded, in one payload."""
+    want = ["nature", "precaution", "stage", "discovered", "part_location",
+            "corrosion", "operator_type", "sdr_type", "submitter", "time_since"]
+    return jsonify({t: code_list(t) for t in want})
+
+
+# ============================================================================
+# Conflicting reports: a ledger, not a rate.
+#
+# The measurement attempt failed twice. A first pass put the disagreement rate at
+# 14.5%, an adversarial check cut it to 2.0%, and the check turned out to have an
+# adjudicator that refuted every flag it ever saw, which makes it a constant
+# rather than a judge. See docs/FINDINGS.md. Neither number stands.
+#
+# So stop trying to produce a rate. A rate needs a denominator, a denominator needs
+# a calibrated instrument, and there isn't one. A ledger needs neither. Every time
+# a reader asks for a plain-English account and the model notices the ticked box
+# disagreeing with the paragraph, that case is written down with its record number,
+# and anyone can open the original and judge it.
+#
+# What accumulates is evidence, one document at a time, found by people reading.
+# Nothing here is a claim about how common this is.
+
+import sqlite3
+
+DB = os.path.join(HERE, "conflicts.db")
+
+
+def db():
+    c = sqlite3.connect(DB, timeout=20)
+    c.execute("""CREATE TABLE IF NOT EXISTS conflicts(
+        id TEXT PRIMARY KEY, tail TEXT, date TEXT, operator TEXT, field TEXT,
+        code_says TEXT, text_says TEXT, note TEXT, discrepancy TEXT,
+        found_at TEXT, confirmed INTEGER DEFAULT 0, disputed INTEGER DEFAULT 0)""")
+    return c
+
+
+def log_conflict(rec, note):
+    """Written when a reader's own lookup surfaces one. Keyed on the record number,
+    so the same report read a hundred times is one entry, not a hundred."""
+    if not rec.get("id") or not note:
+        return
+    try:
+        c = db()
+        c.execute("""INSERT OR IGNORE INTO conflicts
+            (id, tail, date, operator, field, code_says, text_says, note, discrepancy, found_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                  (rec.get("id"), rec.get("tail"), rec.get("date"),
+                   rec.get("operator") or rec.get("operator_code"), None, None, None,
+                   note, (rec.get("text") or "")[:2000],
+                   time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())))
+        c.commit(); c.close()
+    except Exception:
+        pass
+
+
+@app.get("/z/api/conflicts")
+def conflicts():
+    c = db()
+    rows = c.execute("""SELECT id, tail, date, operator, note, discrepancy, found_at,
+                               confirmed, disputed FROM conflicts
+                        ORDER BY found_at DESC LIMIT 500""").fetchall()
+    n = c.execute("SELECT COUNT(*) FROM conflicts").fetchone()[0]
+    c.close()
+    return jsonify(
+        total=n,
+        entries=[{"id": r[0], "tail": r[1], "date": r[2], "operator": r[3], "note": r[4],
+                  "discrepancy": r[5], "found_at": r[6], "confirmed": r[7], "disputed": r[8],
+                  "source_url": "https://aircraftdefects.com/?q=" + requests.utils.quote(
+                      (r[5] or "")[:60])} for r in rows],
+        what_this_is=(
+            "Reports where the coded box a filer ticked disagrees with the description the "
+            "same filer wrote underneath it. Each one was noticed while somebody was reading "
+            "that report, by the model that rephrased it. Nothing is added by a sweep."),
+        what_this_is_not=[
+            "Not a rate. There is no denominator here and there is not meant to be. Two "
+            "attempts to measure how often this happens both failed, and the failures are "
+            "written up in the repository rather than buried.",
+            "Not evidence of anything hidden. Filing is voluntary work on top of the repair, "
+            "the codes are a dropdown beside a free-text box, and careless coding is the "
+            "boring explanation and almost certainly the right one.",
+            "Not verified. A model noticed each of these. Open the record and judge it "
+            "yourself; the record number is on every row.",
+            "Not a safety signal about any operator or aircraft."])
+
+
+@app.post("/z/api/conflicts/<cid>/judge")
+def judge(cid):
+    """A reader who opened the record can say whether it holds. Both directions are
+    recorded, because a disputed entry is as useful as a confirmed one."""
+    v = (request.get_json(force=True, silent=True) or {}).get("verdict")
+    if v not in ("confirmed", "disputed"):
+        return jsonify(error="verdict must be confirmed or disputed"), 400
+    c = db()
+    c.execute("UPDATE conflicts SET %s = %s + 1 WHERE id = ?" % (v, v), (cid,))
+    c.commit()
+    row = c.execute("SELECT confirmed, disputed FROM conflicts WHERE id=?", (cid,)).fetchone()
+    c.close()
+    return jsonify(id=cid, confirmed=row[0] if row else 0, disputed=row[1] if row else 0)

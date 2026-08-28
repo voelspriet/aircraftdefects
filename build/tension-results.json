@@ -1,0 +1,2026 @@
+{
+ "summary": {
+  "sampled": 200,
+  "answered": 200,
+  "failed": 0,
+  "disagreements": 29,
+  "high_confidence": 26,
+  "rate_pct": 14.5,
+  "high_rate_pct": 13.0,
+  "by_field": {
+   "System": 1,
+   "Nature of condition": 8,
+   "How discovered": 5,
+   "Stage of operation": 6,
+   "What the crew did": 4,
+   "Part condition": 3,
+   "Part": 1,
+   "Part / Part condition": 1
+  },
+  "seconds": 269,
+  "population": 159585,
+  "caveat": "The model's judgement is the instrument and it is not yet validated. No human has labelled these 200. Treat the rate as a reading from an uncalibrated gauge, not as a finding."
+ },
+ "results": [
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2023101100703",
+   "date": "09/14/2023",
+   "tail": "8712L"
+  },
+  {
+   "disagrees": true,
+   "field": "System",
+   "code_says": "Leading Edge Devices",
+   "text_says": "The narrative repeatedly and plainly describes the flaps (flaps selected to landing position, differential flap lockout, left outboard flap with sheared inboard aft bearing attach bolt) \u2014 flaps are trailing edge devices, not leading edge devices",
+   "confidence": "high",
+   "id": "20000622AP002",
+   "date": "04/10/2000",
+   "tail": "187GA"
+  },
+  {
+   "disagrees": true,
+   "field": "Nature of condition",
+   "code_says": "False warning",
+   "text_says": "The narrative describes a real malfunction: the gear would not come down when commanded and the crew had to execute an electric override; a proximity switch was removed and replaced",
+   "confidence": "high",
+   "id": "ASOA01029",
+   "date": "03/17/2001",
+   "tail": "239AS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "CALA2017091103127",
+   "date": "09/11/2017",
+   "tail": "37274"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DXTA200702223",
+   "date": "05/29/2007",
+   "tail": "371QS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "UPS08M52138",
+   "date": "01/25/2008",
+   "tail": "294UP"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "2014FA0000031",
+   "date": "12/13/2013",
+   "tail": "2708Y"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "FDEA202010292707",
+   "date": "10/29/2020",
+   "tail": "618FE"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CA110406009",
+   "date": "03/31/2011",
+   "tail": null
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DHL2005742529",
+   "date": "10/15/2005",
+   "tail": "742DH"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "QXEA2012112501431",
+   "date": "11/25/2012",
+   "tail": "406QX"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2022100678802",
+   "date": "09/16/2022",
+   "tail": "265WN"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DALA2022020200681",
+   "date": "01/31/2022",
+   "tail": "698DL"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "AALA201904199013",
+   "date": "04/18/2019",
+   "tail": "965TW"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "WX0A2024072632125",
+   "date": "07/08/2024",
+   "tail": "315NV"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "QXEA2016041300246",
+   "date": "04/02/2016",
+   "tail": "442QX"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CALA2024092602497",
+   "date": "08/26/2024",
+   "tail": "14237"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CA121205010",
+   "date": "12/05/2012",
+   "tail": null
+  },
+  {
+   "disagrees": true,
+   "field": "How discovered",
+   "code_says": "Unknown",
+   "text_says": "The crew noticed the condition during the approach phase in flight (and reported it directly), which plainly states how the condition was discovered",
+   "confidence": "high",
+   "id": "CA120801004",
+   "date": "07/05/2012",
+   "tail": null
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "WWQA04111",
+   "date": "04/07/2011",
+   "tail": "848GF"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2022101749302",
+   "date": "09/29/2022",
+   "tail": "266WN"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "ASAA2021010133798",
+   "date": "01/01/2021",
+   "tail": "431AS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "FDEA201606061855",
+   "date": "06/06/2016",
+   "tail": "782FD"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CA070828002",
+   "date": "08/24/2007",
+   "tail": null
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2024011627836",
+   "date": "12/04/2023",
+   "tail": "8312C"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "08FDEA00507",
+   "date": "02/18/2008",
+   "tail": "684FE"
+  },
+  {
+   "disagrees": true,
+   "field": "Stage of operation",
+   "code_says": "In cruise",
+   "text_says": "The pilot reported the odor during descent",
+   "confidence": "high",
+   "id": "AALA2019120429015",
+   "date": "12/01/2019",
+   "tail": "647AW"
+  },
+  {
+   "disagrees": true,
+   "field": "What the crew did",
+   "code_says": "Emergency descent",
+   "text_says": "The crew descended to 10,000 feet and returned to the field, and the report explicitly states 'NO EMERGENCY WAS DELCARED'",
+   "confidence": "high",
+   "id": "USAASB96182",
+   "date": "09/06/1996",
+   "tail": "781AU"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2021081291721",
+   "date": "07/06/2021",
+   "tail": "411WN"
+  },
+  {
+   "disagrees": true,
+   "field": "Nature of condition",
+   "code_says": "Lost more than half of the electrical power",
+   "text_says": "The narrative describes an intermittent heading indication drift of 7-8 degrees on the left primary flight display, with the unit (ADAHRS) subsequently replaced; no loss of electrical power is described anywhere",
+   "confidence": "high",
+   "id": "CA121213002",
+   "date": "12/10/2012",
+   "tail": null
+  },
+  {
+   "disagrees": true,
+   "field": "Stage of operation",
+   "code_says": "On approach",
+   "text_says": "The event occurred at cruise altitude (FL340, Mach .80) with the crew staying outside RVSM airspace and beginning a descent to FL300 \u2014 i.e., cruise/level flight and descent, not approach",
+   "confidence": "high",
+   "id": "DALA2023060704628",
+   "date": "06/05/2023",
+   "tail": "841MH"
+  },
+  {
+   "disagrees": true,
+   "field": "Nature of condition",
+   "code_says": "False warning",
+   "text_says": "Troubleshooting found the PX 13 sensor wire open (a real defect), the wire was repaired, and the door indication operational test passed \u2014 i.e., the PROX SYS FAULTED message reflected an actual damaged wire, not a false warning",
+   "confidence": "high",
+   "id": "REXA2012032700410",
+   "date": "03/27/2012",
+   "tail": "146PQ"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CALA2023111003326",
+   "date": "10/26/2023",
+   "tail": "468UA"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "QXEA2012080800773",
+   "date": "08/08/2012",
+   "tail": "405QX"
+  },
+  {
+   "disagrees": true,
+   "field": "How discovered",
+   "code_says": "Unknown",
+   "text_says": "The discrepancy was discovered/reported by the flight crew \u2014 the narrative states 'NO LAND 3 DISP ON ASA WITH SYS ENGAGED IN CMD' and includes 'CREW COMMENTS: LEFT AP SAME THING', plainly attributing the report to the crew",
+   "confidence": "low",
+   "id": "UALA2012010900174",
+   "date": "01/09/2012",
+   "tail": "598UA"
+  },
+  {
+   "disagrees": true,
+   "field": "How discovered",
+   "code_says": "Unknown",
+   "text_says": "The condition was found during a C-check inspection (\"INSPECTION TYPE:C ... FOUND CORROSION ON SUPPORT STRUCTURE AS MARKED\")",
+   "confidence": "high",
+   "id": "UPS07M48882",
+   "date": "11/16/2006",
+   "tail": "286UP"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "J7SA2026072800501",
+   "date": "07/23/2026",
+   "tail": "386FX"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "WX0A2020072073530",
+   "date": "07/18/2020",
+   "tail": "253NV"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "GTIA2023090537458",
+   "date": "09/01/2023",
+   "tail": "611NK"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "YENA2023060600579",
+   "date": "06/01/2023",
+   "tail": "375JB"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "CA120223006",
+   "date": "01/28/2012",
+   "tail": null
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2022033073968",
+   "date": "02/17/2022",
+   "tail": "7824A"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWIA2025040300314",
+   "date": "03/14/2025",
+   "tail": "207PS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "QMLA2017030317024",
+   "date": "03/03/2017",
+   "tail": "355AM"
+  },
+  {
+   "disagrees": true,
+   "field": "What the crew did",
+   "code_says": "Unscheduled landing",
+   "text_says": "The crew 'CONTINUED TO DESTINATION' and landed normally; the narrative nowhere describes an unscheduled or precautionary landing.",
+   "confidence": "high",
+   "id": "CA141106001",
+   "date": "11/03/2014",
+   "tail": null
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DXTA2022011054890",
+   "date": "01/07/2022",
+   "tail": "231QS"
+  },
+  {
+   "disagrees": true,
+   "field": "How discovered",
+   "code_says": "Unknown",
+   "text_says": "The narrative plainly states how the condition was discovered: the flight crew observed the flaps stop and the flap drive caution light illuminate after landing, and maintenance then found the faulty flexible shaft assembly during troubleshooting.",
+   "confidence": "high",
+   "id": "CA120511004",
+   "date": "05/09/2012",
+   "tail": null
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWIA2025051916",
+   "date": "05/16/2025",
+   "tail": "983SW"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DALA2019040542226",
+   "date": "04/03/2019",
+   "tail": "660DL"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "FDEA202503140393",
+   "date": "03/14/2025",
+   "tail": "523FE"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "96ZZZM1276",
+   "date": "08/20/1996",
+   "tail": "390US"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CALA2020021600420",
+   "date": "02/12/2020",
+   "tail": "598UA"
+  },
+  {
+   "disagrees": true,
+   "field": "Nature of condition",
+   "code_says": "False warning",
+   "text_says": "The narrative describes a real malfunction, not a false warning: the static line had pulled out of the tee fitting, causing the No. 1 altimeter and airspeed indicators to rapidly move to zero \u2014 an actual failure of the static system feeding the instruments.",
+   "confidence": "high",
+   "id": "CA030527010",
+   "date": "05/16/2003",
+   "tail": null
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "Y2PA96032",
+   "date": "05/20/1996",
+   "tail": "823AA"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CALA9901491",
+   "date": "11/13/1999",
+   "tail": "18223"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CA970325005",
+   "date": "03/07/1997",
+   "tail": null
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWIA972347",
+   "date": "02/09/2001",
+   "tail": "189SW"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2021091404559",
+   "date": "08/01/2021",
+   "tail": "491WN"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "ABXA20170114002",
+   "date": "01/14/2017",
+   "tail": "775AX"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DXTA2023100597270",
+   "date": "10/04/2023",
+   "tail": "630QS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "MTNA070720140001",
+   "date": "07/07/2014",
+   "tail": "812FX"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "2006FA0000210",
+   "date": "02/28/2006",
+   "tail": "941AM"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "CALA2022012600223",
+   "date": "01/24/2022",
+   "tail": "26232"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "F3LA2021006280046",
+   "date": "06/26/2021",
+   "tail": "704FR"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "ASAA1159072",
+   "date": "02/22/2011",
+   "tail": "518AS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "FDEA202504230656",
+   "date": "04/23/2025",
+   "tail": "656FE"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "PCAA0004034",
+   "date": "04/30/2000",
+   "tail": "840EX"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "C2XA11TY018",
+   "date": "02/25/2011",
+   "tail": "14952"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "ASAA2023080644430",
+   "date": "08/06/2023",
+   "tail": "407AS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "IPXA2020120863218",
+   "date": "12/07/2020",
+   "tail": "339UP"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "QXEA2013052101025",
+   "date": "05/21/2013",
+   "tail": "413QX"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "ASAA0752390",
+   "date": "12/19/2007",
+   "tail": "587AS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DALA2024021201918",
+   "date": "02/07/2024",
+   "tail": "306DU"
+  },
+  {
+   "disagrees": true,
+   "field": "Stage of operation",
+   "code_says": "Climbing",
+   "text_says": "AFTER T/O CRUISE ... 1012Z - 0+40 EN ROUTE \u2014 the event occurred during cruise, en route",
+   "confidence": "high",
+   "id": "97FDEA00539",
+   "date": "08/14/1997",
+   "tail": "468FE"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2025021884802",
+   "date": "01/10/2025",
+   "tail": "209WN"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWI2025F00619",
+   "date": "03/06/2025",
+   "tail": "774SK"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "ASAA2020010831807",
+   "date": "01/07/2020",
+   "tail": "408AS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "99ZZZX823",
+   "date": "02/03/1999",
+   "tail": "400GK"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CALA2021060200783",
+   "date": "06/02/2021",
+   "tail": "429UA"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2023020182947",
+   "date": "12/18/2022",
+   "tail": "564WN"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2024011933651",
+   "date": "12/19/2023",
+   "tail": "457WN"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "DUFA20080001",
+   "date": "01/03/2008",
+   "tail": "159MC"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DHL2005745006",
+   "date": "03/25/2005",
+   "tail": "745DH"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CALA9801150",
+   "date": "06/23/1998",
+   "tail": "13881"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CALA2021122902476",
+   "date": "12/29/2021",
+   "tail": "33292"
+  },
+  {
+   "disagrees": true,
+   "field": "Part condition",
+   "code_says": "NO INDICATION",
+   "text_says": "#9 fastener hole HAS INDICATIONS at approx 1 o'clock and 9 o'clock positions (fwd looking aft)",
+   "confidence": "high",
+   "id": "DALA2022070804785",
+   "date": "07/07/2022",
+   "tail": "699DL"
+  },
+  {
+   "disagrees": true,
+   "field": "What the crew did",
+   "code_says": "Oxygen masks dropped; System or circuit switched off",
+   "text_says": "The narrative describes the crew response as the forward flight attendant donning a PBE smoke hood and using a portable Halon fire extinguisher to put out the fire. It never mentions oxygen masks dropping, and it explicitly states 'THE BREAKERS DID NOT POP' with no mention of any circuit being switched off.",
+   "confidence": "low",
+   "id": "AALA201508199009",
+   "date": "08/17/2015",
+   "tail": "942UW"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWIA201437939",
+   "date": "05/15/2014",
+   "tail": "582SW"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2022063015196",
+   "date": "06/03/2022",
+   "tail": "7850B"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "FDEA202202230349",
+   "date": "02/23/2022",
+   "tail": "692FE"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "UPS04M43407",
+   "date": "10/26/2004",
+   "tail": "253UP"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWI2024F00893",
+   "date": "09/06/2024",
+   "tail": "613CZ"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2025010879236",
+   "date": "12/18/2024",
+   "tail": "935WN"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "O2GA2020051188101",
+   "date": "05/04/2020",
+   "tail": "881UP"
+  },
+  {
+   "disagrees": true,
+   "field": "Nature of condition",
+   "code_says": "False warning",
+   "text_says": "The fire handle light was NOT illuminated during the fire detection test and loop B had a fault; an open line was found in the wiring and the harness was replaced \u2014 a failure to detect/indicate, not a false warning",
+   "confidence": "high",
+   "id": "ASMF201611017",
+   "date": "09/29/2016",
+   "tail": "950AM"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DXTA2026061108379",
+   "date": "06/08/2026",
+   "tail": "502QS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "TSAA0152018",
+   "date": "02/18/2001",
+   "tail": "817AL"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWIA2020032749487",
+   "date": "02/19/2020",
+   "tail": "936SW"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2021091542907",
+   "date": "08/02/2021",
+   "tail": "491WN"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "2008UALA05394",
+   "date": "08/22/2008",
+   "tail": "127UA"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "QXEA0101698",
+   "date": "10/23/2001",
+   "tail": "357PH"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SROM200100002",
+   "date": "01/04/2001",
+   "tail": "733AR"
+  },
+  {
+   "disagrees": true,
+   "field": "Part",
+   "code_says": "NONE",
+   "text_says": "A specific part is identified and worked on: the intercostal, part number SH670-31994-1, which was removed and replaced with a new one of the same part number.",
+   "confidence": "high",
+   "id": "SWIA202163274",
+   "date": "12/02/2021",
+   "tail": "773SK"
+  },
+  {
+   "disagrees": true,
+   "field": "What the crew did",
+   "code_says": "Engine shut down in flight",
+   "text_says": "The aircraft was on the ground (during boarding, jet bridge pulled away) and the APU auto-shutdown before the crew could manually shut it down; no engine shutdown in flight occurred",
+   "confidence": "high",
+   "id": "AALA202111165003",
+   "date": "11/06/2021",
+   "tail": "802AW"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "TSAA0251088",
+   "date": "02/26/2002",
+   "tail": "816AL"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "HYIA20170829001",
+   "date": "08/25/2017",
+   "tail": "2714B"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2024081616408",
+   "date": "07/25/2024",
+   "tail": "8699A"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DALA2019032101834",
+   "date": "03/21/2019",
+   "tail": "913DL"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CALA2025061605574",
+   "date": "06/13/2025",
+   "tail": "29124"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "9500709996",
+   "date": "01/13/1995",
+   "tail": "8932E"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "M7K2008F00050",
+   "date": "09/19/2007",
+   "tail": "803MH"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "SIMA20140520002",
+   "date": "05/20/2014",
+   "tail": "682AE"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "0601509604",
+   "date": "07/07/2006",
+   "tail": "604NW"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2023050521720",
+   "date": "03/28/2023",
+   "tail": "7828A"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "FDEA202105191311",
+   "date": "05/19/2021",
+   "tail": "990FD"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWIA2023042800006",
+   "date": "04/26/2023",
+   "tail": "792SK"
+  },
+  {
+   "disagrees": true,
+   "field": "Nature of condition",
+   "code_says": "False warning",
+   "text_says": "The narrative describes a genuine malfunction: a bad nose landing gear weight-on-wheels proximity switch harness that produced a real air/ground fail message, prevented the gear lever from being moved to up, and required replacement of the harness.",
+   "confidence": "low",
+   "id": "CHQA200900137",
+   "date": "06/08/2009",
+   "tail": "258JQ"
+  },
+  {
+   "disagrees": true,
+   "field": "Part condition",
+   "code_says": "DAMAGED",
+   "text_says": "Couplers were removed and replaced, but the narrative states 'NO DEFECTS NOTED' and both the ops check and voice calls were 'OPS CHECK GOOD'",
+   "confidence": "high",
+   "id": "UIEA2021051801139",
+   "date": "05/18/2021",
+   "tail": "1487A"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "ASOA2015112714159",
+   "date": "11/27/2015",
+   "tail": "538CA"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "FDEA202507301339",
+   "date": "07/30/2025",
+   "tail": "787FD"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2023081575849",
+   "date": "07/06/2023",
+   "tail": "229WN"
+  },
+  {
+   "disagrees": true,
+   "field": "Part condition",
+   "code_says": "UNKNOWN",
+   "text_says": "The part condition is wear \u2014 the narrative plainly states 'WEAR BUSHING ON ATTACH FITTING HINGE #3'",
+   "confidence": "high",
+   "id": "YENA2023112901488",
+   "date": "11/26/2023",
+   "tail": "552JB"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "98ZZZX1180",
+   "date": "03/18/1998",
+   "tail": "22JL"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "C2XA04BT123",
+   "date": "12/03/2004",
+   "tail": "26545"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "2026F00119",
+   "date": "06/02/2026",
+   "tail": "11526"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "OEJA202201070001",
+   "date": "01/04/2022",
+   "tail": "618PJ"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2022031073182",
+   "date": "07/10/2019",
+   "tail": "962WN"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "QREA2012F00109",
+   "date": "06/04/2012",
+   "tail": "8111M"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DXTA2009100903810",
+   "date": "10/08/2009",
+   "tail": "827QS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "QXEA0202193",
+   "date": "12/15/2002",
+   "tail": "492US"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "HALA2022122700316",
+   "date": "12/24/2022",
+   "tail": "385HA"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "2026FA0000532",
+   "date": "06/22/2026",
+   "tail": "9HFSM"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "AALA20120721007",
+   "date": "07/21/2012",
+   "tail": "7548A"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "UPS06447504",
+   "date": "07/04/2006",
+   "tail": "676UP"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "08FDEA01218",
+   "date": "04/01/2008",
+   "tail": "448FE"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DALA2023050803611",
+   "date": "05/08/2023",
+   "tail": "570DZ"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "ASAA2018060924995",
+   "date": "06/09/2018",
+   "tail": "566AS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2023070553604",
+   "date": "05/29/2023",
+   "tail": "962WN"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "06FDEA04309",
+   "date": "12/23/2006",
+   "tail": "615FE"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DXTA200601508",
+   "date": "07/17/2006",
+   "tail": "958QS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "WRLA96011",
+   "date": "02/13/1996",
+   "tail": "107WA"
+  },
+  {
+   "disagrees": true,
+   "field": "Stage of operation",
+   "code_says": "On the ground, in inspection or maintenance",
+   "text_says": "The event occurred during a takeoff from the East River and the loss was discovered upon arrival at the end of a flight; the narrative plainly describes in-flight operation, not ground inspection or maintenance",
+   "confidence": "high",
+   "id": "OZTA2013F00143",
+   "date": "07/15/2013",
+   "tail": "539AK"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DALA2026012900705",
+   "date": "01/27/2026",
+   "tail": "345NB"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2021072696680",
+   "date": "07/22/2021",
+   "tail": "8683D"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2023022306219",
+   "date": "01/18/2023",
+   "tail": "213WN"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CALA2024122301618",
+   "date": "12/20/2024",
+   "tail": "57864"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "CA100224010",
+   "date": "02/04/2010",
+   "tail": null
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2021111725830",
+   "date": "10/01/2021",
+   "tail": "786SW"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "Q2SA20210808452",
+   "date": "08/08/2021",
+   "tail": "5237A"
+  },
+  {
+   "disagrees": true,
+   "field": "Nature of condition",
+   "code_says": "No test",
+   "text_says": "PERFORMED OPS CHECK OF THE EMERGENCY LIGHTS IAW BOEING 737-800 AMM 33-51-00. OPS CHECK GOOD.",
+   "confidence": "high",
+   "id": "CALA2025041603890",
+   "date": "04/15/2025",
+   "tail": "76504"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DHL2007873543",
+   "date": "01/15/2008",
+   "tail": "873SJ"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "FDEA201307131551",
+   "date": "07/13/2013",
+   "tail": "303FE"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "IXXA07SMN107S",
+   "date": "02/23/2007",
+   "tail": "71CX"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "ASOA2015072313495",
+   "date": "07/23/2015",
+   "tail": "722EV"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "06FDEA02696",
+   "date": "07/26/2006",
+   "tail": "523FE"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2021061576678",
+   "date": "05/24/2021",
+   "tail": "7747C"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2022061309119",
+   "date": "05/18/2022",
+   "tail": "8690A"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWIA2025092976091",
+   "date": "09/29/2025",
+   "tail": "899SK"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CA001031026",
+   "date": "10/09/2000",
+   "tail": null
+  },
+  {
+   "disagrees": true,
+   "field": "Part / Part condition",
+   "code_says": "Part: NONE, Part condition: NONE (no part identified, no part condition)",
+   "text_says": "The mechanic found the NLG weight-on-wheels (WOW) switch out of rig, adjusted it per AMM 32-60-00, and noted defects found \u2014 plainly identifying a specific part with a defective condition that was corrected",
+   "confidence": "high",
+   "id": "DXTA2021111551910",
+   "date": "11/14/2021",
+   "tail": "664QS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "ASAA2021032834441",
+   "date": "03/28/2021",
+   "tail": "579AS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2022071113431",
+   "date": "05/30/2022",
+   "tail": "481WN"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "MEX2004055",
+   "date": "02/12/2004",
+   "tail": "205AM"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CALA2013090290913",
+   "date": "08/30/2013",
+   "tail": "182UA"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "ASAA2019051329717",
+   "date": "05/13/2019",
+   "tail": "590AS"
+  },
+  {
+   "disagrees": true,
+   "field": "Stage of operation",
+   "code_says": "Taxiing or ground handling",
+   "text_says": "The narrative states the problem occurred and was investigated while in flight (\"COULD NOT BE CORRECTED ON ANY SYSTEM OR START-UP PAGE WHILE IN FLIGHT\"), and the report describes a post-flight discussion, indicating the flight had been conducted.",
+   "confidence": "high",
+   "id": "CA051219005",
+   "date": "12/04/2005",
+   "tail": null
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "ASOA03355",
+   "date": "08/03/2003",
+   "tail": "856AS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "QXEA2012012500027",
+   "date": "01/23/2012",
+   "tail": "400QX"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "P5CA9701094",
+   "date": "06/04/1997",
+   "tail": "853FT"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DALA2026073004414",
+   "date": "07/31/2025",
+   "tail": "117DU"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DXTA2010060904118",
+   "date": "06/08/2010",
+   "tail": "743QS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "QXEA2022020800047",
+   "date": "02/05/2022",
+   "tail": "646QX"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "99UAL900205",
+   "date": "04/11/1999",
+   "tail": "793UA"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DALA2016120509606",
+   "date": "12/02/2016",
+   "tail": "904DE"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DXTA200601595",
+   "date": "09/07/2006",
+   "tail": "375QS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "DXTA2022120575410",
+   "date": "12/03/2022",
+   "tail": "235QS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CALA2019110501910",
+   "date": "10/31/2019",
+   "tail": "597UA"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "HYIA20140606001",
+   "date": "05/14/2014",
+   "tail": "120PC"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2024102836589",
+   "date": "09/11/2024",
+   "tail": "7740A"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "WX0A2014091072152",
+   "date": "09/08/2014",
+   "tail": "415NV"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "FDEA202103250764",
+   "date": "03/25/2021",
+   "tail": "662FE"
+  },
+  {
+   "disagrees": true,
+   "field": "Nature of condition",
+   "code_says": "A warning went off (a warning illuminated/activated)",
+   "text_says": "There was NO green indication of the nose landing gear when extended \u2014 the light failed to come on, the opposite of a warning activating",
+   "confidence": "high",
+   "id": "K11A2022080900153",
+   "date": "08/09/2022",
+   "tail": "129AC"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "SWAA2021072094760",
+   "date": "07/16/2021",
+   "tail": "8559Q"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "AALA202303030666",
+   "date": "02/27/2023",
+   "tail": "111US"
+  },
+  {
+   "disagrees": true,
+   "field": "How discovered",
+   "code_says": "Unknown",
+   "text_says": "The narrative plainly states how it was discovered: a flight attendant reported the aft passenger door handle was not seated against the door, and the mechanic found the missing hardware after landing during inspection.",
+   "confidence": "high",
+   "id": "QXEA2014050300368",
+   "date": "05/03/2014",
+   "tail": "404QX"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "SWAA2021110320844",
+   "date": "09/18/2021",
+   "tail": "793SA"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "AALA20160616008",
+   "date": "06/15/2016",
+   "tail": "368AA"
+  },
+  {
+   "disagrees": true,
+   "field": "Stage of operation",
+   "code_says": "Descending",
+   "text_says": "The narrative plainly describes the takeoff roll (pulls left at 105 and 120 knots on takeoff roll) and taxi testing (taxi test, taxi down BWI runway 28, taxi to the gate) \u2014 a takeoff/taxi event, not a descent. The crew action code 'Emergency descent' is likewise contradicted; no descent, let alone an emergency descent, is described anywhere in the text.",
+   "confidence": "high",
+   "id": "CALA2023081802569",
+   "date": "08/16/2023",
+   "tail": "14735"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "ASOA201201668",
+   "date": "05/07/2012",
+   "tail": "707EV"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2021092707817",
+   "date": "08/16/2021",
+   "tail": "208WN"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CALA2024041601110",
+   "date": "04/10/2024",
+   "tail": "212UA"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "08FDEA02316",
+   "date": "06/18/2008",
+   "tail": "443FE"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "ABXA9600505",
+   "date": "06/06/1996",
+   "tail": "934AX"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CA121221010",
+   "date": "12/15/2012",
+   "tail": null
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "CALA2025090908674",
+   "date": "09/06/2025",
+   "tail": "14235"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "low",
+   "id": "DXTA2021111551920",
+   "date": "11/14/2021",
+   "tail": "670QS"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "CA150119008",
+   "date": "01/16/2015",
+   "tail": null
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "TRAX200600986",
+   "date": "11/04/2006",
+   "tail": "927EV"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "IPXA2020050154828",
+   "date": "04/30/2020",
+   "tail": "415UP"
+  },
+  {
+   "disagrees": false,
+   "field": null,
+   "code_says": null,
+   "text_says": null,
+   "confidence": "high",
+   "id": "SWAA2022061714214",
+   "date": "06/02/2022",
+   "tail": "7876A"
+  }
+ ]
+}

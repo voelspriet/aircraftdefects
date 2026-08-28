@@ -78,6 +78,26 @@ product will never claim."** Nobody asked for that section.
 
 ---
 
+## What it found in the file
+
+Building on this data turned up four things about the data itself, written up in
+[docs/FINDINGS.md](docs/FINDINGS.md) with the scripts to reproduce them.
+
+The first is the one worth reading. In a sample of 200 reports with a long
+narrative, **29 of them, 14.5%, carry a coded field that its own write-up
+contradicts**. A landing gear that would not come down, filed as a false warning.
+A part condition of `NO INDICATION` over a paragraph that says `HAS INDICATIONS`.
+Flaps filed under leading edge devices.
+
+That is not a query anyone can write. No filter expresses "the tick box disagrees
+with the paragraph", which is why nobody has ever counted it. It needs something
+that reads both halves of the form and compares them.
+
+The number is a reading from an uncalibrated gauge and is presented as one: the
+model's judgement is the instrument and no human has labelled the sample yet.
+
+---
+
 ## How the model is used
 
 | Setting | Value | Why |

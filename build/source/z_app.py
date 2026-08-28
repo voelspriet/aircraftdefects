@@ -162,10 +162,7 @@ def airframe(tail):
             "A write-up is a defect that was found and recorded, usually during maintenance.",
             "A long list is not evidence of an unsafe aircraft, and a short one is not "
             "evidence of a safe one.",
-            "The file records an airframe's own total hours at the moment of a report, in "
-            "79% of records, but never how many hours a fleet flew. So the hours "
-            "between two write-ups on one aircraft can be measured, and no count "
-            "here can be turned into a rate."])
+            "The file holds no flying hours per operator, so nothing here is a rate."])
 
 
 # -------------------------------------------------------------------- build 2
@@ -178,47 +175,18 @@ def airframe(tail):
 GLOSS_RULES = """You are rewriting one aircraft maintenance write-up into plain English
 for someone who is not an aviation professional.
 
-Keep the whole story, in the order it happened. These write-ups often describe a
-sequence: what the crew noticed, what they decided, what they asked for, what was
-ruled out, what was found afterwards, what was fixed. Every one of those steps
-matters and none may be dropped. A reader of your version alone must not come away
-with a different account of events from a reader of the original.
-
-Length follows the source. A one-line write-up gets one line. A write-up that
-describes eight things that happened gets all eight.
-
-Rules, all absolute:
+Rules, all of them absolute:
 - Say only what the write-up and the decoded fields state. Add nothing.
 - Never say or imply why it happened. The record does not contain a cause.
 - Never say or imply anything about an accident, a crash, or danger.
-- Keep flight numbers, airports, part locations and manual references as written.
-- Expand trade abbreviations (T/E is trailing edge, MX is maintenance, IAW is in
-  accordance with, A/C is aircraft, AGL is above ground level, TSO is time since
-  overhaul, P/N and S/N are part and serial number) rather than repeating them.
-- Airport codes: keep the code in the account and do not silently swap in a name.
-- Do not soften and do not dramatise. No adjective that is not in the source.
+- Do not soften and do not dramatise. No adjectives that are not in the source.
 - If the text is too abbreviated to be sure what it means, abstain.
-- British English.
-
-Separately: you are given the codes the filer entered. Sometimes a filed code does
-not match the story the same person wrote. If that is clearly the case here, say so
-plainly in one sentence, naming both. If they agree, or you are unsure, return null.
-Never guess at this. It is a serious thing to say about someone's paperwork.
-
-Separately again: list every abbreviation, code or piece of trade shorthand in the
-write-up, with what it means. Two kinds, and the difference matters:
-  "record"  the meaning is derivable from the text or the decoded fields you were given
-  "outside" the meaning comes from your own knowledge and is not in this record at all,
-            such as an airport code, a manufacturer, or a regulation number
-Mark every entry. Never mark something "record" to make it look better sourced. If you
-are not confident an airport code is that airport, leave it out entirely.
+- British English. One or two short sentences, maximum 40 words.
 
 Return JSON only:
-{"plain": "<the account, or null if abstaining>",
+{"plain": "<the sentence, or null if abstaining>",
  "abstained": true|false,
- "reason": "<if abstained, why, in six words or fewer>",
- "code_tension": "<one sentence naming the code and what the text says instead, or null>",
- "jargon": [{"term": "GEG", "means": "Spokane International Airport", "source": "outside"}]}"""
+ "reason": "<if abstained, why, in six words or fewer>"}"""
 
 
 @app.post("/z/api/gloss")
@@ -229,24 +197,16 @@ def gloss():
         return jsonify(error="no text"), 400
     facts = {k: d.get(k) for k in ("system", "part", "condition", "nature",
                                    "stage", "discovered", "zone_label") if d.get(k)}
-    prompt = ("%s\n\nCodes the filer entered, decoded by the FAA's own tables:\n%s\n\n"
-              "The write-up, verbatim:\n%s"
+    prompt = ("%s\n\nDecoded FAA fields for this record:\n%s\n\nThe write-up, verbatim:\n%s"
               % (GLOSS_RULES, json.dumps(facts, ensure_ascii=False), text))
     try:
-        # Longer texts describe a sequence and need room for it. Effort rises with
-        # length too: a one-line write-up is transcription, an eight-step account
-        # is comprehension.
-        long_ = len(text) > 400
-        out = glm(prompt, schema=True, effort="high" if long_ else "low",
-                  max_tokens=2600 if long_ else 900)
+        out = glm(prompt, schema=True, effort="low", max_tokens=700)
     except Exception as e:
         return jsonify(error=str(e)[:200]), 502
     if not out:
         return jsonify(abstained=True, reason="no usable reply"), 200
     return jsonify(plain=out.get("plain"), abstained=bool(out.get("abstained")),
-                   reason=out.get("reason"), code_tension=out.get("code_tension"),
-                   jargon=out.get("jargon") or [],
-                   model=MODEL, effort="high" if long_ else "low")
+                   reason=out.get("reason"), model=MODEL, effort="low")
 
 
 # -------------------------------------------------------------------- build 3
@@ -362,11 +322,9 @@ def operator(code):
                    systems=[{"name": k, "n": v} for k, v in sysc.most_common(12)],
                    records=rows[:60],
                    cannot_show=["This is a count of reports filed, not a rate and not a "
-                                "ranking. Airframe hours are in the file, fleet flying hours "
-                                "are not, and the only aircraft with hours here are the ones "
-                                "that filed something. So no comparison between operators is "
-                                "possible. An operator that files more may simply be "
-                                "inspecting harder."])
+                                "ranking. The file holds no fleet size and no flying hours, "
+                                "so no comparison between operators is possible from it. An "
+                                "operator that files more may simply be inspecting harder."])
 
 
 # ---------------------------------------------------------------- builds 6 + 7
@@ -621,10 +579,8 @@ def entity():
         framing=stage_framing(rows),
         records=recs[:80],
         cannot_show=[
-            "Counts of reports filed. The file carries an airframe's own hours at the "
-            "moment of a report, but no fleet size and no fleet flying hours, so "
-            "nothing here is a rate and nothing here ranks anyone. An aircraft that "
-            "flew for years and never had anything filed does not appear at all.",
+            "Counts of reports filed. The file holds no fleet size and no flying hours, "
+            "so nothing here is a rate and nothing here ranks anyone.",
             "This file records no accidents and no causes.",
             "A write-up is a defect that was found and recorded, usually during maintenance."])
 

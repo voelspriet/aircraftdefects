@@ -212,7 +212,8 @@ That is what a 1M context window is for.
 | `temperature` / `top_p` | 1 / 0.95 | vendor recommendation for this model |
 | Structured output | JSON, with an abstain field | so it cannot ramble into a field that renders as fact |
 
-Reasoning effort is a declared choice per task, never disabled.
+Reasoning effort is a declared choice per task, never disabled. The full
+accounting, every call site and every constraint, is in [MODEL_USE.md](MODEL_USE.md).
 
 ---
 
@@ -247,6 +248,7 @@ the difference.
 
 | | |
 |---|---|
+| [MODEL_USE.md](MODEL_USE.md) | every place GLM-5.3-Flash runs, what it may and may not do there, and what it cost |
 | [PREWASH_METHOD.md](PREWASH_METHOD.md) | the technique, and why writing your own prompt defeats it |
 | [HACKATHON_LOG.md](HACKATHON_LOG.md) | every step in order, including what went wrong |
 | [docs/FINDINGS.md](docs/FINDINGS.md) | four findings about the data, one of them a retraction |

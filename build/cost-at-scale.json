@@ -1,0 +1,259 @@
+{
+ "summary": {
+  "measured_reports": 30,
+  "wall_seconds": 42.5,
+  "concurrency": 6,
+  "seconds_per_report_at_6": 1.42,
+  "tokens_total": 25961,
+  "tokens_per_report_mean": 865,
+  "tokens_per_report_median": 812.0,
+  "prompt_share_pct": 54.1,
+  "corpus": 1757828,
+  "corpus_tokens_upper_bound": 1521165757,
+  "corpus_days_at_6_concurrent": 28.8,
+  "corpus_days_at_60_concurrent": 2.9,
+  "caveat": "Measured on 30 reports drawn from the long-narrative sample, which is the expensive end of the file: every one ran at high reasoning effort. Most reports are short and run at low. This is an upper bound, not a forecast."
+ },
+ "runs": [
+  {
+   "effort": "high",
+   "chars": 568,
+   "seconds": 7.2,
+   "prompt": 460,
+   "completion": 327,
+   "total": 787
+  },
+  {
+   "effort": "high",
+   "chars": 469,
+   "seconds": 7.9,
+   "prompt": 382,
+   "completion": 440,
+   "total": 822
+  },
+  {
+   "effort": "high",
+   "chars": 479,
+   "seconds": 7.0,
+   "prompt": 393,
+   "completion": 316,
+   "total": 709
+  },
+  {
+   "effort": "high",
+   "chars": 750,
+   "seconds": 10.5,
+   "prompt": 569,
+   "completion": 487,
+   "total": 1056
+  },
+  {
+   "effort": "high",
+   "chars": 625,
+   "seconds": 8.8,
+   "prompt": 456,
+   "completion": 282,
+   "total": 738
+  },
+  {
+   "effort": "high",
+   "chars": 478,
+   "seconds": 5.7,
+   "prompt": 460,
+   "completion": 294,
+   "total": 754
+  },
+  {
+   "effort": "high",
+   "chars": 471,
+   "seconds": 5.7,
+   "prompt": 395,
+   "completion": 261,
+   "total": 656
+  },
+  {
+   "effort": "high",
+   "chars": 431,
+   "seconds": 3.4,
+   "prompt": 411,
+   "completion": 195,
+   "total": 606
+  },
+  {
+   "effort": "high",
+   "chars": 757,
+   "seconds": 5.4,
+   "prompt": 484,
+   "completion": 277,
+   "total": 761
+  },
+  {
+   "effort": "high",
+   "chars": 565,
+   "seconds": 8.3,
+   "prompt": 510,
+   "completion": 558,
+   "total": 1068
+  },
+  {
+   "effort": "high",
+   "chars": 561,
+   "seconds": 7.6,
+   "prompt": 488,
+   "completion": 508,
+   "total": 996
+  },
+  {
+   "effort": "high",
+   "chars": 519,
+   "seconds": 4.9,
+   "prompt": 443,
+   "completion": 254,
+   "total": 697
+  },
+  {
+   "effort": "high",
+   "chars": 488,
+   "seconds": 6.7,
+   "prompt": 425,
+   "completion": 380,
+   "total": 805
+  },
+  {
+   "effort": "high",
+   "chars": 732,
+   "seconds": 8.9,
+   "prompt": 486,
+   "completion": 443,
+   "total": 929
+  },
+  {
+   "effort": "high",
+   "chars": 761,
+   "seconds": 5.1,
+   "prompt": 541,
+   "completion": 270,
+   "total": 811
+  },
+  {
+   "effort": "high",
+   "chars": 808,
+   "seconds": 6.0,
+   "prompt": 590,
+   "completion": 406,
+   "total": 996
+  },
+  {
+   "effort": "high",
+   "chars": 542,
+   "seconds": 5.2,
+   "prompt": 431,
+   "completion": 262,
+   "total": 693
+  },
+  {
+   "effort": "high",
+   "chars": 688,
+   "seconds": 10.2,
+   "prompt": 478,
+   "completion": 601,
+   "total": 1079
+  },
+  {
+   "effort": "high",
+   "chars": 647,
+   "seconds": 6.5,
+   "prompt": 437,
+   "completion": 421,
+   "total": 858
+  },
+  {
+   "effort": "high",
+   "chars": 596,
+   "seconds": 7.0,
+   "prompt": 417,
+   "completion": 341,
+   "total": 758
+  },
+  {
+   "effort": "high",
+   "chars": 1119,
+   "seconds": 8.4,
+   "prompt": 853,
+   "completion": 606,
+   "total": 1459
+  },
+  {
+   "effort": "high",
+   "chars": 716,
+   "seconds": 9.4,
+   "prompt": 477,
+   "completion": 517,
+   "total": 994
+  },
+  {
+   "effort": "high",
+   "chars": 505,
+   "seconds": 6.0,
+   "prompt": 417,
+   "completion": 396,
+   "total": 813
+  },
+  {
+   "effort": "high",
+   "chars": 419,
+   "seconds": 3.9,
+   "prompt": 396,
+   "completion": 147,
+   "total": 543
+  },
+  {
+   "effort": "high",
+   "chars": 425,
+   "seconds": 5.3,
+   "prompt": 414,
+   "completion": 329,
+   "total": 743
+  },
+  {
+   "effort": "high",
+   "chars": 610,
+   "seconds": 12.1,
+   "prompt": 495,
+   "completion": 498,
+   "total": 993
+  },
+  {
+   "effort": "high",
+   "chars": 463,
+   "seconds": 6.1,
+   "prompt": 392,
+   "completion": 320,
+   "total": 712
+  },
+  {
+   "effort": "high",
+   "chars": 564,
+   "seconds": 14.9,
+   "prompt": 400,
+   "completion": 727,
+   "total": 1127
+  },
+  {
+   "effort": "high",
+   "chars": 669,
+   "seconds": 10.8,
+   "prompt": 553,
+   "completion": 561,
+   "total": 1114
+  },
+  {
+   "effort": "high",
+   "chars": 495,
+   "seconds": 8.7,
+   "prompt": 390,
+   "completion": 494,
+   "total": 884
+  }
+ ]
+}

@@ -189,16 +189,36 @@ And in step 3 it **caught itself inventing a statistic** that one of its own
 recommended builds rested on. The database then disproved it. See
 [F2 in FINDINGS.md](docs/FINDINGS.md).
 
-### It read the parent tool's source
+### It wrote the interface, from the real source
 
 The page was not written from a description of the house style. GLM-5.3-Flash was
-given **85,326 tokens of the real thing**: the parent Flask app, its 219KB
-single-page front end, and this backend. Fourteen minutes later it returned a
-complete page that matched the palette, the fonts and the restraint, including
-external font loads and a link I wrongly flagged as invented and which turned out
-to be copied faithfully from the original.
+handed **85,326 tokens of the actual thing**: the parent Flask app, its 219KB
+single-page front end, and this backend. 850 seconds later it returned a complete,
+working page that matched the palette, the fonts and the restraint.
 
-That is what a 1M context window is for.
+It carried over conventions nobody named, including *"Free-text locations are kept
+and marked, never forced into a zone"*, which is the parent tool's discipline
+stated in the parent tool's voice. It built a TAIL / AIRLINE / AIRCRAFT TYPE switch
+and made every name clickable, so a reader moves from an aircraft to its operator
+to its type without returning to a search box. Nobody asked for that.
+
+I flagged two things in its output as mistakes. Both were right, and copied
+faithfully from the original. My own hand-written page was the one that deviated.
+
+The design, the brief that produced the design, and the interface are all its work.
+What a human supplied was the data, the constraints, the decision it refused to
+make, and the checking.
+
+### Every report, not a sample
+
+Four examples are an anecdote. All 1,757,828 reports can be restated and checked,
+and that was measured rather than guessed: **865 tokens and 1.42 seconds per
+report**, which is 1.52 billion tokens and **2.9 days at sixty concurrent** for the
+whole file. An upper bound, measured on the expensive end.
+
+It has not been run, and [MODEL_USE.md](MODEL_USE.md) says why: the instrument is
+not calibrated yet, and 1.5 billion tokens through an uncalibrated judge is 1.5
+billion tokens of uncalibrated output.
 
 ---
 

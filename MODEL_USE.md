@@ -186,6 +186,53 @@ concurrent, and 29 flags re-adjudicated by three lenses each.
 
 ---
 
+## The whole file, not a sample
+
+Four examples are an anecdote. The claim worth making is that **every one of the
+1,757,828 reports can be restated and checked**, which has never been possible,
+because until now the only way to read a write-up was for a person to read it.
+
+That claim needs a number, so it was measured rather than guessed.
+Script: [`build/measure_cost.py`](build/measure_cost.py), raw:
+[`build/cost-at-scale.json`](build/cost-at-scale.json).
+
+```
+measured               30 reports, real prompt, metered
+wall time              42.5s at six concurrent
+per report             1.42s, 865 tokens mean, 812 median
+prompt share           54.1% of tokens
+
+extrapolated to 1,757,828 reports
+tokens                 1,521,165,757        upper bound
+at 6 concurrent        28.8 days
+at 60 concurrent        2.9 days
+```
+
+**Why this is an upper bound and not a forecast.** The 30 were drawn from the
+long-narrative sample, the expensive end of the file, and every one ran at `high`
+reasoning effort. Most reports in the corpus are short and run at `low`, at roughly
+a third of the tokens. The real figure is below this. It is stated as a ceiling
+because a ceiling is the honest shape of an estimate built on the worst case.
+
+**What makes it affordable at all** is the architecture the vendor documents:
+sparse plus linear attention, cutting attention compute 3.01x and KV cache 4.44x
+against GLM-5.3, at 18B active parameters out of 320B. Frontier reading at a price
+where a million and a half documents is a weekend rather than a grant application.
+
+**What it would produce.** A plain-English restatement of every write-up in the
+file, and a flag wherever the coded box contradicts the paragraph beneath it. The
+ledger at [/z/conflicts](https://aircraftdefects.com/z/conflicts) currently fills
+one record at a time as people read. A full pass would fill it in three days.
+
+**Why it has not been run.** Because the instrument is not calibrated. Two attempts
+to measure the disagreement rate failed, and the second failed in a way that
+discredits the first. Running 1.5 billion tokens through an uncalibrated judge
+produces 1.5 billion tokens of uncalibrated output. The hand-labelling comes first.
+
+The capability is proven and priced. The permission to trust it is not yet earned.
+
+---
+
 ## Two failures worth publishing
 
 **GLM-5.3 is text only.** A tool whose input is a photograph would have failed

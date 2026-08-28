@@ -72,12 +72,21 @@ def go():
     print("sending %s chars (~%s tokens)" % (format(len(prompt), ","), format(len(prompt)//4, ",")))
     body = {"model": "glm-5.3-flash", "temperature": 1, "top_p": 0.95,
             "thinking": {"type": "enabled", "clear_thinking": False},
-            "reasoning_effort": "max", "max_tokens": 90000,
+            # 90,000 came back as a 502 from their gateway, not from the model. 48,000 is
+            # comfortably more than the 41.5KB page it wrote last time and appears to
+            # sit inside whatever the gateway will hold open.
+            "reasoning_effort": "max", "max_tokens": 48000,
             "messages": [{"role": "user", "content": prompt}]}
     t0 = time.time()
-    r = requests.post("https://api.z.ai/api/paas/v4/chat/completions", json=body, timeout=5400,
-                      headers={"Authorization": "Bearer " + os.environ["ZAI_API_KEY"],
-                               "Content-Type": "application/json"})
+    r = None
+    for attempt in range(3):
+        r = requests.post("https://api.z.ai/api/paas/v4/chat/completions", json=body, timeout=5400,
+                          headers={"Authorization": "Bearer " + os.environ["ZAI_API_KEY"],
+                                   "Content-Type": "application/json"})
+        if r.status_code == 200:
+            break
+        print("  attempt %d: %s, retrying" % (attempt + 1, r.status_code))
+        time.sleep(20)
     if r.status_code != 200:
         print("FAILED", r.status_code, r.text[:400]); return
     m = r.json()["choices"][0]["message"]

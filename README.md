@@ -1,4 +1,4 @@
-# Conflicting Reports
+# Make it readable
 
 [![GLM-5.3-Flash](https://img.shields.io/badge/GLM--5.3--Flash-native%20multimodal-9c4a1e.svg)](https://docs.z.ai/guides/vlm/glm-5.3-flash)
 [![Live](https://img.shields.io/badge/live-aircraftdefects.com%2Fz-1f5c3d.svg)](https://aircraftdefects.com/z/)
@@ -8,17 +8,27 @@
 
 **A government can publish everything it holds and still answer none of your questions.**
 
-Every time a mechanic in America finds something wrong with an aircraft, they file
-it with the FAA. All of it is public. No login, no fee, no records request.
-1,757,828 reports since 1995, on 54,634 aircraft. Almost none of it has ever been
-read, because a report says `ZONE 700` where it means the landing gear, and `A`
-where it means the crew landed somewhere they had not planned to.
+I was watching *Freefall* on Netflix. Relatives of victims were trying to find
+answers about aircraft defects on a government website. Row after row of capital
+letters. Zone numbers. Single-character codes.
 
-*The features in this repository were not specified by a human. GLM-5.3-Flash was
-given flat source material and asked what should be built. Every turn of that
-session is committed here, reasoning traces included: 198,227 tokens through the
-model, 314,399 characters of its thinking kept, so the claim can be checked rather
-than believed.*
+I stopped the documentary, typed the URL in myself, and never went back to it.
+
+What I found was a public database nobody could use. Not secret. Not redacted.
+1,757,828 reports going back to 1995, on 54,634 aircraft, every one of them free
+to read, and almost none of them ever read. A report says `ZONE 700` where it
+means the landing gear, and `A` where it means the crew landed somewhere they had
+not planned to. Trying a real query, I hit timeouts and lags: the ordinary
+complaints of software left alone for a long time.
+
+It irritated me that all of that was there and none of it was reachable.
+
+*This repository is the second pass. The first made the database searchable. This
+one asks a different question, and the features in it were not specified by a
+human: GLM-5.3-Flash was given flat source material and asked what should be
+built. Every turn of that session is committed here, reasoning traces included:
+198,227 tokens through the model, 314,399 characters of its thinking kept, so the
+claim can be checked rather than believed.*
 
 ![The five answers](screenshots/readme_five_answers.png)
 
@@ -32,8 +42,17 @@ than believed.*
 
 ## The Problem
 
-The FAA publishes the database and it publishes the dictionary. It has never put
-the two on the same page.
+The questions I wanted answered were not exotic. What was reported yesterday.
+Which company reported the most. When did it happen, who was involved, where on
+the aircraft, what kind of defect, and what did it force the crew to do.
+
+Without the when, the what, the where and the who, you never get to why. And why
+is where the story is: why does one operator send the same aircraft in sixty times
+in a year?
+
+None of that was reachable, and the reason is small and stupid. The FAA publishes
+the database and it publishes the dictionary. It has never put the two on the same
+page.
 
 A Service Difficulty Report has ten boxes and nine of them are codes. The airline
 is four letters. What the mechanic found is a code. How they found it is another

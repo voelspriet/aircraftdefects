@@ -1,158 +1,251 @@
-# aircraftdefects.com /z
+# Conflicting Reports
 
-New research functions for [aircraftdefects.com](https://aircraftdefects.com), built on
-**GLM-5.3-Flash**, for three audiences: investigative journalists, safety
-researchers, and relatives of people who died in aviation accidents.
+[![GLM-5.3-Flash](https://img.shields.io/badge/GLM--5.3--Flash-native%20multimodal-9c4a1e.svg)](https://docs.z.ai/guides/vlm/glm-5.3-flash)
+[![Live](https://img.shields.io/badge/live-aircraftdefects.com%2Fz-1f5c3d.svg)](https://aircraftdefects.com/z/)
+[![Records](https://img.shields.io/badge/records-1%2C757%2C828-informational.svg)](https://aircraftdefects.com)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+[![Hackathon](https://img.shields.io/badge/GLM--5.3%20Flash-Lightning%20Hackathon-blueviolet.svg)](https://cerebralvalley.ai/e/glm-5-3-flash-lightning-hackathon)
 
-The corpus is every FAA Service Difficulty Report published since 1995:
-**1,757,828 records**, 54,634 aircraft, filed by mechanics when something on an
-aircraft fails, malfunctions, or is found defective. It is entirely public and
-almost entirely unread, because roughly 1.5 million of those records carry a
-free-text write-up in trade shorthand that no structured search reaches.
+**A government can publish everything it holds and still answer none of your questions.**
 
-Built for the [GLM-5.3 Flash Lightning Hackathon](https://cerebralvalley.ai/e/glm-5-3-flash-lightning-hackathon),
-28 August to 1 September 2026. MIT.
+Every time a mechanic in America finds something wrong with an aircraft, they file
+it with the FAA. All of it is public. No login, no fee, no records request.
+1,757,828 reports since 1995, on 54,634 aircraft. Almost none of it has ever been
+read, because a report says `ZONE 700` where it means the landing gear, and `A`
+where it means the crew landed somewhere they had not planned to.
+
+*The features in this repository were not specified by a human. GLM-5.3-Flash was
+given flat source material and asked what should be built. Every turn of that
+session is committed here, reasoning traces included: 198,227 tokens through the
+model, 314,399 characters of its thinking kept, so the claim can be checked rather
+than believed.*
+
+![The five answers](screenshots/readme_five_answers.png)
+
+![The conflicting reports ledger](screenshots/readme_conflicts.png)
+
+**Try it:** [aircraftdefects.com/z](https://aircraftdefects.com/z/) ·
+**The ledger:** [/z/conflicts](https://aircraftdefects.com/z/conflicts) ·
+**Parent tool:** [aircraftdefects.com](https://aircraftdefects.com)
 
 ---
 
-## The method: the model designs, and we keep the receipts
+## The Problem
 
-The features here were not specified by a human and then handed to a model to
-implement. The model was given flat source material and asked to work out what
-should be built. Every turn of that session is committed to this repository,
-including the reasoning traces, so the claim can be checked instead of believed.
+The FAA publishes the database and it publishes the dictionary. It has never put
+the two on the same page.
 
-The technique is the **Prewash**: you never write the long prompt yourself.
+A Service Difficulty Report has ten boxes and nine of them are codes. The airline
+is four letters. What the mechanic found is a code. How they found it is another
+code. What it forced the crew to do is a third. Every one resolves against a table
+the FAA publishes as a zip file on the same website, twenty seconds away, which no
+ordinary person will ever open.
+
+Nothing is secret. Nothing is redacted. The record and its own dictionary were
+published by the same agency and never introduced to each other.
+
+| On the form | What it actually says |
+|---|---|
+| `CALA` | Continental Airlines Inc |
+| `2530` | Buffet and galleys |
+| `IN` | On the ground, in inspection or maintenance |
+| `V` | Visual. Someone looked at it |
+| `B` | Smoke, fumes, odour or sparks |
+| `33` | not in any FAA table, so it stays `33` |
+
+Read as English: a Continental aircraft had smoke or sparks from the galley, found
+by eye during ground maintenance, no emergency procedure triggered.
+
+---
+
+## What This Does
+
+The parent tool answers *which reports match these filters*. That is a lookup. This
+answers a question about a thing, in the order a reporter actually asks:
+
+| | | |
+|---|---|---|
+| **WHEN** | month by month, over the whole span | a spike has a date |
+| **WHERE** | on the airframe, zone and system | drawn on an aircraft |
+| **WHO** | which airline, which tail, which type | click any of them to become the subject |
+| **WHAT** | what was found | nature, part, condition |
+| **WHAT IT FORCED** | what the defect made the crew do | the question the FAA buries hardest |
+
+One thing in: a tail number, an airline, or an aircraft type. Five answers out.
+
+### The Flip
+
+**What the form says:**
+
+> `PrecautionaryProcedureA: E` · `StageOfOperationCode: IN`
+
+**What the same mechanic wrote underneath:**
+
+> THE AIRCRAFT WAS ON THE GROUND DURING BOARDING, JET BRIDGE PULLED AWAY, AND THE
+> APU AUTO-SHUTDOWN BEFORE THE CREW COULD MANUALLY SHUT IT DOWN
+
+`E` decodes to **Engine shut down in flight**. The aircraft was on the ground. It
+was the APU. Not an engine, not in flight.
+
+That is record `AALA202111165003`, and it is in the ledger.
+
+### Say this in plain English
+
+The one generated surface. The model rephrases the mechanic's write-up, keeping
+every step in order, and it may refuse. It sits **under** the original, never
+instead of it.
+
+It also returns two things nobody asked for:
+
+**An abbreviation table**, marked by source. `AGL` is derivable from the text, so
+it is marked *from the record*. That `GEG` is Spokane comes from the model's own
+knowledge, so it is marked *not in this record* and you are told to check it.
+
+**A code disagreement notice**, when the ticked box contradicts the paragraph.
+
+---
+
+## Conflicting Reports: a ledger, not a rate
+
+Two attempts to measure how often codes disagree with their own narrative both
+failed, and [the failures are written up rather than buried](docs/FINDINGS.md).
+A first pass said 14.5%. An adversarial check cut it to 2.0%. Then the check
+turned out to have an adjudicator that refuted every flag it ever saw, which makes
+it a constant rather than a judge.
+
+So the tool stopped trying to produce a rate. A rate needs a denominator, a
+denominator needs a calibrated instrument, and there is not one. A ledger needs
+neither.
+
+[**/z/conflicts**](https://aircraftdefects.com/z/conflicts) fills up from ordinary
+use. Somebody opens a report, presses *Say this in plain English*, and if the model
+notices the disagreement the case is written down with its record number. Nothing
+sweeps the file, so the ledger's size measures **attention, not prevalence**, and
+the page says that in its first paragraph.
+
+Every row has two buttons, *this holds* and *this is wrong*, and both are counted.
+A row where a human overrules the model is the row worth studying.
+
+---
+
+## The Method: the model designs, and we keep the receipts
+
+Nobody wrote a long prompt. The technique is the **Prewash**, documented in
+[PREWASH_METHOD.md](PREWASH_METHOD.md).
 
 | | What happens | Artefact |
 |---|---|---|
-| **Step 1** | A human types one short line asking for a *prompt*, not a plan and not an answer, alongside source material stripped of adjectives | [`design/01-prompt-the-model-wrote.md`](design/01-prompt-the-model-wrote.md) |
-| **Step 2** | The human reads what the model wrote, then types `execute prompt` | [`design/02-answer.md`](design/02-answer.md) |
-| **Step 3** | The human makes it mark every sentence as stated by the source or inferred | [`design/03-stated-vs-inferred.md`](design/03-stated-vs-inferred.md) |
+| **1** | A human types one short line asking for a *prompt*, alongside source material stripped of adjectives | [`design/01`](design/01-prompt-the-model-wrote.md) |
+| **2** | The human reads what the model wrote, then types `execute prompt` | [`design/02`](design/02-answer.md) |
+| **3** | The human makes it mark every sentence as stated or inferred | [`design/03`](design/03-stated-vs-inferred.md) |
 
 The entire human input to step 1 was one sentence:
 
 > Give me a prompt to work out what to build on this dataset for these users.
 
-### Why not simply write the prompt
-
-A detailed prompt carries its author's assumptions in its adjectives. Ask a model
-to "find the most alarming safety patterns" and it will find alarm, because that
-is the question it was handed. The answer will look like analysis and will be a
-reflection.
-
-Handing the model a short line and flat material forces it to frame the question
-itself, and the framing becomes an artefact you can read, argue with, and reject.
-
-The source material in [`design/ask_glm.py`](design/ask_glm.py) is deliberately
-inert: counts, column names, verbatim examples, and the three things the dataset
-does not contain. No adjectives, no ranking, no hint about what would be
-interesting.
+**Why not simply write the prompt.** A detailed prompt carries its author's
+assumptions in its adjectives. Ask a model to find the most alarming safety
+patterns and it will find alarm, because that is the question it was handed. The
+answer will look like analysis and be a reflection.
 
 ### What that produced
 
-The model was told nothing about pitfalls. From counts and column names alone it
-identified the three traps in this dataset, and built its prompt around them:
+Told nothing about pitfalls, from counts and column names alone, the model
+identified the three traps in this dataset and built its prompt around them:
 missing denominators, missing causes, and a grieving non-expert audience.
 
-It also **corrected the source material**. The brief placed a 1M-token context
-window next to a 1.76M-record dataset. The model caught the implication:
+It **corrected the source material**. The brief placed a 1M-token context window
+next to a 1.76M-record dataset. It caught the implication and made batched
+pipelines a precondition rather than a later discovery.
 
-> 1M-token context (large slices of the dataset fit per pass; all 1.76M records do not)
-
-and made batched pipelines a precondition rather than a later discovery.
-
-It did arithmetic nobody asked for. Given 3,945 operator designators of which
-1,213 resolve, it wrote "2,732 of 3,945 operator designators resolve to no name"
-and turned that into a product rule.
-
-And it **refused the decision that was not its to make**. On whether relatives
-should see one airframe's defect history:
+It **refused the decision that was not its to make**, on whether relatives of
+victims should see a per-tail history:
 
 > it's the highest-stakes design decision in the whole plan and it shouldn't be
 > left to the model.
 
-The prompt it wrote puts a data reality audit before any product idea, makes
-rejection its own scored phase, and requires a section headed **"What this
-product will never claim."** Nobody asked for that section.
+That decision, and who made it, is in [docs/DECISIONS.md](docs/DECISIONS.md).
 
+And in step 3 it **caught itself inventing a statistic** that one of its own
+recommended builds rested on. The database then disproved it. See
+[F2 in FINDINGS.md](docs/FINDINGS.md).
+
+### It read the parent tool's source
+
+The page was not written from a description of the house style. GLM-5.3-Flash was
+given **85,326 tokens of the real thing**: the parent Flask app, its 219KB
+single-page front end, and this backend. Fourteen minutes later it returned a
+complete page that matched the palette, the fonts and the restraint, including
+external font loads and a link I wrongly flagged as invented and which turned out
+to be copied faithfully from the original.
+
+That is what a 1M context window is for.
 
 ---
-
-## What it found in the file
-
-Building on this data turned up things about the data itself, written up in
-[docs/FINDINGS.md](docs/FINDINGS.md) with the scripts to reproduce them.
-
-The first one is a retraction, and it is left in on purpose. A pass over 200 long
-reports appeared to show that **14.5% carry a coded field their own narrative
-contradicts**. An adversarial check then cut that to 2.0%, and inspecting the check
-showed one of its three adjudicators had refuted every flag it ever saw, which
-makes it a constant rather than a judge. Neither number survives.
-
-What survives is four documented cases, including an engine recorded as shut down
-in flight when the aircraft was on the ground and it was the APU, and an
-unscheduled landing recorded over a narrative reading `CONTINUED TO DESTINATION`.
-The disagreements are real. The rate is unknown until a human labels the sample.
-
-So the tool stopped trying to produce a rate and built a ledger instead:
-**[aircraftdefects.com/z/conflicts](https://aircraftdefects.com/z/conflicts)**.
-
-It fills up from ordinary use. A reader opens a report, presses *Say this in plain
-English*, and if the model notices the ticked box disagreeing with the paragraph,
-that case is written down with its record number. Nothing sweeps the file, so the
-ledger's size measures attention rather than prevalence, and the page says so at
-the top. Every row carries two buttons, *this holds* and *this is wrong*, and both
-counts are kept, because a case where a human overrules the model is the more
-interesting row.
 
 ## How the model is used
 
 | Setting | Value | Why |
 |---|---|---|
-| Model | `glm-5.3-flash` | The only member of the GLM-5 series that accepts images. GLM-5.3 is text only. |
-| Reasoning | `max` for design, `low` for extraction | Reasoning cannot be disabled on this family and defaults to `max`. Max on a transcription task is billed thinking about boxes that only need reading. |
-| `thinking.clear_thinking` | `false` | Vendor recommendation; keeps the reasoning trace, which is what makes the sessions auditable. |
-| `temperature` / `top_p` | 1 / 0.95 | Vendor recommendation for this model. |
+| Model | `glm-5.3-flash` | the only member of the GLM-5 series that accepts images; GLM-5.3 is text only |
+| Reasoning | `max` designing, `high` on long narratives, `low` on short ones | reasoning cannot be disabled and defaults to `max`; paying a deep-reasoning model to transcribe ten boxes is money burned |
+| `clear_thinking` | `false` | vendor recommendation, and it is what makes the sessions auditable |
+| `temperature` / `top_p` | 1 / 0.95 | vendor recommendation for this model |
+| Structured output | JSON, with an abstain field | so it cannot ramble into a field that renders as fact |
 
-Reasoning effort is a deliberate, declared choice per task, never disabled.
+Reasoning effort is a declared choice per task, never disabled.
 
 ---
 
-## The rule the whole thing is built on
+## The rule the whole thing rests on
 
 **The model reads. The tables decide.**
 
-The model is never asked what a code means. Meaning comes from the FAA's own
-published lookup tables, applied in code. A code absent from those tables is
-displayed as the raw code and labelled undecoded.
+It is never asked what a code means. Meaning comes from the FAA's own published
+tables, applied in code. A code absent from those tables renders as the raw code,
+in red, labelled undecoded.
 
-Asked to interpret, any model will produce a plausible expansion for a code it
-has never seen and will not flag the guess. On a public safety record that is not
-a small error. It is a fabricated fact wearing the formatting of a real one, and
-a reporter cannot tell the difference.
+Asked to interpret, any model produces a plausible expansion for a code it has
+never seen and does not flag the guess. On a public safety record that is a
+fabricated fact wearing the formatting of a real one, and a reporter cannot tell
+the difference.
 
 ## What this will never claim
 
-Carried over from the parent tool, and non-negotiable:
-
 - Not an accident database, and not a safety ranking.
-- No league tables of operators by report count. The dataset contains neither
-  fleet size nor flying hours, so no rate can be computed from it.
-- No causal language. The dataset does not record the cause of a defect.
-- A write-up is a defect that maintenance **caught**. That is usually the system
-  working, not failing.
-- Every number shown must be traceable to records the reader can open.
+- No league table of operators. The file carries an airframe's own hours but no
+  fleet flying hours, and the only aircraft with hours in it are the ones that had
+  something filed. A denominator built from this file would be built out of its own
+  numerator.
+- No causal language. The file does not record the cause of a defect.
+- A write-up is a defect that maintenance **caught**. 74% of all reports were
+  written with the aircraft on the ground. That is usually the system working.
+- Every number traces to records the reader can open.
 
 ---
 
-## Reproducing the design session
+## Repository
+
+| | |
+|---|---|
+| [PREWASH_METHOD.md](PREWASH_METHOD.md) | the technique, and why writing your own prompt defeats it |
+| [HACKATHON_LOG.md](HACKATHON_LOG.md) | every step in order, including what went wrong |
+| [docs/FINDINGS.md](docs/FINDINGS.md) | four findings about the data, one of them a retraction |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | what a model does not get to decide |
+| [design/](design/) | the design session, verbatim, with reasoning traces |
+| [build/](build/) | the build session, the measurement, the failed calibration |
+| [app/](app/) | the service running at /z |
+
+## Running it
 
 ```bash
-python3 -m venv .venv && ./.venv/bin/pip install requests flask python-dotenv
+python3 -m venv .venv && ./.venv/bin/pip install flask requests python-dotenv
 echo "ZAI_API_KEY=your-key" > .env
-./.venv/bin/python design/ask_glm.py
+./.venv/bin/python app/app.py     # 127.0.0.1:8211
 ```
 
-Writes every turn to `design/`, with reasoning traces and a `.meta.json`
-recording model, effort, wall time and token usage for each.
+Reproduce the design session with `./.venv/bin/python design/ask_glm.py`, the
+measurement with `build/measure_tension.py`, and its calibration with
+`build/validate.py`. The samples are seeded, so the same records come back.
+
+MIT.

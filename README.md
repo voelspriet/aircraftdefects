@@ -76,6 +76,18 @@ The prompt it wrote puts a data reality audit before any product idea, makes
 rejection its own scored phase, and requires a section headed **"What this
 product will never claim."** Nobody asked for that section.
 
+
+So the tool stopped trying to produce a rate and built a ledger instead:
+**[aircraftdefects.com/z/conflicts](https://aircraftdefects.com/z/conflicts)**.
+
+It fills up from ordinary use. A reader opens a report, presses *Say this in plain
+English*, and if the model notices the ticked box disagreeing with the paragraph,
+that case is written down with its record number. Nothing sweeps the file, so the
+ledger's size measures attention rather than prevalence, and the page says so at
+the top. Every row carries two buttons, *this holds* and *this is wrong*, and both
+counts are kept, because a case where a human overrules the model is the more
+interesting row.
+
 ---
 
 ## What it found in the file

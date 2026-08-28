@@ -2,3 +2,8 @@
 .env
 __pycache__/
 *.pyc
+
+# the service lives in app/, not at the root
+/app.py
+/index.html
+/conflicts.html

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>One aircraft, in plain English</title>
+<style>
+:root{--bg:#faf7f2;--ink:#1a1a18;--mut:#6b6660;--line:#ddd6cb;--card:#fff;
+      --ok:#1f5c3d;--warn:#8a4b2a;--acc:#1f4f7a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+     font:16px/1.55 ui-serif,Georgia,"Times New Roman",serif}
+.wrap{max-width:960px;margin:0 auto;padding:30px 18px 90px}
+h1{font-size:31px;margin:0 0 6px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin:0 0 22px}
+.rule{height:1px;background:var(--line);margin:24px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:17px 19px;margin-top:16px}
+.card h2{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);
+         margin:0 0 12px;font-weight:600;font-family:ui-sans-serif,system-ui}
+input,button,select{font:inherit;font-size:15px}
+input[type=text]{padding:10px 13px;border:1px solid var(--line);border-radius:8px;width:230px;background:var(--card)}
+button{padding:10px 15px;border-radius:8px;border:1px solid var(--line);background:var(--card);cursor:pointer}
+button.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button.tab{border-radius:999px;padding:6px 13px;font-size:14px}
+button.tab[aria-selected=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.frame{background:#f2f7fb;border:1px solid #cfe0ee;border-radius:10px;padding:13px 16px;margin-top:14px;font-size:15px}
+.never{background:#fff8ec;border:1px solid #e8d7b4;border-radius:10px;padding:12px 16px;margin-top:14px;font-size:14px}
+.never ul{margin:6px 0 0;padding-left:18px}.never li{margin:3px 0}
+table{width:100%;border-collapse:collapse}
+td,th{padding:7px 9px 7px 0;border-bottom:1px solid #f0ebe3;text-align:left;vertical-align:top;font-size:14.5px}
+th{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:13px}
+.mut{color:var(--mut)}.small{font-size:13px}
+.rec{border-bottom:1px solid #f0ebe3;padding:13px 0}
+.verb{font-family:ui-monospace,Menlo,monospace;font-size:13.5px;background:#f7f3ec;padding:9px 11px;border-radius:7px;white-space:pre-wrap}
+.plain{color:var(--ok);margin-top:7px}
+.abst{color:var(--mut);font-style:italic;margin-top:7px;font-size:14px}
+.pill{display:inline-block;background:#f2ede4;border-radius:999px;padding:2px 9px;font-size:12.5px;margin:2px 4px 2px 0;color:var(--mut)}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--ink);
+      border-radius:50%;animation:s .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes s{to{transform:rotate(360deg)}}
+a{color:var(--acc)}
+</style></head><body><div class="wrap">
+
+<h1>One aircraft, in plain English</h1>
+<p class="sub">Every maintenance report the FAA has published about a single aeroplane, decoded.
+1,757,828 reports since 1995. Free, no account.</p>
+
+<div>
+  <input type="text" id="tail" placeholder="Tail number, e.g. N700FX" autocomplete="off">
+  <button class="primary" id="go">Look it up</button>
+  <button id="ex1">N700FX</button>
+  <button id="ex2">N823AL</button>
+</div>
+
+<div id="tabs" style="margin-top:16px;display:none">
+  <button class="tab" data-v="history" aria-selected="true">History</button>
+  <button class="tab" data-v="repeats" aria-selected="false">Written up more than once</button>
+  <button class="tab" data-v="export" aria-selected="false">Cite and export</button>
+</div>
+
+<div id="out"></div>
+
+<div class="rule"></div>
+<p class="small mut">The model reads and phrases. It never decides what a code means: that comes
+from the FAA's own published tables. Plain-English lines are marked, and always sit under the
+mechanic's own words, never instead of them. Built on GLM-5.3-Flash.
+Parent tool: <a href="https://aircraftdefects.com">aircraftdefects.com</a>.</p>
+</div>
+<script>
+const $=s=>document.getElementById(s), out=$("out");
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const num=n=>n==null?"":Number(n).toLocaleString("en");
+let DATA=null, TAIL=null;
+
+function busy(m){out.innerHTML=`<div class="card"><span class="spin"></span>${esc(m)}</div>`}
+function fail(m){out.innerHTML=`<div class="card"><strong>Stopped.</strong> ${esc(m)}</div>`}
+
+$("go").onclick=()=>load($("tail").value);
+$("tail").addEventListener("keydown",e=>{if(e.key==="Enter")load(e.target.value)});
+$("ex1").onclick=()=>{$("tail").value="N700FX";load("N700FX")};
+$("ex2").onclick=()=>{$("tail").value="N823AL";load("N823AL")};
+document.querySelectorAll("#tabs .tab").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#tabs .tab").forEach(x=>x.setAttribute("aria-selected",x===b));
+  view(b.dataset.v);
+});
+
+async function load(t){
+  t=(t||"").trim(); if(!t) return;
+  TAIL=t; busy("reading the file");
+  try{ DATA=await (await fetch("api/airframe/"+encodeURIComponent(t))).json(); }
+  catch(e){ return fail(String(e)); }
+  if(!DATA.found){ $("tabs").style.display="none";
+    return out.innerHTML=`<div class="card"><h2>${esc(DATA.tail)}</h2><p>${esc(DATA.note)}</p></div>`; }
+  $("tabs").style.display="block";
+  document.querySelectorAll("#tabs .tab").forEach((x,i)=>x.setAttribute("aria-selected",i===0));
+  view("history");
+}
+
+function never(list){return `<div class="never"><strong>What this cannot tell you</strong><ul>${
+  list.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`}
+
+async function view(v){
+  if(v==="history") return history_();
+  if(v==="repeats") return repeats_();
+  if(v==="export")  return export_();
+}
+
+async function history_(){
+  const d=DATA, a=d.aircraft||{};
+  out.innerHTML=`<div class="card">
+    <h2>${esc(d.tail)}</h2>
+    <p style="margin:0 0 4px;font-size:19px">${esc((a.make||"")+" "+(a.model||""))}</p>
+    <p class="mut" style="margin:0">${num(d.found)} reports, ${esc(d.first)} to ${esc(d.last)}.
+      ${(d.operators||[]).map(o=>`<span class="pill">${esc(o.name)} · ${num(o.reports)}</span>`).join("")}</p>
+    <div class="frame">${esc((d.framing||{}).sentence||"")}</div>
+    <div id="sum" class="small mut" style="margin-top:12px"><span class="spin"></span>checking the numbers</div>
+  </div>
+  ${never(d.cannot_show)}
+  <div class="card"><h2>Every report, newest first</h2><div id="recs">${
+    d.records.map(recHtml).join("")}</div></div>`;
+  try{ const s=await (await fetch("api/summary/"+encodeURIComponent(TAIL))).json();
+    $("sum").innerHTML = s.summary
+      ? `<strong>In one paragraph.</strong> ${esc(s.summary)}<br><span class="small">${esc(s.note)}</span>`
+      : esc(s.error||""); }catch(e){ $("sum").textContent=""; }
+}
+
+function recHtml(r,i){
+  return `<div class="rec">
+    <div class="small mut">${esc(r.date)} · <span class="mono">${esc(r.id)}</span>
+      ${r.hours?" · "+num(r.hours)+" hours":""}</div>
+    <div style="margin:5px 0">${[r.system,r.part,r.condition].filter(Boolean).map(x=>
+      `<span class="pill">${esc(x)}</span>`).join("")}
+      ${(r.crew||[]).map(x=>`<span class="pill" style="background:#fdecec;color:#8a2a2a">${esc(x)}</span>`).join("")}</div>
+    <div class="verb">${esc(r.text||"(no write-up text)")}</div>
+    <div id="g${i}"><button class="small" style="margin-top:7px;padding:4px 10px"
+      onclick="doGloss(${i})">Say this in plain English</button></div>
+  </div>`;
+}
+
+async function doGloss(i){
+  const r=DATA.records[i], el=$("g"+i);
+  el.innerHTML=`<span class="spin"></span><span class="small mut">asking GLM-5.3-Flash</span>`;
+  try{
+    const g=await (await fetch("api/gloss",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(r)})).json();
+    el.innerHTML = g.abstained||!g.plain
+      ? `<div class="abst">The model declined to rephrase this one${g.reason?": "+esc(g.reason):""}.</div>`
+      : `<div class="plain">${esc(g.plain)}</div><div class="small mut">Rephrased by GLM-5.3-Flash from the words above. The write-up is what counts.</div>`;
+  }catch(e){ el.innerHTML=`<span class="small mut">could not reach the model</span>`; }
+}
+
+async function repeats_(){
+  busy("grouping by system");
+  const d=await (await fetch("api/repeats/"+encodeURIComponent(TAIL))).json();
+  const g=d.groups||[];
+  out.innerHTML=`<div class="card"><h2>Written up more than once</h2>
+    <p class="mut" style="margin-top:0">${esc(d.note)}</p>
+    ${g.length?`<table><tr><th>System</th><th>Part</th><th>Times</th><th>First</th><th>Last</th><th>Hours between</th></tr>
+      ${g.map(x=>`<tr><td>${esc(x.system||"")}</td><td>${esc(x.part||"")}</td><td>${x.times}</td>
+        <td>${esc(x.first)}</td><td>${esc(x.last)}</td><td>${x.hours_between==null?"not recorded":num(x.hours_between)}</td></tr>`).join("")}
+      </table>`:`<p>Nothing on this airframe was written up twice for the same system and part.</p>`}
+    </div>${never(DATA.cannot_show)}`;
+}
+
+function export_(){
+  const c=DATA.citation||{};
+  out.innerHTML=`<div class="card"><h2>Cite and export</h2>
+    <p>Every row carries the FAA's own record number, so anything you quote can be found again.</p>
+    <div class="verb">FAA Service Difficulty Reports, ${esc(DATA.tail)}, ${num(DATA.found)} records,
+${esc(c.first||DATA.first)} to ${esc(DATA.last)}.
+Retrieved ${esc(c.retrieved)} from ${esc(c.url)}
+Record numbers: ${esc((c.record_ids||[]).slice(0,12).join(", "))}${(c.record_ids||[]).length>12?" ...":""}</div>
+    <p style="margin-top:14px"><a href="api/export/${encodeURIComponent(TAIL)}.csv">Download all ${num(DATA.found)} as CSV</a></p>
+    </div>${never(DATA.cannot_show)}`;
+}
+</script></body></html>

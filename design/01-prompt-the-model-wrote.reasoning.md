@@ -1,201 +1,284 @@
-The user wants a prompt they can use (presumably with the GLM-5.3-Flash model, or any capable LLM) to work out what to build on this FAA Service Difficulty Reports dataset for the three user groups.
+The user has a dataset of FAA Service Difficulty Reports (SDR), an existing search interface, and a model (GLM-5.3-Flash) available to build on. They want a prompt they can use to work out what to build for three user groups: investigative journalists; researchers and safety analysts; relatives of people who died in aviation accidents.
 
-Let me think carefully about what makes a good prompt for this task, and what a thoughtful answer looks like.
+So the deliverable is a prompt — a well-crafted prompt to feed to the model (or perhaps to use in a discovery/planning process) that will help work out what to build on this dataset for these users.
 
-First, what's the actual job? They want to figure out what to build. Not build it yet. So the prompt should drive a discovery/scoping exercise: understand the data, understand the users, generate candidate products, evaluate them, and converge on a recommendation with rationale.
+Let me think about what makes a great prompt for this task.
 
-Key constraints and facts from the source material that a good prompt should carry forward:
+The prompt should:
+1. Give the model the full context (dataset, constraints, existing interface, model capabilities, users).
+2. Frame the task: discovery of what to build — not jump to features. It should force grounding in the data's actual affordances and limitations.
+3. Handle the ethical sensitivity — especially the "relatives of people who died in aviation accidents" user group. This is delicate: SDRs are pre-accident/pre-incident maintenance reports, not accident records. Relatives may come hoping to find something about the crash that killed their loved one — but the dataset doesn't record accidents and doesn't contain causes. A naive product could mislead grieving people into thinking a defect report "explains" the accident. This is a crucial design tension the prompt should force the model to confront. Also safety-critical misinformation risk: journalists might over-interpret correlations as causes.
+4. Force honesty about data limitations: no fleet size denominators (can't compute rates), no causes, no accidents, survivorship/underreporting biases, free-text noise, operator designators that don't resolve (3,945 designators but only 1,213 resolve to names — meaning operator aggregation is unreliable), etc.
+5. Ask for a structured output: e.g., user needs → jobs-to-be-done → candidate builds ranked → risks → validation plan → what NOT to build.
+6. Possibly ask the model to interrogate the data — since the model has a 1M token context and file input, the prompt could instruct it to request or examine sample records, or propose data probes to validate feasibility before committing to a build. Actually, a good approach: a two-phase prompt — Phase A: questions and data probes; Phase B: proposals. Or instruct the model to first list critical unknowns that must be tested against the data before designing.
 
-1. The dataset: FAA SDRs, 1995–present, ~1.76M records, ~54,634 aircraft by tail number, ~3,945 operator designators (only 1,213 resolve to names). 76 columns, key ones listed.
+Let me think about what the actual discovery question is. "Give me a prompt to work out what to build on this dataset for these users." So the prompt's job is to help the person (the product owner / developer of aircraftdefects.com) figure out what to build. The prompt should elicit:
 
-2. Nature of the data:
-   - SDRs are reports of failures/malfunctions/defects found — they are not accidents, not causes, not fleet denominators.
-   - Crucially: no fleet size or flying hours → can't compute true rates/failure rates per aircraft. Any "trend" is raw count-based and confounded by reporting behavior. This is a major analytical trap that the prompt should force the model to confront: denominators missing, reporting bias (airlines report more than private operators, etc.).
-   - No cause of defect → can't do root-cause claims.
-   - Doesn't record accidents → can't link defects to crashes directly, and doing so could be defamatory/misleading, especially for the "relatives of people who died" audience. There's an ethical dimension here: for grieving relatives, showing a defect report on the tail number of the plane that crashed could imply causation that the data cannot support. The prompt should surface ethics/care requirements.
-   
-3. Free text Discrepancy is the richest field: most records have free text location only (1,496,585 vs 196,663 coded zone). So text extraction/classification is a key build opportunity — e.g., extracting zones, part mentions, verbs (crack, corrode, fatigue, delaminate...), normalizing.
+- Deep understanding of each user group's actual goals and the emotional/practical stakes.
+- Mapping from dataset affordances (what the data can and cannot support) to user needs.
+- Identification of "traps" — things users will want that the data can't deliver (e.g., "is my flight safe?" — can't answer; "what caused the crash?" — can't answer; "which airline is most dangerous?" — can't compute rates without fleet hours).
+- Candidate builds (products/features) evaluated against criteria: feasibility with the data, value per user group, harm potential, effort.
+- Prioritization and a recommended path, with rationale.
+- Specific data probes to run before building (e.g., check how many records for a given tail number across time; test whether Discrepancy text contains crash-adjacent language; test whether JASC codes cluster usefully).
 
-4. Coded fields resolve against FAA lookup tables — a build task is resolution/normalization (e.g., operator designator → name: 3,945 designators, only 1,213 resolve; a matcher to FAA lists would be valuable).
+Also worth including in the prompt: the model's own capabilities (GLM-5.3-Flash) since builds can leverage LLM features — e.g., free-text parsing of Discrepancy into structured fields (part, location, condition, action), entity resolution of operator designators, summarization, natural-language query interface, timeline narratives per tail number, clustering recurring defects across fleets (same part across different tails/operators — a signal journalists love), alerting/digests. The model has function calling and structured output, so agentic query-over-API features are feasible. Context caching for repeated large docs. But the prompt should not pre-decide the answer; it should ask the model to reason about which model capabilities map to which needs.
 
-5. Existing interface: a filtered search + full-text search with JSON API. So whatever is built extends or builds on a search tool. Candidates: dashboards, alerting/monitoring, narrative explainers, data pipelines, LLM-assisted reading of discrepancy text, entity resolution, repeat-defect detection per tail number, fleet-level pattern surfacing (e.g., "this aircraft model + this part shows clustering of cracks after N cycles" — cycles field exists per record: AircraftTotalCycles, AircraftTotalTime on that aircraft at report time, so you can order reports per tail and see progressive damage; that's a real analytic possibility even without fleet denominators — within-tail-number trajectories don't need fleet denominators).
+However — the user asked for "a prompt to work out what to build." So the prompt is the artifact. I should write the prompt itself, possibly with a brief note on how to use it. The prompt should be self-contained: include all source material facts (so the model doesn't need the user to re-supply), instructions, constraints, output format.
 
-Wait — actually AircraftTotalTime and AircraftTotalCycles give you per-record age of the airframe. So you can do within-aircraft trajectory analysis: same tail over time, hours at each defect. You just can't compute fleet-level failure *rates* (missing non-defective denominator), but you can do things like "defects reported per 1000 flight hours elapsed between reports per tail" — actually you can compute hours *between* reports per tail from TotalTime deltas. That's a legitimate within-fleet exposure proxy. Hmm, but reporting behavior still confounds. Anyway — the point is the prompt should include the fields so the model can find these affordances.
+Key design principles for the prompt:
 
-6. Users:
-   - Investigative journalists: story-finding, vetting leads, quantifying patterns, Freedom-of-information-adjacent timelines, finding clusters before/after events, compare operators. Need citations back to raw records, exact quotes, export for FOIA follow-ups, careful language about causation.
-   - Researchers/safety analysts: repeatable methods, exportable data, statistical caution, reproducibility, codebook for text classification, precision/recall if NLP is involved.
-   - Relatives of accident victims: understandable explanations, gentle UX, no causal implications, plain-language glossary of SDR jargon (JASC codes, stage of operation), ability to look up a tail number and see its maintenance history with appropriate framing and context (SDRs are routine reports; most are benign). Emotional safety. This is a distinct design need — probably a separate surface from the journalist tool.
+1. Role/framing: "You are a product strategist / research engineer working with..." Maybe better: frame as a rigorous product discovery exercise with a skeptical engineer mindset.
 
-7. Model available: GLM-5.3-Flash — 1M context (whole interesting chunks of dataset fit? 1.76M records × maybe 1–2KB = way more than 1M tokens, so not whole dataset, but large slices), structured output JSON schema, function calling, reasoning modes. So LLM-in-the-loop features: classify/extract from Discrepancy text at scale (batching with caching), generate summaries of a tail's history, explain codes in plain language, draft FOIA/story leads. The prompt should ask the plan to specify how the LLM is used and where it must not be used (e.g., never generate causal claims; guardrails; citation to record IDs).
+2. Ground truth: restate the dataset facts verbatim-ish. Important numbers: 1,757,828 records; 54,634 tails; 3,945 operator designators, only 1,213 resolve to names; 76 columns, the listed high-coverage ones; free-text Discrepancy; crew action counts; location coverage (196,663 numbered zone; 1.49M text-only; 64,580 none); existing filters; no fleet size/hours, no cause, no accidents.
 
-So the prompt I write should:
-- Embed the dataset facts (maybe in a compact "CONTEXT" block the prompt-writer can paste).
-- Set the role: senior product person / data product strategist with aviation data + newsroom experience.
-- Force engagement with constraints: no denominators, no causes, no accidents; reporting bias; code tables; the free-text opportunity; existing API as a substrate.
-- Force user-centered analysis: jobs-to-be-done per user group, where current interface falls short, ethical risks especially for relatives.
-- Drive divergent then convergent thinking: e.g., generate 8–15 candidates, score them on a rubric (user value, feasibility with this data, risk of harm/misinterpretation, differentiation, effort), then pick top 1–3 with rationale.
-- Require concrete specification of the chosen direction(s): what the thing is, data pipeline steps (normalization, operator resolution, text extraction), LLM usage plan (prompts, structured output, evaluation of extraction accuracy), UI surfaces, MVP cut, validation with users, success metrics, risks and mitigations (misinterpretation, defamation, grief-sensitive design), and what NOT to build.
-- Ask for honest treatment of what the data can't support — maybe require a "claims the data cannot support" section.
-- Ask for evaluation plan: how to test text-extraction quality on a hand-labeled sample, how to sanity check counts against known events (e.g., known fleet groundings like certain corrosion findings), etc.
-- Output format: structured, e.g., sections with headings; tables for scoring; JSON-ish spec maybe. Since the model supports structured output, could ask for a JSON schema at the end for the chosen MVP spec — optional.
+3. Hard constraints / honesty requirements:
+   - No denominators → no rates, no "most dangerous airline" rankings. Any feature implying per-operator safety comparisons is off-limits or must be framed as "report counts, not rates," which is itself fraught.
+   - No causes → correlational narrative only; must not imply causation.
+   - No accidents → relatives searching a crash will not find the crash; they may find prior maintenance reports for the same tail — which is actually a legitimate, powerful, and sensitive use: "was this aircraft reporting defects before the accident?" That's exactly what journalists do after crashes. So there is a real, valuable feature: tail-number history timeline. But it must be designed with care: the reports predate the accident but do not explain it. Language matters. Should there even be a pathway for relatives? Maybe yes, with careful framing and signposting to NTSB records for accident info. The prompt should make the model wrestle with this: build for relatives or not, and how.
+   - Reporting bias: SDRs are voluntary, reporting culture varies wildly by operator; counts reflect reporting behavior as much as fleet condition.
+   - Free-text noise: abbreviations, typos, inconsistent terminology.
 
-Also the prompt should include instructions on how to handle ambiguity: e.g., ask clarifying questions before assuming (budget, team size, web vs API, single maintainer?). Or state assumptions explicitly. A good prompt might say "If critical inputs are unknown (team size, budget, timeline, whether this is nonprofit/commercial), state assumptions and proceed."
+4. User groups — force persona-level need analysis with jobs, current workarounds, emotional stakes, and failure modes. E.g.:
+   - Journalists: post-accient tail history; pattern detection across operators/aircraft types; trend over time; FOIA-complement; need citations/export, verbatim quotes, verification (link back to raw record), ability to check "has this happened before?"
+   - Researchers/analysts: bulk export, reproducible queries, API, coded-field cross-tabs, time series, normalization of free text, cohort definitions, limitations documentation.
+   - Relatives: find a tail number, see its history in plain language, understand what the records do and don't mean, avoid false hope/false blame; need gentle UX, glossary translation of jargon (JASC codes, mechanic abbreviations), and explicit "this is not the accident record; go to NTSB."
 
-Should the prompt ask the model to do data exploration first? The model is text-only in this framing (though docs say it takes files). Realistically, the person would paste schema + samples. The prompt can instruct: "Before proposing anything, write down what this dataset can and cannot support analytically" — a "data reality audit." That's a strong move to prevent hallucinated metrics like "failure rate."
+5. The prompt should demand that the model separate "what the data supports" from "what users want," and propose builds at the intersection — plus explicitly list the seductive-but-unsupported ideas to refuse or reframe.
 
-Also: the prompt should force explicit grappling with the reporting-bias issue (more reports ≠ less safe; an operator with many SDRs may just have a good reporting culture). Journalists will jump to "operator X has 500 reports!" — the product should prevent naive league tables, or at least contextualize.
+6. Ask for data validation probes: before committing, list concrete queries against the existing API to test feasibility of each proposal (e.g., "pull all records for tail N123AB ordered by date — does the timeline read coherently?"; "sample 200 Discrepancy texts containing 'CORROSION' + a fuselage station — can a model extract station ranges reliably?"; "how many distinct JASC codes appear; are they stable over time?").
 
-And the relatives group: the prompt should demand a separate treatment — maybe "one guided, plain-language flow" vs the power tool — plus a decision on whether to even surface per-tail histories to relatives given misuse/misreading risk, with mitigation (context banners, linking to NTSB accident DB as separate, plain glossary, no causal language, hotline/support links?). Also privacy: tail numbers are public; mechanic names may appear in text — scrubbing PII from free text is a build task (names, phone numbers in text). Good catch: Discrepancy text can contain mechanic names/phone numbers; a PII scrubber is needed for public display. Also the prompt could mention checking for infants (pre-1995 data absent → survivorship/coverage bias: reporting mandates, changes over time; dataset starts 1995 so "since 1995" claims).
+7. Output format: structured, e.g.:
+   - Section 1: Need analysis per user group (top 3–5 jobs each, evidence/assumption tagged).
+   - Section 2: What the data can/cannot support (capability map).
+   - Section 3: Candidate builds (5–10), each with: description, users served, data reliance, model reliance, harm risk, effort, evidence needed.
+   - Section 4: Explicit rejections/reframes (the tempting-but-wrong ideas).
+   - Section 5: Recommended priority with rationale and MVP definition.
+   - Section 6: Validation probes (API calls / sample checks) and success metrics.
+   - Section 7: Ethical guardrails and copy/UX language rules (e.g., required disclaimers).
 
-Also duplicates/updates: SDRs have amendments? Possibly. And the same defect reported multiple times. Dedup consideration.
+Maybe also: "Ask clarifying questions first" vs "state assumptions." For a one-shot discovery prompt, better to instruct: "If information is missing, list assumptions explicitly rather than stalling." Or two-stage: first output unknowns and probes, then wait. Given the model has 1M context and the user might paste data samples, I could design the prompt to optionally accept sample records. I'll include a slot: "[Optional: paste N sample records here — including the three verbatim examples — so the model can ground its analysis]". Actually the three verbatim examples are already in the source; I can include them in the prompt as grounding.
 
-Also "Counts of the coded crew action field" given — shows the flavor: unscheduled landing 112k etc. These make good headline-able facets.
+Also the prompt should exploit model capabilities: instruct the model to consider which GLM-5.3-Flash features (long context to read many raw records; structured output for extraction pipelines; function calling for agentic querying of the live API; context caching for repeated large corpora; reasoning levels for analysis vs cheap extraction) enable which builds — and to be honest about failure modes of LLM features (hallucinated extractions on noisy free text; need for confidence thresholds and human verification, especially given journalism and grieving-relatives contexts).
 
-Now, form of my answer: The user asked: "Give me a prompt to work out what to build on this dataset for these users." So deliverable = a prompt. I should give a single, well-structured prompt, probably in a code block or clearly delimited, with placeholders minimal (they can paste the source material). Should I embed the source material in the prompt or reference it? Better: write the prompt assuming the source material is pasted above/attached, with a marker like [SOURCE MATERIAL BELOW]. Or embed a condensed context block. I think: provide the prompt with a clear slot: "CONTEXT: <paste the dataset description>" — but the user already has the source material, so I can write the prompt to include it. Safer to include a bracketed placeholder "— paste the source material here —" plus the prompt body that references specific facts from it (no denominators, 3 user groups, existing API, etc.), so the prompt is self-coherent regardless.
+Tone constraints: the prompt should require calibrated language, no causal claims, no safety rankings, uncertainty disclosure.
 
-Hmm — should the prompt reference specific numbers (1,757,828 records etc.)? It can, since those are in the pasted material. I'll reference them qualitatively ("~1.76M records") to keep the prompt readable, and rely on the paste.
+Length: This should be a thorough prompt but usable. The user gave dense source material; the prompt should embed the essential facts. I'll aim for a well-organized prompt of maybe 700–1100 words of prompt text, with a short preamble explaining usage. Format: a code block for the prompt so it's copy-pasteable? A fenced block makes copying easy and clearly delimits the artifact. Yes — put the prompt in a markdown code block. Inside, use plain structure with headers. Should I use XML tags? Plain markdown headers inside the block are fine and model-friendly.
 
-Length and format: The user wants a prompt. I should give the prompt itself, formatted with clear sections (role, context, task, constraints, method, output format, quality bar). Use a code block so it's copy-pasteable? A markdown block would preserve formatting. I'll present it in a fenced block. Maybe a one-line intro and possibly a few bullet notes after about why the prompt is shaped that way / how to use it (optional, keep brief). The user is clearly sophisticated (they wrote terse, information-dense source material — reads like a good analyst). Keep my meta-commentary minimal; the prompt is the product. Maybe 3–5 short bullets of "design notes" after — or maybe none? A couple of lines on how to use (run at high reasoning, iterate) could help. I'll add a very short "How to use" note.
+Before/after the block: brief framing — one or two sentences on how to use (paste as-is; optionally append sample records; the prompt forces probes before building). Keep surrounding prose minimal per instructions about not bloating.
 
-Now draft the prompt content.
-
-Structure of the prompt:
-
-1. Role & stance: "You are a senior product strategist and data engineer who has shipped data tools for newsrooms and aviation-safety analysts. You are skeptical, concrete, allergic to dashboards that imply causation the data can't support."
-
-2. Context: paste source material. Also state "Everything you propose must be derivable from this dataset + the existing API + the model described. Do not assume data you haven't been given."
-
-3. Task: "Produce a build plan: what to build, for whom, in what order." Break into phases:
-
-Phase 0 — Data reality audit. Before any ideas: list what this dataset can and cannot support. Specifically address: missing denominators (fleet size, hours) → no fleet-level failure rates; no cause; no accident linkage; reporting bias and who files; 1995 coverage start; code-table gaps; free text vs coded zone coverage. For each: how it constrains product claims. Also list what the data uniquely supports (per-tail serial histories with hours/cycles at each report; free-text richness; longitudinal 1995–present; crew-action severity signal).
-
-Phase 1 — Users. For each of the three groups: their jobs, the questions they actually ask, what they do today (probably manual searching of the existing interface / reading raw SDRs / calling experts), where the current search interface fails them. Note these are three different products possibly; don't force one UI. Special handling for relatives: emotional context, risk of self-blame or misdirected blame, need for plain language, whether to show per-tail histories at all and with what guardrails.
-
-Phase 2 — Candidate generation. 8–12 candidate builds spanning a range: pipeline/data-infrastructure (operator designator resolution to FAA names, zone extraction from free text, PII scrubbing, dedup), analysis features (repeat-defect clustering per tail with hours-between events, part+model cohorting, severity facets from crew action codes, corrosion/crack trajectories), user-facing products (journalist lead-finder with provenance, plain-language explainer mode, export/citation tooling), and LLM-in-the-loop features (batch classification of Discrepancy text to a controlled vocabulary with JSON schema output; natural-language query over the API via function calling; per-tail narrative summaries with strict grounding rules). For each candidate: what it is (1–2 sentences), primary user, what data fields it depends on, why the existing interface can't already do it.
-
-Phase 3 — Evaluation. Score on: user value (per group), feasibility with this data + GLM-5.3-Flash, risk of harmful misinterpretation (1–5 with explicit definition), effort. Show the table. Then reject 2–3 candidates explicitly with reasons (especially ones that imply rates or causes).
-
-Phase 4 — Recommendation. Pick top 1–2. For each: MVP definition (concrete: screens/endpoints/steps), pipeline spec in order with the normalization steps called out, exact LLM usage plan — where the model is used, at what reasoning level, structured-output schemas, context caching for repeated table content, and the grounding rule: every generated claim must cite record IDs; no free generation of causal or rate claims. Evaluation plan for LLM extraction: hand-label 200–300 discrepancies, measure precision/recall per label before shipping; report it. Ethics section: misreading risks per user group, specific mitigations (language rules, banners, no league tables without context, grief-sensitive copy), PII scrub, and a list of "claims this product will refuse to make."
-
-Phase 5 — Sequencing. 2–4 week increments, what ships first and why; what to deliberately not build yet; open questions to resolve with users (list 5 interview questions, one per assumption).
-
-4. Output format: headed sections matching phases; candidate table; final one-page MVP spec; keep it under ~N words. Maybe request that the final answer ends with a 10-line summary a non-technical stakeholder could read.
-
-5. Quality bar / guardrails for the model: "No generic product-manager filler. Every claim about the data must trace to the source material. If you want a fact you don't have (e.g., reporting compliance rates), name it as an open question instead of assuming. Use plain numbers. Prefer rejecting ideas over hedging."
-
-Also instruct about clarifying questions: "If budget/team/timeline materially change the answer, state two variants: solo-maintainer vs small team." Actually simpler: "Assume a team of [X]" placeholder — or instruct to assume 1–2 engineers + 1 designer, 3 months to first ship, and say so. I'll include an ASSUMPTIONS slot with defaults the user can edit. Good: put editable assumptions at top of prompt: team, timeline, platform (web), commercial vs nonprofit, relationship to existing site (extend aircraftdefects.com). Provide defaults so it runs as-is.
-
-One more consideration: should the prompt tell the model to reason at high/max? That's a runtime setting, not prompt content, but I can note it in "How to use."
-
-Also consider: the user might run this in multiple passes (e.g., Phase 0–2 first, then 3–4). I could note that the prompt is splittable at Phase 3. Brief.
-
-Length of the prompt: substantial but not bloated. Maybe 500–800 words in the block. The user's own style is telegraphic; I should keep the prompt tight, imperative sentences. Avoid over-formatting inside the code block; headings + short paragraphs + a few lists are fine.
-
-Let me now write the actual prompt text.
-
-Draft:
+Let me draft the prompt content.
 
 ---
 
-ROLE
-You are a senior data-product strategist who has shipped research and newsroom tools over messy regulatory datasets. You are concrete and skeptical. You would rather kill a feature than ship one that implies something the data cannot support.
+PROMPT DRAFT
 
-CONTEXT
-[paste SOURCE MATERIAL here]
+Role:
+You are a senior product strategist and data engineer advising the operator of aircraftdefects.com, a public search interface over FAA Service Difficulty Reports (SDRs). Your task is to work out what to build next. You must ground every proposal in what this specific dataset can and cannot support, and in what each user group actually needs. Be skeptical, concrete, and specific. Do not propose features the data cannot honestly deliver.
 
-The existing filtered/full-text search with a JSON API is the substrate. GLM-5.3-Flash is available for anything LLM-shaped: 1M-token context (large slices of the dataset fit per pass; the whole 1.76M records do not), function calling, structured output to JSON schema, context caching, reasoning modes.
+Context — the dataset:
+[embed the facts]
 
-ASSUMPTIONS (edit if wrong)
-- Team: 1–2 engineers, part-time designer. First shippable increment: 6 weeks.
-- Platform: web, extending aircraftdefects.com.
-- Funding: nonprofit / grant-backed; no commercial tracking.
-- You may propose new derived tables/pipelines, not just UI.
+Context — what's already built:
+[filters + API facts]
 
-TASK
-Work out what to build. Do it in five phases, in order. Do not skip ahead.
+Context — the build tool:
+GLM-5.3-Flash: [capabilities]. Consider which of these genuinely enable a feature and which are decoration.
 
-PHASE 0 — DATA REALITY AUDIT
-Before any product ideas, state what this dataset can and cannot support.
-- Enumerate the hard limits: no fleet size or flying hours (so no fleet-level failure rates or per-airline "danger rankings"); no cause of defect; no accident records (so no defect→crash linkage); reporting is voluntary and skewed by who files and how much; coverage starts 1995; coded fields have gaps and unresolved operator designators (2,732 of 3,945 have no name).
-- For each limit, write the one-sentence product rule it forces (e.g., "no league tables of operators by report count").
-- Then list what the data uniquely supports that a raw search interface cannot expose: per-tail serial histories anchored to AircraftTotalTime/AircraftTotalCycles; the severity gradient in the crew-action codes; the free-text Discrepancy field (1.5M records describe a location in text that no coded zone captures); 30-year longitudinal depth.
+The users (treat as distinct, with distinct stakes):
+1. Investigative journalists — [probe: what jobs? e.g., after a crash, reconstruct a tail's defect history; find recurring defects across a fleet/type; find operator underreporting... ]
+2. Researchers and safety analysts — [reproducibility, export, cross-tabs...]
+3. Relatives of people who died in aviation accidents — [sensitive; the dataset does NOT record accidents; they will arrive looking for answers the dataset cannot give; risk of harm through misinterpretation; also possible genuine value: seeing the aircraft's prior maintenance history, translated into plain language]
 
-PHASE 1 — USERS
-For each of the three groups, answer in turn:
-- What are the three questions they actually arrive with? (Write them as they would say them.)
-- What do they do today without your tool?
-- Where does the existing search interface break down for them?
-- What would be harmful or merely misleading to show them?
-Treat the relatives' group as a distinct design problem, not a settings toggle on a power tool: grieving, non-expert, at risk of reading causation into co-occurrence. Decide explicitly whether per-tail histories should be shown to them at all, and under what framing and guardrails.
+Hard constraints:
+- No denominators (no fleet size/flying hours) → you cannot compute defect rates; you cannot rank operators by safety; any design implying that is banned. Counts are reporting counts, not risk.
+- No causes → never imply causation; post-accident tail histories show what was reported before, not why the accident happened.
+- No accident records → crash-related queries will not match; design must not pretend otherwise.
+- Reporting bias: SDR filing is voluntary and reporting culture varies; a busy operator's high count may mean good reporting, not bad aircraft. State this wherever counts are shown.
+- Free text is noisy, abbreviated, inconsistent. Any extraction/summarization must handle this and expose confidence and the verbatim source.
 
-PHASE 2 — CANDIDATES
-Generate 8–12 candidates. Each: name, one-sentence description, primary user, exact data dependencies (columns/API params), and why search alone doesn't cover it. Include at least: one data-infrastructure build (e.g., resolving operator designators to FAA names; extracting zone/part/verb structure from Discrepancy text; PII scrubbing of free text), one analysis build that uses the per-tail time/axis (e.g., repeat-defect clusters on one airframe with hours-between-events), one journalist-facing tool, one plain-language surface, and at least two LLM-in-the-loop features that use function calling or JSON-schema output.
+Required process (do these in order):
+1. Need analysis. For each user group: 4–6 jobs-to-be-done, each tagged [evidenced] (inferable from the data/interface described) or [assumed] (needs user research). Include the emotional stakes for group 3 and verification/citation needs for group 1.
+2. Data-vs-need map. Which needs the data directly supports, which it partially supports with rewording/reframing, and which it cannot support. Be explicit about the seductive-but-unsupported ones (e.g., "safest/worst airline," "what caused the crash," "was my flight safe").
+3. Candidate builds. 6–10, each: one-line description; user groups served; exact data fields/text relied on; what the LLM does and where it can fail; harm risk (who could be hurt and how); rough effort (S/M/L); the single cheapest validation probe against the existing API that would confirm or kill it.
+4. Explicit rejections. List at least 3 tempting ideas you are rejecting or reframing, and why.
+5. Recommendation. Pick one MVP (or a tightly scoped sequence). Justify by value-per-risk, not novelty. Define its v1 scope precisely and what is deliberately out.
+6. Validation plan. Concrete probes: actual API query shapes to run, sample-size suggestions, pass/fail criteria. Include at least one probe per user group.
+7. Guardrails. Required UX copy, disclaimers, and behavior rules — especially for tail-number lookups by relatives and for any aggregated "trend" view journalists might quote. Specify wording that is accurate without being cold or alarming.
 
-PHASE 3 — EVALUATION AND REJECTION
-Score every candidate 1–5 on: user value; feasibility with this data; risk of harmful misinterpretation (define what 5 means); effort. Show the table. Then reject the bottom three in plain sentences — especially anything that smuggles in rates, causes, or accident implications.
+Model-capability discipline: for each proposed build, name the specific GLM-5.3-Flash features used and justify; prefer structured output + function calling against the existing JSON API over vibes; if an extraction task is proposed, specify how quality would be measured against ground truth (e.g., hand-labeled sample of N records) before shipping.
 
-PHASE 4 — RECOMMENDATION
-Pick the top 1–2. For each:
-- MVP definition: what exists on day one, described concretely (endpoints, screens, pipeline steps in order).
-- LLM usage plan: where the model runs, at what reasoning level, what the structured-output schema enforces, where context caching pays off, and the grounding rule: every generated statement must cite record IDs, and the product must refuse to emit rate or causal language.
-- Validation: for any text-extraction or classification, hand-label 200–300 records and report precision/recall before shipping; name the sanity-check you'll run against a known event or fleet.
-- Harm analysis per user group with specific mitigations (language rules, contextual banners, no rankings, PII scrub of Discrepancy, plain-language glossary for JASC/stage codes).
-- A short list titled "What this product will never claim."
+Calibration rules: no causal language; counts framed as reports filed; uncertainty shown; every derived claim traceable to raw records (record IDs / query URLs) so a journalist can verify.
 
-PHASE 5 — SEQUENCING
-Order the work in 2-week increments. Mark what ships in each. List what you are deliberately not building yet and why. End with the five user-interview questions that would most change the plan, and the open facts you'd need that are not in the source material.
-
-OUTPUT RULES
-- Every claim about the data must trace to the source material. If you need a fact you don't have, file it as an open question; do not invent it.
-- No product-manager filler ("seamless experience", "leverage"). Plain sentences and numbers.
-- Keep the whole response under 2,500 words. The MVP spec in Phase 4 must be understandable by a non-technical stakeholder in one page.
+Output: structured markdown matching the process above. If something is unknowable from the given material, mark it UNKNOWN-NEEDS-PROBE rather than guessing.
 
 ---
 
-That's pretty good. Let me refine details.
+That's the skeleton. Now let me refine details and make sure I embed the source facts accurately:
 
-- "2,732 of 3,945" — 3,945 − 1,213 = 2,732. Correct. Nice to include a computed fact to show rigor, but it's in the pasted material implicitly. Fine.
-- Should I mention "counts of crew action field" as a severity gradient — yes did.
-- "1.5M records describe a location in text that no coded zone captures" — the numbers: 1,496,585 free-text-only, 196,663 coded, 64,580 none. Could say "~1.5M".
-- Should the prompt include the verbatim examples of discrepancy text? They're in pasted material; the model will see them. Fine.
-- Maybe add to Phase 2: "one LLM feature that turns a natural-language question into API calls via function calling" — included.
-- Also could add: dedup/amendment handling as infra candidate. I mention PII scrub and operator resolution; add "duplicate and amendment detection" maybe as an example list. Keep examples parenthetical.
-- Add instruction: "Do not propose anything requiring data not in the dataset (e.g., linking NTSB accident records) — but you may note it as a future integration with its risk." Hmm — linking to external NTSB data for the relatives group is tempting; the source says dataset doesn't record accidents. Allowing "note as future" is reasonable and shows sophistication: the relatives tool almost certainly wants accident context, but building it is out of scope / risky. I'll add a line: "If a candidate depends on external data (e.g., NTSB accident records), mark it out of scope for this plan and say what would change if it existed."
+- 1,757,828 records, 1995–present, published by FAA, held at aircraftdefects.com.
+- 54,634 aircraft by tail number.
+- 3,945 operator designators; 1,213 resolve to a name from FAA lists. → implication: operator aggregation incomplete; 2,732 designators unresolved.
+- 76 columns; the high-coverage list.
+- Discrepancy: free text by filer; examples (include verbatim).
+- Coded fields resolve to FAA lookup tables; unknown codes displayed as code.
+- Crew action counts (include them — they're useful signals: e.g., 112k unscheduled landings is a hook for journalists).
+- Location coverage: 196,663 numbered zone; 1,496,585 text-only; 64,580 none → implication: location analysis requires free-text extraction for most records — an obvious LLM opportunity, but noisy.
+- Existing interface: filters q, operator, make, model, tail, part, condition, stage, discovered, nature, crew, jasc, ata, zone, corrosion, cracked, minhours, from, to. JSON API, no auth.
+- Not in dataset: fleet size, flying hours, cause, accidents.
+- Users.
+- Model capabilities: video/image/text/file input; text output; 1M context; 128k max output; 320B/18B active MoE; sparse+linear attention (3.01x attention compute reduction, 4.44x KV cache) — relevant: cheap long-context reading; reasoning always on at low/high/max; function calling; structured output JSON schema; context caching; streaming + tool streaming.
 
-- The scoring rubric: "risk of harmful misinterpretation (define what 5 means)" — good.
+I should note in the prompt that image/file input means the model could, e.g., parse scanned FAA lookup tables or screenshots — but maybe keep capability discipline: ask the model to justify each feature used.
 
-- Also want to force explicit consideration of whether some users are served by the same build. Phase 1 last line handles relatives; maybe add "State whether the three groups should be one product with modes or separate surfaces — and argue the choice." Good addition to Phase 1.
+Also: the prompt should tell the model what "build" means — features on the site? New pipelines? Alerts? Reports? Leave broad but bounded to this dataset + interface + model.
 
-- Also: journalists need provenance/exports (record IDs, CSV export, exact quotes) — the candidate categories imply it; I could name it explicitly in Phase 2 list: "one journalist-facing tool that must include provenance (record IDs, exact quotes, export)". Yes.
+One more thing: should the prompt instruct the model to ask clarifying questions first? A hybrid: "First, if any blocking unknowns, list them as UNKNOWN-NEEDS-PROBE and continue with stated assumptions." That keeps one-shot usability.
 
-- Word budget: "under 2,500 words" — reasonable for GLM output.
+Also good: instruct the model to reason about the tension between the three user groups sharing one interface (journalists want density and rawness; relatives want plain language and care; researchers want export). Does the recommendation split audiences or unify? Make it answer that.
 
-- Reasoning level note in "how to use": run at high reasoning; consider splitting at Phase 3 to review candidates before committing; regenerate Phase 4 with structured output if you want a machine-readable spec. Keep to 3 bullets max.
+I'll also add a short instruction about tone of the output itself: decisive, no filler, no generic product-school language.
 
-Format of my response: 
-- One short intro sentence.
-- The prompt in a fenced code block (markdown fenced) so it's copy-pastable. Should I use a code block? If I use ```markdown, the headings inside render as plain text when copied — good. Yes, fenced block.
-- Then "How to use" — 3–4 tight bullets: paste source material where marked; edit ASSUMPTIONS; run at high reasoning; split point; follow-up prompt for the chosen MVP (maybe offer a one-line follow-up prompt like "Phase 4 for candidate X only, expand to full spec").
+Length of prompt: aiming for completeness but not bloat. I think ~900–1200 words inside the block is right. Use headers and bullets.
 
-Keep my commentary minimal. Headers in my response: probably not needed beyond maybe bold "How to use it". Keep it lean.
+Let me also think about whether to include guidance like "consider builds such as X" — no, that would bias the discovery. But I could seed the "data-vs-need" section with the tensions (e.g., location only in free text for 92% of records — extraction is a lever). Hmm — pointing out levers is arguably part of the strategist's job that I'm delegating to the model. Better: instruct the model to identify levers itself ("identify the dataset's untapped affordances: e.g., fields present but unused by the current interface, free-text patterns, cross-record joins by tail/part/operator"). That keeps the prompt from pre-deciding answers while pointing attention productively.
 
-Also double-check the Phase 0 hard-limits phrasing: "voluntary" — SDRs are mandatory for certain holders (Part 121 etc.) but reporting is still skewed; safer phrasing: "filing behavior varies by operator class, so counts reflect reporting culture as much as fleet reality." Good — that's accurate and neutral.
+Also include: "Before proposing anything, list what the existing interface already covers, so proposals add value rather than duplicate filters."
 
-One more thing: the prompt should tell the model to think about the dataset's *scale for LLM processing*: 1.76M records is too many to pass wholesale; a build plan should include how the pipeline batches (e.g., process by year/operator slices, cache shared lookup tables in context). I have context caching mention in Phase 4. Maybe add to Phase 0: "note the volume implications for any LLM pass (1.76M records cannot fit in one context; plan batching)." Good, concrete.
+And success metrics: for journalists — could a story be verified from the site alone (traceability)? For researchers — reproducibility (shareable query state)? For relatives — does the tail-history page clearly state what SDRs are and are not?
 
-Also the "survivorship" nuance: records from 1995 onward only; changes in reporting rules over time. Add to limits list: "reporting requirements and forms changed over 30 years" — I'll phrase generally: "coverage and reporting behavior have shifted since 1995."
+Alright. Also add an optional slot at the top of the prompt: "Optional attachments: paste 20–50 sample records spanning different eras/operators below to ground the analysis; if absent, proceed and mark extraction-quality claims as UNKNOWN-NEEDS-PROBE."
 
-Okay. Also the instruction "Do not skip ahead" and "in order" helps the reasoning model structure output.
+Now the surrounding prose: Keep it short. Maybe 2–4 sentences before the block: what it does, how to use, and one tip (optionally append sample records; run the probes before building). No heavy preamble.
 
-Let me also make sure the prompt asks the model to make a *decision*, not present options neutrally: "Pick the top 1–2" + rejection — yes, forces convergence.
+Format decision: single fenced code block containing the prompt in markdown. Headers inside as plain text lines with ## or just capitalized lines — inside a code block, markdown headers won't render but that's fine since it's meant to be copy-pasted to the model; models handle markdown-in-plain-text fine. I'll use markdown syntax inside.
 
-Final check on the answer format per instructions: This is a conversational/technical request; markdown fine. Length: medium — the prompt block dominates. Avoid excessive nesting in my own prose; the prompt block itself will have structure (that's appropriate since it's a document the user asked for).
+Should I number the sections inside the prompt? Yes, ordered process.
 
-Write it now, tightening wording.
+Let me now write the final prompt carefully, embedding facts accurately.
 
-One small thing: the user said "Give me a prompt to work out what to build on this dataset for these users." So singular prompt. Deliver one prompt. Maybe also offer the optional follow-up micro-prompt at the end. Fine.
+Draft the block:
 
-Also, should the prompt address the model's "reasoning always enabled" — runtime setting, in How to use.
+---
 
-Write final.
+# Role and task
+
+You are a senior product strategist and applied data scientist advising the operator of aircraftdefects.com — a public search site over FAA Service Difficulty Reports (SDRs). Your job: decide what to build next, and what not to build. Ground every claim in the dataset facts below. Be skeptical and specific. If you cannot support a claim from the material given, mark it UNKNOWN-NEEDS-PROBE instead of guessing.
+
+# Dataset facts
+
+- FAA Service Difficulty Reports, 1995–present, published by the FAA, hosted at aircraftdefects.com. 1,757,828 records; 54,634 aircraft by tail number.
+- A record is filed by a mechanic or operator when a component fails, malfunctions, or is found defective.
+- 76 columns. Highest-coverage fields: [list].
+- OperatorDesignator: 3,945 distinct values, only 1,213 resolve to an operator name from FAA lists. Operator-level aggregation is therefore incomplete.
+- Discrepancy: free text written by the filer, present in most records. Verbatim examples:
+  - "RH MAIN FLAP CARRIAGE NR 2 HAS PITTING IN BOLT HOLE FOR O/B UPPER RUB PAD"
+  - "THE PAWL BEHIND THE CREW ENTRY DOOR EXTERNAL HANDLE IS WORN"
+  - "CABIN SEAT TRACK FOUND CORROSION AT FR73-FR77"
+- Coded fields resolve against FAA lookup tables; codes absent from the tables display raw.
+- Crew action codes, whole-dataset counts: unscheduled landing 112,189; aborted take-off 20,438; engine shut down in flight 14,703; emergency descent 8,620; aborted approach 3,902; fire extinguisher fired 2,747; fuel dumped 1,531; oxygen masks dropped 1,168; cabin lost pressure 326; autorotation 130.
+- Location: 196,663 records have a numbered zone; 1,496,585 state a location only in free text; 64,580 state none.
+- Existing interface: filtered search over coded fields + full-text search over Discrepancy. Filter parameters: q, operator, make, model, tail, part, condition, stage, discovered, nature, crew, jasc, ata, zone, corrosion, cracked, minhours, from, to. JSON API, no authentication.
+
+# What the dataset does NOT contain (hard constraints)
+
+- No fleet size or flying hours → no defect rates. You cannot rank operators or aircraft types by safety, and no design may imply it. Counts are counts of reports filed.
+- No cause of a defect → no design may imply causation.
+- No accident records → someone searching for a crash will not find it here. Prior-to-accident maintenance history for a tail is visible; the accident itself is not.
+- Voluntary reporting → filing culture varies by operator; volume differences reflect reporting behavior as much as fleet condition.
+
+# Users
+
+1. Investigative journalists. Likely jobs: reconstruct a tail number's defect history around an accident; find whether a defect pattern recurs across tails of a type or across an operator; verify claims with citable raw records. They need traceability to the underlying record, export, and precise language they can quote without over-claiming.
+2. Researchers and safety analysts. Likely jobs: reproducible queries, bulk export, cross-tabs over coded fields, time series, well-documented limitations.
+3. Relatives of people who died in aviation accidents. Likely arrive after a crash looking for answers. The dataset cannot tell them why. Risk of harm: misreading a maintenance report as an explanation of the accident; either false blame or false reassurance. Possible genuine value: a careful, plain-language account of what was reported about that aircraft before the accident, with clear boundaries on what it means.
+
+Treat these groups as sharing one interface with conflicting needs: density and rawness (journalists), rigor and export (researchers), plain language and care (relatives). Your recommendation must address whether to split or unify.
+
+# Build tools available
+
+GLM-5.3-Flash. Multimodal input (video, image, text, file), text output; 1M-token context; 128k max output; 320B parameters / 18B active; sparse and linear attention (3.01× attention-compute reduction, 4.44× KV-cache reduction vs GLM-5.3); reasoning always enabled (low/high/max); function calling; structured output to JSON schema; context caching; streaming and tool streaming. Use capability discipline: for each proposal, name the features it actually uses and why; prefer structured output + function calling against the existing JSON API; flag where LLM output could be wrong on this noisy free text and how errors would be caught.
+
+# Required process (output in this order)
+
+1. Existing-coverage audit. What the current interface already answers well, so proposals add value rather than duplicate filters.
+2. Need analysis per user group. 4–6 jobs each, tagged [EVIDENCED] (supported by the material above) or [ASSUMED] (needs user research). State emotional and reputational stakes per group.
+3. Data-vs-need map. Three buckets: directly supported; supported only with reframing (say exactly what reframing); unsupported. Include the seductive-but-unsupported ideas (e.g., "most dangerous airline," "what caused the crash," "was my flight safe") and say how each must be refused or reframed.
+4. Untapped affordances. Fields present but underused by the current interface; cross-record joins the schema invites (tail over time; same part across tails/operators; location from free text for the 92% of records lacking a zone — and the noise risks of extracting it).
+5. Candidate builds. 6–10. Each: one-line description; users served; exact fields/text relied on; LLM's role and failure modes; harm risk (who, how); effort S/M/L; the single cheapest API probe that would confirm or kill it.
+6. Explicit rejections. ≥3 tempting ideas you refuse or reframe, with reasons.
+7. Recommendation. One MVP or tightly scoped sequence. Justify by value-per-harm-per-effort. Define v1 scope precisely, including what is deliberately excluded and why.
+8. Validation plan. Concrete probes against the live API: query shapes, sample sizes, pass/fail criteria. At least one probe per user group. Include a labeling-based quality check for any extraction feature (e.g., hand-check N records before shipping).
+9. Guardrails. Required UX copy and behavior rules, especially: tail lookups by relatives; any aggregate "trend" a journalist might quote; every derived view must link back to raw records (record IDs / reproducible query URLs). Write example wording that is accurate without being cold or alarming.
+
+# Calibration rules for your output
+
+- No causal language anywhere. Counts are "reports filed," never "incidents" or "failures" as a rate.
+- Surface uncertainty; distinguish count of reports from prevalence of defects.
+- Decisive, concrete, no filler, no generic product-school vocabulary.
+
+---
+
+Optional slot: "Sample records (optional): paste 20–50 records spanning years, operators, and aircraft types here to ground extraction-feasibility judgments."
+
+Hmm, that's decent. Let me reconsider a few things:
+
+- Should the prompt tell the model about the three example discrepancy texts? Yes — included.
+- Should I mention the model can ingest images/files (e.g., FAA lookup tables as PDFs)? The capability discipline item covers it implicitly. Fine.
+- Should the prompt be model-agnostic? The user said "Model available to build on: GLM-5.3-Flash" — so the prompt should incorporate it. Yes, included in "Build tools available."
+- Should the prompt ask the model to consider cost/latency? Maybe briefly — reasoning always enabled means cheap extraction tasks still pay reasoning cost; the 18B-active MoE mitigates. Could add "note reasoning is always on; tier tasks by reasoning level (low for bulk extraction, high/max for synthesis)" — that's a genuinely useful operational note. Add to capability discipline.
+
+- One risk: the prompt is long. But the user's source material is dense and the task is substantive; a thorough prompt is appropriate. I'll keep surrounding prose minimal.
+
+- Should the surrounding prose include how to use it (e.g., "paste into GLM-5.3-Flash; optionally append sample records; treat its probes as a checklist before building")? A couple sentences, yes.
+
+- Also maybe note: run it at reasoning max once; iterate with follow-ups per section. Keep to one line.
+
+Formatting: The main artifact in a fenced code block (```text or ```markdown). Inside, markdown formatting. Bullets and headers inside the block. Surrounding prose 3–4 short sentences total. Given the guidance that code/artifacts in blocks are right for copy-paste, and the user explicitly asked "give me a prompt," a code block is the right call.
+
+One more consideration: the user might want the prompt to also cover "should we build for relatives at all?" — my step 3/7 handles tension; I'll add an explicit question in the users section: "Decide explicitly whether and how to serve group 3, or whether to redirect them to NTSB records — and defend that decision." Good, add.
+
+Also add to process step 2 or 7: "Address whether group 3 should be served at all, redirected, or served with heavy guardrails" — put it in Recommendation or as its own sub-question in Need analysis. I'll put it under Users as a decision the model must make.
+
+Also the journalist probe about the crew-action numbers: 112,189 unscheduled landings is a striking hook — leave for the model to find; don't pre-digest.
+
+Word count check of the block: probably ~700–850 words. Fine.
+
+Let me also double-check accuracy of embedded facts against source:
+- 1,757,828 records ✓; 54,634 tails ✓; 3,945 designators / 1,213 resolved ✓.
+- Column list — include full high-coverage list ✓ (I'll list them).
+- Crew counts ✓ (copy exactly).
+- Location numbers ✓.
+- Filters list ✓ (q, operator, make, model, tail, part, condition, stage, discovered, nature, crew, jasc, ata, zone, corrosion, cracked, minhours, from, to).
+- "JSON API, no authentication" ✓.
+- Not contains: fleet size/hours, cause, accidents ✓.
+- Model specs: video/image/text/file input; text output; 1,000,000 context; 128,000 max output; 320B/18B active; 3.01x attention, 4.44x KV cache vs GLM-5.3; reasoning always enabled low/high/max; function calling; structured output JSON schema; context caching; streaming and tool streaming ✓.
+- The 92% figure: 1,496,585 / (196,663+1,496,585+64,580) = 1,496,585 / 1,757,828 ≈ 85.1%, not 92%. Let me recompute: 196,663+1,496,585 = 1,693,248; +64,580 = 1,757,828 ✓ matches total. 1,496,585/1,757,828 = 0.8514 → ~85%. So "location only in free text for ~85% of records." Correct my earlier "92%" to ~85%. Good catch — I'll say "about 85%."
+
+Also note: only ~11% have numbered zone (196,663/1,757,828 ≈ 11.2%) — the model can compute; I don't need to precompute everything, but the 85% I state should be right if I state it. Safer: just give raw numbers and let the model compute; but a light guide is fine. I'll give raw numbers and add "most records" phrasing without percentages, or state 85% correctly. I'll state "~85%" — it's correct.
+
+"Present in most records" for Discrepancy — source says present in most records ✓.
+
+Also: 64,580 state no location.
+
+Final structure of my answer:
+1. One-two sentence lead.
+2. The prompt in a fenced block.
+3. Two or three short usage notes (optional samples; run probes; treat rejections seriously). Keep tight.
+
+Actually per instructions, minimize postamble. I'll do lead sentence, block, then 3 bullets max of usage tips.
+
+Let me finalize wording inside the block, tightening.
+
+Also, title the prompt inside: maybe first line "# Task" — fine without a title.
+
+One more element: instruct output format of the model's answer? "Structured markdown, sections numbered as below, tables allowed for candidate builds." Add.
+
+And: "Length discipline: candidate builds table compact; recommendation ≤300 words." Could add but maybe over-constraining; a light "be compact where lists work" suffices. I'll add a brief output note.
+
+Write it now.
+
+Also small thing: the prompt says "senior product strategist and applied data scientist" — good dual framing.
+
+Include in Dataset facts the sentence defining what an SDR record is (mechanic/operator files when component fails/malfunctions/defective) ✓ — important for framing ("reports filed" language).
+
+Okay, compose final.

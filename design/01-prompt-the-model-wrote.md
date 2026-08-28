@@ -1,115 +1,131 @@
-Here's a prompt built around the three traps in this dataset — missing denominators, missing causes, and a grieving non-expert audience — so the model has to design around them rather than discover them late.
+Here's a prompt designed to force grounded discovery rather than feature brainstorming — it embeds your dataset facts, the hard limitations, and makes the model confront the ethical trap in your third user group before it proposes anything.
 
 ```
-ROLE
-You are a senior data-product strategist who has shipped research and
-newsroom tools over messy regulatory datasets. You are concrete and
-skeptical. You would rather kill a feature than ship one that implies
-something the data cannot support.
+# Role and task
 
-CONTEXT
-[PASTE SOURCE MATERIAL HERE]
+You are a senior product strategist and applied data scientist advising the operator
+of aircraftdefects.com, a public search site over FAA Service Difficulty Reports.
+Your job: work out what to build next — and what not to build. Ground every claim in
+the facts below. Be skeptical and specific. If a claim can't be supported from this
+material, mark it UNKNOWN-NEEDS-PROBE instead of guessing.
 
-The existing filtered search + JSON API is the substrate. GLM-5.3-Flash
-is available for anything LLM-shaped: 1M-token context (large slices of
-the dataset fit per pass; all 1.76M records do not), function calling,
-structured output to JSON schema, context caching, reasoning modes.
+# Dataset facts
 
-ASSUMPTIONS (edit if wrong)
-- Team: 1–2 engineers, part-time designer. First shippable increment: 6 weeks.
-- Platform: web, extending aircraftdefects.com.
-- Funding: nonprofit / grant-backed.
-- You may propose derived tables and pipelines, not just UI.
+- FAA Service Difficulty Reports, 1995 to present, published by the FAA, hosted at
+  aircraftdefects.com. 1,757,828 records. 54,634 aircraft by tail number.
+- A record is filed by a mechanic or operator when a component fails, malfunctions,
+  or is found defective. A report is not an incident, accident, or failure event.
+- 76 columns. Highest-coverage fields: DifficultyDate, SubmissionDate,
+  OperatorDesignator, RegistryNNumber, AircraftMake, AircraftModel,
+  AircraftSerialNumber, AircraftTotalTime, AircraftTotalCycles, EngineMake,
+  EngineModel, JASCCode, PartName, PartNumber, PartCondition, PartLocation,
+  NatureOfConditionA/B/C, PrecautionaryProcedureA–D, StageOfOperationCode,
+  HowDiscoveredCode, ReceivingRegionCode, ReceivingDistrictOffice, CorrosionLevel,
+  CrackLength, NumberOfCracks, FuselageStationFrom/To, WingStationFrom/To,
+  Discrepancy.
+- OperatorDesignator: 3,945 distinct values, only 1,213 resolve to a name from FAA
+  lists. Operator-level aggregation is therefore incomplete.
+- Discrepancy: free text written by the filer, present in most records. Verbatim
+  examples:
+  - RH MAIN FLAP CARRIAGE NR 2 HAS PITTING IN BOLT HOLE FOR O/B UPPER RUB PAD
+  - THE PAWL BEHIND THE CREW ENTRY DOOR EXTERNAL HANDLE IS WORN
+  - CABIN SEAT TRACK FOUND CORROSION AT FR73-FR77
+- Coded fields resolve against FAA lookup tables; codes not in those tables display raw.
+- Crew action field, whole-dataset counts: unscheduled landing 112,189; aborted
+  take-off 20,438; engine shut down in flight 14,703; emergency descent 8,620;
+  aborted approach 3,902; fire extinguisher fired 2,747; fuel dumped 1,531; oxygen
+  masks dropped 1,168; cabin lost pressure 326; autorotation 130.
+- Location: 196,663 records carry a numbered zone; 1,496,585 (~85%) state a location
+  only in free text; 64,580 state none.
+- Existing interface: filtered search over coded fields plus full-text search over
+  Discrepancy. Filter parameters: q, operator, make, model, tail, part, condition,
+  stage, discovered, nature, crew, jasc, ata, zone, corrosion, cracked, minhours,
+  from, to. JSON API, no authentication.
 
-TASK
-Work out what to build. Five phases, in order. Do not skip ahead.
+# Hard constraints — the dataset does NOT contain
 
-PHASE 0 — DATA REALITY AUDIT
-Before any product ideas, state what this dataset can and cannot support.
-- Enumerate the hard limits: no fleet size or flying hours (no fleet-level
-  failure rates, no per-operator danger rankings); no cause of defect; no
-  accident records (no defect-to-crash linkage); filing behaviour varies by
-  operator class, so counts reflect reporting culture as much as fleet
-  reality; coverage and reporting behaviour have shifted since 1995; 2,732
-  of 3,945 operator designators resolve to no name.
-- For each limit, write the one-sentence product rule it forces
-  (e.g. "no league tables of operators by report count").
-- Note the volume implication for any LLM pass: 1.76M records require
-  batched pipelines, not single-context processing.
-- Then list what the data uniquely supports that raw search cannot expose:
-  per-tail serial histories anchored to AircraftTotalTime/AircraftTotalCycles;
-  the severity gradient in the crew-action codes; ~1.5M records that state a
-  location in free text no coded zone captures; 30 years of longitudinal depth.
+- Fleet size or flying hours → no denominators, no defect rates. You cannot rank
+  operators or aircraft types by safety and no design may imply it. Counts are
+  counts of reports filed.
+- Cause of a defect → no design may imply causation.
+- Accident records → someone searching for a crash will not find it here. What IS
+  visible is maintenance reporting on a tail before an accident.
+- Voluntary filing → reporting culture varies by operator; volume differences
+  reflect reporting behavior as much as fleet condition.
 
-PHASE 1 — USERS
-For each of the three groups, in turn:
-- The three questions they actually arrive with, phrased as they would say them.
-- What they do today without your tool.
-- Where the existing search interface breaks down for them.
-- What would be harmful or merely misleading to show them.
-State whether the three groups should be one product with modes or separate
-surfaces, and argue the choice. Treat the relatives' group as a distinct
-design problem, not a settings toggle: grieving, non-expert, at risk of
-reading causation into co-occurrence. Decide explicitly whether per-tail
-histories should be shown to them at all, and under what framing.
+# Users
 
-PHASE 2 — CANDIDATES
-Generate 8–12 candidates. Each: name, one-sentence description, primary
-user, exact data dependencies (columns / API params), and why search alone
-doesn't cover it. Include at least:
-- one data-infrastructure build (resolving operator designators to FAA
-  names; extracting zone/part/verb structure from Discrepancy text; PII
-  scrubbing of free text; duplicate/amendment detection);
-- one analysis build using the per-tail time axis (e.g. repeat-defect
-  clusters on one airframe with hours-between-events);
-- one journalist-facing tool that must include provenance (record IDs,
-  exact quotes, export);
-- one plain-language surface;
-- two LLM-in-the-loop features using function calling or JSON-schema output.
-If a candidate depends on external data (e.g. NTSB accident records), mark
-it out of scope and say what would change if it existed.
+1. Investigative journalists. Likely jobs: reconstruct a tail number's defect
+   history around an accident; test whether a defect pattern recurs across a type
+   or operator; verify claims with citable raw records. Need traceability,
+   export, and language they can quote without over-claiming.
+2. Researchers and safety analysts. Likely jobs: reproducible queries, bulk export,
+   cross-tabs over coded fields, time series, documented limitations.
+3. Relatives of people who died in aviation accidents. Likely arrive after a crash
+   looking for answers. The dataset cannot tell them why. Harm risk: misreading a
+   maintenance report as an explanation of the accident — false blame or false
+   reassurance. Possible genuine value: a careful, plain-language account of what
+   was reported about that aircraft before the accident, with explicit boundaries
+   on what it means.
 
-PHASE 3 — EVALUATION AND REJECTION
-Score every candidate 1–5 on: user value; feasibility with this data; risk
-of harmful misinterpretation (state what a 5 means); effort. Show the table.
-Then reject the bottom three in plain sentences — especially anything that
-smuggles in rates, causes, or accident implications.
+These groups share one interface with conflicting needs: density and rawness
+(journalists), rigor and export (researchers), plain language and care (relatives).
+Decide explicitly whether group 3 should be served, redirected (e.g., to NTSB
+records), or served only with heavy guardrails — and defend that decision.
 
-PHASE 4 — RECOMMENDATION
-Pick the top 1–2. For each:
-- MVP definition: what exists on day one, described concretely (endpoints,
-  screens, pipeline steps in order).
-- LLM usage plan: where the model runs, at what reasoning level, what the
-  structured-output schema enforces, where context caching pays off, and the
-  grounding rule: every generated statement must cite record IDs, and the
-  product must refuse to emit rate or causal language.
-- Validation: for any text extraction or classification, hand-label 200–300
-  records and report precision/recall before shipping; name one sanity-check
-  against a known event or fleet.
-- Harm analysis per user group with specific mitigations (language rules,
-  contextual banners, no rankings, PII scrub of Discrepancy, plain-language
-  glossary for JASC and stage codes).
-- A short list titled "What this product will never claim."
+# Build tools available
 
-PHASE 5 — SEQUENCING
-Order the work in 2-week increments and mark what ships in each. List what
-you are deliberately not building yet and why. End with the five user-
-interview questions that would most change the plan, and the open facts you
-would need that are not in the source material.
+GLM-5.3-Flash. Multimodal input (video, image, text, file), text output; 1,000,000
+token context; 128,000 token max output; 320B parameters / 18B active; sparse and
+linear attention (3.01x attention compute, 4.44x KV cache reduction vs GLM-5.3);
+reasoning always enabled at low/high/max; function calling; structured output to
+JSON schema; context caching; streaming and tool streaming.
+Capability discipline: for each proposal, name the features it actually uses and
+justify them. Prefer structured output plus function calling against the existing
+JSON API. Tier reasoning level to task (low for bulk extraction, high/max for
+synthesis). Flag where LLM output could be wrong on this noisy free text and how
+errors would be caught before users see them.
 
-OUTPUT RULES
-- Every claim about the data must trace to the source material. If you need
-  a fact you don't have, file it as an open question; do not invent it.
-- No product-manager filler. Plain sentences and numbers.
-- Under 2,500 words. The Phase 4 MVP spec must be understandable by a
-  non-technical stakeholder in one page.
+# Required process — output sections in this order
+
+1. Existing-coverage audit. What the current filters already answer well, so
+   proposals add value rather than duplicate them.
+2. Need analysis per user group. 4–6 jobs each, tagged [EVIDENCED] or [ASSUMED].
+   Include emotional and reputational stakes per group.
+3. Data-vs-need map. Three buckets: directly supported; supported only with
+   reframing (state the exact reframing); unsupported. Include the
+   seductive-but-unsupported ideas (e.g., "most dangerous airline," "what caused
+   the crash," "was my flight safe") and specify how each is refused or reframed.
+4. Untapped affordances. Fields present but underused by the current interface;
+   joins the schema invites (tail over time; same part across tails and operators;
+   free-text location extraction for the ~85% of records lacking a zone, with its
+   noise risks).
+5. Candidate builds. 6–10, compact table. Each: description; users served; exact
+   fields/text relied on; the LLM's role and failure modes; harm risk (who, how);
+   effort S/M/L; the single cheapest API probe that would confirm or kill it.
+6. Explicit rejections. At least 3 tempting ideas you refuse or reframe, with
+   reasons.
+7. Recommendation. One MVP, or a tightly scoped sequence. Justify by
+   value-per-harm-per-effort, not novelty. Define v1 scope precisely, including
+   what is deliberately excluded and why.
+8. Validation plan. Concrete probes against the live API: query shapes, sample
+   sizes, pass/fail criteria. At least one probe per user group. Any extraction
+   feature must include a hand-labeled quality check (specify N) before shipping.
+9. Guardrails. Required UX copy and behavior rules — especially for tail lookups
+   by relatives, and for any aggregate view a journalist might quote. Every derived
+   view must link back to raw records (record IDs / reproducible query URLs).
+   Draft example wording that is accurate without being cold or alarming.
+
+# Calibration rules for your output
+
+- No causal language anywhere. Counts are "reports filed," never rates or
+  "incidents."
+- Distinguish prevalence of defects from volume of reports, everywhere.
+- Structured markdown matching the section order above; tables where they compress.
+- Decisive, concrete, no filler, no generic product-school vocabulary.
 ```
 
-**How to use it**
-
-- Paste your source material at the marker and edit the ASSUMPTIONS block — those four lines materially change what gets recommended.
-- Run at high or max reasoning. The prompt's value is that Phase 0 and Phase 3 force rejection before the model commits to a build.
-- If you want to steer mid-flight, split at Phase 3: review the candidate table, then run a follow-up like *"Phase 4 only, for candidate X, expanded to a full engineering spec."*
-- If you want a machine-readable plan, add *"Output the Phase 4 MVP spec as JSON matching a schema you propose"* — the model's structured-output mode will enforce it.
-
-The one thing worth changing per your situation: the Phase 1 instruction about relatives. If you've already decided they get a separate surface (or no per-tail lookup at all), say so directly in the prompt — it's the highest-stakes design decision in the whole plan and it shouldn't be left to the model.
+**Usage notes:**
+- Run it once at reasoning max, then interrogate individual sections in follow-ups (the candidate-builds table is the natural place to drill in).
+- Before accepting any build that parses Discrepancy, append 20–50 real sample records spanning years and aircraft types to the prompt — extraction feasibility is the load-bearing assumption and the model can't honestly judge it from three examples.
+- Treat section 6 (explicit rejections) as seriously as section 7; for this dataset the refusals are where most of the reputational and ethical risk lives.

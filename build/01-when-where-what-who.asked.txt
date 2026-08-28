@@ -1,0 +1,305 @@
+Here is a published account of a tool I built on the FAA Service
+Difficulty Report database, and what happened while building it.
+
+---
+
+How to fix indecipherable public data with AI
+Because a government can publish everything it holds and still answer none of your
+questions.
+HENK VAN ESS
+AUG 28, 2026 ∙ PAID
+4
+1
+Share
+Make it Readable, part one: using AI to bend data toward your questions. This
+part is inspired by the Netﬂix documentary Freefall.
+I viewed Freefall on Netﬂix. Relatives of victims were attempting to ﬁnd answers
+to their questions partly via a governmental website. Row after row of capital
+letters. Zone numbers. Single character codes.
+What was the database? It’s called Service Difﬁculty Report and is maintained by
+(1) How to fix indecipherable public data with AI
+the Federal Aviation Administration. When technicians in the United States ﬁnd
+an issue with a plane (e.g., a crack in a component; rust under a piece of
+equipment; or a failed seal), they ﬁle it. These reports are then made available to
+everyone. You don’t need to sign in, pay a fee, or submit a request for records.
+There are 1,541,548 of these reports from 2000 (I didn’t use earlier years) through
+today. They relate to 44,812 separate planes.
+Field
+Code
+Whatitactuallysays
+(a)OperatorDesignator
+CALA
+ContinentalAirlinesInc
+(b)OperatorType
+Airline(FAA:aircarrier)
+(c)JASC/ATACode
+2530
+Buffetandgalleys.Hotplates,coffeepots,ovens,food
+(d)StageofOperation
+(e)HowDiscovered
+(f)NatureofCondition
+(g)PrecautionaryProcedures
+(h)FAARegion
+(i)DistrictOffice
+IN
+V
+B
+GL
+33
+Ontheground,ininspectionormaintenance
+Visual.Someonelookedatit
+Smoke,fumes,odourorsparks
+None.Thecrewtooknolistedaction
+GreatLakes
+Still33.NotintheFAA'sowntables
+(j)FlightNumber
+blank Notfiled
+For researchers, the database is a nightmare. A report will never tell you that
+there was an issue with “the landing gear.” Rather, it will state “ZONE 700.”
+Emergency landing? That’s just an A. But if it pops up elsewhere in the
+document, it means Airline.
+(1) How to fix indecipherable public data with AI
+The FAA documents never tell you that “the crew made an emergency
+landing.” Instead, it will simply say “A.”
+An airline’s name is made up of letters such as CALA. The technician’s ﬁnding is
+a completely different code. The code used to identify how the technician found
+the issue initially is a third code.
+When I attempted to conduct a search using a legitimate query, I encountered
+timeout and latency issues. Typical IT issues with software that has gone
+unmaintained for a considerable period of time. Creating links between two
+pieces of data were difﬁcult.
+Finding anything remotely resembling a “lead” was even more difﬁcult. This
+leads me to ask the question of any public database: Who is responsible for
+developing the protocol? Who controls access to the data? If the answer is that
+the public controls both, is the data presented in a way the public understands it?
+The answer is often no.
+(1) How to fix indecipherable public data with AI
+There are questions I want answered. What types of defects were reported
+yesterday? Which companies reported the most? At what time did they report
+them? Who were the individuals involved? What location on the airplane was
+affected? What type of defect was reported?
+What action did the crew take in response to the reported defect? Without
+knowing the “when,” “what,” “where” and “who,” I cannot begin to determine
+“why.” Why does a single operator send the same airplane out for repairs 60 times
+in a year? How can that occur?
+The database does not provide an explanation for that. I wanted to uncover the
+hidden stories within the data.
+In the past (read 2025), I would download all the data into a spreadsheet, create a
+pivot table, rotated it one direction, rotated it another direction, and hoped the
+spreadsheet did not crash due to its size. In 2026, I type what I desire in my own
+language and the system creates it for me. I build about two original, highly
+hyper-focused research tools a week for myself and my clients
+Imagination is the limit to creating things, not your ability to remember formulas
+or knowing how to code. If you can express what you desire, you can create it.
+How does that work? How did I build a full ﬂedged tool, as shown below?
+(1) How to fix indecipherable public data with AI
+Digital Digging with Henk van Ess
+Watch on
+A black box with white letters
+A majority of users who use AI will probably be doing so by way of a chat box in
+their browser. If they paste a document into the chat box, the AI will read it. If
+they paste forty documents into the chat box, some will drop off. If they ask the
+AI to create a complex tool, they will receive code that they must save, install and
+run themselves.
+But if the same AI is running within a terminal (Windows, Mac, no download
+needed) it can access your ﬁle system, download anything that is required for
+execution, execute it, observe any errors and correct those errors. The latter
+portion is the key to this process. After completing its task, the AI observes the
+outcome of its work and attempts to complete the same task again. You act as an
+intermediary to convey information: do this, do that. If the terminal and AI is
+installed on a server, you can post the output directly onto the web. So out of a
+window that looks like it came from 1989 (it does) you get a working tool on your
+own machine, or a website anyone can visit. The limit is no longer what you can
+92,043 unscheduled landings. All public. Almost nobody can read them. Now you can. And >nd leads92,043 unscheduled landings. All public. Almost nobody can read them. Now you can. And >nd leads92,043 unscheduled landings. All public. Almost nobody can read them. Now you can. And >nd leads92,043 unscheduled landings. All public. Almost nobody can read them. Now you can. And >nd leads(1) How to fix indecipherable public data with AI
+build. Can you describe what you want?
+Let’s start building the tool in the Terminal app. For a researcher who cannot
+code, the barrier is never imagination. It was having to learn to speak Python, to
+structure a project, to know about fail-safes, to know how not to leak your own
+material. Some of that still matters. But the part where you personally type the
+lines of code is over. Here is how I started the project. I downloaded the brand
+new LLM, GLM-5.3 Flash Lightning.
+I gave it a link to the public aircraft defects database and asked:
+Can I use the FAA database to answer the questions when where what and who?
+It answers back in the same green characters. Yes, that is possible. Should I show
+you how?
+It warned me about two of my questions. The who means airlines, and the
+airlines are hiding behind odd-looking codes across 26 years of history, some of
+them obsolete and some not. The what means every engineer writing up a repair
+in a private thicket of abbreviations, which will all have to be looked up. The
+where is the awkward one, because a report will often describe a repair without
+ever saying where on the aircraft it happened. The location is implicit. The
+mechanic knew. The AI found a list of FAA codes, I checked it, and granted it to
+rebuild the public database in human language.
+(1) How to fix indecipherable public data with AI
+That was just step 1. I found the information still overwhelming. How do I
+change that? The ﬁrst picture that arrived in my head was a schematic aircraft,
+seen from the side, sitting at the top. Can AI build that for me? And how do I
+explain what I want to see? I asked:
+The parts that get written up most are drawn darker. The parts nobody reports
+are pale. You land on the page and before you have read a word you already know
+which section of the aircraft is in trouble. And that is what happened:
+(1) How to fix indecipherable public data with AI
+This is impossible to do on the FAA website.
+It can only place a report that used a numbered zone. In 1,238,316 reports the
+mechanic simply wrote where it was, in plain English. In 90,262 there is no
+location given at all.
+I did not know that until I asked why the count under the drawing was so much
+smaller than the ﬁle. The answer was that not everyone ﬁling a defect provides
+that ﬁeld, which left me a decision to make: is the part I can plot still
+representative enough to show? I decided it was. It is big enough.
+But a machine asked to draw where aeroplanes break will draw it from whatever
+it can place, and the result looks complete. It will not volunteer the gap, because
+it has no instinct for the sentence beginning “this cannot show you.” So both of
+those counts now sit underneath the aircraft on the live page, in the same size
+type as everything else.
+And then I started the process of iterations. People hear “the AI built it” and
+picture a single instruction producing a ﬁnished website. That is not what
+happens and it never has been.
+(1) How to fix indecipherable public data with AI
+What happens is a loop. You describe what you want. You look at what came
+back. You ﬁnd the speciﬁc thing that is wrong with it and you say that, and only
+that, and then you go round again. Change one thing at a time, because if you ask
+for ﬁve changes and two come back wrong you will not know which two.
+The good parts of this site were not designed in advance. They exist because I
+used the thing, found it irritating, and complained precisely.
+I ask for a backup of the ﬁrst version before the second version exists.
+Professional coders have a name for doing this properly, which is GitHub, and it
+is worth setting up an account early even if you never learn what most of it does.
+Make it private. If the work is for clients, private is not optional. Then tell the
+machine to save each version there as you go.
+Because a picture is only ever a sample of what went wrong, the page needed a
+search box as well. How often did the left wing of a Boeing Dreamliner get
+written up?
+The strongest objection to building this is not that the tool is inaccurate. It is that
+the tool is accurate and still misleading.
+Sort by operator and the biggest airline comes out on top, because it has more
+aircraft, ﬂying more hours, inspected by more people. A rigorous maintenance
+department will ﬁle more reports than a sloppy one, since ﬁling the report is the
+system working rather than failing. None of it is divided by ﬂeet size or ﬂying
+hours, because the FAA ﬁle does not contain ﬂeet size or ﬂying hours.
+One pattern survives all of that, and it is why the tool exists at all. When a single
+operator writes up the same system, on several different aircraft, on the same
+day, the cause is almost never the aircraft. It is a batch of parts, a supplier, a
+procedure, or an inspection everybody ran at once. You cannot see that reading
+one row at a time. It is arithmetic, and a computer should be doing it for you.
+(1) How to fix indecipherable public data with AI
+Then I wanted a teaser for the project.
+A tool nobody visits is a hobby, so I asked whether the article I had written could
+be turned into something that met the standards of an educational tutorial on
+YouTube. Two or three minutes.
+The ﬁrst thing it told me was that I needed a proper voice. Your Mac has voices
+built in, and it was blunt about them: they will sound terrible to a human, they
+are obviously synthesized.
+I asked what the fastest route to a better one was. I know Eleven Labs, and I
+know what they charge for a good sample. It suggested OpenAI, whose voices are
+good and cost very little. I asked how. It said I needed something called an API.
+Here is what an API is, in the terms of this article. You are not allowed into their
+kitchen and you would not want to be. There is a hatch in the wall. You pass a
+written order through it and a ﬁnished plate comes back, and neither side ever
+sees the other’s mess. The API is the hatch. The key you sign up for is your
+docket number, the thing that says which account gets billed for the plate.
+So I signed up, got the key, stored it somewhere safe, and told the machine to use
+it at the moment it needed to make the voice. I
+The voice came back and I did not like it. Too slow, and the intonation was off.
+The obvious move is to ﬁght the voice: adjust the settings, ask for warmth, ask for
+a different reading. I asked for the speed to come up, and then I tried something
+else. I asked whether we could change the text so that the voice would
+pronounce it better.
+That worked immediately. It kept my script and shortened the sentences to suit
+the way the model breathes. I never looked up a single voice setting.
+This is the move worth stealing from the whole demo. When the output is wrong,
+(1) How to fix indecipherable public data with AI
+the ﬁx is often upstream of the thing you are annoyed with.
+Then I asked for a ﬂyover. We already had the aircraft at the top of the page, so
+could the camera ﬂy into it and show the actual problems reported in that
+section, as video?
+It could, using another one of those hatches, and it wanted my key for the picture
+service. It made ﬁve or six clips and put them into the demo. Ten minutes, two
+dollars.
+Then the camera lurched sideways and dived into the wrong part of the fuselage.
+My instinct was to type “this is wrong.” That is useless. No AI understands what
+you meant, it only assumes, and it assumes conﬁdently. So I described what I
+was looking at instead:
+(1) How to fix indecipherable public data with AI
+It came back with the diagnosis, that the arithmetic had been out by a factor of
+2.6, and then it ﬁxed the thing. Describe the symptom rather than the verdict. You
+are the patient who can say where it hurts, not the doctor who names the
+disease.
+Send out a team
+I use a technique, for the projects where I genuinely do not know yet how the
+information should look. Because I am not sure what is in the database.
+I ask for a team. Ten usability experts, ten layout experts, ten narrative experts,
+and a project leader over the top of them. Each one takes the part of the problem
+that belongs to their trade and comes back with suggestions, the project leader
+picks between them, and I get the full report when they are done. Here’s another
+tool I made with that approach, especially for this article. Where America Sues
+(1) How to fix indecipherable public data with AI
+When I applied this technique to our current Aircraft Defects project, it came with
+a wealth of ideas:
+Sort the ﬁle by the things a journalist would actually chase: smoke or fumes in
+the cabin, cracks found, an engine shut down in ﬂight, an unscheduled landing,
+bird strikes, landing gear trouble, something burning, fuel leaks, oxygen masks
+dropping, the cabin losing pressure, an aborted take-off, corrosion, urgent level 3
+corrosion damage, an uncontained engine failure.
+Show one report from yesterday and the most reported aircraft this month. Put
+the code legend where people can see it. Let them zoom in on a ﬂeet, on new
+defects, on old airframes, on engines, on several aircraft failing the same way on
+the same day.
+Ask what the crew did during the emergency. And let people search for any word
+and any date, without a starting point.
+(1) How to fix indecipherable public data with AI
+I did not think of most of that.
+before
+(1) How to fix indecipherable public data with AI
+after
+The database was public the whole time, and so was the dictionary. They were
+on the same page, twenty seconds apart, and the only reason nobody could read
+the ﬁle is that nobody at the agency ever put the two on the same plate.
+That took two hours to ﬁx. Check the full result here:
+https://aircraftdefects.com/?hero=anatomy
+I could not believe the number either. The reason it went that fast is that the AI is
+born for seeing patterns, the data was well structured and the questions were
+well structured, because I had chosen my own criteria ﬁrst and could picture the
+tool I wanted before I asked for it.
+Which is the actual condition for all of this. It works when you have enough data
+and when you have domain knowledge. You need a clear picture of what the
+(1) How to fix indecipherable public data with AI
+ﬁnished thing should be, or at least an honest attempt at one. Without that you
+get a fast, conﬁdent, useless website.
+Where this goes
+Over the next few weeks I am going to take you through how tools like this get
+built by someone who cannot code, one prompt at a time, including the parts that
+went wrong.
+At the end I will hand you Craig Silverman’s Indicator guide to vibecoding for
+OSINT, published 24 August 2026. Craig is my “brother” in search and research.
+He interviewed me for over an hour for that piece, and there is a great deal more
+in it than I will cover later.
+4 Likes ∙ 1 Restack
+Previous
+Discussion about this post
+Comments
+Restacks
+Write a comment...
+(1) How to fix indecipherable public data with AI
+© 2026 
+ · Privacy ∙ Terms ∙ Collection notice
+Substack is the home for great culture
+𝚑𝚎𝚗𝚔
+𝚟𝚊𝚗
+𝚎𝚜𝚜
+ 
+ 
+
+---
+
+The database is live at aircraftdefects.com with a public JSON API, no auth:
+/api/search (filters: q, operator, make, model, tail, part, condition, stage,
+discovered, nature, crew, jasc, ata, zone, corrosion, cracked, minhours, from,
+to, limit, offset), /api/hero, /api/glossary, /api/facets, /api/clusters,
+/api/trend, /api/ageing, /api/engines, /api/corrosion, /api/leads, /api/spikes,
+/api/phrases, /api/aircraft/<tail>. Records carry OperatorControlNumber as an id.
+It now holds 1,757,828 reports from 1995, on 54,634 aircraft.
+
+Now, my first question again, the one I opened with:
+
+Can I use the FAA database to answer the questions when where what who?

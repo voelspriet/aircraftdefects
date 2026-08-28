@@ -1,17 +1,17 @@
 {
   "model": "glm-5.3-flash",
   "effort": "max",
-  "seconds": 189.7,
+  "seconds": 231.9,
   "usage": {
-    "completion_tokens": 7425,
+    "completion_tokens": 9105,
     "completion_tokens_details": {
-      "reasoning_tokens": 5924
+      "reasoning_tokens": 7177
     },
     "prompt_tokens": 788,
     "prompt_tokens_details": {
-      "cached_tokens": 0
+      "cached_tokens": 768
     },
-    "total_tokens": 8213
+    "total_tokens": 9893
   },
   "sent": "\nSOURCE MATERIAL\n\nDataset: FAA Service Difficulty Reports, published by the FAA, 1995 to present.\nHeld at aircraftdefects.com. 1,757,828 records. 54,634 aircraft by tail number.\n3,945 operator designators, of which 1,213 resolve to a name from FAA lists.\n\nA record is filed by a mechanic or operator when a component fails, malfunctions\nor is found defective.\n\nColumns, 76 in total. Those with values in most records:\n  DifficultyDate, SubmissionDate, OperatorDesignator, RegistryNNumber,\n  AircraftMake, AircraftModel, AircraftSerialNumber, AircraftTotalTime,\n  AircraftTotalCycles, EngineMake, EngineModel, JASCCode, PartName, PartNumber,\n  PartCondition, PartLocation, NatureOfConditionA, NatureOfConditionB,\n  NatureOfConditionC, PrecautionaryProcedureA, PrecautionaryProcedureB,\n  PrecautionaryProcedureC, PrecautionaryProcedureD, StageOfOperationCode,\n  HowDiscoveredCode, ReceivingRegionCode, ReceivingDistrictOffice,\n  CorrosionLevel, CrackLength, NumberOfCracks, FuselageStationFrom,\n  FuselageStationTo, WingStationFrom, WingStationTo, Discrepancy.\n\nDiscrepancy is free text written by the person filing. Present in most records.\nThree verbatim examples:\n  RH MAIN FLAP CARRIAGE NR 2 HAS PITTING IN BOLT HOLE FOR O/B UPPER RUB PAD\n  THE PAWL BEHIND THE CREW ENTRY DOOR EXTERNAL HANDLE IS WORN\n  CABIN SEAT TRACK FOUND CORROSION AT FR73-FR77\n\nCoded fields resolve against FAA lookup tables published by the FAA.\nCodes not present in those tables are displayed as the code.\n\nCounts of the coded crew action field, whole dataset:\n  unscheduled landing 112,189; aborted take-off 20,438; engine shut down in\n  flight 14,703; emergency descent 8,620; aborted approach 3,902; fire\n  extinguisher fired 2,747; fuel dumped 1,531; oxygen masks dropped 1,168;\n  cabin lost pressure 326; autorotation 130.\n\nLocation: 196,663 records carry a numbered zone. 1,496,585 state a location in\nthe free text only. 64,580 state no location.\n\nExisting interface: filtered search over the coded fields and full-te"
 }

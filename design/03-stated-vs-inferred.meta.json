@@ -1,0 +1,17 @@
+{
+  "model": "glm-5.3-flash",
+  "effort": "max",
+  "seconds": 337.4,
+  "usage": {
+    "completion_tokens": 16000,
+    "completion_tokens_details": {
+      "reasoning_tokens": 14179
+    },
+    "prompt_tokens": 7196,
+    "prompt_tokens_details": {
+      "cached_tokens": 2816
+    },
+    "total_tokens": 23196
+  },
+  "sent": "Take your previous answer and mark each sentence as either stated in the source material or inferred by you. For anything inferred, say it is not established by the source."
+}

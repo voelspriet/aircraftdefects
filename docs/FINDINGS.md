@@ -738,3 +738,37 @@ sentence.
 always the whole corpus, so its first entry is the file's start. There is now
 also a guard that refuses to call a month partial when its covered days equal its
 length, whatever flagged it.
+
+## F23. A table inside a panel inside a page, and the model with nothing to do (29 Aug 2026)
+
+Two faults from moving the desk into `#p-search` (F20), both visible in a glance
+and invisible to every count.
+
+**The table lost 110px to nesting.** The wrap gives 1040, the panel takes 18
+either side and the section another 16: a 1080px table had 970 and scrolled
+sideways inside a panel inside a page. Fixing the container it sits in was the
+wrong instinct; the box now bleeds back out to the panel's edge and the table
+fits without scrolling at a laptop width.
+
+**The write-ups lost their gloss button.** `/z/api/gloss` was still there, still
+working, and nothing on the page called it. That endpoint is the one thing this
+desk has that the reference does not: a model that reads the mechanic's own words
+back in plain English.
+
+    filed    RIGHT EMERGENCY EXIT LOWER EMERGENCY LIGHT LENS MISSING.
+             REPLACED THE EMERGENCY LIGHT LENS IAW AMM 33-51-01.
+             OPS CHECKED GOOD. NO DEFECTS NOTED.
+
+    read     The lower emergency light lens at the right emergency exit was
+             missing. The emergency light lens was replaced in accordance with
+             AMM 33-51-01. It was operationally checked good, and no defects
+             were noted.
+
+Every reading says underneath that it was written by GLM-5.3-Flash from the
+write-up and the decoded codes and adds nothing the report does not say. On the
+page, not in a footnote.
+
+The button did nothing on its first attempt, and silently: the write-up band
+toggles its own clamp on click, so the bar carried a `stopPropagation` to protect
+it, which killed the delegated handler along with the toggle. Bound to the button
+itself instead.

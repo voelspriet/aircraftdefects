@@ -3827,11 +3827,31 @@ function loadPatterns(){
   vget('api/trend?'+qs).then(function(d){ paintTrend(vEl('pt-trend'),d); })
     .catch(function(e){ vEl('pt-trend').innerHTML='<p class="pfail">The month-by-month count did not load ('+VH((e&&e.message)||e)+'). No trend is shown.</p>'; });
   loadPtBrk();
-  vget('api/phrases?'+qs).then(function(d){
+  /* The endpoint refuses to compute over-represented vocabulary against the
+     whole corpus, and it is right to: every word sits at lift 1.0 there, so the
+     answer would be a list of the commonest English in the file dressed as a
+     finding. It answers 400 with "narrow the selection first". That is not a
+     failure of the page and must not be reported as one. */
+  if(!qs){
+    vEl('pt-phr').innerHTML='<div class="ggrp">Words that stand out here</div>'+
+      '<p class="pnote">Choose something first. Against the whole file every word '+
+      'is average by definition, so there is nothing for this to be more common than.</p>';
+  } else vget('api/phrases?'+qs).then(function(d){
     var rows=objRows(firstArr(d));
-    vEl('pt-phr').innerHTML='<div class="ggrp">Phrases the mechanics use most, inside your selection</div>'+
-      (rows.length?rows.slice(0,18).map(function(r){ var lab=String(rL(r)),n=rN(r);
-        return '<button type="button" class="brow" data-setk="q" data-setv="'+VH(lab)+'"><span class="bl">'+VH(lab)+'</span><span class="bb"><span class="bf" style="width:'+pct_05(rows,n)+'%"></span></span><b class="bn">'+VN(n)+'</b></button>'; }).join('')
+    /* the row is {word, in_selection, corpus, lift}. Read through the generic
+       accessors every bar came out at 0. And lift is the finding: 6.7 means the
+       word turns up nearly seven times as often here as in the file at large,
+       which is what makes it worth searching for. The count alone would rank
+       the commonest English in the selection. */
+    var mxL=1; rows.forEach(function(r){ var l=+r.lift||0; if(l>mxL)mxL=l; });
+    vEl('pt-phr').innerHTML='<div class="ggrp">Words that stand out here</div>'+
+      (rows.length?rows.slice(0,18).map(function(r){
+        var lab=String(r.word!=null?r.word:rL(r));
+        var n=(r.in_selection!=null?r.in_selection:rN(r)), lf=+r.lift||0;
+        return '<button type="button" class="brow" data-setk="q" data-setv="'+VH(lab)+'">'+
+          '<span class="bl">'+VH(lab)+'</span>'+
+          '<span class="bb"><span class="bf" style="width:'+Math.round(100*lf/mxL)+'%"></span></span>'+
+          '<b class="bn">'+(lf?VN(Math.round(lf*10)/10)+'\u00d7 ':'')+VN(n)+'</b></button>'; }).join('')
       :'<p class="pnote">No repeated phrases in this selection.</p>');
   }).catch(function(e){ vEl('pt-phr').innerHTML='<p class="pfail">The phrase count did not load ('+VH((e&&e.message)||e)+').</p>'; });
 }

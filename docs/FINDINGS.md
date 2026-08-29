@@ -522,3 +522,39 @@ half-fix it printed `[object Object]`.
 endpoint refusing to compute over-represented vocabulary against the whole
 corpus, which is correct: every word is at lift 1.0 there. The panel treats it as
 an error. It should say what the endpoint says.
+
+## F15. Six panels answering in code (29 Aug 2026)
+
+Every panel fetched, returned 200 and rendered. Six of them said nothing a reader
+could use, because each endpoint names its own fields and the panels reached for
+generic ones.
+
+| panel | what it showed | what the row actually holds |
+|---|---|---|
+| Story leads | `Lead` × 8 | `{tail, operator, make, model, recent, earlier, busiest_day, one_day_burst}` |
+| Corrosion | `Corrosion level` × 9, then `[object Object]` | `level`, and `meaning` null or `{label, faa}` |
+| Words that stand out | eighteen bars at 0 | `{word, in_selection, corpus, lift}` |
+| How it was found | `E 14,515  U 1,480  B 9` | the plain words are in `meaning.label` |
+| Engines | "No engine figures came back" | one flat `rows` array, not three breakdowns |
+| Same defect | `Same defect` × 10 | `{part_name, part_number, condition, reports, operators}` |
+| What the crew did | `AALA 155,997  DALA 148,192` | `{key, reports, with_crew_action, share}` |
+
+Three of these were worse than empty.
+
+**The crew panel ranked the wrong number.** It drew bars on `reports`, which
+ranks the airlines that file most and answers nothing. The panel is about the
+share of a selection that forced the crew to act, which is `with_crew_action`.
+American Airlines goes from 155,997 to 11,957, and the ranking changes with it.
+
+**The vocabulary panel needs lift, not frequency.** `6.7` means the word turns up
+nearly seven times as often in this selection as in the file at large. Ranked by
+raw count it would list the commonest English in the selection and present it as
+a pattern.
+
+**A lead has to say when it is not one.** `one_day_burst` marks an airframe whose
+recent reports fall on a single day: a heavy check, not a failing aircraft. The
+sentence now says so, because a lead that does not is a false lead.
+
+One place the airline names come from: the menu the controls half already builds
+from the FAA's cross-reference. The name map lives in another closure, so a panel
+reaching for it got nothing.

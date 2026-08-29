@@ -3923,7 +3923,11 @@ function loadFound(){
     var rows=objRows(firstArr(d));
     var INSTR={B:1,D:1,E:1,M:1,T:1,U:1,X:1}, inst=[],eye=[],tot=0,inn=0;
     rows.forEach(function(r){ var c=String(rC(r)||'').trim(), n=rN(r); tot+=n;
-      var row={label:String(rL(r)||vcode('discovered',c)||c),code:c,n:n};
+      /* the row carries meaning:{faa,label,note}, so a generic label lookup
+         missed it and sixteen methods listed as bare letters: E, U, B. */
+      var mn=r.meaning, lb=(mn&&typeof mn==='object')?(mn.label||mn.faa):mn;
+      var row={label:String(lb||rL(r)||vcode('discovered',c)||c),code:c,n:n,
+               note:(mn&&mn.note)||''};
       if(INSTR[c]){ inst.push(row); inn+=n; } else eye.push(row); });
     var html='';
     if(tot>0){
@@ -4122,7 +4126,12 @@ function loadDefect(){
     var rows=objRows(firstArr(d));
     if(!rows.length){ b.innerHTML='<p class="pnote">No repeated defect stood out.</p>'; return; }
     b.innerHTML='<div class="ggrp">The same defect, many aircraft — whole file</div>'+rows.slice(0,10).map(function(r){
-      var lab=String(rL(r)||rC(r)||'Same defect'), n=rN(r);
+      /* the row is {part_name, part_number, condition, reports, aircraft,
+         operators}. With no name field the label fell through to the panel's
+         own title, so ten rows all read "Same defect". */
+      var lab=[r.part_name, r.part_number?('p/n '+r.part_number):'', r.condition]
+                .filter(Boolean).join(' \u00b7 ') || String(rL(r)||rC(r)||'Same defect');
+      var n=(r.reports!=null?r.reports:rN(r));
       var ops=r.operators!=null?r.operators:(r.n_operators!=null?r.n_operators:null);
       var meta=[(ops!=null&&ops!=='')?(VN(Number(ops)||0)+' operators'):null, r.first?pdate(r.first):null, r.last?pdate(r.last):null].filter(Boolean).join(' · ');
       var k=(r.part!=null||r.code!=null)?'part':'q';
@@ -4193,7 +4202,19 @@ function loadEngines(){
   b.innerHTML='<p class="pnote">Counting engine and APU trouble…</p>';
   vget('api/engines').then(function(d){
     d=d||{}; var html='';
-    var mk=firstArr(d.by_make||d.makes||d.enginemake), md=firstArr(d.by_model||d.models||d.enginemodel), sys=firstArr(d.by_ata||d.systems||d.by_system);
+    /* one flat rows array: {make, make_name, model, reports, aircraft,
+       inflight_shutdowns, flameout_or_stoppage}. Looked for three separate
+       breakdowns that do not exist, so the panel said no figures came back
+       while the endpoint was answering with forty. */
+    var raw=firstArr(d.rows||d);
+    var byMake={};
+    raw.forEach(function(r){ var k=r.make_name||r.make; if(!k)return;
+      var e=byMake[k]||(byMake[k]={label:k,n:0,isd:0,fo:0});
+      e.n+=(+r.reports||0); e.isd+=(+r.inflight_shutdowns||0); e.fo+=(+r.flameout_or_stoppage||0); });
+    var mk=Object.keys(byMake).map(function(k){return byMake[k];}).sort(function(a,b){return b.n-a.n;});
+    var md=raw.slice().sort(function(a,b){return (+b.reports||0)-(+a.reports||0);})
+      .map(function(r){return {label:[r.make_name||r.make,r.model].filter(Boolean).join(' '),n:+r.reports||0};});
+    var sys=[];
     if(mk.length) html+=barList(mk,null,{head:'By engine maker',limit:10});
     if(md.length) html+=barList(md,null,{head:'By engine model',limit:10});
     if(sys.length) html+=barList(sys,MAPS.ata,{head:'By system chapter',limit:10});
@@ -4215,7 +4236,17 @@ function loadCq(){
   out.innerHTML='<p class="pnote">Counting…</p>';
   vget('api/consequences?by='+encodeURIComponent(by)).then(function(d){
     out.innerHTML='<div class="ggrp">What crews did — whole file, by '+VH(vEl('cq-by').selectedOptions[0].textContent.toLowerCase().replace(/^by /,''))+'</div>'+
-      barList(objRows(firstArr(d)),MAPS[by],{limit:14})+
+      /* the row is {key, reports, with_crew_action, share, actions[]}. The bar
+         was drawn on reports, which ranks the airlines that file most and says
+         nothing; the panel is about the share of a selection that forced the
+         crew to act. And the key is a designator, so fourteen bars read AALA,
+         DALA, CALA where the reference names the airline. */
+      barList(objRows(firstArr(d)).map(function(r){
+        var k=r.key!=null?r.key:rC(r);
+        var lab=(by==='operator') ? (opLabel(k)||String(k)) : String(k);
+        return {code:k, label:lab, n:(r.with_crew_action!=null?r.with_crew_action:rN(r)),
+                share:r.share, reports:r.reports};
+      }),MAPS[by],{limit:14})+
       '<p class="pnote">A crew action is what the FAA form says the crew did, not a description of severity.</p>';
   }).catch(function(e){ out.innerHTML='<p class="pfail">The crew-action figures did not load ('+VH((e&&e.message)||e)+').</p>'; });
 }
@@ -4550,6 +4581,21 @@ else mountViews();
     var n=document.querySelector('[data-pick="'+PICK[j]+'"]'); if(n) n.focus();
   });
 })();
+
+/* One place the airline names come from: the menu the controls half already
+   builds, with the FAA's own cross-reference behind it. The name map itself
+   lives in another closure, so a panel reaching for it got nothing and drew
+   fourteen bars reading AALA, DALA, CALA. */
+function opLabel(code){
+  if(!code) return "";
+  var sel=document.getElementById("operator");
+  if(!sel) return "";
+  if(!opLabel._m || opLabel._n!==sel.options.length){
+    opLabel._m={}; opLabel._n=sel.options.length;
+    for(var i=1;i<sel.options.length;i++) opLabel._m[sel.options[i].value]=sel.options[i].textContent;
+  }
+  return opLabel._m[code]||"";
+}
 
 /* ---- 06-controls ---- */
 /* ================= CONTROLS HALF ================= */

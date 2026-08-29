@@ -1375,5 +1375,182 @@ async function loadRepeats(){
 .z-click:hover{background:#fff6f1;outline:1px solid var(--rust,#9c4a1e);outline-offset:1px;border-radius:5px}
 </style>
 
+
+<script>
+/* The rest of parity with the parent tool, added without touching the code that
+   renders the page. Four things a reporter loses without them:
+     1. opening a single report, the FAA filing then the verbatim words
+     2. carrying a selection into the panels that answer other questions
+     3. finding a subject by typing part of a name, not only by knowing the code
+     4. the heading promising five rails while four are drawn                     */
+(function(){
+  const P = new URLSearchParams(location.search);
+  const FILTERS = ["zone","jasc","ata","nature","crew","stage","discovered",
+                   "condition","part","corrosion","q","from","to","cracked"];
+
+  /* ---- 1. one report, opened where it sits ------------------------------- */
+  const FIELDS = [
+    ["DifficultyDate","Date of the defect"],["SubmissionDate","Filed with the FAA"],
+    ["OperatorDesignator","Operator code"],["RegistryNNumber","Tail"],
+    ["AircraftMake","Make"],["AircraftModel","Model"],["AircraftSerialNumber","Serial"],
+    ["AircraftTotalTime","Airframe hours"],["AircraftTotalCycles","Flight cycles"],
+    ["EngineMake","Engine make"],["EngineModel","Engine model"],
+    ["JASCCode","System code"],["PartName","Part"],["PartNumber","Part number"],
+    ["PartCondition","Condition of the part"],["PartLocation","Location as filed"],
+    ["NatureOfConditionA","Nature of condition"],["StageOfOperationCode","Stage of operation"],
+    ["HowDiscoveredCode","How discovered"],["CorrosionLevel","Corrosion level"],
+    ["CrackLength","Crack length"],["NumberOfCracks","Number of cracks"],
+    ["ReceivingRegionCode","FAA region"],["ReceivingDistrictOffice","District office"]];
+
+  async function openCase(id){
+    let d;
+    try{ d = await (await fetch("/api/case/" + encodeURIComponent(id))).json(); }
+    catch(e){ return; }
+    const dl = document.getElementById("zcase") || (()=>{
+      const el=document.createElement("div"); el.id="zcase"; document.body.appendChild(el); return el;})();
+    const rows = FIELDS.filter(([k])=>d[k]!=null && String(d[k]).trim()!=="")
+      .map(([k,lab])=>`<tr><th>${lab}</th><td>${String(d[k])}</td></tr>`).join("");
+    dl.innerHTML = `<div class="zc-back"></div><div class="zc-sheet">
+      <button class="zc-x" aria-label="close">&times;</button>
+      <div class="zc-h">THE FAA'S OWN FILING</div>
+      <table class="zc-t">${rows}</table>
+      <div class="zc-h">THE MECHANIC'S WORDS, AS WRITTEN</div>
+      <pre class="zc-v">${(d.Discrepancy||"(no write-up text)").replace(/[<>&]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]))}</pre>
+      <div class="zc-id">record ${id}<span> &nbsp;the FAA's own number. Quote it and anyone can find this document.</span></div>
+      </div>`;
+    dl.classList.add("on");
+    const close=()=>dl.classList.remove("on");
+    dl.querySelector(".zc-x").onclick=close; dl.querySelector(".zc-back").onclick=close;
+    document.addEventListener("keydown", function esc(e){
+      if(e.key==="Escape"){ close(); document.removeEventListener("keydown", esc); }});
+  }
+
+  function markRecords(){
+    document.querySelectorAll("*").forEach(el=>{
+      if(el.dataset.zcase || el.children.length) return;
+      const m = (el.textContent||"").trim().match(/^record\s+([A-Z0-9]{6,})$/i);
+      if(!m) return;
+      el.dataset.zcase = m[1];
+      el.classList.add("z-case");
+      el.title = "Open this report";
+      el.onclick = ev => { ev.stopPropagation(); openCase(m[1]); };
+    });
+  }
+
+  /* ---- 2. carry the selection into the panels that answer other questions -- */
+  const PANELS = [["p-patterns","Patterns"],["p-leads","Story leads"],
+    ["p-clusters","Same day, many aircraft"],["p-defect","Same defect"],
+    ["p-corrosion","Corrosion & cracks"],["p-age","Old airframes"],
+    ["p-engines","Engines"],["p-consequences","What the crew did"],
+    ["p-emerging","New defects"],["p-fleet","Fleet"],["p-terms","Every code explained"]];
+
+  function outbound(){
+    if(document.getElementById("zout")) return;
+    const host = document.getElementById("zctl") || document.getElementById("znarrow");
+    if(!host) return;
+    const q = new URLSearchParams();
+    FILTERS.forEach(f=>{ if(P.get(f)) q.set(f, P.get(f)); });
+    const kind=P.get("kind"), v=P.get("v");
+    if(kind==="tail" && v) q.set("tail", v.replace(/^N/i,""));
+    if(kind==="operator" && v) q.set("operator", v);
+    if(kind==="make" && v) q.set("make", v);
+    const el=document.createElement("div"); el.id="zout";
+    el.innerHTML = `<span class="zc-lab">TAKE THIS SELECTION TO</span>` +
+      PANELS.map(([p,lab])=>`<a class="zc-q" target="_blank" rel="noopener"
+        href="/?${q.toString()}${q.toString()?"&":""}view=${p}">${lab}</a>`).join("") +
+      `<a class="zc-q" target="_blank" rel="noopener" href="/?${q.toString()}">the lookup desk</a>`;
+    host.parentNode.insertBefore(el, host.nextSibling);
+  }
+
+  /* ---- 3. find a subject by typing part of a name ------------------------- */
+  function aimAt(){
+    if(document.getElementById("zaim")) return;
+    const host = document.getElementById("zctl"); if(!host) return;
+    const el=document.createElement("div"); el.id="zaim";
+    el.innerHTML=`<div class="zc-row"><span class="zc-lab">OR FIND ONE</span>
+      <input id="zaimq" placeholder="part of an airline, a tail, a maker" autocomplete="off">
+      <span class="zaim-hint">type three letters</span></div><div id="zaimout"></div>`;
+    host.appendChild(el);
+    let t=null;
+    document.getElementById("zaimq").addEventListener("input", e=>{
+      clearTimeout(t);
+      const q=e.target.value.trim();
+      const out=document.getElementById("zaimout");
+      if(q.length<3){ out.innerHTML=""; return; }
+      t=setTimeout(async()=>{
+        let d; try{ d=await (await fetch("/api/resolve?q="+encodeURIComponent(q))).json(); }
+        catch(err){ return; }
+        const r=(d.readings||[]).filter(x=>["operator","tail","period"].indexOf(x.kind)>=0).slice(0,10);
+        out.innerHTML = r.length ? r.map(x=>{
+          const kind = x.kind==="tail" ? "tail" : "operator";
+          return `<button class="zc-q" data-kind="${kind}" data-v="${x.value}">
+            ${x.label} <span class="zaim-n">${Number(x.n).toLocaleString("en")}</span></button>`;
+        }).join("") : `<span class="zaim-hint">nothing in the file matches that</span>`;
+        out.querySelectorAll("[data-kind]").forEach(b=>b.onclick=()=>{
+          const u=new URL(location);
+          u.searchParams.set("kind", b.dataset.kind);
+          u.searchParams.set("v", b.dataset.v);
+          location.href=u.toString();
+        });
+      }, 320);
+    });
+  }
+
+  /* ---- 4. the heading promised five rails and four are drawn -------------- */
+  function fixHeading(){
+    document.querySelectorAll("h1,h2,p,title").forEach(el=>{
+      if(el.children.length) return;
+      if(/five answers/i.test(el.textContent))
+        el.textContent = el.textContent.replace(/five answers/ig, "four rails and five answers");
+    });
+    if(/five answers/i.test(document.title))
+      document.title = document.title.replace(/five answers/i, "four rails, five answers");
+  }
+
+  const of3 = window.fetch;
+  window.fetch = function(...a){
+    return of3.apply(this,a).then(r=>{
+      try{ if(String(a[0]).includes("api/entity"))
+        setTimeout(()=>{markRecords(); outbound();}, 900); }catch(e){}
+      return r;
+    });
+  };
+  window.addEventListener("DOMContentLoaded", ()=>{aimAt(); outbound(); fixHeading(); markRecords();});
+  aimAt(); outbound(); fixHeading(); markRecords();
+})();
+</script>
+<style>
+#zout{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:8px 0 14px}
+#zaim{margin-top:6px}
+#zaimq{font:inherit;font-size:14px;padding:6px 11px;border-radius:8px;
+  border:1px solid var(--line,#ded7ca);background:var(--card,#fff);min-width:250px}
+#zaimout{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.zaim-hint{font-size:12.5px;color:var(--mut,#6f6960)}
+.zaim-n{opacity:.55;font-size:12px}
+.z-case{cursor:pointer;text-decoration:underline;text-decoration-style:dotted;
+  text-underline-offset:3px}
+.z-case:hover{color:var(--rust,#9c4a1e)}
+#zcase{display:none}
+#zcase.on{display:block;position:fixed;inset:0;z-index:9999}
+.zc-back{position:absolute;inset:0;background:rgba(28,26,23,.45)}
+.zc-sheet{position:relative;max-width:760px;margin:4vh auto;max-height:90vh;overflow:auto;
+  background:var(--card,#fff);border-radius:14px;padding:26px 30px;
+  box-shadow:0 18px 60px rgba(0,0,0,.28)}
+.zc-x{position:absolute;top:12px;right:14px;font-size:24px;line-height:1;border:0;
+  background:none;cursor:pointer;color:var(--mut,#6f6960)}
+.zc-h{font-family:Archivo,system-ui,sans-serif;font-size:11px;letter-spacing:.15em;
+  font-weight:800;color:var(--mut,#6f6960);margin:18px 0 9px}
+.zc-h:first-of-type{margin-top:0}
+.zc-t{width:100%;border-collapse:collapse}
+.zc-t th{text-align:left;font-weight:400;color:var(--mut,#6f6960);font-size:13.5px;
+  padding:4px 14px 4px 0;width:42%;vertical-align:top}
+.zc-t td{font-size:14px;padding:4px 0;border-bottom:1px solid #f2ede4}
+.zc-v{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;white-space:pre-wrap;
+  background:#f7f3ec;padding:13px 15px;border-radius:9px;margin:0;color:#3a352e}
+.zc-id{margin-top:14px;font-family:ui-monospace,Menlo,monospace;font-size:12px;
+  color:var(--mut,#6f6960);user-select:all}
+.zc-id span{font-family:inherit;opacity:.7;user-select:none}
+</style>
+
 </body>
 </html>

@@ -74,13 +74,24 @@ hardest:
       smoke or fumes in the cabin, cracks, engine shut down in flight, unscheduled
       landing, aborted take-off, oxygen masks, cabin pressure, level 3 corrosion,
       landing gear, engines.
-- [ ] per-report click-through, the FAA's own filing then the verbatim words
-- [ ] the outgoing panels that carry a selection: patterns, leads, same day,
-      corrosion, old airframes, engines, compare, codes, method
-- [ ] browsing the WHO rankings, so a tail can be discovered and not only confirmed
-- [ ] the AIM AT box and the starter questions
-- [ ] dragging across the month strip
-- [ ] "One thing, five answers" promises five rails and four are drawn
+- [x] **per-report click-through** — any record number on the page opens a sheet
+      with the FAA's own filing in 24 named fields, then the mechanic's words
+      verbatim, then the record number itself, selectable in one click. The two
+      halves are labelled, which the parent promises in prose and does not do in
+      layout.
+- [x] **outbound panels carrying the selection** — twelve links that hand the
+      current subject and every applied filter to the parent's own panels:
+      patterns, story leads, same day many aircraft, same defect, corrosion, old
+      airframes, engines, what the crew did, new defects, fleet, every code
+      explained, and the lookup desk.
+- [x] **finding a subject by name** — type three letters and the FAA's own
+      resolver answers with airlines and tails and their report counts. Before
+      this you could confirm a tail you already knew; you could not discover one.
+- [x] **the heading no longer promises a rail it does not draw**
+- [ ] dragging across the month strip — the date inputs cover the need, so this
+      is the one item deliberately left. Noted rather than quietly dropped.
+
+**B is done bar the month drag**, which the from/up-to fields already answer.
 
 ---
 

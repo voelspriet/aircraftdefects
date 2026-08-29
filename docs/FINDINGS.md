@@ -206,3 +206,42 @@ exactly this reason.
 Correction sent to GLM with the evidence attached rather than an instruction,
 and with three acceptance checks it had to build for. See
 `rebuild/02-where.prompt.txt`.
+
+## F6. The comparison had to be mechanical (29 Aug 2026)
+
+Six agents read the parent instrument and wrote down what it does. That produced
+good specifications, and it found the zone bug. It did not produce a comparison:
+every agent described the parent, none of them counted the clone.
+
+`build/parity_diff.py` drives both pages through five states in a real browser
+and counts elements. Prose about parity is an opinion; a count is not.
+
+With a zone filter applied, 29 Aug 2026:
+
+                              parent   clone
+  filter controls                19       0
+  starter questions              19       0
+  panels                         16       0
+  report rows                   100       0
+  mechanic's write-ups          100       0
+  case-sheet buttons            101       0
+  month spine rows                1       0
+  decoded glossary terms        396       0
+  month bars, rail shut         380       0
+  crew ladder rows                8      10
+
+Two findings the eye had missed.
+
+**The crew ladder draws ten rows where the parent caps at eight.** The parent
+counts ten watched codes and silently omits up to two, with no "more" affordance,
+unlike the WHO rail which discloses its cap twice. More is not better here: the
+cap is the specification.
+
+**The two pages spell their rails differently in the URL.** The parent uses the
+hero key (`?hero=anatomy`), the clone uses the rail id (`?hero=where`). A link
+copied out of the parent opens the wrong rail on the clone. Shareable links are
+the parent's whole citation model, so this is not cosmetic.
+
+The harness also caught its own first error: it had probed the parent with the
+clone's vocabulary and reported the parent as having no WHO rail. Recorded here
+because a comparison tool that flatters one side is worse than none.

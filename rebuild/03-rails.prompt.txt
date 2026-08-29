@@ -1,0 +1,574 @@
+You rebuilt the instrument for a public desk over FAA Service Difficulty
+Reports. The WHERE rail is now correct. I have since driven both the original and
+your rebuild through five states in a real browser and counted what each one has.
+Here is what the machine found, not what I think.
+
+# The measurement
+
+Five states, each loaded in both pages, elements counted in the DOM.
+
+                          original   yours
+  month bars, rail shut      380        0
+  rows in the crew ladder      8       10
+  gutter value lines           4        0
+  reading paragraphs           4        1
+  specimen decoded line      yes       no
+
+Your gutters read "WHEN month by month". The original's read "WHEN 380 months",
+"WHERE on the aircraft all zones", "WHO 54,634 aircraft", "FORCED 151,543 of
+1,757,827". You are printing the sub-label where the value belongs.
+
+Your standing sentence reads "Reading 1,757,827 reports." The original's reads
+"1,757,827 reports, everything the FAA has published to 26 August 2026." and,
+once something is chosen, "84,453 reports, upper fuselage. 1,673,374 set aside."
+
+Your specimen prints raw keys: "controlFDEA202608261230 filed2026-08-26 partLamp".
+The original prints a decoded line: "Boeing 777FHT - Emergency Lighting - Lamp -
+Functional check - On the ground, in inspection or maintenance - 26 August 2026".
+
+One more, from the URLs: the original names its rails horizon, anatomy, swarm,
+ledger in ?hero=. You name them when, where, whose, forced. A link copied out of
+the original opens the wrong rail on yours. Accept both spellings.
+
+# Six things to build
+
+1. THE MONTH STRIP WHEN THE RAIL IS SHUT. Every rail keeps its shape when closed:
+   14px tall instead of 84, no axis, no magnifier, no sentence, tabindex -1. You
+   draw a flat grey bar, so a reader who has the aircraft open learns nothing
+   about time. 380 bars, both scaled against the corpus maximum.
+
+2. THE GUTTER VALUE. Three lines when open (question, sub-label, value), two when
+   shut (question and value on one baseline). The value is what the rail currently
+   amounts to, never the sub-label.
+
+3. THE READING PARAGRAPH ON ALL FOUR RAILS. You have one, on WHERE. Each rail
+   states in plain words what its own figures amount to. A number on its own is a
+   display, not a finding.
+
+4. THE CREW LADDER CAPS AT EIGHT. You draw ten. Ten codes are counted and up to
+   two are silently omitted, deliberately, with no "more" affordance. And the
+   block bar must use crew_reports, never the sum of the per-code counts: a
+   report can carry four codes at once. In the whole corpus the eight rows sum to
+   165,298 against a crew_reports of 151,543.
+
+5. THE SPECIMEN'S DECODED LINE. Seven parts in a fixed order, joined with a
+   middle dot, each dropped when empty or in a dead-value list, and the part
+   dropped when it merely repeats the system.
+
+6. THE STANDING SENTENCE. With the count, the clauses, the set-aside remainder,
+   each clause droppable, and the refusal to print a figure computed for a
+   different selection.
+
+# The specifications
+
+Written by reading the original's behaviour rather than its source, so they
+record decisions and not just shapes. Where they state a number, a string or a
+formula, that is load-bearing. Where they state a reason, reach the same end your
+own way.
+
+--- WHEN ---
+# WHEN / horizon rail — build specification
+
+RAILS[0]: rail id "when", gutter WHEN, subhead "month by month", hero key "horizon".
+Hand line: `Drag across the months to take a period.`
+
+## The data, and the one thing that surprises everybody
+GET api/hero -> d.months = [{m:"YYYY-MM", n, all}] ASCENDING.
+Server builds it as:
+  allm = every month in the WHOLE FILE (cached)
+  selm = the same grouping under the current WHERE
+  months = [{m, n:selm.get(m,0), all:allm[m]} for m in sorted(allm)]
+CONSEQUENCE THE FRONT END DEPENDS ON:
+  the month list is ALWAYS the full corpus span, whatever the filter.
+  Filtering NEVER shortens the strip. It only zeroes n for months outside the selection.
+  So the reporter always sees what was excluded, standing in ash beside what was kept.
+A month with zero reports in the whole file simply has no entry. No gap-filling.
+Reports with a null difficulty date are in d.total but in NO month bucket.
+total===0 returns ghost months (n:0, real all): same strip, no rust.
+
+d.lag.settled_before = max(difficulty_dt) - p95_days
+d.lag.p95_days = 95th percentile of datediff(day, difficulty_dt, SubmissionDate)
+A month counts as settled once 95% of what it will hold has had time to arrive.
+
+## Two month predicates
+partialMonth(m): true when m is the first or last bucket of the CORPUS and that edge
+  does not land on a whole month, OR the first/last bucket of the user's own from/to
+  window and that edge is mid-month.
+  Reason: drawn plain they read as a crash or a boom that is only the download date.
+  They are kept, counted and MARKED, never dropped.
+settled(m): last day of that month <= settled_before. Defaults TRUE when no cutoff.
+
+## Scales
+cmax = max(m.all), floored at 1.
+BOTH the corpus bar AND the selection bar are scaled against cmax. NEVER against smax.
+The selection is always drawn as a fraction of the corpus, so a small selection looks small.
+H = 84px open, 14px closed.
+
+## One month = one span
+  ch = (m.all/cmax)*H          sh = NARROWED ? (m.n/cmax)*H : 0
+  part = partialMonth(m.m) || !settled(m.m)
+  <span class="mo[ part]" data-aim="month|YYYY-MM" tabindex="0|-1" role="button|presentation"
+        aria-label="August 2025, 1,234 reports[, a part month|, still filling up]">
+    <i class="ghostb" style="height:62.3px"></i>
+    <i class="selb"   style="height:11.4px"></i>   <!-- only when sh truthy -->
+  </span>
+Heights .toFixed(1) px. selb follows ghostb in DOM order, both absolutely positioned at
+bottom:0, so rust paints OVER ash from the baseline up.
+The aria suffix distinguishes the two causes even though the class does not.
+
+NARROWED = [...params().keys()].some(k=>k!=="hero")
+With no filters set there is NO rust anywhere. At rest the corpus stands in ash, so the
+reporter can see there is nothing selected without reading a word.
+
+## Colours
+--ink #1d1d1f  --paper #f7f5f0  --ash #756f69  --rust #c44b28  --line #e2ded5
+--rust-text #b8431f   (rust on paper is only 4.40:1, so rust TEXT is a darker variant)
+.mo .ghostb{background:#d8d2c6}
+.mo .selb{background:var(--rust)}
+.mo:hover .ghostb,.mo.lit .ghostb{background:#c3bbac}
+.mo.part .ghostb{background:repeating-linear-gradient(45deg,#d8d2c6 0 3px,var(--paper) 3px 6px)}
+.mo.lit{outline:1.5px solid var(--ink);outline-offset:1px}
+.mo.inband .ghostb{background:#b9ae99}
+.mo.inband::after{content:"";position:absolute;left:0;right:0;top:-3px;height:2px;background:var(--rust)}
+.months{display:flex;gap:2px;align-items:flex-end}
+.mo{position:relative;flex:1;min-width:0;cursor:pointer}
+.mo i{position:absolute;bottom:0;left:0;right:0;display:block;border-radius:1px}
+
+## The magnifier
+Drawn only when open && smax && smax < cmax*0.25 — the busiest selected month is under a
+quarter of the busiest corpus month, so the rust bars would be unreadable.
+  f = (cmax*0.62)/smax
+  polyline over a 1000-unit viewBox, preserveAspectRatio="none", stroke #c44b28,
+  stroke-width 1.5, vector-effect non-scaling-stroke, aria-hidden, pointer-events none
+  <span class="magnote">selection &times;3.7 to be visible</span>
+NEVER silently rescale. Add a LABELLED magnified line with the factor printed.
+.mag{position:absolute;left:0;right:0;bottom:16px;height:84px;pointer-events:none}
+.magnote{position:absolute;right:0;top:-2px;font-family:'IBM Plex Mono';font-size:10.5px;
+  color:var(--rust-text);background:var(--paper);padding:0 4px}
+
+## The year axis (open only)
+One <span> per month, same flex geometry as the bars, holding the four-digit year ONLY in
+January and an empty string in every other month.
+.axis{display:flex;gap:2px;margin-top:3px;font-family:'IBM Plex Mono';font-size:9.5px;
+  color:var(--ash)} .axis span{flex:1;min-width:0;text-align:left}
+
+## Scrolling over long runs
+wide = open && ms.length>72   (more than six years)
+--mw: ms.length*9 px, set inline on .track
+.rail.open[data-rail=when] .track{overflow-x:auto;overscroll-behavior-x:contain}
+.rail.open[data-rail=when] .months,.axis{min-width:var(--mw,100%)}
+.rail.open[data-rail=when] .mo{min-width:5px}
+Source comment: "Twenty-six years is 320 months. Fitted to the width each bar was 1px:
+a hairline nobody can read or hit. They keep a usable width and the rail scrolls instead."
+Hint when wide: `380 months, so the strip scrolls sideways. It opens at the most recent.`
+Opening at the most recent, at the END of every drawHero and drawPhone:
+  wtr.scrollLeft = wtr.scrollWidth    // over-set, browser clamps hard right
+
+## The gutter — and a quirk to preserve
+val = periodClause() || `${months.length} months`
+railWhen never passes `open` to gutter() (it goes to the ignored 2nd arg of esc), so WHEN
+ALWAYS renders the compact .gut.rest form and "month by month" never appears in the gutter.
+Every other rail passes it. Keep this.
+
+periodClause() reads #from/#to, NOT the API:
+  neither set            -> ""
+  same month, day 01, to = last day of month -> "August 2025"
+  same month, day 01, to earlier             -> "1 to 14 August 2025"
+  both set otherwise     -> "3 Aug 2024 to 14 May 2025"
+  only from              -> "from 3 Aug 2024"      only to -> "up to 14 May 2025"
+Only call it a month when the WHOLE month is in the selection.
+
+## The sentence underneath
+all  = months.filter(m=>!partialMonth(m.m))
+full = all.filter(m=>settled(m.m))
+young= all.length - full.length
+if(full.length<2) return ""      // no paragraph at all
+hi/lo are reduced over m.n (the SELECTION count), ties resolve to the earliest month.
+
+1, always:
+  `Between ${num(lo.n)} and ${num(hi.n)} reports in a settled month, busiest in
+   ${monthName(hi.m)}, quietest in ${monthName(lo.m)}.`
+2, only when full.length>=24:
+  last=full.slice(-12), prev=full.slice(-24,-12), av = rounded mean of n
+  ` The last twelve settled months average ${num(a)} a month against ${num(bb)} for the
+    twelve before, a difference of ${diff}%.`
+  The difference is ABSOLUTE. Direction is NEVER stated.
+3, only when young>0, singular/plural switched throughout:
+  ` The ${spell(young)} most recent months are left out of those figures: reports still
+    arrive up to ${num(lag)} days after the event, so they hold only part of what they
+    will hold. The dip at the right of the chart is the post arriving late, not fewer faults.`
+  spell(n) = WORDS[n] up to ten, num(n) above.
+Rationale in the source: "Reading their dip as a fall is the most available wrong story
+in this data."
+
+## Margin note for part months
+If ANY month is partial, one rust margin entry:
+  `${MONTHS[mm]} ${yy} covers 1 to ${dd} ${MONTHS[mm]}, so its bar counts ${dd} days
+   against ${inMonth} in a whole one`
+Always also pushed, ash: `counts are of reports filed, not of flights`.
+
+## Interactions
+Months carry data-aim ONLY, never data-take. Everything goes through pointer events.
+monthAt(ev,track) maps x by UNIFORM DIVISION of the whole .months box, not by hit-testing
+a bar — which stays correct under horizontal scroll because .months is the scrolled content.
+Out-of-box positions clamp to the first/last month.
+
+pointerdown -> dragFrom = monthAt, paintBracket(from,from), setPointerCapture
+pointermove -> paintBracket(dragFrom, monthAt)
+pointerup   -> takePeriod(dragFrom, monthAt||dragFrom)
+
+paintBracket(a,b): lo/hi by STRING compare on "YYYY-MM"; toggle .inband; then
+  aim(`${monthName(lo)} to ${monthName(hi)} &middot; ${num(n)} reports &middot; release to take it`)
+  n is the running SELECTION total inside the band.
+
+takePeriod(a,b):
+  from = `${lo}-01`
+  to   = `${hi}-${last calendar day of hi, padded}`
+  show p-search, search(0), showChange()
+  aimHold(`narrowed to ${monthName(lo)}${lo===hi?"":" to "+monthName(hi)}. [undo]`)
+A plain click is a zero-length drag, so it takes one month.
+
+.rail.open[data-rail=when] .months{touch-action:none;user-select:none} + preventDefault on
+pointerdown: text selection and browser panning over the strip are suppressed so the drag
+is unambiguous. This is why the phone gets a separate renderer.
+
+Hover aim: `${monthName(key)} &middot; ${num(m.n)} reports &middot; click to narrow to this month`
+aim() REFUSES to write while a hold is live: an undo outranks a hover.
+.aim{min-height:20px} — reserved height so the layout does not jump.
+
+## Keyboard
+Active when document.activeElement has class "mo".
+Arrow/Home/End: FOCUS FIRST, then repaint — or focusin overwrites the bracket.
+Shift+arrow: kbAnchor is set to the index BEFORE moving, then paintBracket(anchor,target).
+  Any arrow WITHOUT shift resets kbAnchor=null.
+Enter/Space: kbAnchor set -> takePeriod(anchor,this); else heroMonth(this).
+Every .mo is tabindex 0 when open. With 380 months that is 380 tab stops, accepted.
+
+## Cross-highlight from the results table
+Hovering any tr[data-month] outlines its month bar (.mo.lit) and tints that month's spine
+row (tr.spine.lit td{background:#fbe6dc}). Row data-month is derived client-side from the
+US-format DifficultyDate.
+paintSpines() fills each .spinen from heroData.months: `${num(m.n)} in this selection`.
+
+## Typed route: Aim at -> a month or a year
+takeReading for kind "period":
+  4 chars  -> lo = v+"-01-01", hi = v+"-12-31"
+  YYYY-MM  -> lo = v+"-01",    hi = v+"-"+last day
+  CLAMP ONLY WHERE THE PERIOD AND THE FILE OVERLAP:
+     clo = lo<RANGE.from?RANGE.from:lo ; chi = hi>RANGE.to?RANGE.to:hi
+     if(clo<=chi){lo=clo;hi=chi}
+Two documented refusals:
+1. A year in progress IS clamped to the file's real end. Taking 2026 used to caption the
+   selection "1 Jan 2026 to 31 Dec 2026" over a count that stopped at the newest report,
+   promising four months of data that do not exist yet.
+2. A period wholly OUTSIDE the file is left as asked, NOT clamped, because clamping would
+   produce a backwards range: "1 Dec 2026 to 20 Aug 2026". Left as asked, it returns
+   nothing and says so.
+Valid but empty: `${label} is a valid month or year, but this file holds no report for it.
+  It runs from ${prettyDate(RANGE.from)} to ${prettyDate(RANGE.to)}.`
+
+## Degraded states
+heroData null: drawHero early-returns a SKELETON — stamp, a sentence slot, an empty .aim,
+  and four inert rails. No months at all. "A dark instrument tells the reporter nothing
+  about why. The frame stands."
+d.months empty: railWhen returns "" and the row is absent from the DOM entirely.
+Rail closed: H=14, no axis, no magnifier, no hint, no reading; tabindex -1, role
+  presentation; the whole .rail gets onclick="setHero('horizon')". The drag handlers
+  require .rail.open, so a closed strip cannot be dragged: clicking opens it.
+resize: debounced 180ms -> full drawHero.
+
+## What the rail deliberately does NOT do
+- No standalone number. There is no headline count of its own anywhere.
+- Never scales the selection to its own maximum in the bars.
+- Never drops partial or unsettled months.
+- Never states a direction for the twelve-vs-twelve change.
+- Never claims a whole month unless the whole month is selected.
+- Never pairs a figure with a mismatched selection: if HERO_FOR !== params().toString()
+  the sentence prints an ellipsis instead of a number, and a stale hero reply that arrives
+  late is DISCARDED by heroSeq.
+- Never lets a hover overwrite an undo message.
+
+--- WHO ---
+# WHO / swarm rail — build specification
+
+RAILS[2]: rail id "whose", heading WHO, subhead "airline and tail", hero key "swarm".
+`?hero=swarm` opens it. Default hero is anatomy, not swarm.
+
+## API fields, from GET api/hero
+| field | shape | notes |
+|---|---|---|
+| operator_rows | [{o:"DESIGNATOR", n:int}] max 8, ordered n DESC then o ASC | counted over EVERY report, never from the capped airframe list. Blank designators excluded, so "no operator named" never appears as a row. |
+| operators | int | COUNT(DISTINCT NULLIF(OperatorDesignator,'')) |
+| swarm | [{t:"REG without leading N", o, op, n}] max 900 (SWARM_CAP), n DESC then t ASC | the rail uses only .t and .n |
+| swarm_total | int | true uncapped airframe count |
+| aircraft | int | same value as swarm_total |
+| total | int | COUNT(*) of the selection |
+
+Empty selection: swarm [], swarm_total 0, operator_rows ABSENT. Guard with (d.operator_rows||[]).
+
+## Closed state
+Gutter value: `${num(d.swarm_total||0)} aircraft` — airframes, not operators.
+Strip: one span per operator row (<=8), `style="flex:${Math.max(1,n)}"`,
+title `${opName(o)}: ${num(n)}`, class "sel" when it matches the operator URL param.
+Airframes are NOT represented when closed.
+CSS: .strip{display:flex;gap:1px;height:12px} span background #d8d2c6, .sel background rust,
+hover #c3bbac.
+
+## Open state
+`.rail .track.two{display:grid;grid-template-columns:1fr 330px;gap:18px}`
+Collapses to 1fr under 760px.
+
+### Operators column, left
+Header literal: `Operators`
+Rows: all of operator_rows (max 8), server-sorted, no client re-sort or slice.
+Bar scale mxO = max count among shown rows. Width `${(n/mxO*100).toFixed(1)}%` — one decimal,
+linear, top bar always 100.0%.
+Count cell `<b>${num(n)}</b>`, right aligned, mono.
+Overflow row when (d.operators - top.length) > 0:
+  `<div class="orow more" data-aim="more-ops"><span class="on ash">${num(rest)} more operators</span></div>`
+  no bar, no count, no data-take, cursor default, not focusable.
+
+### Airframes column, right, fixed 330px
+Header literal: `Airframes`
+Rows: d.swarm.slice(0,8) — top 8 only.
+Label `"N"+t`; the registration is stored WITHOUT the leading N, the page prepends it.
+Bar scale mxA computed over the 8 shown rows, INDEPENDENT of the operator scale.
+Overflow row when swarm_total > swarm.length (the 900 cap, not the 8 shown):
+  `${num(swarm_total - swarm.length)} more airframes, not ranked here`  VERBATIM
+
+### Row geometry
+.orow{display:grid;grid-template-columns:120px 1fr 52px;gap:8px;align-items:center;
+  font-size:11.5px;cursor:pointer;padding:0 3px;border-radius:3px;height:14px}
+.orow:hover,.orow:focus-visible{background:rgba(196,75,40,.08)}
+.orow .on{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.orow .on.mono{font-family:'IBM Plex Mono',monospace}
+.orow .ob{height:6px;background:#e8e3d8;border-radius:3px;overflow:hidden}
+.orow .ob i{display:block;height:100%;background:var(--rust)}
+.orow b{font-family:'IBM Plex Mono',monospace;font-weight:400;text-align:right;color:#5f584f}
+.orow.more{cursor:default}
+Under 760px: grid-template-columns:100px 1fr 46px
+.col .ch{font:600 10.5px/1.2 Archivo;letter-spacing:.1em;color:var(--ash);margin-bottom:3px}
+
+Palette: --ink:#1d1d1f --paper:#f7f5f0 --ash:#756f69 --smoke:#6b6560 --rust:#c44b28
+--line:#e2ded5 --card:#fff. Bar trough #e8e3d8, count text #5f584f, resting strip #d8d2c6,
+strip hover #c3bbac, hover wash rgba(196,75,40,.08), taken wash rgba(196,75,40,.12).
+Rust is reserved for a chosen selection; at rest the corpus stands in ash.
+
+## Operator with no resolved name
+opName(o) returns CODES.operator[o].label if present, else the RAW DESIGNATOR verbatim.
+No marker, no italics, no "unknown" wording. Blank designators never reach the rail.
+
+## The sentence underneath
+```
+const ops=(d.operator_rows||[]), nOps=d.operators||0;
+if(ops.length && nOps>ops.length){
+  const top=ops.reduce((s,r)=>s+r.n,0);
+  out=`${spell(ops.length)} operators file ${pct(top,tot)}% of what is here; `
+     +`the other ${num(nOps-ops.length)} share the rest.`;
+  out=out.charAt(0).toUpperCase()+out.slice(1);
+} else {
+  out=`${num(nOps)} ${nOps===1?"operator files":"operators file"} everything here.`;
+}
+out+=` ${num(d.aircraft||0)} aircraft appear in all.`;
+const sw=(d.swarm||[])[0];
+if(sw && sw.n>1) out+=` One of them, N${sw.t}, is written up ${num(sw.n)} times.`;
+```
+spell: ["","one",...,"ten"], falls back to num(n).
+pct(a,b) = (Math.round(a/b*1000)/10).toFixed(1) — always one decimal.
+Denominator is the WHOLE selection including blank-operator reports.
+Returns "" when d.total is 0.
+
+## Cap disclosure, two independent places
+1. inline: the "N more airframes, not ranked here" row
+2. margin note, pushed before render:
+   `the tail list shows the ${num(swarm.length)} most-reported aircraft out of ${num(swarm_total)}; the airline list counts every report`
+   always followed by `counts are of reports filed, not of flights`
+   .margin{font-family:'IBM Plex Mono';font-size:11.5px;color:var(--ash);line-height:1.5}
+
+## Interactions
+Handlers bound to document, not the rail, because drawHero replaces the DOM each time.
+Every mark carries data-aim (what to say) and, if actionable, data-take (what to do).
+
+Hover/focus writes into #iAim (mono 13px, rust, min-height 20px):
+  operator row: `${opName(key)} &middot; click to follow this operator`
+  airframe row: `N${key} &middot; click to follow this one airframe`
+  more-ops:  `not ranked here; use the operator control below to reach any of the 309`
+  more-tails:`not ranked here; type a tail number in the controls below`
+mouseout clears. A held message from aimHold (6s) outranks hover.
+
+Click, via closest("[data-take]"):
+  operator|X -> takeFilter("operator", X, opName(X))
+  tail|X     -> takeFilter("tail", X, "N"+X)
+takeFilter sets the control value, shows p-search, runs search(0), then holds
+  `narrowed to ${label}. <button class="undoit" onclick="history.back();unaim()">undo</button>`
+
+Keyboard: .orow has tabindex 0 and role button when open. Enter or Space triggers take.
+Arrow walking and shift-extend are WHEN-rail only.
+.orow:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+Hint line for this rail: `Click an airline or an airframe to follow it.`
+
+Selected state: syncControls() toggles class "taken" when the URL param matches.
+.orow.taken{background:rgba(196,75,40,.12);outline:0}
+.orow.taken{box-shadow:inset 2px 0 0 var(--rust)}
+
+Not in this rail: drag selection, cross-highlighting from table rows, tooltips on open rows.
+
+## Reachability beyond the 8 drawn
+The aim-at combobox pushes every operator_rows entry AND every one of the up-to-900
+swarm entries, so all 900 airframes are reachable by typing though 8 are drawn.
+
+--- FORCED ---
+# FORCED / ledger rail + SPECIMEN — build specification
+
+RAILS[3]: rail id "forced", gutter heading FORCED, subhead "what the crew did", hero key "ledger".
+The PICKER TAB reads "WHAT IT FORCED", the rail gutter reads "FORCED". Same substitution on phone.
+Hand line when open: `Click what the crew had to do.`
+
+## API fields, GET api/hero
+- total: int, COUNT(*) of selection. Denominator of the block bar.
+- crew: [{code,label,n}] — watch list is exactly ten codes A,B,C,E,F,G,I,J,L,R.
+  n counts REPORTS in which that code appears in ANY of the four PrecautionaryProcedure slots.
+  Codes with n===0 are DROPPED. Sorted server-side descending by n.
+- crew_reports: int — DISTINCT report count. A report with three watched codes counts ONCE.
+  THIS NUMBER MUST NEVER BE DERIVED BY SUMMING crew[].n.
+- span: {from,to,days,dated} — only span.days used, for the per-day rate.
+Empty selection: crew [], crew_reports 0, no specimen key.
+
+## Closed state
+Gutter value verbatim: `${num(cr)} of ${num(tot)}`
+Bar width: sh = tot ? cr/tot*100 : 0, printed .toFixed(2) + "%"
+.restbar{height:6px;background:#e8e3d8;border-radius:3px;overflow:hidden}
+.restbar i{display:block;height:100%;background:var(--rust)}
+.val is IBM Plex Mono 10.5px, colour var(--rust-text) #b8431f, white-space nowrap.
+
+## Open state
+### The block bar
+.fblock{position:relative;height:22px;background:#e8e3d8;border-radius:3px;overflow:hidden;
+  display:flex;align-items:center}
+.fblock i{position:absolute;left:0;top:0;bottom:0;background:var(--rust)} width .toFixed(2)%
+.fblock .flab{position:relative;padding-left:9px;font-family:'IBM Plex Mono';font-size:11px;
+  color:var(--ink)}
+Label sits INSIDE the bar at the left, so it starts on rust and runs onto grey when the share
+is small. Text verbatim: `${num(cr)} of ${num(tot)} forced a crew action`
+data-aim="crewall" but NO data-take: clicking it does nothing.
+
+### The action rows
+rows = (d.crew||[]).filter(x=>!["K","0","O"].includes(x.code)).slice(0,8)
+mx = max of the DISPLAYED eight, so the top bar is always 100%.
+CAP IS 8. Ten codes are counted, so up to two non-zero actions are silently omitted, and
+there is NO "N more actions" affordance, unlike WHO.
+.orow.wide{grid-template-columns:190px 1fr 56px;height:17px} .orow.wide .on{font-size:12px}
+taken when params().get("crew")===x.code, re-applied by syncControls().
+
+### The double-count disclosure, two places, both required
+1. `.fnote` under the last row, verbatim template:
+   `A report can carry four of these, so they add to more than ${num(cr)}.`
+   .fnote{font-size:11px;color:var(--ash);margin-top:4px}
+   Printed unconditionally whenever the rail is open and crew_reports > 0.
+2. The arithmetic: bar and gutter use crew_reports, never the sum. Live figures:
+   112,189+20,438+14,703+8,620+3,902+2,747+1,531+1,168 = 165,298 against crew_reports 151,543.
+
+### The sentence underneath
+Guards: if(!tot) return ""  |  if(!cr) return the zero text (below)
+First sentence verbatim:
+  `${num(cr)} reports, ${pct(cr,tot)}% of this selection, record something the crew had to do
+   rather than something found on the ground.`
+pct(a,b) = (Math.round(a/b*1000)/10).toFixed(1) — always one decimal.
+Then, if a top action exists (chosen from ALL returned codes, not the 8 drawn):
+  ` The commonest is ${top.label.toLowerCase()}, ${num(top.n)} times${r?", "+r+".":"."}`
+  NOTE the leading space and that the label is LOWERCASED here, unlike the row label.
+rate(n,days):
+  if(!n||!days||n<30||days<60) return ""      // too thin to quote
+  per = days/n
+  if(per>=1.5) return `about one every ${Math.round(per)} days`
+  return `about ${(n/days).toFixed(1)} a day`
+days is the span of the SELECTION's difficulty_dt, min to max inclusive. Not the corpus span,
+not the calendar filter.
+Live whole-corpus example:
+  151,543 reports, 8.6% of this selection, record something the crew had to do rather than
+  something found on the ground. The commonest is unscheduled landing, 112,189 times,
+  about 9.7 a day.
+.reading{margin:9px 0 0;padding:8px 12px 8px 13px;border-left:2px solid var(--rust);
+  background:#faf7f3;font:15px/1.5 Georgia,'Times New Roman',serif;max-width:74ch}
+.rail>.reading{grid-column:2} — aligns under the track, not the gutter.
+
+## Interactions
+Click a row -> takeFor("crew|A") -> takeFilter("crew","A",label) -> setFilter, show p-search,
+search(0), then aimHold 6s: `narrowed to X. <button class="undoit" onclick="history.back();unaim()">undo</button>`
+Server matches ANY of the four slots. Taking an action does NOT close the rail.
+Clicking is NOT additive: it replaces any existing crew value.
+Hover aim, row:   `${label} &middot; ${num(n)} reports &middot; click to narrow`
+Hover aim, block: `${num(crew_reports)} of ${num(total)} reports forced the crew to act`  (no click clause)
+Keyboard: rows tabindex 0 role button; Enter AND Space both take. The block bar is not focusable.
+
+## Nothing has a crew action
+A. total>0, crew_reports===0: rail still draws in full, bar at 0.00%, label `0 of N forced a
+   crew action`, rows empty, and the reading is verbatim:
+   `No report in this selection records an action the crew had to take. Everything here was
+    found on the ground.`
+   KNOWN EDGE: the .fnote still prints "...add to more than 0." unguarded.
+B. total===0: reading returns "" before inspecting crew. A .zero block appears above the rails:
+   `Nothing matches all of these at once.` plus up to three `Drop <Label> -> N reports` ghosts
+   from leave_one_out. Seam button reads `Nothing to read yet`.
+
+## THE SPECIMEN BLOCK
+Fed by d.lines (up to 24 discrepancy strings) and d.specimen. Server picks: the NEWEST report
+in the selection whose Discrepancy length is BETWEEN 60 AND 150 characters, ties broken by
+descending control number. Only lines[0] is used, so the specimen is stable for a selection.
+
+d.specimen = {text, control, aircraft, system, part, condition, stage, found, date}
+Every field is a lookup, never inferred.
+
+Markup:
+  .specimen.opens role=button tabindex=0 data-case=CONTROL aria-label="Open the full report X"
+  .sh header verbatim (typographic apostrophes):
+     `One report from this selection. First the FAA's own filing of it, then the mechanic's
+      words as written.` + <span class="opencue">`Click to open the full report →`</span>
+     phone cue: `Tap to open it →`
+  .spec-decoded  — the decoded line
+  .sl            — jargon(lines[0]), CLAMPED TO TWO LINES
+
+When control is empty, the opens class, role, tabindex, data-case, aria-label and the whole
+opencue span are ALL omitted and the block is inert text.
+
+### specLine order, fixed
+1 aircraft  2 system  3 part  4 condition  5 found  6 stage  7 prettyDate(date)
+part is DROPPED when it duplicates the system:
+  norm(x)=lowercase, letters only; drop if norm(sys).includes(norm(part)) || the reverse
+  (this kills "Tire · Tire")
+Every element except the date is dropped when falsy or in
+  dead = ["","Other","Not reported","Unknown","None"]   (exact, case-sensitive)
+If nothing survives, specLine returns "" and only the header and raw line render.
+Joined with " &middot; ".
+.spec-decoded{font:600 12.5px/1.5 Archivo;color:var(--rust-text,#a3421f);margin:2px 0 3px;
+  letter-spacing:.01em}
+.specimen .sl{font-family:'IBM Plex Mono';font-size:12px;line-height:1.5;color:#403b35;
+  margin-top:3px;-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;
+  overflow:hidden}
+.specimen.opens{cursor:pointer;border-radius:5px;margin:0 -8px;padding:4px 8px 5px}
+hover/focus background #f3efe8, focus-visible outline 2px solid var(--rust)
+Hidden under 479px.
+
+### Clicking it
+Two DOCUMENT-level listeners so they survive every redraw: click and keydown(Enter/Space) on
+closest("[data-case]") -> openCase(id).
+
+
+# What to return
+
+One self-contained block of JavaScript and CSS that drops into your existing file
+inside its IIFE, using your existing helpers. Keep your function names so the
+block overrides by redeclaration.
+
+What I will check in a browser before it ships:
+
+- 380 month bars present with the WHERE rail open, the busiest month darkest, the
+  part months hatched.
+- Four gutter value lines, reading counts and not sub-labels.
+- Four reading paragraphs, one per rail.
+- Exactly 8 crew rows, and the block bar at 151,543 not 165,298.
+- The specimen's decoded line for the newest report.
+- ?hero=anatomy and ?hero=where both open the aircraft.
+
+Write the code. Explain only where you departed from the specification and why.
+No preamble.

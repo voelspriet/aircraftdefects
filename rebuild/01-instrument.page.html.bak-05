@@ -2713,6 +2713,26 @@ function loadFound(){
     html+='<p class="pnote">Coded B, D, E, M, T, U or X means an instrument found it: a warning went off or a test failed.</p>';
     var st=firstArr((d&&typeof d==='object'&&(d.stages||d.by_stage))||[]);
     if(st.length) html+=barList(st,MAPS.stage,{head:'By stage of flight',limit:10});
+    /* systems_most_instrumented is the finding: where damage is most often
+       hidden from the eye and has to be found by machine. The panel had it in
+       the response and drew none of it. */
+    var smi=firstArr(d.systems_most_instrumented);
+    if(smi.length){
+      html+='<div class="ggrp">Where damage is most often hidden</div>'+
+        '<p class="pnote">Systems in which the largest share of finds needed an instrument, so the '+
+        'defect was not visible from outside the aircraft.</p>'+
+        '<div class="l3wrap"><table class="l3"><tbody>'+
+        '<tr><td><b>System</b></td><td><b>Found by instrument</b></td><td><b>Of all reports</b></td>'+
+        '<td><b>Share</b></td></tr>'+
+        smi.slice(0,12).map(function(r){
+          var j=r.jasc||{}, lab=j.label||j.chapter_label||j.code||'';
+          var tot2=(r.reports!=null?r.reports:r.total), ins=(r.instrumented!=null?r.instrumented:rN(r));
+          var sh=(r.share!=null)?r.share:(tot2?Math.round(1000*ins/tot2)/10:null);
+          return '<tr><td>'+VH(lab)+'</td><td>'+VN(ins)+'</td><td>'+(tot2!=null?VN(tot2):'')+
+            '</td><td>'+(sh!=null?sh+'%':'')+'</td></tr>';
+        }).join('')+'</tbody></table></div>';
+    }
+    if(d.explainer) html+='<p class="pnote">'+VH(d.explainer)+'</p>';
     b.innerHTML=html;
   }).catch(function(e){ pfail('p-found',(e&&e.message)||e); });
 }
@@ -3073,9 +3093,25 @@ function loadEngines(){
     var md=raw.slice().sort(function(a,b){return (+b.reports||0)-(+a.reports||0);})
       .map(function(r){return {label:[r.make_name||r.make,r.model].filter(Boolean).join(' '),n:+r.reports||0};});
     var sys=[];
+    /* the reference's point is not how many reports name an engine but how
+       often one stopped: inflight_shutdowns and flameout_or_stoppage. Ranked by
+       report count alone the panel says which engine is common. */
+    var stops=raw.filter(function(r){return (+r.inflight_shutdowns||0)+(+r.flameout_or_stoppage||0)>0;})
+      .sort(function(a,b){return ((+b.inflight_shutdowns||0)+(+b.flameout_or_stoppage||0))
+                               -((+a.inflight_shutdowns||0)+(+a.flameout_or_stoppage||0));});
+    var stopHTML=stops.length?('<div class="ggrp">Shut down or flamed out in flight</div>'+
+      '<div class="l3wrap"><table class="l3"><tbody>'+
+      '<tr><td><b>Engine</b></td><td><b>Shut down in flight</b></td><td><b>Flameout or stoppage</b></td>'+
+      '<td><b>Reports naming it</b></td><td><b>Aircraft</b></td></tr>'+
+      stops.slice(0,15).map(function(r){
+        return '<tr><td>'+VH([r.make_name||r.make,r.model].filter(Boolean).join(' '))+'</td>'+
+          '<td>'+VN(r.inflight_shutdowns)+'</td><td>'+VN(r.flameout_or_stoppage)+'</td>'+
+          '<td>'+VN(r.reports)+'</td><td>'+VN(r.aircraft)+'</td></tr>';
+      }).join('')+'</tbody></table></div>'):'';
     if(mk.length) html+=barList(mk,null,{head:'By engine maker',limit:10});
     if(md.length) html+=barList(md,null,{head:'By engine model',limit:10});
     if(sys.length) html+=barList(sys,MAPS.ata,{head:'By system chapter',limit:10});
+    html+=stopHTML;
     b.innerHTML='<div class="ggrp">Engines — whole file</div>'+(html||'<p class="pnote">No engine figures came back.</p>')+
       '<p class="pnote">There is no engine-make filter on the instrument, so the maker and model bands are read-only. For flameouts and uncontained failures, use the starter questions on the instrument.</p>';
   }).catch(function(e){ pfail('p-engines',(e&&e.message)||e); });
@@ -3105,7 +3141,24 @@ function loadCq(){
         return {code:k, label:lab, n:(r.with_crew_action!=null?r.with_crew_action:rN(r)),
                 share:r.share, reports:r.reports};
       }),MAPS[by],{limit:14})+
-      '<p class="pnote">A crew action is what the FAA form says the crew did, not a description of severity.</p>';
+      /* every row carries actions[]: which of the ten the crew actually took,
+         and how often. Without them the panel ranks airlines and says nothing
+         about what happened, which is the question it is named after. */
+      (function(){
+        var rows=objRows(firstArr(d)).slice(0,10);
+        if(!rows.length||!rows[0].actions) return '';
+        return '<div class="ggrp">What those actions were</div><div class="l3wrap"><table class="l3"><tbody>'+
+          rows.map(function(r){
+            var k=r.key!=null?r.key:rC(r);
+            var who=(by==='operator')?(opLabel(k)||k):k;
+            var acts=(r.actions||[]).slice().sort(function(a,b){return (b.n||0)-(a.n||0);})
+              .slice(0,4).map(function(a){ return VH(a.label||a.code)+' '+VN(a.n); }).join(' \u00b7 ');
+            return '<tr><td>'+VH(who)+'</td><td>'+VN(r.with_crew_action)+' of '+VN(r.reports)+
+              '</td><td>'+(r.share!=null?r.share+'%':'')+'</td><td>'+acts+'</td></tr>';
+          }).join('')+'</tbody></table></div>';
+      })()+
+      '<p class="pnote">A crew action is what the FAA form says the crew did, not a description of severity. '+
+      'A share is per report filed, not per flight: an airline that files more reports is not necessarily less safe.</p>';
   }).catch(function(e){ out.innerHTML='<p class="pfail">The crew-action figures did not load ('+VH((e&&e.message)||e)+').</p>'; });
 }
 

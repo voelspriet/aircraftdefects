@@ -589,3 +589,30 @@ A pattern worth naming after sixteen findings: **a panel that renders is not a
 panel that answers.** Every one of these returned 200, drew something, and threw
 nothing. Only reading what they said, side by side with the reference, found
 them.
+
+## F17. Three panels that ranked the wrong column (29 Aug 2026)
+
+The last three short panels were not missing data. They were showing the column
+that answers nothing.
+
+**What the crew did** listed airlines by report count. Every row already carried
+`actions[]`: which of the ten the crew actually took, and how often. Without it
+the panel ranks the airlines that file most and never says what happened, which
+is the question it is named after. It now reads:
+
+> American Airlines Inc (AALA) — 11,957 of 155,997, 7.66% — Unscheduled landing
+> 10,259 · Aborted take-off 1,015 · Engine shut down in flight 535 · Aborted
+> approach 331
+
+**Engines** ranked engines by how many reports name them, which measures how
+common the engine is. The columns that matter are `inflight_shutdowns` and
+`flameout_or_stoppage`, and they were in the response untouched.
+
+**How it was found** drew the method breakdown and dropped
+`systems_most_instrumented` entirely. That is the finding: the systems where the
+largest share of finds needed a machine, so the damage was not visible from
+outside the aircraft. Wing longerons and stringers lead at 18.8%.
+
+Same shape as F15 and F16 and worth stating once more: none of these threw, none
+returned an error, and all three drew something plausible. The data was in the
+response the whole time.

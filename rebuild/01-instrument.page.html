@@ -2103,7 +2103,7 @@ function railWhere(d,open,nar){
   var body;
   if(open){
     var mx=1; rows.forEach(function(r){ if(r.n>mx)mx=r.n; });
-    var list=rows.slice(0,12).map(function(r){
+    var list=rows.slice(0,20).map(function(r){
       return '<div class="orow" data-aim="zone|'+esc(r.id)+'" data-take="zone|'+esc(r.id)+'" tabindex="0" role="button">'
         +'<span class="on">'+esc(r.label)+'</span>'
         +'<span class="ob"><i style="width:'+(r.n/mx*100).toFixed(1)+'%"></i></span>'
@@ -3051,7 +3051,7 @@ function loadLeads(){
   vEl('spike-by').addEventListener('change',loadSpikes);
   vget('api/leads').then(function(d){
     var rows=objRows(firstArr(d));
-    var html=rows.slice(0,8).map(function(r){
+    var html=rows.slice(0,20).map(function(r){
       /* a lead is an airframe: {tail, operator, make, model, recent, earlier,
          busiest_day, busiest_day_n, days_filed_on, one_day_burst}. There is no
          title field, so eight cards all read "Lead". The sentence is built from
@@ -3198,7 +3198,7 @@ function loadDefect(){
   vget('api/same-defect').then(function(d){
     var rows=objRows(firstArr(d));
     if(!rows.length){ b.innerHTML='<p class="pnote">No repeated defect stood out.</p>'; return; }
-    b.innerHTML='<div class="ggrp">The same defect, many aircraft — whole file</div>'+rows.slice(0,10).map(function(r){
+    b.innerHTML='<div class="ggrp">The same defect, many aircraft — whole file</div>'+rows.slice(0,20).map(function(r){
       /* the row is {part_name, part_number, condition, reports, aircraft,
          operators}. With no name field the label fell through to the panel's
          own title, so ten rows all read "Same defect". */
@@ -3265,7 +3265,7 @@ function loadStructure(){
         '<p class="pnote">Level 3 is an urgent airworthiness concern. The operator had to notify '+
         'the regulator within three days and act across the fleet, which is a checkable fact you '+
         'can put to them.</p><div class="l3wrap"><table class="l3"><tbody>'+
-        l3.slice(0,60).map(function(r){
+        l3.slice(0,200).map(function(r){
           var dt=String(r.DifficultyDate||'').split('/');
           var when=dt.length===3?(dt[1]+' '+['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+dt[0]]+' '+dt[2]):(r.DifficultyDate||'');
           var op=opLabel(r.OperatorDesignator)||r.OperatorDesignator||'';
@@ -3274,7 +3274,7 @@ function loadStructure(){
             '<td>'+VH(r.PartName||'')+'</td><td>'+VH(r.PartLocation||'')+'</td>'+
             '<td><button type="button" class="ghostbtn" data-case="'+VH(r.OperatorControlNumber||'')+'">Case sheet</button></td></tr>';
         }).join('')+'</tbody></table></div>'+
-        (l3.length>60?'<p class="pnote">'+VN(l3.length-60)+' more are not listed here.</p>':'');
+        (l3.length>200?'<p class="pnote">'+VN(l3.length-200)+' more are not listed here.</p>':'');
     }
     b.innerHTML='<div class="ggrp">Corrosion and cracking, whole file — click a figure to narrow the search</div>'+html;
   }).catch(function(e){ pfail('p-structure',(e&&e.message)||e); });

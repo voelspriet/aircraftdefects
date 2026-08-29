@@ -847,3 +847,38 @@ reads "Continental Airlines Inc (CALA...".
 Five harnesses of mine were green through all of this. Counting, reading,
 enumerating, measuring geometry and checking claims: none of them asks whether a
 thing can be reached, seen or operated at the width a reader actually has.
+
+## F26. The phone had no layout at all (29 Aug 2026)
+
+Measured at 390px: the reference renders `.instrument.phone` with 462 phone
+elements and no desktop rails. The rebuild rendered four desktop rails at 350px
+wide and nothing else. Its own code read
+`function drawPhone(d){ drawHero(d,true); }`, so a phone got the desktop
+instrument at a third of the width.
+
+The reference has a separate renderer below 760px: the rails become collapsible
+sections, the month strip a pannable row of 44px chips, the aircraft a spatial
+3x3 grid of zone cells shaded by the same alpha the drawing uses, the ladders
+tappable rows of at least 52px. And a first tap raises a pill reading what you
+are pointing at, which a second tap confirms, so nothing is filtered by accident
+on a touch screen.
+
+That last one is the part a desktop build cannot infer. On a mouse a hover shows
+you what a click will do; on a phone there is no hover, so the confirmation has
+to be a second tap.
+
+Also fixed this round, all measured against the reference:
+
+**The case sheet's stepper counted wrong.** It read "1 of 100", "1 of 99",
+"1 of 99", "1 of 99" while the report behind it changed each time: a label that
+lies about where you are in a list. It now reads 1, 2, 3 of 100, computing the
+index fresh on every render rather than mutating a stored one.
+
+**The tab ids were `vtab-p-search` where the reference has `tab-p-search`,** so a
+link written for the reference did not find the tab.
+
+**There was no h1 anywhere.** The reference has eight, one per panel. Eight now.
+
+Still open from this round: the case sheet is a card in the flow rather than an
+overlay, four desktop rails still render behind the phone layout at 390px, and
+nine selects are missing their aria-label.

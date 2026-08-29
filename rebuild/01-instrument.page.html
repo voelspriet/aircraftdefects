@@ -266,6 +266,11 @@ from aircraftdefects.com, rebuilt line by line by GLM-5.3-Flash.">
 .picker button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 @media(max-width:760px){.picker{width:100%}.picker button{flex:1;padding:3px 4px 5px}}
 
+.l3wrap{overflow-x:auto;max-width:100%;margin-top:6px;border:1px solid #d8d2c6;border-radius:6px}
+table.l3{border-collapse:collapse;width:100%;font-size:12.5px}
+table.l3 td{padding:4px 8px;border-top:1px solid #ece6da;white-space:nowrap}
+table.l3 tr:first-child td{border-top:0}
+
 
 #sdControls{margin:16px 0 0;font:15px/1.45 Georgia,serif;color:#2b2622}
 #sdControls label{display:block;font:600 11px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#6f6a63;margin-bottom:3px}
@@ -3150,9 +3155,43 @@ function loadStructure(){
     if(cr!=null) html+=statCard(cr,'Cracking recorded','cracked','1');
     if(!html){ var alt=objRows(firstArr(d)); if(alt.length) html=barList(alt,null,{}); }
     if(!html){ b.innerHTML='<p class="pnote">No corrosion or cracking figures came back.</p>'; return; }
-    var zones=firstArr(d.by_zone||d.zones), parts=firstArr(d.by_part||d.parts||d.top_parts);
-    if(zones.length) html+=barList(zones,MAPS.zone,{head:'Where on the aircraft',limit:10});
-    if(parts.length) html+=barList(parts,MAPS.part,{head:'What was corroded or cracked',limit:10});
+    /* The endpoint answers with five sections and the panel used one. It looked
+       for by_zone and by_part, which do not exist, and ignored by_operator,
+       by_model, cracks_by_model and level3: 194 rows of the reference's panel
+       against 12 here. */
+    var byOp=firstArr(d.by_operator), byMod=firstArr(d.by_model), cbm=firstArr(d.cracks_by_model);
+    if(byOp.length) html+=barList(byOp.map(function(r){
+        return {code:r.operator, label:(opLabel(r.operator)||r.operator), n:+r.reports||0,
+                sub:VN(r.aircraft)+' aircraft'};
+      }),MAPS.operator,{head:'Corrosion by airline',limit:10});
+    if(byMod.length) html+=barList(byMod.map(function(r){
+        return {code:r.model, label:r.model, n:+r.reports||0, sub:VN(r.aircraft)+' aircraft'};
+      }),MAPS.model,{head:'Corrosion by aircraft model',limit:10});
+    if(cbm.length) html+=barList(cbm.map(function(r){
+        return {code:r.model, label:r.model+(r.longest_inches?'  \u00b7  longest '+r.longest_inches+' in':''),
+                n:+r.cracks||0};
+      }),MAPS.model,{head:'Measured cracking, by model',limit:10});
+
+    /* Level 3 obliged the operator to tell the regulator within three days and
+       to act across the fleet. Each one is a checkable fact, so the reference
+       lists them as records rather than as a number. */
+    var l3=firstArr(d.level3);
+    if(l3.length){
+      html+='<div class="ggrp">Every level 3 finding, '+VN(l3.length)+' of them</div>'+
+        '<p class="pnote">Level 3 is an urgent airworthiness concern. The operator had to notify '+
+        'the regulator within three days and act across the fleet, which is a checkable fact you '+
+        'can put to them.</p><div class="l3wrap"><table class="l3"><tbody>'+
+        l3.slice(0,60).map(function(r){
+          var dt=String(r.DifficultyDate||'').split('/');
+          var when=dt.length===3?(dt[1]+' '+['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+dt[0]]+' '+dt[2]):(r.DifficultyDate||'');
+          var op=opLabel(r.OperatorDesignator)||r.OperatorDesignator||'';
+          return '<tr><td>'+VH(when)+'</td><td>'+VH(op)+'</td>'+
+            '<td>'+VH([r.AircraftMake,r.AircraftModel].filter(Boolean).join(' '))+'</td>'+
+            '<td>'+VH(r.PartName||'')+'</td><td>'+VH(r.PartLocation||'')+'</td>'+
+            '<td><button type="button" class="ghostbtn" data-case="'+VH(r.OperatorControlNumber||'')+'">Case sheet</button></td></tr>';
+        }).join('')+'</tbody></table></div>'+
+        (l3.length>60?'<p class="pnote">'+VN(l3.length-60)+' more are not listed here.</p>':'');
+    }
     b.innerHTML='<div class="ggrp">Corrosion and cracking, whole file — click a figure to narrow the search</div>'+html;
   }).catch(function(e){ pfail('p-structure',(e&&e.message)||e); });
 }

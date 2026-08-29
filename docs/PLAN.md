@@ -35,7 +35,7 @@ Verified: gloss returns in 6.2s at `low`, five jargon terms, no gateway errors.
 
 ---
 
-## B. Parity with the parent tool — **in progress**
+## B. Parity with the parent tool — **re-opened**, 29 August
 
 The inventory was not made by me reading two pages. Three screenshots of the
 parent and one of /z went to GLM-5.3-Flash with one question: what does the first
@@ -91,7 +91,40 @@ hardest:
 - [ ] dragging across the month strip — the date inputs cover the need, so this
       is the one item deliberately left. Noted rather than quietly dropped.
 
-**B is done bar the month drag**, which the from/up-to fields already answer.
+### Re-opened, 29 August
+
+Everything ticked above was true of the earlier /z: a page you read, with
+click-to-narrow bolted onto it. It was not true of the rebuilt clone, and this
+section said otherwise for a day. Marking it done was possible because "done" had
+been established by looking and describing rather than by counting.
+
+Two harnesses now count, in about ninety seconds, and they disagree with the
+ticks. `build/parity_diff.py` drives both pages through five states and counts
+elements; `build/parity_options.py` enumerates the lists inside them.
+
+                        parent    clone
+  select menus              22        1
+  options inside them   11,444        6
+  tabs                      20        4
+  buttons                   50       26
+  headings                  45        1
+  panels                    16        0
+  report rows              100        0
+  month bars, rail shut    380        0
+
+What is genuinely finished is the instrument: four rails, the aircraft shaded by
+where the trouble sits, clicking narrows, all driven in a browser. Call it a
+third of B.
+
+- [x] the instrument's WHERE rail, against a written specification
+- [ ] the other three rails: month strip when shut, gutter values, reading
+      paragraphs, the crew ladder's cap of eight
+- [ ] the search half: 19 controls, 18 starter questions, the count line, the
+      record table with the mechanic's words, the glossary, the case sheet
+- [ ] the fifteen analysis panels and the three-group tab strip
+- [ ] one URL dialect: ?hero=anatomy and ?hero=where must both open the aircraft
+
+A phase can no longer pass by being described. It has to survive the count.
 
 ---
 

@@ -3894,7 +3894,12 @@ function loadAircraft(){
     var rows=objRows(firstArr(d)), max=0; rows.forEach(function(r){ max=Math.max(max,rN(r)); });
     vEl('ac-rep').innerHTML='<div class="ggrp">Aircraft with the most reports, in your selection</div>'+
       (rows.length?rows.slice(0,15).map(function(r){
-        var t=String(rC(r)||rL(r)).replace(/^N/i,''), lab=rL(r), n=rN(r);
+        /* the row is {tail, make, model, operator, n, systems, first, last}.
+           Read generically the tail came back empty, so fifteen rows read "N"
+           with a number beside it and no aircraft named. */
+        var t=String(r.tail!=null?r.tail:(rC(r)||rL(r))).replace(/^N/i,'');
+        var lab=[r.make,r.model].filter(Boolean).join(' ')||rL(r);
+        var n=(r.n!=null?r.n:rN(r));
         return '<button type="button" class="brow" data-tail="'+VH(t)+'"><span class="bl">N'+VH(t)+(lab&&lab!==t&&lab!==('N'+t)?' — '+VH(lab):'')+'</span><span class="bb"><span class="bf" style="width:'+(max>0?Math.max(1,Math.round(100*n/max)):0)+'%"></span></span><b class="bn">'+VN(n)+'</b></button>'; }).join('')
       :'<p class="pnote">No aircraft repeats in this selection.</p>');
   }).catch(function(e){ vEl('ac-rep').innerHTML='<p class="pfail">The repeat-offender list did not load ('+VH((e&&e.message)||e)+').</p>'; });
@@ -4069,7 +4074,11 @@ function loadEm(){
     var map=(by==='partnumber')?null:MAPS[by];  // no P/N filter field exists, so those rows are read-only
     out.innerHTML='<div class="ggrp">New defects — whole file — '+VH(vEl('em-days').selectedOptions[0].textContent.toLowerCase())+'</div>'+
       rows.slice(0,14).map(function(r){
-        var lab=String(rL(r)||rC(r)||''), n=rN(r);
+        /* the row is {key, label, recent, earlier, aircraft, operators}: what is
+           rising is `recent`, and the whole point is the comparison with
+           `earlier`. Read generically every bar came out at 0. */
+        var lab=String(r.label||r.key||rL(r)||rC(r)||'');
+        var n=(r.recent!=null?r.recent:rN(r));
         var prev=r.previous!=null?r.previous:(r.before!=null?r.before:(r.prior!=null?r.prior:(r.base!=null?r.base:null)));
         var sub=prev!=null?(function(){ var p=Number(prev)||0;
           return 'was '+VN(p)+' in the comparable stretch before — '+(p===n?'no change':(n>p?'up '+VN(n-p):'down '+VN(p-n))); })():'';
@@ -4099,8 +4108,11 @@ function loadCl(){
   var render=function(){
     var rows=(CL_ROWS||[]).filter(function(r){
       if(kind==='all') return true;
-      var k=String(r.kind||r.type||r.label||'').toLowerCase();
-      var sched=/sched|recur|plan|check/.test(k);
+      /* the flag is looks_routine, a boolean. Reading kind/type/label found
+         nothing, so every filter matched everything. */
+      var sched=(r.looks_routine!=null)
+        ? !!r.looks_routine
+        : /sched|recur|plan|check/.test(String(r.kind||r.type||r.label||'').toLowerCase());
       return kind==='sched'?sched:!sched;
     });
     out.innerHTML='<div class="ggrp">One day, many aircraft — whole file, '+VH(vEl('cl-min').selectedOptions[0].textContent.toLowerCase())+'</div>'+
@@ -4109,14 +4121,30 @@ function loadCl(){
   if(CL_ROWS&&CL_MIN===min){ render(); return; }
   out.innerHTML='<p class="pnote">Grouping days…</p>';
   vget('api/clusters?min='+encodeURIComponent(min)).then(function(d){
-    CL_ROWS=objRows(firstArr(d)); CL_MIN=min; render();
+    /* the response is {rows, caveat}: firstArr walked the values and could
+       return the caveat string, after which .map threw and the panel reported
+       its own crash as the clusters not loading. */
+    CL_ROWS=objRows((d&&Array.isArray(d.rows))?d.rows:firstArr(d)); CL_MIN=min; render();
   }).catch(function(e){ out.innerHTML='<p class="pfail">The clusters did not load ('+VH((e&&e.message)||e)+').</p>'; });
 }
 function clusterCard(r){
   var day=r.date||r.day||r.day_key||'';
   var nAc=r.aircraft!=null?Number(r.aircraft)||0:(r.n_aircraft!=null?Number(r.n_aircraft)||0:rN(r));
-  var bits=[]; ['zone','ata','part','nature','model','operator'].forEach(function(k){ if(r[k]) bits.push(prettyKey(k)+': '+r[k]); });
-  var tails=objRows(r.tails||r.aircraft_list||r.fleet||[]);
+  /* the row is {date, operator, aircraft, reports, example_part, jasc{},
+     looks_routine, other_days_like_this, tails}. jasc is an object and tails is
+     a comma-separated string, not a list, so objRows() got a string and .map
+     threw: the panel reported its own crash as the clusters not loading. */
+  var bits=[];
+  if(r.operator) bits.push('Airline: '+(opLabel(r.operator)||r.operator));
+  if(r.jasc) bits.push('System: '+((r.jasc&&(r.jasc.label||r.jasc.chapter_label||r.jasc.code))||r.jasc));
+  if(r.example_part) bits.push('For example: '+r.example_part);
+  if(r.reports!=null) bits.push(VN(r.reports)+' reports');
+  if(r.other_days_like_this) bits.push(VN(r.other_days_like_this)+' other days like this one');
+  ['zone','ata','nature','model'].forEach(function(k){ if(r[k]) bits.push(prettyKey(k)+': '+r[k]); });
+  var tl=r.tails||r.aircraft_list||r.fleet||[];
+  var tails=(typeof tl==='string')
+    ? tl.split(/\s*,\s*/).filter(Boolean).map(function(x){return {code:x};})
+    : objRows(tl);
   var th=tails.slice(0,12).map(function(t){ var s=String(rC(t)||rL(t)).replace(/^N/i,''); return '<button type="button" class="ghost" data-tail="'+VH(s)+'">N'+VH(s)+'</button>'; }).join(' ');
   var more=tails.length>12?'<span class="pnote">and '+(tails.length-12)+' more aircraft</span>':'';
   return '<div class="lead"><h3>'+(day?VH(pdate(day))+' — ':'')+VN(nAc)+' aircraft on the same day</h3>'+
@@ -4229,7 +4257,33 @@ function loadAg(){
     if(by==='hours') map={k:'minhours',guess:true,v:function(r){
       var m=String(rL(r)).match(/^\s*([\d,]+)/); if(!m) return null;
       var v=Number(m[1].replace(/,/g,'')); return (v>=1000)?String(v):null; }};
-    out.innerHTML='<div class="ggrp">Reports by airframe age — whole file</div>'+barList(rows,map,{limit:12})+
+    /* the band is {from, to, reports, aircraft, corrosion_reports,
+       corrosion_share, top_systems[]}. Drawn as a bar list it came out as seven
+       bare numbers with nothing saying what they counted. The question the panel
+       asks is whether old airframes break differently, and that is answered by
+       the corrosion share climbing across the bands, not by the report count. */
+    var bandLab=function(r){
+      if(r.from==null) return String(rL(r));
+      return VN(r.from)+(r.to!=null?' to '+VN(r.to):' and up');
+    };
+    var head=(by==='hours')?'Reports by hours on the airframe':'Reports by takeoffs and landings';
+    out.innerHTML='<div class="ggrp">'+head+'</div>'+
+      '<div class="l3wrap"><table class="l3"><tbody>'+
+      '<tr><td><b>Band</b></td><td><b>Reports</b></td><td><b>Aircraft</b></td>'+
+      '<td><b>Corrosion reports</b></td><td><b>Share</b></td>'+
+      '<td><b>Systems that dominate this band</b></td></tr>'+
+      rows.map(function(r){
+        var sys=(r.top_systems||[]).slice(0,2).map(function(t){
+          var j=t.jasc||{}; return (j.label||j.chapter_label||j.code||'')+(t.n!=null?' '+VN(t.n):'');
+        }).filter(Boolean).join(', ');
+        var canClick=(by==='hours'&&r.from!=null&&r.from>=1000);
+        return '<tr>'+
+          '<td>'+(canClick?'<button type="button" class="ghostbtn" data-setk="minhours" data-setv="'+r.from+'">'+VH(bandLab(r))+'</button>':VH(bandLab(r)))+'</td>'+
+          '<td>'+VN(r.reports)+'</td><td>'+VN(r.aircraft)+'</td>'+
+          '<td>'+VN(r.corrosion_reports)+'</td>'+
+          '<td>'+(r.corrosion_share!=null?r.corrosion_share+'%':'')+'</td>'+
+          '<td>'+VH(sys)+'</td></tr>';
+      }).join('')+'</tbody></table></div>'+
       (by==='hours'?'<p class="pnote">Click a band to keep every airframe at or past that many hours. Bands that do not start with a number are not clickable.</p>'
                    :'<p class="pnote">Cycles are takeoffs and landings. The instrument has no cycle filter, so these bands are read-only.</p>');
   }).catch(function(e){ out.innerHTML='<p class="pfail">The ageing figures did not load ('+VH((e&&e.message)||e)+').</p>'; });

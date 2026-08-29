@@ -558,3 +558,34 @@ sentence now says so, because a lead that does not is a false lead.
 One place the airline names come from: the menu the controls half already builds
 from the FAA's cross-reference. The name map lives in another closure, so a panel
 reaching for it got nothing.
+
+## F16. Four more panels, and a crash reported as an absence (29 Aug 2026)
+
+**Same day, many aircraft** said "The clusters did not load ((rows || []).map is
+not a function)". That is the panel reporting its own crash in the words it
+reserves for a network failure. The row carries `tails` as a comma-separated
+string, not a list, and `jasc` as an object; a generic list helper got the string
+and threw. The kind filter read `kind`, `type` and `label`, none of which exist:
+the flag is `looks_routine`, a boolean, so every setting matched everything.
+
+It now reads: *11 July 1997 — 62 aircraft on the same day. Airline: Mesa Airlines
+Inc (MASA) · System: Trailing Edge Flaps.*
+
+**Aircraft** listed fifteen rows reading `N` and a number, with no aircraft
+named. The row is `{tail, make, model, operator, n, systems, first, last}`. Now:
+*N855FT — BOEING 747124, 1,068.*
+
+**New defects** drew every bar at zero. What is rising is `recent`, and the
+comparison with `earlier` is the whole point of the panel.
+
+**Old airframes** printed seven bare numbers with nothing saying what they
+counted. The band is `{from, to, reports, aircraft, corrosion_reports,
+corrosion_share, top_systems[]}` and the question the panel asks is whether old
+airframes break differently. Drawn as a table the answer is visible: the
+corrosion share climbs 0.9%, 4.7%, 8.4% across the bands. The report count, which
+was all the panel showed, does not answer it at all.
+
+A pattern worth naming after sixteen findings: **a panel that renders is not a
+panel that answers.** Every one of these returned 200, drew something, and threw
+nothing. Only reading what they said, side by side with the reference, found
+them.

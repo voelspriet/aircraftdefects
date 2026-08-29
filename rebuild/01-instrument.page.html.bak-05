@@ -2625,17 +2625,43 @@ function loadPatterns(){
       :'<p class="pnote">No repeated phrases in this selection.</p>');
   }).catch(function(e){ vEl('pt-phr').innerHTML='<p class="pfail">The phrase count did not load ('+VH((e&&e.message)||e)+').</p>'; });
 }
-function loadPtBrk(){
-  var by=vEl('pt-by')?vEl('pt-by').value:'ata', box=vEl('pt-brk');
-  box.innerHTML='<p class="pnote">Counting…</p>';
-  vget('api/breakdown?by='+encodeURIComponent(by)+'&'+pstr()).then(function(d){
-    var GRP2={ata:'ata',operator:'operator',nature:'nature',crew:'precaution',discovered:'discovered'};
+/* The reference counts the selection seven ways at once and puts them on one
+   page: system, airline, model, part, what was found, what the crew did, how it
+   was found. Behind a dropdown a reader sees one of them and has to know to look
+   for the rest, which is the difference between a page you read and a form you
+   operate. The dropdown is kept, and scrolls to the one it names. */
+var PT_ALL=[['ata','Aircraft system'],['operator','Airline'],['model','Model'],
+            ['part','Part'],['nature','What was found'],['crew','What the crew did'],
+            ['discovered','How it was found']];
+function ptOne(by,label){
+  var GRP2={ata:'ata',operator:'operator',nature:'nature',crew:'precaution',discovered:'discovered'};
+  return vget('api/breakdown?by='+encodeURIComponent(by)+'&'+pstr()).then(function(d){
     var rows=objRows(firstArr(d));
     rows.forEach(function(r){ if(r.label==null){ var c=rC(r), grp=GRP2[by];
-      var lab=grp?(by==='ata'?ataLab(c):vcode(grp,c)):null; if(lab) r.label=lab; } });
+      var lab=grp?(by==='ata'?ataLab(c):vcode(grp,c)):null;
+      if(!lab&&by==='operator') lab=opLabel(c);
+      if(lab) r.label=lab; } });
     rows.sort(function(a,b){ return rN(b)-rN(a); });
-    box.innerHTML=barList(rows,MAPS[by],{limit:14});
-  }).catch(function(e){ box.innerHTML='<p class="pfail">The breakdown did not load ('+VH((e&&e.message)||e)+').</p>'; });
+    return '<div id="ptb-'+by+'">'+barList(rows,MAPS[by],{head:label,limit:14})+'</div>';
+  }).catch(function(e){
+    return '<div id="ptb-'+by+'"><div class="ggrp">'+VH(label)+'</div>'+
+      '<p class="pfail">This breakdown did not load ('+VH((e&&e.message)||e)+').</p></div>';
+  });
+}
+function loadPtBrk(){
+  var box=vEl('pt-brk'); if(!box) return;
+  var want=vEl('pt-by')?vEl('pt-by').value:null;
+  if(box.dataset.filled==='1'){
+    if(want){ var t=document.getElementById('ptb-'+want);
+      if(t) t.scrollIntoView({block:'start',behavior:'smooth'}); }
+    return;
+  }
+  box.innerHTML='<p class="pnote">Counting the selection seven ways…</p>';
+  Promise.all(PT_ALL.map(function(pr){ return ptOne(pr[0],pr[1]); })).then(function(parts){
+    box.innerHTML=parts.join(''); box.dataset.filled='1';
+    if(want){ var t=document.getElementById('ptb-'+want);
+      if(t) t.scrollIntoView({block:'start',behavior:'smooth'}); }
+  });
 }
 function paintTrend(box,d){
   var rows=objRows(firstArr(d)).map(function(r){ return {m:String(r.month!=null?r.month:rL(r)),n:rN(r)}; })
@@ -2658,14 +2684,24 @@ function loadAircraft(){
   vget('api/repeat-offenders?'+pstr()).then(function(d){
     var rows=objRows(firstArr(d)), max=0; rows.forEach(function(r){ max=Math.max(max,rN(r)); });
     vEl('ac-rep').innerHTML='<div class="ggrp">Aircraft with the most reports, in your selection</div>'+
-      (rows.length?rows.slice(0,15).map(function(r){
-        /* the row is {tail, make, model, operator, n, systems, first, last}.
-           Read generically the tail came back empty, so fifteen rows read "N"
-           with a number beside it and no aircraft named. */
-        var t=String(r.tail!=null?r.tail:(rC(r)||rL(r))).replace(/^N/i,'');
-        var lab=[r.make,r.model].filter(Boolean).join(' ')||rL(r);
-        var n=(r.n!=null?r.n:rN(r));
-        return '<button type="button" class="brow" data-tail="'+VH(t)+'"><span class="bl">N'+VH(t)+(lab&&lab!==t&&lab!==('N'+t)?' — '+VH(lab):'')+'</span><span class="bb"><span class="bf" style="width:'+(max>0?Math.max(1,Math.round(100*n/max)):0)+'%"></span></span><b class="bn">'+VN(n)+'</b></button>'; }).join('')
+      /* the row is {tail, make, model, operator, n, systems, first, last}. As
+         bars it showed the count and hid everything that makes an airframe worth
+         following: who flies it, how many separate systems it has been written
+         up for, and over what span. The reference tabulates it. */
+      (rows.length?('<div class="l3wrap"><table class="l3"><tbody>'+
+        '<tr><td><b>Tail</b></td><td><b>Aircraft</b></td><td><b>Operator</b></td>'+
+        '<td><b>Reports</b></td><td><b>Systems</b></td><td><b>First</b></td><td><b>Last</b></td></tr>'+
+        rows.slice(0,40).map(function(r){
+          var t=String(r.tail!=null?r.tail:(rC(r)||rL(r))).replace(/^N/i,'');
+          var lab=[r.make,r.model].filter(Boolean).join(' ')||rL(r);
+          var n=(r.n!=null?r.n:rN(r));
+          return '<tr><td><button type="button" class="ghostbtn" data-tail="'+VH(t)+'">N'+VH(t)+'</button></td>'+
+            '<td>'+VH(lab)+'</td><td>'+VH(opLabel(r.operator)||r.operator||'')+'</td>'+
+            '<td>'+VN(n)+'</td><td>'+(r.systems!=null?VN(r.systems):'')+'</td>'+
+            '<td>'+VH(r.first||'')+'</td><td>'+VH(r.last||'')+'</td></tr>';
+        }).join('')+'</tbody></table></div>'+
+        '<p class="pnote">A tail high on this list is not a dangerous aircraft. It is an aircraft that '+
+        'has been written up often, which can be age, a heavy check, or an operator that files carefully.</p>')
       :'<p class="pnote">No aircraft repeats in this selection.</p>');
   }).catch(function(e){ vEl('ac-rep').innerHTML='<p class="pfail">The repeat-offender list did not load ('+VH((e&&e.message)||e)+').</p>'; });
   var one=vEl('ac-one');

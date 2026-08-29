@@ -616,3 +616,27 @@ outside the aircraft. Wing longerons and stringers lead at 18.8%.
 Same shape as F15 and F16 and worth stating once more: none of these threw, none
 returned an error, and all three drew something plausible. The data was in the
 response the whole time.
+
+## F18. Behind a dropdown is not on the page (29 Aug 2026)
+
+**Patterns** counted the selection one way at a time, behind a "Group the
+selection by" menu. The reference counts it seven ways at once and puts them all
+on the page: system, airline, model, part, what was found, what the crew did, how
+it was found. 947 characters against 10,765.
+
+The difference is not decorative. A reader who sees one breakdown has to know the
+other six exist before they can ask for them, and the point of the panel is that
+you notice the one you were not looking for. The menu is kept and now scrolls to
+the section it names, so the shortcut survives without the concealment.
+
+**Aircraft** listed the most-written-up airframes as bars: a tail and a count.
+The row carries `{tail, make, model, operator, n, systems, first, last}`, and the
+bar hid everything that makes an airframe worth following, above all how many
+separate systems it has been written up for and over what span. N855FT is 1,068
+reports across 24 systems between 1995 and 2000; N641GT is 1,005 across 33 since
+2011. Those are different stories and the bar drew them the same.
+
+The panel now says, under the table, that a tail high on the list is not a
+dangerous aircraft: it is one that has been written up often, which can be age, a
+heavy check, or an operator that files carefully. The reference makes that point
+and it is the difference between a lead and an accusation.

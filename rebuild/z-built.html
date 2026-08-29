@@ -2923,13 +2923,26 @@ function drawHero(d, phone){
   var host=heroEl(); if(!host) return;
   if(!d){ host.innerHTML=skeletonHTML(); return; }
   heroData=d;
+  /* The file's real end is sent: span.to, and lag.file_to beside it. Falling
+     back to the last day of the last month turned 26 August into 31 August, so
+     the standing sentence promised five days of reports that do not exist. The
+     same shape of error as captioning a selection "1 Jan to 31 Dec" over a count
+     that stopped in August. Guessed only when nothing is sent. */
   heroRange=d.range||{
-    from:(d.months&&d.months.length)?d.months[0].m+"-01":null,
-    to:d.published||((d.months&&d.months.length)?d.months[d.months.length-1].m+"-"+String(lastDay(d.months[d.months.length-1].m)).padStart(2,"0"):null)
+    from:(d.span&&d.span.from)||((d.months&&d.months.length)?d.months[0].m+"-01":null),
+    to:(d.span&&d.span.to)||(d.lag&&d.lag.file_to)||d.published||d.asof||
+       ((d.months&&d.months.length)?d.months[d.months.length-1].m+"-"+String(lastDay(d.months[d.months.length-1].m)).padStart(2,"0"):null)
   };
   var openKey=heroKey(), nar=narrowed(), h="";
   if((d.total||0)===0) h+=zeroHTML(d);
-  h+='<div class="ihead"><div class="stamp">'+esc(d.stamp||"FAA Service Difficulty Reports")+'</div>';
+  /* the stamp carries the span, so a reader knows what the page can answer for
+     before reading a number. Without it the heading is a title; with it, it is a
+     statement about coverage. */
+  var stampTxt=esc(d.stamp||"FAA Service Difficulty Reports");
+  if(!d.stamp&&heroRange&&heroRange.from&&heroRange.to)
+    stampTxt+=' \u00b7 '+esc(shortDate(heroRange.from)).toUpperCase()+
+              ' TO '+esc(shortDate(heroRange.to)).toUpperCase();
+  h+='<div class="ihead"><div class="stamp">'+stampTxt+'</div>';
   /* The reference puts a tablist beside the stamp. Without it a rail can only
      be reached by clicking the rail itself, which leaves no keyboard route at
      all and no announcement of which of the four is open. */
@@ -2948,7 +2961,11 @@ function drawHero(d, phone){
   h+=railWhere(d, openKey==="where", nar);
   h+=railWho(d,   openKey==="whose", nar);
   h+=railForced(d,openKey==="forced",nar);
-  h+='</div>'+specimenHTML(d,phone);
+  /* the margin belongs to the instrument, not to one rail: what a part month
+     counts, and that these are reports filed rather than flights, is true
+     whichever rail is open. Rendered inside WHEN it vanished the moment a
+     reader opened the aircraft. */
+  h+='</div>'+specimenHTML(d,phone)+whenMargin(d);
   host.innerHTML=h;
   heroAfter();
 }
@@ -3023,7 +3040,7 @@ function railWhen(d,open,nar){
     body+='<div class="hint">'+(wide
       ? num(ms.length)+' months, so the strip scrolls sideways. It opens at the most recent.'
       : 'Drag across the months to take a period.')+'</div>'
-      +'<div class="reading">'+whenReading(d)+'</div>'+whenMargin(d);
+      +'<div class="reading">'+whenReading(d)+'</div>';
   }
   // WHEN never passes `open` to gutter(): the compact form always, "month by month" never in the gutter. Kept.
   return '<div class="rail'+(open?" open":"")+'" data-rail="when">'
@@ -4796,6 +4813,13 @@ function opLabel(code){
     for(var i=1;i<sel.options.length;i++) opLabel._m[sel.options[i].value]=sel.options[i].textContent;
   }
   return opLabel._m[code]||"";
+}
+
+function shortDate(iso){
+  if(!iso) return "";
+  var p=String(iso).split("-");
+  if(p.length<3) return String(iso);
+  return (+p[2])+" "+String(HERO_MONTHS[+p[1]-1]||p[1]).slice(0,3)+" "+p[0];
 }
 
 /* ---- 06-controls ---- */

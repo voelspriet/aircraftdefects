@@ -682,3 +682,31 @@ or as an empty panel: everything was on the page, in the wrong container.
 Twenty findings, and this is the second to come from splitting one surface into
 briefs (F13 was the other, where both halves misread the same endpoint in
 different ways). Splitting the work is right; the seam is where to look.
+
+## F21. Five days of reports that do not exist (29 Aug 2026)
+
+The standing sentence read:
+
+> 1,757,827 reports, everything the FAA has published to **31 August 2026**.
+
+The file ends on 26 August. The endpoint sends the real end twice, as `span.to`
+and as `lag.file_to`, and the page read neither: it took the last month in the
+strip and appended the last day of that month.
+
+This is the same shape as an error the reference carries a comment about, where
+taking a year in progress captioned a selection "1 Jan 2026 to 31 Dec 2026" over
+a count that stopped in August. There the fix was to clamp only where the period
+and the file overlap. Here the fix is simpler, because the answer was in the
+response: use what is sent, and guess only when nothing is.
+
+The number is small and the claim is not. A desk whose whole argument is that it
+withholds any figure it cannot compute had, in its opening line, promised five
+days of reports that had not been filed.
+
+Two more from the same pass. **The stamp had lost its span**: the reference reads
+`FAA SERVICE DIFFICULTY REPORTS · 1 JAN 1995 TO 26 AUG 2026`, so a reader knows
+what the page can answer for before reading a number. **And the margin lived
+inside the WHEN rail**, so the notes that a part month counts 26 days against 31,
+and that these are reports filed rather than flights, vanished the moment a
+reader opened the aircraft. Both are true whichever rail is open; the margin
+belongs to the instrument.

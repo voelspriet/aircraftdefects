@@ -1,0 +1,623 @@
+You rebuilt the instrument for a public desk over FAA Service Difficulty
+Reports, and a second brief is building the search half beneath it. This is the
+third and last part: the analysis panels.
+
+# The measurement
+
+I enumerated every option, control, button, tab and heading on both pages in a
+real browser. Not counts of features this time, the actual lists.
+
+  select menus        original 22    yours 1
+  options inside them original 11,444 yours 6
+  tabs                original 20    yours 4
+  buttons             original 50    yours 26
+  headings            original 45    yours 1
+  panels              original 16    yours 0
+
+Every one of these menus is missing from your page:
+
+  #operator     3947 options   e.g. Southwest Airlines Co (SWAA), American Airlines Inc (AALA), 
+  #make          248 options   e.g. BOEING, AIRBUS, DOUG
+  #ata            49 options   e.g. Placards and markings, Servicing, Standard practices
+  #nature         24 options   e.g. Other (1,296,250), No test (143,964), A warning went off (14
+  #crew           14 options   e.g. Other (207,371), Unscheduled landing (112,190), Aborted take
+  #condition    3131 options   e.g. CORRODED, CRACKED, INOPERATIVE
+  #discovered     14 options   e.g. Someone looked at it (727,013), Other (351,590), Unknown (29
+  #stage          18 options   e.g. On the ground, in inspection or maintenance (1,303,444), Not
+  #zone           10 options   e.g. Upper fuselage (84,453), Lower fuselage (60,966), Doors (22,
+  #corrosion       3 options   e.g. Level 2, beyond allowable limits (118,565), Level 3, urgent 
+  #cracked         2 options   e.g. Cracking recorded
+  #minhours        4 options   e.g. 20,000 hours or more, 50,000 hours or more, 75,000 hours or 
+  #spike-by        5 options   e.g. By part, By model, By airline
+  #fl-op        3947 options   e.g. Southwest Airlines Co (SWAA), American Airlines Inc (AALA), 
+  #em-by           4 options   e.g. By system, By part condition, By part number
+  #em-days         3 options   e.g. Last 180 days, Last year
+  #cl-min          4 options   e.g. 4 or more, 6 or more, 10 or more
+  #cl-kind         3 options   e.g. Everything, Recurring, probably scheduled
+  #ag-by           2 options   e.g. By takeoff-and-landing cycles
+  #cq-by           3 options   e.g. By model, By manufacturer
+  #cmp-field       3 options   e.g. Models, Manufacturers
+
+Some of that belongs to the search half and is being built separately. What
+follows is yours: the fifteen panels that are not the search table, their tab
+strip, and the three groups it is divided into.
+
+# The thing that makes this hard, and is the point
+
+Four of the sixteen panels narrow to the reader's selection. Twelve do not. They
+answer from the whole corpus, or from a slice the reader sets inside the panel
+itself. A reader who has filtered to one airline and then reads "Story leads"
+is looking at every airline, and if the page does not say so, they will quote it
+as if it were their airline.
+
+So every panel carries a scope line as its first child, and the tab strip is
+divided into three named groups that say the same thing again:
+
+  Narrows to what you selected   p-search, p-patterns, p-aircraft, p-found
+  Ignore your selection          the nine analysis panels
+  Reference                      p-compare, p-terms, p-method
+
+The exact wording of both, and of the scope line in each of its three forms, is
+in the specification. It is not decoration. It is the difference between a
+figure a journalist can publish and one they cannot.
+
+# What to build
+
+Fifteen panels: everything in the table below except p-search, which the other
+brief is building. Each one lazily loaded when its tab is first shown, each with
+its scope line, its heading, its controls where it has them, and its own
+endpoint.
+
+The specification names every tab label verbatim, every endpoint with its query
+parameters and allowed values, every heading, and what each panel shows.
+
+# The specifications
+
+Written by reading the original's behaviour rather than its source, so they
+record decisions and not just shapes. Where they state a number, a string or a
+formula, that is load-bearing. Where they state a reason, reach the same end your
+own way.
+
+--- THE SIXTEEN PANELS, THE TAB STRIP AND THE RECORD ROWS ---
+# The sixteen panels and the record rows — build specification
+
+## THE SIXTEEN TABS, verbatim labels, in order
+GROUP "Narrows to what you selected"
+  p-search    Search              api/search + hero + vocab + resolve + export.csv
+  p-patterns  Patterns            api/trend, api/breakdown?by=ata|operator|model|part|
+                                  nature|crew|discovered, api/phrases
+  p-aircraft  Aircraft            api/aircraft/<tail> (WHOLE CORPUS) + api/repeat-offenders
+                                  (follows the filter)
+  p-found     How it was found    api/inspection-method
+GROUP "Ignore your selection"
+  title: "These ignore your selection. Each answers from all N reports, or from a slice you
+          set inside the panel"
+  p-fleet        Fleet                    api/fleet?operator=&model=
+  p-leads        Story leads              api/leads + api/spikes?by=ata|part|model|operator
+  p-emerging     New defects              api/emerging?by=part|jasc|condition|partnumber
+                                          &days=120|180|365
+  p-clusters     Same day, many aircraft  api/clusters?min=3|4|6|10, kind filtered client-side
+  p-defect       Same defect              api/same-defect
+  p-structure    Corrosion & cracks       api/corrosion
+  p-age          Old airframes            api/ageing?by=hours|cycles
+  p-engines      Engines                  api/engines
+  p-consequences What the crew did        api/consequences?by=operator|model|make
+GROUP "Reference"
+  p-compare   Compare               api/compare?field=operator|model|make&a=&b=
+  p-terms     Every code explained  api/glossary + api/facets
+  p-method    Method                static prose, numbers injected from api/facets
+
+Loading is LAZY: show(id) triggers that panel's loader. p-fleet and p-compare load only on
+their own buttons.
+KNOWN DISCREPANCY worth preserving or fixing: FOLLOWS_FILTER omits p-aircraft, but
+VIEW_GROUPS puts it in the "narrows" group.
+
+## THE RECORD TABLE — eleven columns
+<tr><th>Date</th><th>Operator</th><th>Aircraft</th><th>Tail</th><th>System</th><th>Part</th>
+    <th>What was found</th><th>Crew did</th><th>Found by</th><th>Stage</th><th></th></tr>
+The eleventh header is EMPTY (the case-sheet button).
+Every tr.rep carries data-month="YYYY-MM" and data-zone="ZONE n00 or ''".
+
+1  Date       ukDate(DifficultyDate) = "D Mon YYYY" from FAA "MM/DD/YYYY"; non-3-part values
+              pass through unchanged. Below it, muted "N{tail}" or "N&mdash;". Not clickable.
+2  Operator   opName(code)||code, clickable -> setFilter('operator',code).
+              Blank field -> <span class="absent term">no operator named</span> carrying the
+              OPGAP sentence as its tooltip, overwritten at boot from api/facets.
+3  Aircraft   "{Make} {Model}". Click sets MODEL ONLY. The make is not set. Not decoded.
+4  Tail       "N{RegistryNNumber}". Stored N-numbers carry NO leading N; it is prepended in
+              the template. Click -> loadTail() and switches to p-aircraft.
+5  System     x._jasc.label (server-decoded), clickable -> jasc. Below it, muted "ch. NN"
+              clickable -> ata. Styled rust.
+6  Part       PartName -> part filter. Below it, PartCondition printed RAW, not clickable
+              in this table.
+7  What was found   cc("nature", NatureOfConditionA). *** ONLY SLOT A ***. B and C are
+              dropped here and surface only in the case sheet. Then CorrosionLevel if set,
+              then "{n} cracks" muted.
+8  Crew did   crewCell(x): collects all four PrecautionaryProcedure slots, drops empties.
+              None -> <span class="absent">not recorded</span>.
+              *** If the crew FILTER holds a code present in the row, that code is MOVED TO
+              THE FRONT, so the row cannot look as if it contradicts the filter. ***
+              First value bare, later ones in <div class="alsoc">.
+              Rendered by cc("precaution", v, "crew") — code group "precaution", filter
+              field "crew".
+9  Found by   cc("discovered", HowDiscoveredCode)
+10 Stage      whole cell .muted, cc("stage", StageOfOperationCode)
+11 (blank)    <button class="ghost" aria-label="Open report CTRL, N123, PARTNAME"
+                      onclick="openCase('CTRL')">Case sheet</button>
+
+## cc(grp, v, field) — the four-way decode
+1 empty v            -> <span class="absent">not recorded</span>   (italic grey)
+2 code not in table  -> esc(v), PLAIN TEXT, no click. It is shown as filed.
+3 "bare" (no note AND faa.toUpperCase()===label.toUpperCase())
+                     -> <span class="c dull" onclick="setFilter(field,v)">short</span>
+                        clickable, greyed, NO tooltip
+4 otherwise          -> <span class="term c" data-fixed="short|tip" onclick=...>short</span>
+                        tip = [label, "FAA wording: "+faa, note].filter(Boolean).join(". ")
+CODES loaded ONCE at boot from api/glossary. Tooltip delivery is a delegated mouseover on
+.term filling #tip with <b>term</b><br>definition. Escape hides it.
+
+## THE MONTH SPINE
+Before the first row of each new month:
+  <tr class="spine" data-spine="2025-08"><td colspan="11">
+    <span>August 2025</span><b class="spinen"></b></td></tr>
+mKey is built from DifficultyDate.split("/") as `${dp[2]}-${dp[0].padStart(2,"0")}`.
+LASTMONTH suppresses repeats and is reset at the top of every render; because more() reuses
+it and appends, the sequence continues correctly across pages.
+.spinen is filled LATER by paintSpines() from heroData.months: "N in this selection", or
+emptied if the month is absent. Sticky at top:44px.
+
+## THE WRITE-UP ROW
+<tr class="wrote"><td colspan="11">
+  <div class="wu clip" onclick="this.classList.toggle('clip')">
+    <div class="txt">${jargon(Discrepancy)}</div></div></td></tr>
+
+jargon(t):
+1 clean(t) HTML-DECODES the FAA string by round-tripping through a detached <textarea>, so
+  "&amp;LT;P&amp;GT;" style entities become literal characters
+2 esc() re-escapes for safe insertion
+3 "<P>" (case-insensitive) becomes
+    </span><span class="wu-action"><b>What the mechanic did about it</b><br>
+  and "</P>" is deleted. The FAA's <P> marker separates THE FAULT FROM THE FIX, and the
+  second half gets a labelled sub-block.
+4 wraps everything in an outer <span>
+5 every 2-to-7-character lowercase glossary key (amm, mel, inop, r&r, p/n, fod, ...) is
+  wrapped in <span class="term" data-t="key"> on a word-boundary regex
+
+Clip/expand:
+.wu.clip .txt uses -webkit-line-clamp:3 (5 below 1100px). The gradient fade is drawn only
+when .long is present. markClipped() sets .long when clip is on AND
+scrollHeight > clientHeight+2, then appends a REAL BUTTON:
+  class="ghost wu-toggle" type="button" aria-controls="wu-txt-N" aria-expanded="false"
+  text "Read the whole write-up" / "Show less", label and aria flipped in step.
+Clicking the band itself also toggles.
+
+markHits(): highlights the current #q value. Escapes regex metacharacters. Guards with
+t.dataset.marked===q so the same text is never marked twice. Walks text nodes with a
+TreeWalker that REJECTS anything already inside a <mark>, then CONCATENATES them into a flat
+string SO A PHRASE CAN SPAN A GLOSSARY SPAN, finds all case-insensitive matches with the
+zero-length guard, then walks the nodes BACKWARDS splitting each into fragments and
+<mark class="hit">. It is a literal substring match: no stemming, no word boundary.
+mark.hit{background:#ffe9c9;color:inherit;border-radius:2px;padding:0 1px}
+
+renderTail() is the SINGLE post-render hook:
+  markClipped(); gridify(); syncSwipeHint(); markHits(); rove();
+
+## THE CAPTION ABOVE THE TABLE
+<div class="cut"> holds:
+  <span class="cs"> the hero's one-line sentence, REPEATED at the seam
+  <span class="cm"> three meta spans, each given class "lit" when its condition holds:
+    "newest first, ties broken on the control number"        lit when total>1
+    "N carry no date, filed at the end" / "every report carries a date"
+    "N shown of M" / "all N shown"                            lit when total>100
+    <button class="backup">&uarr; back to the instrument</button>
+
+sameDayRuns(rows): when any tail+date pair has MORE THAN FOUR rows on the loaded page:
+  `Some of what you see here is one inspection, not one fault each: ${body}. A mechanic
+   writes up every finding separately, so a heavy check on a single aircraft fills a page.
+   Count events, not rows.`
+  each run reads "<b>N</b> of them on N{tail} on {date}", joined "; " for the top two, plus
+  "; and N more like it".
+
+Swipe hint, shown only when the table actually overflows:
+  `Swipe the table sideways for System, Part, what was found, what the crew did, how it was
+   found, the stage of flight and the report button.`
+
+## ORDERING AND PAGING
+Server order is FIXED: ORDER BY difficulty_dt DESC NULLS LAST, OperatorControlNumber DESC.
+Undated reports sort LAST. There is NO user-selectable sort.
+Page size hard-coded 100. more() calls search(offset+100) with popping=true so load-more is
+not a history step. On more(), the new body is spliced in by replacing "</table>" — the
+header, caption and empty state are NOT re-rendered.
+The header row is REPEATED EVERY 25 ROWS.
+CASE_ORDER is set at offset 0 and concatenated on later pages; it drives the case stepper.
+Count line: "<strong>N</strong> reports match your selection" / "report matches", or
+  "<strong>N</strong> reports, nothing filtered yet".
+
+## THE CASE SHEET — openCase(id)
+Stores lastFocus. pushState with hero and case, so the link is SHAREABLE and BACK CLOSES IT.
+#case-box gets role=dialog aria-modal=true aria-labelledby=case-title tabindex=-1, trapFocus
+marks every sibling inert, focus lands after 30ms. Escape and a backdrop click close.
+Contents IN ORDER:
+1 sticky action bar: the stepper (only when caseFromLink is false and CASE_ORDER.length>1)
+    "N of M loaded" + ", of K that match" when the selection is bigger than what is loaded
+  then: Copy the quote | Copy the citation | Copy the link | Copy all three | Close
+2 <div class="route">How you got here: ${filterWords() || "the whole corpus, nothing filtered"}</div>
+3 <blockquote class="bigq">${jargon(Discrepancy)}</blockquote>
+4 "Before you publish this", casePublishNotes(d), in this order:
+   - "You opened this report by its control number, so no selection was applied. It is
+      evidence of what a mechanic filed, not of what happened."   (when caseFromLink)
+     else "This is one report of N in the selection you were looking at. It is evidence of
+      what a mechanic filed, not of what happened."
+   - operator named: "The operator name comes from the FAA's December 2006 cross-reference.
+      Check current ownership before you name X in print."
+     unresolved code: "Operator code X is not in the FAA cross-reference used here, so no
+      name is asserted."
+   - CorrosionLevel==="3": "Corrosion level 3 obliged the operator to notify the regulator
+      within three days and to act across the fleet. That is a checkable fact you can put
+      to them."
+   - HowDiscoveredCode in B,D,E,M,T,U,X: "This was found by instrument, so it was not
+      visible from outside the aircraft."
+   - any crew action: "The crew action recorded here is what the FAA form says the crew did,
+      not a description of severity."
+   - ALWAYS LAST: "Quote the mechanic's words as filed. The FAA publishes no per-report
+      permalink, so cite the control number and this desk's link."
+5 <div class="eyebrow-k">Report CTRL</div>
+6 <h2 id="case-title"> four parts joined " &middot; ", empty parts dropped: operator name
+   (or "Operator not recorded"), make+model, part name sentence-cased plus condition
+   lowercased, and the date.
+7 <p class="lede">Every code on this report, spelled out. The FAA's own wording is kept
+   beside the plain English so you can quote either.</p>
+8 <table class="kv"> — row(k,v) OMITS any row whose value is falsy, so blanks disappear
+   entirely. Headings in order:
+   Date of the difficulty | Airline | Filed by | Aircraft | Tail number |
+   Hours on the airframe | Cycles (takeoffs and landings) | System | Part |
+   Condition of the part | Where on the aircraft | What was found | What the crew did |
+   How it was found | Stage of flight | Corrosion | Cracks | The mechanic's own words |
+   Context | Check it against the source | How to cite it
+   one(e)  = <strong>label</strong> + muted "FAA wording: faa" + muted note
+   many(a) = each joined by <hr>, or "none recorded"
+   Server drops crew entries whose faa is NONE or NOT AVAILABLE, and nature entries whose
+   faa is NOT AVAILABLE.
+   Airline row adds one of two muted notes: "Name from the FAA Air Carrier/Operator
+   cross-reference, December 2006 edition. Check current ownership before publishing." or
+   "Not in the FAA cross-reference used here, which is the December 2006 edition. Shown as
+   filed."
+   Context row: "This airframe appears in N reports." + "This part number appears in M."
+
+sourceLinks(d), in order, all target=_blank rel=noopener:
+  "The FAA's own search" -> https://sdrs.faa.gov/Query.aspx
+     + "It posts a form rather than answering an address, so paste the control number
+        <b class="mono">CTRL</b> into its Operator Control Number box."
+  "N123 on Flightradar24" -> /data/aircraft/n123  + ", to see what the aircraft has been
+     doing since."
+  "N123 on FlightAware"
+  "Flightradar24 playback for {date}" -> /YYYY-MM-DD/12:00
+     + "Free accounts reach back about a week, so an older day needs a paid plan."
+  "Who owns N123" -> registry.faa.gov/AircraftInquiry/Search/NNumberResult?nNumberTxt=123
+
+Copy payloads read currentCase, NEVER an HTML attribute:
+  quote -> quoteText(): decodes entities, replaces the <P> marker (and an optional wrapping
+     parenthesis) with a BLANK LINE, strips </P>, trims. The label "What the mechanic did
+     about it" is DELIBERATELY NOT in the clipboard text.
+  cite  -> d._cite + " Desk permalink: " + location.href
+  link  -> location.href
+  all   -> "quote"\n\ncite\nDesk permalink: link
+_cite is built server-side and keeps the difficulty date and the submission date DISTINCT:
+  `FAA Service Difficulty Report {ctrl}. Difficulty dated {D Month YYYY}[, filed with the
+   FAA {D Month YYYY}]. Source: FAA Service Difficulty Reporting System, https://sdrs.faa.gov`
+copyBit() swaps the label to "copied" 1500ms, or "copy failed, select the text" 2600ms.
+
+## KEYBOARD MODEL FOR THE TABLE
+gridify(): role=grid on the table, role=row on each tr, columnheader/gridcell on cells, then
+collapses ALL interactive descendants to tabindex -1 except ONE roving stop.
+gridKeys(): Arrow keys, Home and End over the visible buttons, rowLen from the first tr.rep.
+makeReachable(): every non-button [onclick] gets tabindex 0 and role button; a global keydown
+turns Enter/Space into a click.
+A MutationObserver on body re-runs makeReachable and gridify on every insertion.
+
+## MOBILE
+Below 900px the first column and the header row become sticky.
+Below 1100px the write-up band becomes position:sticky;left:0;width:calc(100vw - 44px) so it
+stays readable while the row scrolls sideways, and the clamp goes from 3 lines to 5.
+
+--- THE SELECTION MACHINERY THE PANELS SIT INSIDE ---
+# Filters, AIM AT and the selection machinery — build specification
+
+## THE ONE IDEA
+There is NO filter state object. The DOM inputs ARE the state. Every control's id IS its
+parameter name. params() reads them, and the same string goes to the address bar and to
+the API. A link is the state.
+
+FIELDS = q, operator, make, model, part, ata, jasc, nature, crew, condition, stage, zone,
+         tail, discovered, corrosion, cracked, minhours, from, to
+LABEL  = Text, Operator, Manufacturer, Model, Part, System, Exact system, Found,
+         Crew action, Part condition, Stage of flight, Zone on the aircraft, Tail number,
+         How found, Corrosion, Cracking, At least this many hours, From, To
+HIDDEN_FIELDS (live inside "More filters") = everything except q, operator, from, to
+URL_KNOWN = FIELDS + view, hero, case, aircraft, ca, cb, cf
+NO_RAIL = fields no hero rail can draw: q, make, model, part, condition, discovered, stage,
+          corrosion, cracked, minhours, jasc, ata   (zone, tail, operator, crew, from/to ARE drawn)
+CLAUSE_ORDER = q, jasc, ata, part, condition, zone, operator, make, model, tail, crew,
+               nature, discovered, stage, corrosion, minhours, cracked, from, to
+FOLLOWS_FILTER = ["p-search","p-patterns","p-found"]   // the ONLY panels that narrow
+
+params(): new URLSearchParams, for each FIELDS key read el(k).value.trim(), skip empties.
+setFilter(k,v): el(k).value=v; show("p-search"); search(0); showChange().
+  setFilter(k,'') is the UNIVERSAL REMOVE. Every chip x and every "Drop X" button is this.
+showChange(): scrolls so chips/count are visible, but ONLY UPWARDS, never down.
+search(off): p=params()+limit=100+offset; URL = location.search minus FIELDS plus params()
+  plus hero=heroKind, so view/case/aircraft/ca/cb/cf SURVIVE every search.
+  pushState for a real new search; replaceState when popping || !booted || unchanged —
+  load-more and a rail switch are not steps a reporter walks back.
+Listeners: SELECT and type=date search on CHANGE; text inputs search on ENTER.
+Restore at boot: e.value=u.get(k); if(e.value!==u.get(k)) UNRESOLVED[k]=u.get(k)
+  — a <select> silently refuses a value it has no option for, and that refusal is CAUGHT.
+syncControls(): class "landed" (rust left border, #fdf7f4) on any control holding a value.
+syncMoreFilters(): "(N active)" into #mfCount, and force-opens the <details> when N>0.
+
+## SERVER CONTRACT — FAIL CLOSED
+FILTER_ARGS is a SUPERSET of FIELDS: it also accepts enginemake, enginemodel, partmake,
+which no control sets.
+_filters() is fully parameterised and FAILS CLOSED: any unparseable or non-existent value
+goes into `rejected` and raises BadFilter. It is NEVER dropped. Any query-string name
+outside KNOWN_ARGS is likewise rejected. HTTP 400 with {error,rejected,unknown,message},
+message ending ", so no query was run."
+
+q         lower(Discrepancy) LIKE ? ESCAPE '\'  with \ % _ escaped so the count cannot
+          silently widen
+nature    (NatureOfConditionA=? OR B=? OR C=?)          validated against CODES.nature
+crew      (PrecautionaryProcedureA=? OR B=? OR C=? OR D=?)  validated against CODES.precaution
+zone      must match ^ZONE \d00$; SQL rebuilds it from regexp_extract on PartLocation
+jasc      exact 4 digits, else rejected
+corrosion only "1","2","3"        cracked only the literal "1"
+minhours  digits only, TRY_CAST(AircraftTotalTime AS BIGINT) >= ?
+ata       substr(JASCCode,1,2) = ?   *** NOT VALIDATED, the one loose end ***
+from/to   inclusive, YYYY-MM-DD, REAL-CALENDAR checked
+limit default 100 clamped 1..500; offset default 0 min 0
+
+## THE CONTROLS
+Primary row: #q (with datalist), #operator, #from, #to, Search, Clear.
+#q autocompletes FROM THE MECHANICS' OWN VOCABULARY: on input, >=3 chars, debounce 180ms,
+  api/vocab?q=..&limit=10, options labelled "N reports". Under 3 chars the list is emptied.
+  Stale replies dropped by qSugSeq.
+#from/#to get min and max set to the corpus range at boot.
+More filters: make, model, part, jasc (HIDDEN input, settable only by clicking a system or
+  via AIM AT), ata, nature, crew, condition, discovered, stage, zone, tail, corrosion,
+  cracked, minhours.
+Empty labels: "Any operator", "Any manufacturer", "Anything found", "Anything the crew did",
+  "Any part condition", "Found by any method", "Any stage of flight",
+  "Anywhere on the aircraft", "Any corrosion level", "Cracked or not", "Any airframe age".
+opts() builds the six coded pickers sorted BY REPORT COUNT DESC, each labelled
+  "Label (12,345)" or "Label (no reports)" with class="empty" when zero.
+  Skips: nature ["0"], crew ["0","K"], discovered ["0"], corrosion ["1"], stage ["00"],
+  zone ["ZONE 000"].
+
+## THE AIM AT BOX
+Rendered inside the instrument, twice (desktop .ipad and phone .phextra).
+  <label>Aim at</label>
+  <select id="aimKind">a month or year | an airline | a tail number | a zone |
+                       a system code | free text search</select>
+  <input id="iAimAt" role="combobox" aria-controls="aimSug" aria-autocomplete="list">
+  <button onclick="aimAtGo()">Take it</button>
+  <label class="aimday">or one day<input id="aimDay" type="date"></label>
+  <div class="aimsug" id="aimSug" role="listbox" hidden>
+Placeholders per kind:
+  period   "a month or a year, e.g. August or 2025"
+  operator "an airline, e.g. United or UAL"
+  tail     "a tail number, e.g. N583"
+  zone     "a zone, e.g. 300"
+  jasc     "a system code, e.g. 3230"
+  ""       "any words the mechanic wrote, e.g. bird strike"
+aimPlaceholder runs on change AND on a 600ms interval, because the hero repaints and
+replaces the node.
+
+Typing: >=2 chars, debounce 220ms, sugFetch with a sugSeq guard.
+  free text -> api/vocab, mapped to {kind:"q", what:"a word in the write-ups"}
+  otherwise -> api/resolve?q=..&kind=..
+  SUG = readings.filter(x=> x.kind!=="q" && (x.n>0 || kindNamed))
+  The word reading NEVER appears in this list: free text has its own field.
+  Zero-count rows are hidden while browsing but KEPT once a kind is named, because
+  "that year holds no reports" is an answer.
+
+/api/resolve: NOTHING IS INFERRED. Either the caller names the kind and only that kind is
+matched, or every kind that matches is returned and the reader picks.
+  tail   strips a leading N, ^[0-9A-Z]{1,6}$, LIKE stem%, exact first then count desc
+  period month names part-typed; a unique month prefix WITH a year gives that month,
+         WITHOUT a year the newest years holding that month; also ^\d{4}([-/]\d{1,2})?$
+  operator exact designator first, then >=3-char substring of the label
+  jasc   only when ^\d{4}$        zone code or >=3-char substring of the label
+  q      ALWAYS appended, even at zero
+Sort key: (kind=="q", -best[kind], -n, label) — strongest kind group first, the word
+reading ALWAYS LAST. Ordering is a reading aid only. Nothing is auto-selected.
+
+Suggestion rows are grouped under headings:
+  KINDLAB = {period:"MONTH OR YEAR", zone:"ZONE", operator:"AIRLINE", tail:"TAIL",
+             jasc:"SYSTEM", q:"WORD IN THE WRITE-UPS"}
+  heading colours .sk-operator #8c4a2f  .sk-tail #3f6b57  .sk-period #4a5d80
+                  .sk-zone #7a5a2e      .sk-jasc #5d4a72  .sk-q #6f6a63
+  <div class="sug on nought" role="option" aria-disabled="true">
+    <span class="sl">label</span><span class="sw">what | no report in this file</span><b>n</b>
+  .sug.nought{opacity:.62;cursor:default} and is INERT.
+Keyboard: ArrowDown/Up move SUGI, Enter takes the highlighted row, Escape closes.
+Enter with nothing highlighted falls through to aimAtGo().
+
+## "Take it" — aimAtGo()
+Empty -> return. Free-text kind -> handOff() and return.
+Otherwise fetch api/resolve WITHOUT a kind: Take it always considers EVERY reading.
+  opts    = readings where kind!=="q" && n>0
+  empties = readings where kind!=="q" && !n
+  word    = the q reading
+No opts but some empties:
+  `${label} is a valid ${kindlab.toLowerCase()}, but this file holds no report for it.
+   It runs from ${prettyDate(RANGE.from)} to ${prettyDate(RANGE.to)}.`
+No opts at all:
+  `no month, zone, airline, tail or system is called "${raw}".`
+  plus, if the word has hits, a button `Search the write-ups for "${raw}" instead  N`
+  otherwise the flat sentence `No mechanic wrote that word either.`
+Exactly one -> takeReading(it).
+MORE THAN ONE:
+  `"${raw}" could mean more than one thing here. Which do you want?`
+  with one button per option: `${label} <em>${what}</em> <b>${n}</b>`
+  *** DELTA is an airline AND a word a mechanic writes. Picking silently is how the wrong
+      number reaches print. ***
+The box DELIBERATELY REFUSES to fall back to free text: "it used to search the write-ups
+without being asked, which quietly turned a category question into a text one. It offers
+instead."
+
+takeReading(o): period -> from/to pair, clamped ONLY where the period and the file overlap
+(see when.md). Every other kind maps its kind straight onto the filter of the same name.
+Then aimHold(`took ${label}, ${what}, ${num(n)} reports. [undo]`).
+handOff(): raw text into #q, search, scroll #q into view and flash it 1400ms, then
+  `searched the write-ups for "${raw}", not a category.` + undo
+#aimDay: sets BOTH from and to to the same date. A single day comes from the calendar,
+  never from a typo in two date boxes.
+
+## THE AIM LINE
+#iAim is the ONE element a pointer may write to.
+aim(text,tone)   refuses while a hold is live
+aimHold(text,6s) HELD={text,until}, painted with class "aim held" and data-hold="1"
+unaim()          clears unless a hold is live
+paintHeld()      re-applies a live hold after EVERY hero repaint
+Undo is literally history.back(); unaim() — it works because every search pushed an entry.
+
+## STARTER QUESTIONS — 18, verbatim, in order
+Smoke or fumes in the cabin      {nature:"B"}
+Cracks found                     {q:"crack"}
+Engine shut down in flight       {crew:"E"}
+Unscheduled landing              {crew:"A"}
+Bird strikes                     {q:"bird"}
+Landing gear trouble             {ata:"32"}
+Something burning                {q:"burn"}
+Fuel leaks                       {q:"fuel leak"}
+Oxygen masks dropped             {crew:"G"}
+Cabin lost pressure              {crew:"I"}
+Aborted take-off                 {crew:"C"}
+Corrosion past the limit         {corrosion:"2"}
+Urgent corrosion, level 3        {corrosion:"3"}
+Damage no one could see          {discovered:"E"}
+Engine flameout                  {nature:"X"}
+Uncontained engine failure       {nature:"T"}
+Old airframes, 50,000 hours plus {minhours:"50000"}
+Something fell off in flight     {nature:"D"}
+First six always show; 6+ carry class "extra" (display:none unless #starters has .all).
+Toggle button reads "12 more questions" / "fewer".
+starter(i) CLEARS EVERY FIELD FIRST, so starters never stack.
+
+## CHIPS
+Refused values FIRST, one per UNRESOLVED key:
+  <span class="chip warn">Label: value <em>&mdash; not a value in this data</em> <b>x</b></span>
+Then one per live parameter (a rejected key gets ONE chip, not two):
+  <span class="chip">Label: shown<b>x</b></span>
+`shown` is DECODED, never raw: ata->ATA[v], operator->"Name (CODE)", jasc->label,
+  nature/discovered/stage/condition/corrosion->code(), crew->code("precaution"),
+  zone->code("part_location"), cracked->"recorded", minhours->"50,000 hours".
+.chip #fdf1ec on #f0d5cb, text #8a2a17. .chip.warn #fdf3ee on #eec9b8, text #7c3a1f.
+Each x gets aria-label "Remove filter " + chip text.
+#unresolved says: `One value in this link is not in this data, so no search was run.
+  There is no number on this page to quote.`
+
+Other removal routes, ALL reducing to setFilter(k,''):
+  .clause[data-drop] in the standing sentence; the period clause carries data-drop="from|to"
+    so one click drops BOTH dates
+  the zero-result row's "Drop X" buttons + "Clear all filters"
+  dropRefused(k) / dropStray(k) on a rejected link
+  the .zero block's "Drop X -> N reports" ghosts from leave_one_out
+  the phone .phchips row
+
+## EXPORT AND COPY LINK
+copyLink copies location.href EXACTLY as it stands: every filter plus hero plus whichever
+of view/aircraft/case/ca/cb/cf is live. #copied shows "copied" for 1500ms.
+Export label, set in search():
+  total>5000 -> `Export CSV (newest 5,000 of ${total})` title "Ordered newest first. The
+    oldest reports are not in this file. Narrow with a date range to export the rest."
+  total===0  -> `Export CSV (0 rows)` disabled
+  else       -> `Export CSV`
+Server EXPORT_CAP 5000. Every coded column gets a DECODED TWIN column inserted immediately
+after it. A final column CaseSheetURL holds the per-report permalink.
+Filename sdr-<slug>.csv from the filter values, or sdr-all.csv. When capped the filename
+gains -newest5000ofN AND a first line is prepended to the body:
+  `# This file holds the newest 5000 of N matching reports. The oldest N-5000 are not in
+     it. Narrow with a date range to export the rest.`
+
+## STATING THE SELECTION IN WORDS
+clauseText(k,v): q -> `where a mechanic wrote "v"`; operator -> the NAME, no code;
+  tail -> "N"+v; cracked -> "with cracking recorded"; minhours -> "N hours or more on the
+  airframe"; coded fields -> code().toLowerCase(); from/to -> "" (periodClause handles it).
+sentenceHTML(d) walks CLAUSE_ORDER and wraps each live parameter as
+  <span class="clause" tabindex="0" data-drop="k" data-aim="drop-k">…</span>
+THREE OUTPUTS:
+1 STALE: if HERO_FOR!==null && HERO_FOR!==params().toString(), the numbers on hand were
+  computed for a DIFFERENT selection, so they are WITHHELD:
+    `<b class="fig">…</b> counting ${clauses}…`
+2 nothing selected:
+    `<b class="fig">${num(corpus)}</b> reports, everything the FAA has published to
+     ${prettyDate(RANGE.to)}.`
+3 something selected:
+    `<b class="fig">${num(n)}</b> ${report|reports}, ${clauses}.
+     <span class="aside">${num(corpus-n)} set aside.</span>`
+  and when d.total!==LAST_TOTAL, the instrument and the table have DRIFTED APART:
+    `<span class="broken">the count above and the rows below disagree: reload before you
+     quote either</span>`
+
+scopeLine(id):
+  p-search and p-aircraft: BLANK (the count bar already says it)
+  FOLLOWS_FILTER with n>0: `Showing <strong>your selection</strong>, ${n} reports.`
+  every other panel: `This view always answers for <strong>all ${TOTAL} reports</strong>.
+    It does not narrow to your current selection (${filterWords()}).`
+    unfiltered: `All ${TOTAL} reports.`
+VIEW_GROUPS label the tab strip with the same honesty:
+  "Narrows to what you selected" | "Ignore your selection" | "Reference"
+
+Zero results: `No report matches this combination.` then
+  one clause  -> `No report matches ${a}.`
+  two         -> `No report is both ${a} and ${b}.`
+  three+      -> `No report is all of: ${a, b, c} and ${last}.`
+
+## "NO ROWS YET, ON PURPOSE"
+Triggered when nothing is filtered AND REVEALED is false. Renders and RETURNS BEFORE ANY
+api/search CALL IS MADE.
+  #count: `<strong>${TOTAL} reports.</strong> Nothing chosen yet.`
+  body:   `<strong>No rows yet, on purpose.</strong> Listing everything answers no question
+           and buries the one you have.`
+          muted: `Take a month, a zone, an airline or a tail from the instrument above, pick
+           one of the starter questions, or set a filter. To read the file straight through
+           anyway, use the button at the foot of the instrument.`
+          buttons: `Read all ${TOTAL} anyway` -> revealAll(), `Show me the starter questions`
+Source reasoning: "A table of the whole corpus is not an answer to anything, and it arrives
+before the reporter has asked. The hero still shows the shape of the whole file; the rows
+wait until something has been chosen."
+REVEALED is set ONLY by goResults(). resetAll() sets it false again, so Clear returns the
+page to the empty-on-purpose state.
+
+## FAIL-CLOSED LINK HANDLING, CLIENT HALF
+strayParams() returns URL keys outside URL_KNOWN. search() REFUSES to query when either a
+stray name or a refused value is present:
+  `This link uses a name|names this tool has no filter for: X. It was probably written for
+   an older version of this page`
+  `This link asks for Label value, which is not a value this data holds`
+joined ". " and closed:
+  `, so no query was run rather than answering with all ${TOTAL} reports.`
+#count becomes `<strong>No search was run.</strong>`, heroData=null, Export and Copy
+disabled. A 400 from the server folds into the SAME path, so there is ONE VOICE for
+"no number was produced".
+
+
+# What to return
+
+One self-contained block: markup, CSS and JavaScript, dropping into the existing
+page below the search half, inside the same IIFE, using the existing helpers. Say
+where the markup goes. Assume the other brief provides params(), setFilter(),
+search(), the chips and the record table; call them, do not redefine them.
+
+What I will check in a browser:
+
+- 20 tab buttons with the labels the specification names, in three named groups.
+- All 16 panel ids present.
+- Switching to a tab fetches its endpoint once, and not before.
+- With a zone filter set, a panel in the "ignore" group says so in its own words
+  and still reports the whole-corpus figure.
+- Every select the specification names, populated from the API, sorted the way it
+  says, and labelled with its report count.
+
+Write the code. Explain only where you departed from the specification and why.
+No preamble.

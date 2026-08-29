@@ -245,3 +245,38 @@ the parent's whole citation model, so this is not cosmetic.
 The harness also caught its own first error: it had probed the parent with the
 clone's vocabulary and reported the parent as having no WHO rail. Recorded here
 because a comparison tool that flatters one side is worse than none.
+
+## F7. Counting features was not enough either (29 Aug 2026)
+
+F6 counted elements and found the lower half of the page missing. That was still
+too coarse. `build/parity_options.py` enumerates the actual lists: every select
+with all of its options, every button label, every tab, every heading, every
+endpoint each page calls.
+
+                        parent    clone
+  select menus              22        1
+  options inside them   11,444        6
+  tabs                      20        4
+  buttons                   50       26
+  headings                  45        1
+  panels                    16        0
+
+Twenty-two menus are missing outright, among them operator with 3,947 options,
+condition with 3,131, make with 248 and ata with 49. Every one is built at boot
+from `/api/facets`, sorted by report count, each option labelled with its own
+count so a reader can see what is worth choosing before choosing it.
+
+The endpoint lists explain a figure from F6 that had looked mysterious. The clone
+calls `/z/hero`, `/z/trend`, `/z/facets` and `/z/api/codes`; it never calls
+`/api/glossary`. Without it there is no code table, which is why 396 decoded
+abbreviations in the parent's write-ups came out as 0. The missing glossary was
+not a rendering fault. The page had never asked for the meanings.
+
+Three lessons, in order of how expensive they were:
+
+- A count of features says a table exists. A count of options says the table can
+  be operated. Only the second is parity.
+- The harness must enumerate, not summarise. "Filters missing" is a note; "#operator,
+  3,947 options, missing" is a work item.
+- Both harnesses are in `build/` and run in about ninety seconds, so this is
+  checkable on every change rather than argued about.

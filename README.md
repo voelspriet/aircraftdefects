@@ -268,6 +268,7 @@ the difference.
 
 | | |
 |---|---|
+| [docs/PLAN.md](docs/PLAN.md) | the five phases, what is done and what is not |
 | [MODEL_USE.md](MODEL_USE.md) | every place GLM-5.3-Flash runs, what it may and may not do there, and what it cost |
 | [PREWASH_METHOD.md](PREWASH_METHOD.md) | the technique, and why writing your own prompt defeats it |
 | [HACKATHON_LOG.md](HACKATHON_LOG.md) | every step in order, including what went wrong |

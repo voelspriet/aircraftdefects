@@ -1,0 +1,14 @@
+{
+  "seconds": 216.3,
+  "usage": {
+    "completion_tokens": 12301,
+    "completion_tokens_details": {
+      "reasoning_tokens": 7821
+    },
+    "prompt_tokens": 12311,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "total_tokens": 24612
+  }
+}

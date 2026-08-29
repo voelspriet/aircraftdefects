@@ -54,20 +54,53 @@ def key():
     return k
 
 
-def glm(prompt, schema=None, effort="low", max_tokens=1200):
-    """One call. Structured output where a schema is given, so the model cannot
-    ramble into a field that will be rendered as fact."""
+def glm(prompt, schema=None, effort="low", max_tokens=1200, tools=None):
+    """One call, streamed.
+
+    Streaming is not a nicety here. Without it the request holds a connection open
+    while the model thinks and writes, and nothing crosses the wire until the very
+    last moment. Their gateway closed two such requests on us: a 502 from
+    alibaba-ga on one, a reset connection on the retry, both on jobs that ran long.
+    The first thing I blamed was prompt size, wrongly: the run that succeeded had
+    three times the input of the run that failed. What separated them was how long
+    the line stayed silent.
+
+    With stream=True the tokens arrive as they are produced, no proxy sees an idle
+    socket, and a job may take as long as it needs. The vendor recommends it for
+    this model for exactly this reason.
+    """
     body = {"model": MODEL, "temperature": 1, "top_p": 0.95,
             "thinking": {"type": "enabled", "clear_thinking": False},
             "reasoning_effort": effort, "max_tokens": max_tokens,
+            "stream": True,
             "messages": [{"role": "user", "content": prompt}]}
     if schema:
         body["response_format"] = {"type": "json_object"}
-    r = requests.post(ZAI, json=body, timeout=180, headers={
+    if tools:
+        body["tools"] = tools
+        body["tool_stream"] = True
+
+    r = requests.post(ZAI, json=body, timeout=1800, stream=True, headers={
         "Authorization": "Bearer " + key(), "Content-Type": "application/json"})
     if r.status_code != 200:
         raise RuntimeError("z.ai %s %s" % (r.status_code, r.text[:200]))
-    txt = r.json()["choices"][0]["message"].get("content") or ""
+
+    out = []
+    for line in r.iter_lines(decode_unicode=True):
+        if not line or not line.startswith("data:"):
+            continue
+        chunk = line[5:].strip()
+        if chunk == "[DONE]":
+            break
+        try:
+            d = json.loads(chunk)
+        except ValueError:
+            continue
+        for ch in d.get("choices", []):
+            piece = (ch.get("delta") or {}).get("content")
+            if piece:
+                out.append(piece)
+    txt = "".join(out)
     if not schema:
         return txt
     m = re.search(r"\{.*\}", txt, re.S)

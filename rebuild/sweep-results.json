@@ -1,0 +1,252 @@
+{
+ "summary": {
+  "scanned": 600,
+  "flagged_by_first_pass": 71,
+  "both_passes_agreed": 40,
+  "passes_disagreed": 31,
+  "seconds": 845,
+  "note": "Two independent readings per report, field order reversed between them. Only agreement reaches the ledger. Where the two passes split, that is recorded here and nothing is published."
+ },
+ "agreed": [
+  {
+   "id": "AALA202504017775",
+   "agreed": true,
+   "field": "Stage of operation",
+   "note": "The filed stage of operation says In cruise. The write-up says in descent"
+  },
+  {
+   "id": "CALA2025032703244",
+   "agreed": true,
+   "field": "Stage of operation",
+   "note": "The filed stage of operation says On the ground, in inspection or maintenance. The write-up says The condition (fwd entry door warning light false illumination) occurred in flight at 1000 ft AGL after takeoff, per the narrative"
+  },
+  {
+   "id": "CALA2025022402462",
+   "agreed": true,
+   "field": "Nature of condition",
+   "note": "The filed nature of condition says No test. The write-up says Emergency light power packs were checked and found less than minimum 15 minutes, troubleshooting was performed, and a replacement power pack passed an operational check per AMM 33-51-06-200-801 \u2014 tests/checks were clearly performed."
+  },
+  {
+   "id": "CALA2025043004337",
+   "agreed": true,
+   "field": "Stage of operation",
+   "note": "The filed stage of operation says On the ground, in inspection or maintenance. The write-up says The condition occurred during gear retraction, which happens in flight \u2014 not during ground inspection or maintenance"
+  },
+  {
+   "id": "DALA2026051202976",
+   "agreed": true,
+   "field": "Part condition",
+   "note": "The filed part condition says DETACHED. The write-up says the selector handle/lever was found stuck, was cleaned, and then operated correctly (arm/disarm) \u2014 it was not detached"
+  },
+  {
+   "id": "SWIA202507210306",
+   "agreed": true,
+   "field": "Part",
+   "note": "The filed part says STRINGER. The write-up says skin damage (the narrative states the underlying SKIN was found damaged and repaired, not the stringer)"
+  },
+  {
+   "id": "CALA2025042104051",
+   "agreed": true,
+   "field": "System",
+   "note": "The filed system says Fuselage Main, Longeron/Stringer. The write-up says Corrosion found at stringer S-36L in the LH and RH stabilizer torsion box compartments (internal), i.e., the stabilizer, not the fuselage main structure"
+  },
+  {
+   "id": "FDEA202504280665",
+   "agreed": true,
+   "field": "Part condition",
+   "note": "The filed part condition says CORRODED. The write-up says The narrative describes the seat track crown as WORN, with wear exceeding allowable limits per SRM, and makes no mention of corrosion"
+  },
+  {
+   "id": "CALA2026031014452",
+   "agreed": true,
+   "field": "Stage of operation",
+   "note": "The filed stage of operation says On the ground, in inspection or maintenance. The write-up says The odor occurred in flight - during climb, shortly after takeoff, and lasted several minutes before clearing"
+  },
+  {
+   "id": "SWIA202501130",
+   "agreed": true,
+   "field": "System",
+   "note": "The filed system says DC Power Distribution System. The write-up says COMPLETE LOSS OF AC POWER IN FLIGHT"
+  },
+  {
+   "id": "SIMA20260505001",
+   "agreed": true,
+   "field": "Nature of condition",
+   "note": "The filed nature of condition says A warning went off. The write-up says NO EICAS MESSAGE DISPLAYED"
+  },
+  {
+   "id": "DXTA2026042807820",
+   "agreed": true,
+   "field": "Nature of condition",
+   "note": "The filed nature of condition says A warning went off. The write-up says The main cabin door exterior handle was difficult to open and close, with noticeable binding while opening the door handle"
+  },
+  {
+   "id": "FDEA202511252206",
+   "agreed": true,
+   "field": "Nature of condition",
+   "note": "The filed nature of condition says No test. The write-up says PERFORMED EMERGENCY LIGHTS TEST IAW AMM 33-51-00-5"
+  },
+  {
+   "id": "GTIA2025080739037",
+   "agreed": true,
+   "field": "Stage of operation",
+   "note": "The filed stage of operation says Descending. The write-up says During climb out"
+  },
+  {
+   "id": "VNAA202608210005",
+   "agreed": true,
+   "field": "Part condition",
+   "note": "The filed part condition says CRACKED. The write-up says A dent to the slat outer skin, repaired per REO 670-57-42-2551-REV-A \u2014 no crack is described anywhere in the narrative"
+  },
+  {
+   "id": "CALA2026051516299",
+   "agreed": true,
+   "field": "Nature of condition",
+   "note": "The filed nature of condition says No test. The write-up says A battery pack capacity check per AMM 33-51-06-200-801 was performed twice, a retest was done, and troubleshooting per WDM 33-51-34-1 and 33-51-61-4 was performed, which found three battery packs would not hold a charge"
+  },
+  {
+   "id": "EE4Y2025112823555",
+   "agreed": true,
+   "field": "Part condition",
+   "note": "The filed part condition says WORN. The write-up says A CRACK WAS FOUND ON RH WING FIXED LEADING EDGE SKIN"
+  },
+  {
+   "id": "CALA2026081818706",
+   "agreed": true,
+   "field": "Part condition",
+   "note": "The filed part condition says FAULTY. The write-up says No faults found \u2014 multiple BITE checks showed no faults, the fault could not be duplicated, and the RH flow control card was replaced only as a precautionary measure with 'no defects noted' on the ops check."
+  },
+  {
+   "id": "R61A2025070200274",
+   "agreed": true,
+   "field": "Part condition",
+   "note": "The filed part condition says GOUGED. The write-up says CRACK INDICATION (confirmed crack in the link fitting, damage removed by reaming)"
+  },
+  {
+   "id": "VNAA2025111411101",
+   "agreed": true,
+   "field": "Stage of operation",
+   "note": "The filed stage of operation says On the ground, in inspection or maintenance. The write-up says Odor occurred in flight - strongest during takeoff and twice during cruise flight; ground maintenance was only the subsequent corrective action"
+  },
+  {
+   "id": "AALA202508047550",
+   "agreed": true,
+   "field": "Part condition",
+   "note": "The filed part condition says NO DISCREPANCY. The write-up says The fitting was damaged/worn and 'REQUIRES REPLACEMENT' per EA 365943, and was replaced \u2014 i.e., a definite discrepancy existed"
+  },
+  {
+   "id": "CALA2026071017660",
+   "agreed": true,
+   "field": "Stage of operation",
+   "note": "The filed stage of operation says Climbing. The write-up says Taxiing"
+  },
+  {
+   "id": "DXTA2026010606413",
+   "agreed": true,
+   "field": "What the crew did",
+   "note": "The filed what the crew did says Aborted take-off. The write-up says The event occurred while taxiing, just prior to applying take-off thrust (just above idle). The crew applied higher thrust for taxi and then brought the throttles back to idle, which cleared the CAS messages. No take-off roll was begun, so no take-off was aborted."
+  },
+  {
+   "id": "DXTA2025123106347",
+   "agreed": true,
+   "field": "Nature of condition",
+   "note": "The filed nature of condition says No test. The write-up says OPS CHECKS GOOD AT THIS TIME (a functional/operational check was performed)"
+  },
+  {
+   "id": "WX0A2025092232572",
+   "agreed": true,
+   "field": "Nature of condition",
+   "note": "The filed nature of condition says No test. The write-up says Performed an operational test of cabin emergency lights and signs IAW MM 33-51-00-710-009-A, which found the L2 and R2 exit signs did not illuminate"
+  },
+  {
+   "id": "DALA2025042103038",
+   "agreed": true,
+   "field": "Part",
+   "note": "The filed part says FITTING (with part condition CRACKED, i.e., the fitting is the cracked part). The write-up says The cracked item is the FIN 80VU (antenna fin); it is in contact with the structure lower lateral fitting RH side, which is not described as cracked"
+  },
+  {
+   "id": "UIEA2025062500813",
+   "agreed": true,
+   "field": "Nature of condition",
+   "note": "The filed nature of condition says No test. The write-up says A test was performed that found cartridge resistance out of limits, and after replacement another test was performed with satisfactory results"
+  },
+  {
+   "id": "IPXA2026040163446",
+   "agreed": true,
+   "field": "Stage of operation",
+   "note": "The filed stage of operation says Taxiing or ground handling. The write-up says The narrative plainly states the odor occurred during START UP AND TAKEOFF, which contradicts the coded stage of taxiing/ground handling (takeoff is a distinct stage of operation)."
+  },
+  {
+   "id": "CALA2025081207612",
+   "agreed": true,
+   "field": "Stage of operation",
+   "note": "The filed stage of operation says On the ground, in inspection or maintenance. The write-up says AIRBORNE WITH ASSOCIATED ODOR IN FLIGHT DECK AND CABIN \u2014 the fault occurred in flight"
+  },
+  {
+   "id": "DALA2025051503754",
+   "agreed": true,
+   "field": "Stage of operation",
+   "note": "The filed stage of operation says On the ground, in inspection or maintenance. The write-up says The condition started on short final, during flight (fumes/burning rubber smell reported by flight attendants upon reaching the gate)"
+  },
+  {
+   "id": "DXTA2026010906483",
+   "agreed": true,
+   "field": "Stage of operation",
+   "note": "The filed stage of operation says On the ground, in inspection or maintenance. The write-up says Upon landing and taxiing in \u2014 the door failed during normal arrival/ground operation, before any inspection or maintenance began"
+  },
+  {
+   "id": "CALA2026052616536",
+   "agreed": true,
+   "field": "Nature of condition",
+   "note": "The filed nature of condition says No test. The write-up says The condition was found through testing: an ops check revealed the emergency pathway lights did not operate, and a continuity check of the power supply fuses found a bad fuse"
+  },
+  {
+   "id": "SWAA2025040721566",
+   "agreed": true,
+   "field": "Stage of operation",
+   "note": "The filed stage of operation says Taxiing or ground handling. The write-up says ENROUTE NOTICED ELECTRICAL BURN SMELL... LANDED AT NEAREST SUITABLE WHICH WAS DTW"
+  },
+  {
+   "id": "DALA2025092907082",
+   "agreed": true,
+   "field": "Stage of operation",
+   "note": "The filed stage of operation says Taxiing or ground handling. The write-up says The fumes occurred in the flight deck and forward cabin in flight, worsening over 3-5 minutes until #2 engine and packs were shut down, forcing a gate return"
+  },
+  {
+   "id": "CALA2026011412947",
+   "agreed": true,
+   "field": "Part condition",
+   "note": "The filed part condition says UNKNOWN. The write-up says Inspected and found satisfactory \u2014 no girt material came out, latch assembly did not break, reinspection OK to service"
+  },
+  {
+   "id": "2025FA0000003",
+   "agreed": true,
+   "field": "Stage of operation",
+   "note": "The filed stage of operation says On the ground, in inspection or maintenance. The write-up says During taxi out and takeoff, in flight operation (the surging occurred while applying takeoff power)"
+  },
+  {
+   "id": "FDEA202507111179",
+   "agreed": true,
+   "field": "Part condition",
+   "note": "The filed part condition says DENTED. The write-up says PUNCTURED"
+  },
+  {
+   "id": "DXTA2026010806461",
+   "agreed": true,
+   "field": "Nature of condition",
+   "note": "The filed nature of condition says No test. The write-up says The narrative plainly describes a defect found and verified through testing: emergency lights failed the arm-position functional check, failed again after two charge procedures, and passed the post-repair ops check."
+  },
+  {
+   "id": "CALA2025060505279",
+   "agreed": true,
+   "field": "Part condition",
+   "note": "The filed part condition says FAULTED. The write-up says Battery pack was near its life limit (not failed) and was removed and replaced as a life-limit item per AMM"
+  },
+  {
+   "id": "FDEA202606010665",
+   "agreed": true,
+   "field": "Part condition",
+   "note": "The filed part condition says FAILED. The write-up says Old bottle was not blown; both tests passed and the discharge light extinguished before landing, indicating no actual failure of the bottle"
+  }
+ ]
+}

@@ -37,6 +37,21 @@ number stands, and both failures are in the repository rather than deleted.
 What replaced the number is a ledger of individual cases which states, in its first
 paragraph, that its size measures attention rather than prevalence.
 
+## What was built when
+
+The hackathon ran 28 August 10:00 to 1 September. The timeline is stated plainly
+rather than blurred:
+
+| | |
+|---|---|
+| **Before**, 26 to 27 August | aircraftdefects.com itself: the ingest, the FAA code tables, the search, the four drawn rails. Existing work, and the substrate this builds on. |
+| **During**, 28 to 29 August | everything in this repository. The design session, the five-question surface at /z, the plain-English gloss, the abbreviation table, the code-disagreement notice, the conflicts ledger, the measurement and its retraction, and the interface GLM wrote from the parent's source. |
+
+Two fixes to the parent tool were made during the window as a consequence of this
+work, and are noted for completeness: a count frozen at 170,201 while the database
+held 1,757,828, and a claim that the file contains no flying hours when it carries
+airframe hours in 79% of records. Both were found by building on it.
+
 ## Links
 
 - Live: https://aircraftdefects.com/z/

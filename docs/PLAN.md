@@ -94,3 +94,40 @@ The test for anything here: if a database query could do it, it does not belong.
 - [ ] a full pass over the corpus, once the instrument is calibrated. Measured:
       865 tokens and 1.42s a report, so 1.52 billion tokens and 2.9 days at sixty
       concurrent. Not run, and [MODEL_USE.md](../MODEL_USE.md) says why.
+
+---
+
+## F. Artwork the data earns — **pending**
+
+The parent tool draws four things and draws them well: a side view of an aircraft
+shaded by where it gets written up, a month strip, ladders of airlines and tails,
+a block bar of what the crew was forced to do. Those are instruments. This is
+something else.
+
+The test: **the picture has to be made of the data, not decorated with it.** A
+chart with a nice colour is a chart. A drawing whose shape only exists because
+1,757,828 particular records exist is artwork the data earned.
+
+Candidates, none built yet:
+
+- [ ] **The airframe's own life.** One aircraft, every write-up it ever collected,
+      laid along its own hours rather than along the calendar. 100,000 hours of a
+      747 as a single line, with each defect where it happened in that life. Two
+      aircraft of the same type side by side are then directly comparable in a way
+      no date axis allows.
+- [ ] **Thirty years of one fuselage.** The side view the parent draws, but as
+      thirty-two frames, one per year. Where the trouble sits moves. Nobody has
+      seen that move.
+- [ ] **What the trade calls it.** The vocabulary of one failure, drawn as the
+      words themselves at the size mechanics use them. Not a word cloud of common
+      English: the private thicket of a trade, sized by frequency in 1.5 million
+      write-ups.
+- [ ] **The day the fleet flinched.** Same operator, same system, several aircraft,
+      one day. Drawn as the aircraft involved, on that date, so the shape of a
+      batch of parts going wrong is visible as a shape.
+- [ ] **The paperwork gap.** Reports arrive up to 1,201 days after the event. Drawn
+      as the distance between when something happened and when it was written down,
+      which is a picture of an institution's reflexes.
+
+The one rule, same as everywhere else: where a picture can only place part of the
+selection, it says so underneath, in the same size type.

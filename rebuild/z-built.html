@@ -2928,9 +2928,15 @@ function drawHero(d, phone){
      the standing sentence promised five days of reports that do not exist. The
      same shape of error as captioning a selection "1 Jan to 31 Dec" over a count
      that stopped in August. Guessed only when nothing is sent. */
+  /* This is the FILE's extent, not the selection's, and the two are different
+     things. span is the selection: with a zone filter it starts at that zone's
+     first report, and reading it here made January 1995 look like a part month
+     and print "covers 1 to 31 January, 31 days against 31".
+     lag.file_to is the file's end whatever is filtered, and the months array is
+     always the whole corpus, so its first entry is the file's start. */
   heroRange=d.range||{
-    from:(d.span&&d.span.from)||((d.months&&d.months.length)?d.months[0].m+"-01":null),
-    to:(d.span&&d.span.to)||(d.lag&&d.lag.file_to)||d.published||d.asof||
+    from:(d.months&&d.months.length)?d.months[0].m+"-01":((d.span&&d.span.from)||null),
+    to:(d.lag&&d.lag.file_to)||d.published||d.asof||
        ((d.months&&d.months.length)?d.months[d.months.length-1].m+"-"+String(lastDay(d.months[d.months.length-1].m)).padStart(2,"0"):null)
   };
   var openKey=heroKey(), nar=narrowed(), h="";
@@ -3113,9 +3119,17 @@ function whenMargin(d){
   ms.forEach(function(m){
     if(!partialMonth(m.m,d)) return;
     var c=coveredDays(m.m), mm=+m.m.slice(5,7), yy=m.m.slice(0,4);
+    if(c.days>=c.inMonth) return;   /* a whole month is not a part month, whatever flagged it */
     notes.push('<span class="mr">'+HERO_MONTHS[mm-1]+' '+yy+' covers '+(c.s===1?"1":c.s)+' to '+c.e+' '+HERO_MONTHS[mm-1]
       +', so its bar counts '+num(c.days)+' days against '+num(c.inMonth)+' in a whole one</span>');
   });
+  /* the airframe list is the 900 most-reported of 54,634, and that is true
+     whichever rail is showing. Computed from the response rather than from the
+     WHO renderer, which only runs when WHO is open. */
+  var sw=(d&&d.swarm)||[], swT=(d&&(d.swarm_total!=null?d.swarm_total:d.aircraft))||0;
+  if(swT>sw.length&&sw.length)
+    notes.push('<span class="mr">the tail list shows the '+num(sw.length)+
+      ' most-reported aircraft out of '+num(swT)+'; the airline list counts every report</span>');
   notes.push('<span>counts are of reports filed, not of flights</span>');
   return '<div class="margin">'+notes.join("<br>")+'</div>';
 }
@@ -3202,8 +3216,12 @@ function railWho(d,open,nar){
       +'<div class="col"><div class="ch">Airframes</div>'+trows+'</div></div>'
       +'<div class="hint">Click an airline or an airframe to follow it.</div>'
       +'<div class="reading">'+whoReading(d)+'</div>'
-      +'<div class="margin"><span class="mr">the tail list shows the '+num(swarm.length)+' most-reported aircraft out of '+num(swT)
-      +'; the airline list counts every report</span><br><span>counts are of reports filed, not of flights</span></div>';
+      ;
+    /* the cap is true whether or not this rail is open, so it belongs to the
+       instrument's margin. Kept here it appeared only while WHO was showing,
+       and a reader on the aircraft never learned that the airframe list is the
+       900 most-reported rather than all of them. */
+    ;
   }
   return '<div class="rail'+(open?" open":"")+'" data-rail="whose">'+g+body+'</div>';
 }

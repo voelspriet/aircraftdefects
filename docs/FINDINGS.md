@@ -710,3 +710,31 @@ inside the WHEN rail**, so the notes that a part month counts 26 days against 31
 and that these are reports filed rather than flights, vanished the moment a
 reader opened the aircraft. Both are true whichever rail is open; the margin
 belongs to the instrument.
+
+## F22. The caveats disappeared when you were not looking at them (29 Aug 2026)
+
+Two of the instrument's three margin notes were rendered inside the rail they
+came from, so they vanished the moment a reader opened another one.
+
+**The part-month note** lived in the WHEN renderer. Open the aircraft and the
+warning that August 2026 counts 26 days against 31 was gone, while the bar it
+warns about was still on screen a few pixels above.
+
+**The cap disclosure** lived in the WHO renderer, and it is the more serious of
+the two: the airframe list is the 900 most-reported of 54,634. A reader on any
+other rail never learned that, and the WHO ladder is exactly the kind of list
+someone quotes as "the worst aircraft".
+
+Both are true whichever rail is open. They belong to the instrument.
+
+And a fault I introduced myself while fixing F21. Taking the file's extent from
+`span` was wrong: `span` is the *selection's* extent, so with a zone filter it
+starts at that zone's first report, in November 2001, and January 1995 was then
+flagged as a part month reading "covers 1 to 31 January, so its bar counts 31
+days against 31 in a whole one". A caveat that contradicts itself in its own
+sentence.
+
+`lag.file_to` is the file's end whatever is filtered, and the months array is
+always the whole corpus, so its first entry is the file's start. There is now
+also a guard that refuses to call a month partial when its covered days equal its
+length, whatever flagged it.

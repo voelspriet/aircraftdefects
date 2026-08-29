@@ -250,9 +250,12 @@ from aircraftdefects.com, rebuilt line by line by GLM-5.3-Flash.">
 .phcell.pad{background:repeating-linear-gradient(45deg,#efeae0 0 4px,var(--paper) 4px 8px)}
 .phcell.taken,.phcell.lit{box-shadow:inset 0 0 0 2px var(--rust)}
 
-@media (max-width:760px){.rail .track.two{grid-template-columns:1fr}.rail>.reading{grid-column:1}}
+/* the reference drops to one column near 960, not 760. Held to 760 the
+   drawing was squeezed into whatever the legend left over: 312px against
+   the reference's 640 at a 900px window, a third of the picture. */
+@media (max-width:960px){.rail .track.two{grid-template-columns:1fr}.rail>.reading{grid-column:1}}
 
-<style>
+
 #sdControls{margin:16px 0 0;font:15px/1.45 Georgia,serif;color:#2b2622}
 #sdControls label{display:block;font:600 11px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#6f6a63;margin-bottom:3px}
 #sdControls input,#sdControls select{font:14px/1.3 system-ui,sans-serif;padding:7px 9px;border:1px solid #cfc6bd;background:#fff;border-radius:3px;max-width:100%}
@@ -308,7 +311,7 @@ from aircraftdefects.com, rebuilt line by line by GLM-5.3-Flash.">
 option.empty{color:#a49c93}
 @keyframes sdflash{from{background:#fbe9d7}to{background:#fff}}
 #q.flash{animation:sdflash 1.4s}
-</style>
+
 
 
 #rr-sec{margin:26px auto 0;max-width:1460px;padding:0 16px}
@@ -323,7 +326,11 @@ option.empty{color:#a49c93}
 .rr-count strong{color:#22201c;font-size:15px}
 .rr-note{background:#fdf3e0;border:1px solid #ecd9b0;border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.5;margin:0 0 8px;color:#4d4433}
 .rr-hint{font-size:12px;color:#8b857a;margin:0 0 6px}
-.rr-scroll{overflow-x:auto;border:1px solid #d8d2c6;border-radius:8px;background:#fffdf8}
+/* the table is 1080px wide by design and the box must clip it, or the whole
+   page scrolls sideways instead of the table. Measured at 820px: the body
+   ran to 861. */
+.rr-scroll{overflow-x:auto;max-width:100%;border:1px solid #d8d2c6;border-radius:8px;background:#fffdf8}
+#rr-sec{max-width:100%;min-width:0;overflow:hidden}
 table.reps{border-collapse:collapse;width:100%;min-width:1080px;font-size:13.5px;color:#22201c}
 table.reps th{text-align:left;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#6f6a60;background:#f6f1e6;border-bottom:2px solid #22201c;padding:8px;position:sticky;top:0;z-index:3}
 table.reps th.mid,table.reps td{position:static}
@@ -1793,10 +1800,16 @@ if(!document.getElementById("hero-css2")){
 .zero .zghost{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ash);margin-top:4px}
 tr.spine.lit td,tr[data-month].lit td{background:#fbe6dc}
 
+/* The reference drops the drawing out of its two columns near 960, not 760.
+   Held to 760 the aircraft got whatever the 330px legend left over: 312px at a
+   900px window against the reference's 640, a third of the picture. */
+@media(max-width:960px){
+  .rail .track.two{grid-template-columns:minmax(0,1fr)}
+  .rail>.reading{grid-column:1}
+}
 @media(max-width:760px){
   .rail{grid-template-columns:minmax(0,1fr)}
   .rail>.track,.rail>.hint,.rail>.reading,.rail>.margin{grid-column:1}
-  .rail .track.two{grid-template-columns:minmax(0,1fr)}
   .orow,.orow.wide{grid-template-columns:100px minmax(0,1fr) 46px}
 }
 @media(max-width:479px){.specimen{display:none}}
@@ -2527,12 +2540,13 @@ railWhere = function(d, open, nar){
   try{ HERO.zones = buildZones(); }catch(e){ HERO.zones = []; }
   var val = whereVal ? whereVal() : "all zones";
   var g = gutter("WHERE", "on the aircraft", esc(val), open);
-  var body = open
-    ? '<div class="track two">' + acSVG() +
-      '<div>' + legendHTML() + zonenoteHTML() + '</div></div>' +
-      '<p class="reading">' + whereReadingHTML() + '</p>'
-    : '<div class="track">' + restWhere() + '</div>';
-  return '<div class="rail'+(open?" open":"")+'" data-rail="where">'+g+body+'</div>';
+  /* restWhere() already returns a whole rail, gutter and all, so wrapping it
+     drew the rail twice: the layout run counted where,where in one page. */
+  if(!open) return restWhere();
+  return '<div class="rail open" data-rail="where">' + g +
+    '<div class="track two">' + acSVG() +
+    '<div>' + legendHTML() + zonenoteHTML() + '</div></div>' +
+    '<p class="reading">' + whereReadingHTML() + '</p></div>';
 };
 
 /* ---- 05-panels ---- */

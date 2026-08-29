@@ -9,7 +9,11 @@ import pathlib, re, subprocess, sys
 HERE = pathlib.Path(__file__).parent
 page = (HERE / "01-instrument.page.html").read_text()
 
-css = re.search(r"<style>\n(/\* -+\n   the instrument's clothes.*?)</style>", page, re.S).group(1)
+# Every style block, not only the instrument's own. The desk's CSS is appended
+# to the same element by the splice, and matching one comment banner copied
+# the first half of it: /z had the table markup and none of its rules, so the
+# table overflowed the page while /z/rebuilt was fine.
+css = "\n".join(re.findall(r"<style>(.*?)</style>", page, re.S))
 js  = re.search(r"<script>\n(\(function\(\)\{\n\"use strict\";.*)</script>", page, re.S).group(1)
 MOUNT = '<div id="hero-root"><div id="hero"></div></div>'
 

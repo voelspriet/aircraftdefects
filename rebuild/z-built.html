@@ -150,6 +150,8 @@ details.card[open]>summary{margin-bottom:8px}
 }
 </style>
 <style>
+html,body{margin:0;padding:0;background:#f2eee6}
+
 /* ---------------------------------------------------------------------------
    the instrument's clothes. paper, ash, ink; rust is reserved for a chosen
    selection and appears nowhere else. everything is scoped under #hero-root
@@ -393,9 +395,12 @@ details.card[open]>summary{margin-bottom:8px}
 .phcell.pad{background:repeating-linear-gradient(45deg,#efeae0 0 4px,var(--paper) 4px 8px)}
 .phcell.taken,.phcell.lit{box-shadow:inset 0 0 0 2px var(--rust)}
 
-@media (max-width:760px){.rail .track.two{grid-template-columns:1fr}.rail>.reading{grid-column:1}}
+/* the reference drops to one column near 960, not 760. Held to 760 the
+   drawing was squeezed into whatever the legend left over: 312px against
+   the reference's 640 at a 900px window, a third of the picture. */
+@media (max-width:960px){.rail .track.two{grid-template-columns:1fr}.rail>.reading{grid-column:1}}
 
-<style>
+
 #sdControls{margin:16px 0 0;font:15px/1.45 Georgia,serif;color:#2b2622}
 #sdControls label{display:block;font:600 11px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#6f6a63;margin-bottom:3px}
 #sdControls input,#sdControls select{font:14px/1.3 system-ui,sans-serif;padding:7px 9px;border:1px solid #cfc6bd;background:#fff;border-radius:3px;max-width:100%}
@@ -451,6 +456,88 @@ details.card[open]>summary{margin-bottom:8px}
 option.empty{color:#a49c93}
 @keyframes sdflash{from{background:#fbe9d7}to{background:#fff}}
 #q.flash{animation:sdflash 1.4s}
+
+
+
+#rr-sec{margin:26px auto 0;max-width:1460px;padding:0 16px}
+.cut{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:baseline;padding:8px 2px 10px}
+.cut .cs{font-size:14.5px;color:#22201c}
+.cm{display:flex;gap:6px 14px;align-items:baseline;flex-wrap:wrap;font-size:12px;color:#8b857a}
+.cm .rr-meta{opacity:.5}
+.cm .rr-meta.lit{opacity:1;color:#8a3d12;font-weight:600}
+.backup{background:none;border:0;border-bottom:1px solid #c9c2b2;padding:0 0 1px;font:inherit;font-size:12px;color:#8a3d12;cursor:pointer}
+.backup:hover{border-color:#8a3d12}
+.rr-count{font-size:13px;color:#6f6a60;margin:0 0 8px}
+.rr-count strong{color:#22201c;font-size:15px}
+.rr-note{background:#fdf3e0;border:1px solid #ecd9b0;border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.5;margin:0 0 8px;color:#4d4433}
+.rr-hint{font-size:12px;color:#8b857a;margin:0 0 6px}
+/* the table is 1080px wide by design and the box must clip it, or the whole
+   page scrolls sideways instead of the table. Measured at 820px: the body
+   ran to 861. */
+.rr-scroll{overflow-x:auto;max-width:100%;border:1px solid #d8d2c6;border-radius:8px;background:#fffdf8}
+#rr-sec{max-width:100%;min-width:0;overflow:hidden}
+table.reps{border-collapse:collapse;width:100%;min-width:1080px;font-size:13.5px;color:#22201c}
+table.reps th{text-align:left;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#6f6a60;background:#f6f1e6;border-bottom:2px solid #22201c;padding:8px;position:sticky;top:0;z-index:3}
+table.reps th.mid,table.reps td{position:static}
+table.reps td{padding:7px 8px;border-bottom:1px solid #eee7d8;vertical-align:top}
+tr.spine td{position:sticky;top:44px;z-index:2;background:#efe8d8;font-weight:600;font-size:12.5px;letter-spacing:.04em;padding:6px 8px;border-bottom:1px solid #d8d2c6;color:#22201c}
+tr.spine .spinen{margin-left:10px;color:#8a3d12}
+td .sub{display:block;font-size:11.5px;color:#8b857a;margin-top:2px}
+.muted{color:#8b857a}
+.c{cursor:pointer}.c:hover{text-decoration:underline}
+.dull{color:#9a948a}
+.term{text-decoration:underline;text-underline-offset:2px;text-decoration-color:#a4501e;text-decoration-thickness:1px;cursor:help}
+.term.c{cursor:pointer}
+.absent{font-style:italic;color:#a09a8e}
+.jasc{color:#8a3d12;font-weight:600}
+.alsoc{font-size:11.5px;color:#6f6a60;margin-top:2px}
+.ghost{background:none;border:1px solid #c9c2b2;border-radius:6px;padding:3px 10px;font:inherit;font-size:12px;color:#22201c;cursor:pointer}
+.ghost:hover{border-color:#8a3d12;color:#8a3d12}
+tr.wrote td{padding:0 8px 8px}
+.wu{position:relative;border-left:3px solid #e4dccb;background:#fbf7ee;padding:6px 10px;margin-top:2px;cursor:pointer;font-size:13px;line-height:1.5;color:#3d3a33}
+.wu.clip .txt{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.wu.clip.long::after{content:"";position:absolute;left:0;right:0;bottom:16px;height:26px;background:linear-gradient(rgba(251,247,238,0),#fbf7ee);pointer-events:none}
+.wu-action{display:block;margin-top:4px}
+.wu-action b{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:#8a3d12}
+.wu-toggle{margin-top:5px}
+mark.hit{background:#ffe9c9;color:inherit;border-radius:2px;padding:0 1px}
+.rr-empty td{padding:44px 20px;text-align:center;color:#6f6a60;font-size:14px}
+.rr-more{padding:12px 2px 30px}
+#tip{position:fixed;display:none;max-width:340px;background:#26231e;color:#f4efe2;font-size:12.5px;line-height:1.45;padding:8px 10px;border-radius:6px;z-index:80;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+#tip b{color:#ffd9a8}
+#case-box{position:fixed;inset:0;background:rgba(34,32,28,.45);display:none;z-index:60;padding:24px 12px;overflow-y:auto}
+#case-box.open{display:block}
+.case-panel{max-width:860px;margin:0 auto;background:#fffdf8;border-radius:12px;box-shadow:0 18px 60px rgba(0,0,0,.35);padding-bottom:30px;outline:none}
+.case-bar{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:rgba(255,253,248,.94);backdrop-filter:blur(4px);border-bottom:1px solid #e4dccb;padding:10px 18px}
+.case-step{display:flex;align-items:center;gap:8px;margin-right:auto;font-size:12.5px;color:#6f6a60;white-space:nowrap}
+.case-actions{display:flex;gap:6px;flex-wrap:wrap}
+.route{padding:14px 18px 0;font-size:12.5px;color:#6f6a60}
+.bigq{margin:14px 18px;padding:14px 16px;border-left:3px solid #a4501e;background:#fbf7ee;font-size:14.5px;line-height:1.55;color:#22201c}
+.pnotes{margin:0 18px;padding:10px 16px 10px 32px;background:#f4efe2;border-radius:8px;font-size:13px;line-height:1.5;color:#3d3a33}
+.pnotes li{margin:4px 0}
+.eyebrow-k{margin:18px 18px 2px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8a3d12;font-weight:700}
+#case-title{margin:0 18px 4px;font-size:21px;line-height:1.3;color:#22201c}
+.lede{margin:2px 18px 10px;color:#6f6a60;font-size:13px}
+table.kv{width:calc(100% - 36px);margin:0 18px;border-collapse:collapse;font-size:13.5px;color:#22201c}
+table.kv th{text-align:left;width:172px;vertical-align:top;padding:8px 10px 8px 0;color:#6f6a60;font-weight:600;font-size:12px;border-bottom:1px solid #eee7d8}
+table.kv td{padding:8px 0;border-bottom:1px solid #eee7d8;vertical-align:top}
+table.kv .mut,table.kv td .mut{display:block;color:#8b857a;font-size:12px;margin-top:3px}
+table.kv hr{border:0;border-top:1px dashed #d8d2c6;margin:6px 0}
+.srclist{list-style:none;padding:0;margin:0}
+.srclist li{margin:5px 0}
+.srclist .mut{display:block;font-size:12px;color:#8b857a}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.95em}
+@media (max-width:1100px){
+  .wu{position:sticky;left:0;width:calc(100vw - 44px)}
+  .wu.clip .txt{-webkit-line-clamp:5}
+}
+@media (max-width:900px){
+  table.reps th:first-child{position:sticky;left:0;z-index:4}
+  table.reps td:first-child{position:sticky;left:0;background:#fffdf8;z-index:1}
+  tr.spine td:first-child{background:#efe8d8;z-index:2}
+}
+
+
 </style>
 </head>
 <body>
@@ -2725,10 +2812,16 @@ if(!document.getElementById("hero-css2")){
 .zero .zghost{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ash);margin-top:4px}
 tr.spine.lit td,tr[data-month].lit td{background:#fbe6dc}
 
+/* The reference drops the drawing out of its two columns near 960, not 760.
+   Held to 760 the aircraft got whatever the 330px legend left over: 312px at a
+   900px window against the reference's 640, a third of the picture. */
+@media(max-width:960px){
+  .rail .track.two{grid-template-columns:minmax(0,1fr)}
+  .rail>.reading{grid-column:1}
+}
 @media(max-width:760px){
   .rail{grid-template-columns:minmax(0,1fr)}
   .rail>.track,.rail>.hint,.rail>.reading,.rail>.margin{grid-column:1}
-  .rail .track.two{grid-template-columns:minmax(0,1fr)}
   .orow,.orow.wide{grid-template-columns:100px minmax(0,1fr) 46px}
 }
 @media(max-width:479px){.specimen{display:none}}
@@ -3459,12 +3552,13 @@ railWhere = function(d, open, nar){
   try{ HERO.zones = buildZones(); }catch(e){ HERO.zones = []; }
   var val = whereVal ? whereVal() : "all zones";
   var g = gutter("WHERE", "on the aircraft", esc(val), open);
-  var body = open
-    ? '<div class="track two">' + acSVG() +
-      '<div>' + legendHTML() + zonenoteHTML() + '</div></div>' +
-      '<p class="reading">' + whereReadingHTML() + '</p>'
-    : '<div class="track">' + restWhere() + '</div>';
-  return '<div class="rail'+(open?" open":"")+'" data-rail="where">'+g+body+'</div>';
+  /* restWhere() already returns a whole rail, gutter and all, so wrapping it
+     drew the rail twice: the layout run counted where,where in one page. */
+  if(!open) return restWhere();
+  return '<div class="rail open" data-rail="where">' + g +
+    '<div class="track two">' + acSVG() +
+    '<div>' + legendHTML() + zonenoteHTML() + '</div></div>' +
+    '<p class="reading">' + whereReadingHTML() + '</p></div>';
 };
 
 /* ---- 05-panels ---- */

@@ -99,10 +99,17 @@ if(!document.getElementById("hero-css2")){
 .zero .zghost{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ash);margin-top:4px}
 tr.spine.lit td,tr[data-month].lit td{background:#fbe6dc}
 
+/* The reference drops the drawing out of its two columns near 960, not 760.
+   Held to 760, the aircraft got whatever the 330px legend left over: 312px at a
+   900px window against the reference's 640, a third of the picture. The gutter
+   and the ladder rows keep the narrower breakpoint. */
+@media(max-width:960px){
+  .rail .track.two{grid-template-columns:minmax(0,1fr)}
+  .rail>.reading{grid-column:1}
+}
 @media(max-width:760px){
   .rail{grid-template-columns:minmax(0,1fr)}
   .rail>.track,.rail>.hint,.rail>.reading,.rail>.margin{grid-column:1}
-  .rail .track.two{grid-template-columns:minmax(0,1fr)}
   .orow,.orow.wide{grid-template-columns:100px minmax(0,1fr) 46px}
 }
 @media(max-width:479px){.specimen{display:none}}

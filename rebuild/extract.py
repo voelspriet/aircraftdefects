@@ -30,4 +30,10 @@ def parts(md):
         rest = re.sub(r"<style>.*?</style>|<script>.*?</script>", "", body, flags=re.S)
         rest = "\n".join(l for l in rest.splitlines() if l.strip())
         if rest.strip(): html += rest + "\n"
+    # A css fence may still carry a literal <style> line, and a js fence a
+    # <script> one. Left in, the nested tag closes the outer element early and
+    # every rule after it sits outside any stylesheet: the table lost its
+    # overflow box and the page scrolled sideways instead.
+    css = re.sub(r"</?style[^>]*>", "", css)
+    js  = re.sub(r"</?script[^>]*>", "", js)
     return html, css, js

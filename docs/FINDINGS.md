@@ -358,3 +358,36 @@ view, not a selection.
 restored values from the URL before building the options, so every select refused
 every value and marked it unresolved. The silent refusal the code exists to catch
 was being caused by the order it ran in.
+
+## F10. What only a layout run finds (29 Aug 2026)
+
+Counting elements says the parts are on the page. It says nothing about where
+they land. `build/parity_layout.py` loads both pages three times at two window
+widths, in three states, and compares geometry.
+
+Four faults, none of which any count would have shown.
+
+**The WHERE rail was drawn twice.** `restWhere()` already returns a whole rail,
+gutter and all, and the adapter wrapped it in another. In the run it reads as
+`when, where, where, whose, forced`: five rails on a four-rail instrument.
+
+**The page scrolled sideways at 820px.** The table is 1080px wide by design and
+its box is meant to clip it. The box had no rules at all, because the model's
+CSS fence opened with a literal `<style>` line; nested inside the page's own
+style element it closed it early, and every rule after it sat outside any
+stylesheet. The markup was there, the styling was not, and nothing reported it.
+
+**The drawing was a third of the size at 900px.** The reference drops the
+aircraft out of its two columns near 960; the rebuild held to 760, so between
+those widths the drawing got whatever the 330px legend left over: 312px against
+640. Both pages were "correct" at 1440 and on a phone, and wrong in between,
+which is the width a laptop actually uses.
+
+**The style rule that could not win.** The fix was applied to the static
+stylesheet, where it lost to the instrument's own CSS, injected into the head at
+runtime and therefore last in the cascade. The measurement said 312 three times
+in a row before the cause was found in the right file.
+
+Cumulative layout shift runs between 0.24 and 0.87 on **both** pages, so the text
+reflows as things load in each of them. That is not a regression, and it is not
+acceptable in either; it is now a known item rather than an impression.

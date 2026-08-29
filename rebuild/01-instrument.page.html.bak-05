@@ -250,7 +250,10 @@ from aircraftdefects.com, rebuilt line by line by GLM-5.3-Flash.">
 .phcell.pad{background:repeating-linear-gradient(45deg,#efeae0 0 4px,var(--paper) 4px 8px)}
 .phcell.taken,.phcell.lit{box-shadow:inset 0 0 0 2px var(--rust)}
 
-@media (max-width:760px){.rail .track.two{grid-template-columns:1fr}.rail>.reading{grid-column:1}}
+/* the reference drops to one column near 960, not 760. Held to 760 the
+   drawing was squeezed into whatever the legend left over: 312px against
+   the reference's 640 at a 900px window, a third of the picture. */
+@media (max-width:960px){.rail .track.two{grid-template-columns:1fr}.rail>.reading{grid-column:1}}
 </style>
 <div id="hero-root"><div id="hero"></div></div>
 <script>
@@ -1578,10 +1581,16 @@ if(!document.getElementById("hero-css2")){
 .zero .zghost{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ash);margin-top:4px}
 tr.spine.lit td,tr[data-month].lit td{background:#fbe6dc}
 
+/* The reference drops the drawing out of its two columns near 960, not 760.
+   Held to 760 the aircraft got whatever the 330px legend left over: 312px at a
+   900px window against the reference's 640, a third of the picture. */
+@media(max-width:960px){
+  .rail .track.two{grid-template-columns:minmax(0,1fr)}
+  .rail>.reading{grid-column:1}
+}
 @media(max-width:760px){
   .rail{grid-template-columns:minmax(0,1fr)}
   .rail>.track,.rail>.hint,.rail>.reading,.rail>.margin{grid-column:1}
-  .rail .track.two{grid-template-columns:minmax(0,1fr)}
   .orow,.orow.wide{grid-template-columns:100px minmax(0,1fr) 46px}
 }
 @media(max-width:479px){.specimen{display:none}}
@@ -2312,12 +2321,13 @@ railWhere = function(d, open, nar){
   try{ HERO.zones = buildZones(); }catch(e){ HERO.zones = []; }
   var val = whereVal ? whereVal() : "all zones";
   var g = gutter("WHERE", "on the aircraft", esc(val), open);
-  var body = open
-    ? '<div class="track two">' + acSVG() +
-      '<div>' + legendHTML() + zonenoteHTML() + '</div></div>' +
-      '<p class="reading">' + whereReadingHTML() + '</p>'
-    : '<div class="track">' + restWhere() + '</div>';
-  return '<div class="rail'+(open?" open":"")+'" data-rail="where">'+g+body+'</div>';
+  /* restWhere() already returns a whole rail, gutter and all, so wrapping it
+     drew the rail twice: the layout run counted where,where in one page. */
+  if(!open) return restWhere();
+  return '<div class="rail open" data-rail="where">' + g +
+    '<div class="track two">' + acSVG() +
+    '<div>' + legendHTML() + zonenoteHTML() + '</div></div>' +
+    '<p class="reading">' + whereReadingHTML() + '</p></div>';
 };
 
 /* ---- 05-panels ---- */

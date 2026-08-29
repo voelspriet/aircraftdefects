@@ -13,7 +13,11 @@
 .rr-count strong{color:#22201c;font-size:15px}
 .rr-note{background:#fdf3e0;border:1px solid #ecd9b0;border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.5;margin:0 0 8px;color:#4d4433}
 .rr-hint{font-size:12px;color:#8b857a;margin:0 0 6px}
-.rr-scroll{overflow-x:auto;border:1px solid #d8d2c6;border-radius:8px;background:#fffdf8}
+/* the table is 1080px wide by design and the box must clip it, or the whole
+   page scrolls sideways instead of the table. Measured at 820px: the body
+   ran to 861. */
+.rr-scroll{overflow-x:auto;max-width:100%;border:1px solid #d8d2c6;border-radius:8px;background:#fffdf8}
+#rr-sec{max-width:100%;min-width:0;overflow:hidden}
 table.reps{border-collapse:collapse;width:100%;min-width:1080px;font-size:13.5px;color:#22201c}
 table.reps th{text-align:left;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#6f6a60;background:#f6f1e6;border-bottom:2px solid #22201c;padding:8px;position:sticky;top:0;z-index:3}
 table.reps th.mid,table.reps td{position:static}

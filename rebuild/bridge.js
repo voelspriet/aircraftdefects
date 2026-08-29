@@ -91,7 +91,11 @@ SD_CORPUS_P.then(function(){
     "#p-search #rr-sec{padding-left:0;padding-right:0;margin-left:-18px;margin-right:-18px}" +
     "#p-search #rr-sec>*:not(.rr-scroll){padding-left:18px;padding-right:18px}" +
     "table.reps{min-width:1000px}" +
-    ".wu-gloss{margin-top:6px;font:inherit}" +
+    /* the clipped band draws a fade over its own bottom edge, and the button
+       sat under it: legible on a short write-up, ghosted on a long one,
+       which is exactly where a reader wants it most. */
+    ".wu-gloss{margin-top:6px;font:inherit;position:relative;z-index:3;background:transparent}" +
+    ".wu.clip.long::after{z-index:1}" +
     ".wu-gloss button{background:none;border:1px solid #cfc6bd;border-radius:4px;" +
       "padding:2px 9px;font:12px/1.5 system-ui,sans-serif;color:#8a2a17;cursor:pointer}" +
     ".wu-gloss button:hover{background:#fdf1ec}" +
@@ -174,6 +178,15 @@ SD_CORPUS_P.then(function(){
       });
   }
 
-  setInterval(addButtons, 700);
+  /* an interval that touches the DOM twice a second shows up as a jitter while
+     reading. Observe the table instead and add buttons only when rows change. */
+  var mo=new MutationObserver(function(){ addButtons(); });
+  function watch(){
+    var t=document.getElementById("rr-scroll")||document.body;
+    mo.observe(t,{childList:true,subtree:true});
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",watch);
+  else watch();
   addButtons();
+  setTimeout(addButtons,1500); setTimeout(addButtons,4000);
 })();

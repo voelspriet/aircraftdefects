@@ -1,0 +1,88 @@
+You rebuilt this instrument and it works: four rails, the aircraft shaded, every
+mark a filter, sixteen panels, the records with the mechanic's own words. What is
+left is how it looks beside the original, and the differences are not small.
+
+Both pages were driven in a browser at 1440px in the same state
+(?zone=ZONE 500&from=2025-12-01&to=2025-12-31, WHO open) and measured.
+
+# Nine differences, measured
+
+1. THE STANDING SENTENCE IS THE PAGE'S HEADLINE, AND YOURS IS BODY TEXT.
+   The reference sets it large, in a serif, with the count in rust, each clause
+   underlined and droppable, and the remainder in a smaller aside:
+
+       145 reports, left wing, December 2025.  1,757,682 set aside.
+       ^^^ rust, ~34px serif       ^^^^^^^^^ underlined clauses   ^^^ smaller, ash
+
+   Yours prints the same words at body size in one flat grey line. It is the
+   first thing a reader looks at and the only place the selection is stated in
+   words.
+
+2. IT NAMES THE ZONE BY ITS CODE. Yours reads "145 reports, ZONE 500"; the
+   reference reads "145 reports, left wing". The code belongs in the filter, the
+   words belong in the sentence.
+
+3. THE AIRLINE LADDER READS SWAA, DALA, SWIA, AALA, CALA, VNAA, FDEA, REXA.
+   The reference reads Southwest Airlines Co, Delta Air Lines Inc, Skywest
+   Airlines Inc, American Airlines Inc. The names come from the FAA's own
+   December 2006 cross-reference, which the operator menu is already built from;
+   the designator is what a reporter has to quote and the name is what they
+   recognise, so the aim line should carry both.
+
+4. THE AIM AT BOX IS NOT ON THE PAGE in this state. The reference shows it
+   between the sentence and the rails: a kind selector, a text field, "Take it",
+   and a separate one-day date field. It is the typed route into the instrument
+   and without it a reader can only click.
+
+5. THE HAND LINE IS INSIDE THE RAIL AND IN THE WRONG VOICE. The reference puts
+   it under the aim line, in the page's own type, dark: "Click an airline or an
+   airframe to follow it." followed by "Or use the filters below." Yours sets it
+   in grey monospace inside the open rail, where it reads as a caption rather
+   than an instruction.
+
+6. THE SEAM BUTTON IS MISSING. The reference ends the instrument with a rust
+   button, "Read the 145 →", which is how a reader crosses from the shape of the
+   selection to the reports themselves.
+
+7. THE MARGIN LOSES THE PART-MONTH NOTE in this state. The reference shows it in
+   rust above the ash line: "August 2026 covers 1 to 26 August, so its bar counts
+   26 days against 31 in a whole one".
+
+8. THE SPECIMEN IS WRAPPED IN QUOTATION MARKS. The reference prints the
+   mechanic's line bare, in monospace, because it is a filing and not a quote in
+   prose.
+
+9. THE ROWS ARE A QUARTER TALLER, AND THE PAGE IS 5,000px LONGER.
+
+       record row      reference 73px    yours 99px
+       write-up row    reference 87px    yours 101px
+       page height     reference 17,771  yours 22,916
+
+   A hundred reports should fit in about the same space. Part of this is the
+   "Say it in plain English" button, which takes a line of its own on every row.
+   It should not cost a line: put it beside "Read the whole write-up", or let it
+   sit at the end of the write-up's own text flow.
+
+# What to return
+
+One self-contained block of CSS and JavaScript that drops into the page inside
+its IIFE, using the existing helpers, correcting all nine. Keep every figure and
+every sentence exactly as it is; this is about how they are set and where they
+sit, except for items 2, 3, 4, 6 and 7, where something is missing or wrong and
+has to be produced.
+
+Do not declare a name the page already uses for something else. Earlier blocks
+collided on pct() and on setFilter(), and the later declaration won in silence.
+Prefix anything that might clash.
+
+What I will check in a browser, at 1440px, in the state above:
+
+- The sentence reads "145 reports, left wing, December 2025." at display size,
+  with the count in rust and 1,757,682 set aside in a smaller aside.
+- The ladder names eight airlines, not eight designators.
+- An AIM AT box with a kind selector, a field, Take it, and a one-day date.
+- A rust "Read the 145 →" at the foot of the instrument.
+- The part-month note in the margin.
+- The record row under 80px and the page under 19,000px.
+
+Explain only where you departed from this and why. No preamble.

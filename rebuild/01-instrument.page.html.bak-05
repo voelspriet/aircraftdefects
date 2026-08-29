@@ -482,8 +482,17 @@ function composeHero(raw){
   HERO.loo=raw.leave_one_out||[];
   if(!active().length)CORPUS=TOTAL||CORPUS;
 }
-const opName=k=>{const o=(HERO&&HERO.ops||[]).find(x=>x.key===String(k));
-  return (o&&o.label)||gLook(["operator","airline","carrier"],k)||String(k)};
+/* The airline ladder read SWAA, DALA, SWIA where the reference reads Southwest
+   Airlines Co, Delta Air Lines Inc. This looked the name up in a table filled by
+   a boot that no longer runs, so it fell through to the designator every time.
+   The controls half builds that list once, from the FAA's own cross-reference;
+   opLabel reads it, and it is the one place airline names come from. */
+const opName=k=>{
+  const o=(HERO&&HERO.ops||[]).find(x=>x.key===String(k));
+  if(o&&o.label) return o.label;
+  try{ const l=opLabel(String(k)); if(l) return l.replace(/\s*\([^)]*\)\s*$/,""); }catch(e){}
+  return gLook(["operator","airline","carrier"],k)||String(k);
+};
 const crewLabel=c=>{const x=(HERO&&HERO.crew||[]).find(y=>y.code===String(c));
   return (x&&x.label)||crewGloss(c)||("code "+c)};
 

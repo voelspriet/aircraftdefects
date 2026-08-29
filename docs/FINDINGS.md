@@ -772,3 +772,41 @@ The button did nothing on its first attempt, and silently: the write-up band
 toggles its own clamp on click, so the bar carried a `stopPropagation` to protect
 it, which killed the delegated handler along with the toggle. Bound to the button
 itself instead.
+
+## F24. What the counts could not see (29 Aug 2026)
+
+Five harnesses said the rebuild had everything: the elements, the options, the
+sentences, the panels' content. Put the two pages side by side at the same
+filter and the difference is obvious in a second.
+
+`build/parity_rails.py` screenshots both in the same state and samples every
+element's box at 2, 4, 6, 9 and 12 seconds, so anything still moving after the
+page has settled is named rather than scored. Both pages now come out at zero
+movement, which is the answer to a jitter I had introduced myself: two timers,
+one from the controls half repainting a placeholder every 600ms and one of mine
+adding buttons every 700ms. An interval that touches the DOM twice a second is
+visible as a wobble while reading. Replaced by an observer on the table.
+
+What the screenshots showed that no count had:
+
+| | reference | rebuild |
+|---|---|---|
+| standing sentence | display serif, count in rust, clauses underlined | flat body text |
+| the zone in it | left wing | ZONE 500 |
+| airline ladder | Southwest Airlines Co | SWAA |
+| AIM AT box | between sentence and rails | absent |
+| hand line | dark, under the aim line | grey monospace inside the rail |
+| seam button | Read the 145 → | absent |
+| specimen | bare monospace | wrapped in quotation marks |
+| record row | 73px | 99px |
+| page height | 17,771px | 22,916px |
+
+The last two are the same fault: a quarter more height per row over a hundred
+rows is 5,000 pixels of page. Part of it is a button I added on a line of its
+own for every write-up, which is a fair example of a fix that measures well and
+reads badly.
+
+**The lesson is about the harnesses, not the rebuild.** Counting answers "is it
+there". Reading answers "does it say the right thing". Neither answers "does it
+look like the same tool", and that is the question a reader actually asks in the
+first second. Screenshots, side by side, at the same filter.

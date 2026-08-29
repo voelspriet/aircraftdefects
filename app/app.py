@@ -508,6 +508,57 @@ def health():
                            "9": "operator page"})
 
 
+# The parent page is served under /z verbatim, and it calls api/... relative to
+# wherever it sits, so under /z those land here. Anything this service does not
+# answer itself is handed straight through to the parent on 8124. That way /z is
+# the same instrument, with the model layer added, rather than a lesser page
+# built to resemble one.
+@app.route("/z/api/<path:rest>", methods=["GET", "POST"])
+def passthrough(rest):
+    if request.method == "GET":
+        r = requests.get(SDR + "/api/" + rest, params=request.args, timeout=120)
+    else:
+        r = requests.post(SDR + "/api/" + rest, json=request.get_json(silent=True),
+                          params=request.args, timeout=120)
+    return Response(r.content, status=r.status_code,
+                    mimetype=r.headers.get("Content-Type", "application/json"))
+
+
+@app.get("/z/static/<path:f>")
+def zstatic(f):
+    r = requests.get(SDR + "/static/" + f, timeout=60)
+    return Response(r.content, status=r.status_code,
+                    mimetype=r.headers.get("Content-Type", "application/octet-stream"))
+
+
+# The rebuilt page calls api("facets") and its helper resolves that against the
+# page's own URL, so the request arrives as /z/facets rather than /z/api/facets.
+# That is a fault in my brief, which listed the endpoints with an api/ prefix and
+# did not say whether the helper should add one. Rather than edit a page the model
+# wrote, the server answers both shapes.
+KNOWN_API = ("hero", "facets", "trend", "glossary", "breakdown", "search", "clusters",
+             "leads", "spikes", "corrosion", "ageing", "engines", "consequences",
+             "phrases", "vocab", "freshness", "emerging", "repeat", "compare",
+             "explain", "resolve", "fleet", "inspection", "case", "aircraft")
+
+
+@app.route("/z/<name>", methods=["GET"])
+def bare_api(name):
+    if name not in KNOWN_API:
+        from flask import abort
+        abort(404)
+    r = requests.get(SDR + "/api/" + name, params=request.args, timeout=120)
+    return Response(r.content, status=r.status_code,
+                    mimetype=r.headers.get("Content-Type", "application/json"))
+
+
+@app.get("/z/rebuilt")
+def rebuilt():
+    """The instrument as GLM-5.3-Flash rebuilt it. Kept on its own path while it is
+    compared against the original, so neither replaces the other by accident."""
+    return send_from_directory(app.static_folder, "rebuilt.html")
+
+
 @app.get("/z/conflicts")
 @app.get("/z/conflicts/")
 def conflicts_page():
@@ -758,7 +809,12 @@ def db():
     c.execute("""CREATE TABLE IF NOT EXISTS conflicts(
         id TEXT PRIMARY KEY, tail TEXT, date TEXT, operator TEXT, field TEXT,
         code_says TEXT, text_says TEXT, note TEXT, discrepancy TEXT,
-        found_at TEXT, confirmed INTEGER DEFAULT 0, disputed INTEGER DEFAULT 0)""")
+        found_at TEXT, confirmed INTEGER DEFAULT 0, disputed INTEGER DEFAULT 0,
+        source TEXT DEFAULT 'reading')""")
+    try:
+        c.execute("ALTER TABLE conflicts ADD COLUMN source TEXT DEFAULT 'reading'")
+    except Exception:
+        pass
     return c
 
 
@@ -785,7 +841,7 @@ def log_conflict(rec, note):
 def conflicts():
     c = db()
     rows = c.execute("""SELECT id, tail, date, operator, note, discrepancy, found_at,
-                               confirmed, disputed FROM conflicts
+                               confirmed, disputed, COALESCE(source,'reading') FROM conflicts
                         ORDER BY found_at DESC LIMIT 500""").fetchall()
     n = c.execute("SELECT COUNT(*) FROM conflicts").fetchone()[0]
     c.close()
@@ -793,12 +849,15 @@ def conflicts():
         total=n,
         entries=[{"id": r[0], "tail": r[1], "date": r[2], "operator": r[3], "note": r[4],
                   "discrepancy": r[5], "found_at": r[6], "confirmed": r[7], "disputed": r[8],
+                  "source": r[9],
                   "source_url": "https://aircraftdefects.com/?q=" + requests.utils.quote(
                       (r[5] or "")[:60])} for r in rows],
         what_this_is=(
             "Reports where the coded box a filer ticked disagrees with the description the "
-            "same filer wrote underneath it. Each one was noticed while somebody was reading "
-            "that report, by the model that rephrased it. Nothing is added by a sweep."),
+            "same filer wrote underneath it. Two ways in, and every row says which. Marked "
+            "READING, it was noticed while a person was reading that report. Marked SCAN, it "
+            "came from a sweep of the file in which two independent passes had to agree "
+            "before anything was written down. Neither has been checked by a human."),
         what_this_is_not=[
             "Not a rate. There is no denominator here and there is not meant to be. Two "
             "attempts to measure how often this happens both failed, and the failures are "
@@ -809,6 +868,27 @@ def conflicts():
             "Not verified. A model noticed each of these. Open the record and judge it "
             "yourself; the record number is on every row.",
             "Not a safety signal about any operator or aircraft."])
+
+
+@app.post("/z/api/conflicts/add")
+def conflict_add():
+    """Used by the sweep. A single pass is one model's opinion, so the sweep only
+    posts here when two independent readings named the same field and agreed."""
+    d = request.get_json(force=True, silent=True) or {}
+    if not d.get("id") or not d.get("note"):
+        return jsonify(error="need id and note"), 400
+    try:
+        c = db()
+        c.execute("""INSERT OR IGNORE INTO conflicts
+            (id, tail, date, operator, note, discrepancy, found_at, source)
+            VALUES (?,?,?,?,?,?,?,'scan')""",
+                  (d["id"], d.get("tail"), d.get("date"), d.get("operator"),
+                   d["note"][:600], (d.get("discrepancy") or "")[:2000],
+                   time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())))
+        c.commit(); n = c.execute("SELECT COUNT(*) FROM conflicts").fetchone()[0]; c.close()
+        return jsonify(ok=True, total=n)
+    except Exception as e:
+        return jsonify(error=str(e)[:200]), 500
 
 
 @app.post("/z/api/conflicts/<cid>/judge")

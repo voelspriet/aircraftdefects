@@ -640,3 +640,27 @@ The panel now says, under the table, that a tail high on the list is not a
 dangerous aircraft: it is one that has been written up often, which can be age, a
 heavy check, or an operator that files carefully. The reference makes that point
 and it is the difference between a lead and an accusation.
+
+## F19. A page about provenance, with its own numbers missing (29 Aug 2026)
+
+The Method panel is where a desk says where its file comes from and what it
+cannot tell you. On the rebuild it read:
+
+> Every figure on this desk comes from the FAA's Service Difficulty Reporting
+> System: — reports mechanics filed when they found something on an aircraft
+> broken, worn, corroded or not working, covering — to —.
+
+Seven em dashes where the figures belong, on the one page whose whole purpose is
+to be checkable. Two causes, both silent.
+
+The placeholders are marked `data-f="m-total"`, and the setter looked them up by
+`id`. `getElementById` returned null for every one, and the function returned
+without complaint.
+
+And the values it was fetching do not exist at the top level: the totals and the
+span live under `range`, and `operators` is a list of 3,946 designators rather
+than a count of them. So even had the setter found its elements it would have
+written nulls, which print as the same dash.
+
+Two independent faults producing one indistinguishable symptom, on the page a
+reader goes to when they want to know whether to trust the rest.

@@ -4547,17 +4547,36 @@ function loadMethod(){
   var b=pbody('p-method'); if(!b) return;
   b.innerHTML=METHOD_PROSE;
   facets().then(function(f){ if(!f) return;
-    var tot=f.total!=null?f.total:(f.reports!=null?f.reports:totalN());
+    /* the totals and the span live under range, and operators is a list of
+       3,946 designators rather than a count. Read flat, every figure in the
+       Method panel came back null and printed as an em dash: "covering — to —",
+       "— reports carry no date at all". A page about provenance with its own
+       numbers missing. */
+    var R=f.range||{};
+    var tot=(R.total!=null)?R.total:(f.total!=null?f.total:(f.reports!=null?f.reports:totalN()));
     setF('m-total',tot); setF('m-reps',tot);
-    setF('m-undated',f.undated!=null?f.undated:(f.no_date!=null?f.no_date:null));
-    setF('m-ops',f.operators!=null?f.operators:(facetList(f,'operator').length||null));
-    setF('m-tails',f.tails!=null?f.tails:(f.aircraft!=null?f.aircraft:(facetList(f,'tail').length||null)));
-    var fr=f.from||f.first||f.start, to=f.to||f.last||f.end;
+    setF('m-undated',f.undated!=null?f.undated:(f.no_date!=null?f.no_date:(R.undated!=null?R.undated:null)));
+    var ops=Array.isArray(f.operators)?f.operators.length
+            :(f.opgap&&f.opgap.designators!=null?f.opgap.designators
+             :(typeof f.operators==='number'?f.operators:facetList(f,'operator').length));
+    setF('m-ops',ops||null);
+    setF('m-tails',(typeof f.tails==='number')?f.tails
+        :((typeof f.aircraft==='number')?f.aircraft:null));
+    var fr=R.from||f.from||f.first||f.start, to=R.to||f.to||f.last||f.end;
     try{ if(typeof RANGE!=='undefined'&&RANGE){ fr=fr||RANGE.from; to=to||RANGE.to; } }catch(_){}
     setF('m-from',fr?pdate(fr):null); setF('m-to',to?pdate(to):null);
   }).catch(function(){ /* the prose keeps its dashes rather than inventing a number */ });
 }
-function setF(id,v){ var e=vEl(id); if(!e) return; e.textContent=(v==null||v==='')?'\u2014':(typeof v==='number'?VN(v):String(v)); }
+function setF(id,v){
+  /* the placeholders are marked data-f, not id, so a lookup by id found nothing
+     and every figure in the Method panel stayed an em dash: a page about where
+     the numbers come from, with its own numbers missing. */
+  var list=document.querySelectorAll('[data-f="'+id+'"]');
+  var e=vEl(id);
+  var txt=(v==null||v==='')?'\u2014':(typeof v==='number'?VN(v):String(v));
+  if(e) e.textContent=txt;
+  for(var i=0;i<list.length;i++) list[i].textContent=txt;
+}
 
 /* ================================ SHOW, MOUNT, BOOT ================================ */
 var LOADERS={'p-patterns':loadPatterns,'p-aircraft':loadAircraft,'p-found':loadFound,'p-fleet':buildFleet,

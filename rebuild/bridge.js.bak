@@ -105,7 +105,27 @@ SD_CORPUS_P.then(function(){
     ".wu-plain .src{display:block;margin-top:5px;font:11.5px/1.4 system-ui,sans-serif;color:#756f69}";
   document.head.appendChild(css);
 
+  /* The endpoint takes nineteen fields. Read off the visible cells it got nine,
+     and the reading could not mention the airframe's hours, its cycles, the part
+     number, the zone, the corrosion level or the crack length, because none of
+     those is in a column. The row carries its control number, and one report has
+     its own endpoint holding all of it. */
+  function controlOf(wu){
+    var tr = wu.closest("tr"); var rep = tr && tr.previousElementSibling;
+    var host = rep || tr;
+    var n = host && host.querySelector("[data-case]");
+    if (n && n.dataset.case) return n.dataset.case;
+    var b = host && host.querySelector("[onclick^='openCase']");
+    if (b) { var m = /openCase\(['"]([^'"]+)/.exec(b.getAttribute("onclick")||""); if (m) return m[1]; }
+    return null;
+  }
+
+  var FIELDS19 = ["date","operator","make","model","system","part","part_number",
+                  "condition","nature","crew","stage","discovered","zone","zone_label",
+                  "corrosion","cracks","crack_length","hours","cycles"];
+
   function factsFor(wu){
+    /* the cells, as a fallback if the control number is not on the row */
     var tr = wu.closest("tr"); var rep = tr && tr.previousElementSibling;
     var out = {};
     if (rep && rep.cells) {
@@ -117,6 +137,52 @@ SD_CORPUS_P.then(function(){
     }
     Object.keys(out).forEach(function(k){ if(!out[k]) delete out[k]; });
     return out;
+  }
+
+  function fullFacts(wu){
+    var id = controlOf(wu);
+    if (!id) return Promise.resolve(factsFor(wu));
+    return fetch("api/case/" + encodeURIComponent(id))
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if (!d || d.error) return factsFor(wu);
+        var one = function(x){ return (x && typeof x === "object") ? (x.label || x.faa || "") : (x || ""); };
+        var many = function(a){ return Array.isArray(a) ? a.map(one).filter(Boolean).join("; ") : one(a); };
+        var out = {
+          date: d.DifficultyDate,
+          operator: (d._operator && d._operator.label) || d.OperatorDesignator,
+          make: d._aircraft_make || d.AircraftMake,
+          model: d.AircraftModel,
+          system: (d._jasc && d._jasc.label) || d.JASCCode,
+          part: d.PartName,
+          part_number: d.PartNumber,
+          condition: d.PartCondition,
+          nature: many(d._nature_all),
+          crew: many(d._crew_all),
+          stage: one(d._stage),
+          discovered: one(d._discovered),
+          zone: d.PartLocation,
+          /* the case endpoint sends the raw zone and no decoded twin, so the
+             words come from the zone menu, which the page builds once from the
+             FAA's own table. One source for a name, everywhere. */
+          zone_label: (function(z){
+            if (!z) return "";
+            var sel = document.getElementById("zone");
+            if (sel) for (var i = 0; i < sel.options.length; i++)
+              if (sel.options[i].value === z)
+                return sel.options[i].textContent.replace(/\s*\([^)]*\)\s*$/, "").trim();
+            return "";
+          })(d.PartLocation),
+          corrosion: one(d._corrosion) || d.CorrosionLevel,
+          cracks: d.NumberOfCracks,
+          crack_length: d.CrackLength,
+          hours: d.AircraftTotalTime,
+          cycles: d.AircraftTotalCycles
+        };
+        FIELDS19.forEach(function(k){ if (!out[k]) delete out[k]; });
+        return out;
+      })
+      .catch(function(){ return factsFor(wu); });
   }
 
   function addButtons(){
@@ -154,9 +220,12 @@ SD_CORPUS_P.then(function(){
     var raw = txt ? txt.innerText.replace(/\s+/g, " ").trim() : "";
     if (!raw) return;
     b.disabled = true; b.textContent = "Reading it…";
-    var body = factsFor(wu); body.text = raw;
-    fetch("api/gloss", {method:"POST", headers:{"Content-Type":"application/json"},
-                        body: JSON.stringify(body)})
+    fullFacts(wu)
+      .then(function(body){
+        body.text = raw;
+        return fetch("api/gloss", {method:"POST", headers:{"Content-Type":"application/json"},
+                                   body: JSON.stringify(body)});
+      })
       .then(function(r){ return r.json(); })
       .then(function(d){
         var out = document.createElement("div");

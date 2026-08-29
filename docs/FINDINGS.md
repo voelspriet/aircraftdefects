@@ -810,3 +810,40 @@ reads badly.
 there". Reading answers "does it say the right thing". Neither answers "does it
 look like the same tool", and that is the question a reader actually asks in the
 first second. Screenshots, side by side, at the same filter.
+
+## F25. Two reviewers, thirty-four faults, one cause under a third of them (29 Aug 2026)
+
+Two agents drove the original and the rebuild side by side and reported, one on
+CSS and one on layout. Neither was allowed to fix anything: a work list, not a
+patch. Full reports in `docs/reviews/`.
+
+**The rebuild runs a different palette.** `#hero-root` redefines every token: ink
+`#211d14` against `#1d1d1f`, rust `#a8431f` against `#c44b28`, paper `#f2eee6`
+against `#f7f5f0`. A census of computed colours: the page paints `rgb(34,32,28)`
+5,739 times where the original paints ink.
+
+That is the finding that matters most, and not because of the colours. I had
+spent a round correcting elements one at a time and got eight of eight type
+measurements green while the system underneath them was a different one. Every
+one of those corrections was a plaster. It also explains two colours that appear
+nowhere in the original: a purple counter and a green confirmation. With the
+palette wrong, something reaches for a colour that looks about right.
+
+**What the eye and the harnesses had both missed.**
+
+At 390px the case sheet opens 5,693px above the viewport: a reader taps and
+nothing appears to happen. There is no phone layout at all, where the original
+swaps to tappable month chips and a zone grid. The month strip is clipped with no
+way to scroll it, 24% hidden at 820px and 54% at 390px. The seam and the column
+headers do not stick, so through 19,000px of records the reader has eleven
+unlabelled columns and no running count. Seven focus rings are invisible, one at
+contrast 1.00: ink on ink, so "Take it" renders as a plain dark rectangle.
+
+**And two that are wrong rather than missing.** The case sheet's stepper counts
+"1 of 100", "1 of 99", "1 of 99", "1 of 99" while the report behind it does
+change: the label lies about where you are. Labels clip mid-word, so an airline
+reads "Continental Airlines Inc (CALA...".
+
+Five harnesses of mine were green through all of this. Counting, reading,
+enumerating, measuring geometry and checking claims: none of them asks whether a
+thing can be reached, seen or operated at the width a reader actually has.

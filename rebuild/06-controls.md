@@ -15,7 +15,7 @@ Where things go:
   <div class="bar">
     <div class="fld grow">
       <label for="q">Text</label>
-      <input id="q" list="qList" autocomplete="off" placeholder="any words a mechanic wrote">
+      <input id="q" list="qList" autocomplete="off" aria-label="Any words in the mechanic's write-up" placeholder="Any words in the write-up, e.g. bird strike">
       <datalist id="qList"></datalist>
     </div>
     <div class="fld">
@@ -41,8 +41,13 @@ Where things go:
     <div class="grid">
       <input type="hidden" id="jasc">
       <div class="fld"><label for="make">Manufacturer</label><select id="make"><option value="">Any manufacturer</option></select></div>
-      <div class="fld"><label for="model">Model</label><select id="model"><option value="">Any model</option></select></div>
-      <div class="fld"><label for="part">Part</label><select id="part"><option value="">Any part</option></select></div>
+      <div class="fld"><label for="model">Model</label><!-- model and part are free text in the original, not menus. As selects with
+     one option they refused every value arriving in a link: a shared URL
+     carrying model=CNDAIR CL6002B19 ran no query at all and said the value
+     was not in the data, where the reference answers with nought reports.
+     The placeholders are the original's, verbatim. -->
+<input id="model" aria-label="Aircraft model" placeholder="Model, e.g. 7378H4"></div>
+      <div class="fld"><label for="part">Part</label><input id="part" aria-label="Part name" placeholder="Part name, e.g. BEARING"></div>
       <div class="fld"><label for="ata">System</label><select id="ata"><option value="">Any ATA chapter</option></select></div>
       <div class="fld"><label for="nature">Found</label><select id="nature"><option value="">Anything found</option></select></div>
       <div class="fld"><label for="crew">Crew action</label><select id="crew"><option value="">Anything the crew did</option></select></div>
@@ -50,7 +55,7 @@ Where things go:
       <div class="fld"><label for="discovered">How found</label><select id="discovered"><option value="">Found by any method</option></select></div>
       <div class="fld"><label for="stage">Stage of flight</label><select id="stage"><option value="">Any stage of flight</option></select></div>
       <div class="fld"><label for="zone">Zone on the aircraft</label><select id="zone"><option value="">Anywhere on the aircraft</option></select></div>
-      <div class="fld"><label for="tail">Tail number</label><input id="tail" placeholder="e.g. N583"></div>
+      <div class="fld"><label for="tail">Tail number</label><input id="tail" aria-label="Tail number" placeholder="Tail number, e.g. 583UP"></div>
       <div class="fld"><label for="corrosion">Corrosion</label><select id="corrosion"><option value="">Any corrosion level</option></select></div>
       <div class="fld"><label for="cracked">Cracking</label><select id="cracked"><option value="">Cracked or not</option><option value="1">Cracking recorded</option></select></div>
       <div class="fld"><label for="minhours">At least this many hours</label><select id="minhours"><option value="">Any airframe age</option><option value="20000">20,000 hours or more</option><option value="50000">50,000 hours or more</option><option value="75000">75,000 hours or more</option></select></div>
@@ -420,12 +425,26 @@ function sd2BuildOpts(){
 function decodeShown(k,v){
   switch(k){
     case"q":return"“"+v+"”";
-    case"ata":return"ATA["+v+"]";
+    case"ata":{
+      /* the chapter has a name; "ATA[57]" is the lookup written out loud */
+      var a=(sd2CODES&&sd2CODES.ata&&sd2CODES.ata[v])||null;
+      return (a&&(a.label||a))||("chapter "+v);
+    }
     case"tail":return"N"+v;
     case"cracked":return"recorded";
     case"minhours":return sd2Num(+v)+" hours";
     case"from":case"to":return sd2Pretty(v);
-    case"operator":{var f=sd2Facets.operator&&sd2Facets.operator[v];return((f&&f.label)||v)+" ("+v+")";}
+    case"operator":{
+      /* The names live in the code table from api/glossary, 1,213 of them.
+         sd2Facets.operator is built from a plain list of designators with
+         no names in it, so its label is the code and the chip read
+         "CALA (CALA)" where the reference reads "Continental Airlines Inc
+         (CALA)". */
+      var t=(sd2CODES&&sd2CODES.operator&&sd2CODES.operator[v])||null;
+      var nm=(t&&(t.label||t.short))||null;
+      if(!nm){var f=sd2Facets.operator&&sd2Facets.operator[v]; nm=(f&&f.label!==v)?f.label:null;}
+      return (nm?nm+" ("+v+")":v);
+    }
     default:return String(sd2Code(k,v));
   }
 }
@@ -464,7 +483,12 @@ function buildChips(){
 function clauseText(k,v){
   switch(k){
     case"q":return'where a mechanic wrote “'+v+'”';
-    case"operator":{var f=sd2Facets.operator&&sd2Facets.operator[v];return(f&&f.label)||v;}
+    case"operator":{
+      var t2=(sd2CODES&&sd2CODES.operator&&sd2CODES.operator[v])||null;
+      if(t2&&(t2.label||t2.short))return t2.label||t2.short;
+      var f=sd2Facets.operator&&sd2Facets.operator[v];
+      return (f&&f.label!==v?f.label:null)||v;
+    }
     case"tail":return"N"+v;
     case"cracked":return"with cracking recorded";
     case"minhours":return sd2Num(+v)+" hours or more on the airframe";

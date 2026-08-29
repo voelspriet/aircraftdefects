@@ -210,10 +210,16 @@ function rowHtml(x){
   if(month&&month!==LASTMONTH){h+=spineHtml(month);LASTMONTH=month;}
   h+='<tr class="rep" data-month="'+month+'" data-zone="'+escAttr(zone)+'">';
   h+='<td>'+esc(ukDate(x.DifficultyDate))+'<span class="sub">N'+esc(reg||'—')+'</span></td>';
-  var oc=x.OperatorCode||x.Operator||x.AirCarrierCode||'';
+  /* The field is OperatorDesignator. Read under three names it does not use,
+     every row said "no operator named" while the data holds MASA, FDEA,
+     ABXA. Only 5.6% of the file genuinely names no operator, so this was
+     not a blank column but a false statement about the report. */
+  var oc=x.OperatorDesignator||x.OperatorCode||x.Operator||x.AirCarrierCode||'';
   if(oc)h+='<td><span class="c" onclick="setFilter(\'operator\',\''+escAttr(oc)+'\')">'+esc(opName(oc)||oc)+'</span></td>';
   else h+='<td><span class="absent term" data-opgap="1" data-label="no operator named" data-tip="'+escAttr(OPGAP)+'" title="'+escAttr(OPGAP)+'">no operator named</span></td>';
-  var mk=(x.Make||'').trim(),md=(x.Model||'').trim(),nm=(mk+' '+md).trim();
+  /* likewise AircraftMake and AircraftModel: every row read "not recorded"
+     over rows holding BOEING, EMB, AIRBUS. */
+  var mk=(x.AircraftMake||x.Make||'').trim(),md=(x.AircraftModel||x.Model||'').trim(),nm=(mk+' '+md).trim();
   h+='<td>'+(nm?'<span class="c" onclick="setFilter(\'model\',\''+escAttr(md||mk)+'\')">'+esc(nm)+'</span>':'<span class="absent">not recorded</span>')+'</td>';
   h+=reg?'<td><span class="c" onclick="rrTail(\''+escAttr(reg)+'\')">N'+esc(reg)+'</span></td>'
         :'<td><span class="absent">no N-number</span></td>';

@@ -152,12 +152,9 @@ details.card[open]>summary{margin-bottom:8px}
 <!--INSTRUMENT-CSS-->
 </head>
 <body>
-<header>
-  <h1>One thing, five answers</h1>
-  <div class="sub">A tail number, an airline or an aircraft type in — and the FAA's Service Difficulty
-    Reports answer five ways: when, where on the aircraft, whose, what was found, and what it forced
-    the crew to do. The same public corpus as the <a href="/">lookup desk</a>.<span id="hsub"></span></div>
-</header>
+<!-- the page's own header removed: the instrument states what the file is,
+     and a second introduction above it says the same thing twice -->
+
 <main class="wrap">
 <div id="hero-root"><div id="hero"></div></div>
 
@@ -661,9 +658,21 @@ async function doGloss(i,btn){
   try{
     const res=await fetch("/z/api/gloss",{method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({text:r.text,system:r.system,part:r.part,condition:r.condition,
-        nature:(r.nature||[]).join("; "),stage:r.stage,discovered:r.discovered,
-        zone_label:r.zone_label})});
+      /* Everything the record holds and the endpoint accepts. Eight of nineteen
+         fields were being sent, so the reading could not mention the date, where
+         on the airframe it was, how many hours the airframe had flown, how long
+         the crack was or what the crew did: the model can only work with what it
+         is given. There is no time of day in this file, only a date, and nothing
+         here invents one. */
+      body:JSON.stringify({text:r.text,
+        date:r.date, operator:r.operator||r.operator_code, make:r.make, model:r.model,
+        system:r.system, part:r.part, part_number:r.part_number, condition:r.condition,
+        nature:(r.nature||[]).join("; "),
+        crew:Array.isArray(r.crew)?r.crew.join("; "):r.crew,
+        stage:r.stage, discovered:r.discovered,
+        zone:r.zone, zone_label:r.zone_label,
+        corrosion:r.corrosion, cracks:r.cracks, crack_length:r.crack_length,
+        hours:r.hours, cycles:r.cycles})});
     d=await res.json();
     if(!res.ok)err=(d&&d.error)?d.error:("HTTP "+res.status);
   }catch(e){err=String(e&&e.message||e)}

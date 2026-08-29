@@ -268,7 +268,11 @@ from aircraftdefects.com, rebuilt line by line by GLM-5.3-Flash.">
 
 .l3wrap{overflow-x:auto;max-width:100%;margin-top:6px;border:1px solid #d8d2c6;border-radius:6px}
 table.l3{border-collapse:collapse;width:100%;font-size:12.5px}
-table.l3 td{padding:4px 8px;border-top:1px solid #ece6da;white-space:nowrap}
+table.l3{width:100%;table-layout:auto}
+table.l3 td{padding:4px 8px;border-top:1px solid #ece6da;white-space:nowrap;vertical-align:top}
+/* the last column carries a sentence, not a value: nowrap pushed it off
+   the page and left a scrollbar under a readable table */
+table.l3 td:last-child{white-space:normal;line-height:1.45}
 table.l3 tr:first-child td{border-top:0}
 
 
@@ -417,7 +421,7 @@ table.kv hr{border:0;border-top:1px dashed #d8d2c6;margin:6px 0}
   <div class="bar">
     <div class="fld grow">
       <label for="q">Text</label>
-      <input id="q" list="qList" autocomplete="off" placeholder="any words a mechanic wrote">
+      <input id="q" list="qList" autocomplete="off" aria-label="Any words in the mechanic's write-up" placeholder="Any words in the write-up, e.g. bird strike">
       <datalist id="qList"></datalist>
     </div>
     <div class="fld">
@@ -442,8 +446,13 @@ table.kv hr{border:0;border-top:1px dashed #d8d2c6;margin:6px 0}
     <div class="grid">
       <input type="hidden" id="jasc">
       <div class="fld"><label for="make">Manufacturer</label><select id="make"><option value="">Any manufacturer</option></select></div>
-      <div class="fld"><label for="model">Model</label><select id="model"><option value="">Any model</option></select></div>
-      <div class="fld"><label for="part">Part</label><select id="part"><option value="">Any part</option></select></div>
+      <div class="fld"><label for="model">Model</label><!-- model and part are free text in the original, not menus. As selects with
+     one option they refused every value arriving in a link: a shared URL
+     carrying model=CNDAIR CL6002B19 ran no query at all and said the value
+     was not in the data, where the reference answers with nought reports.
+     The placeholders are the original's, verbatim. -->
+<input id="model" aria-label="Aircraft model" placeholder="Model, e.g. 7378H4"></div>
+      <div class="fld"><label for="part">Part</label><input id="part" aria-label="Part name" placeholder="Part name, e.g. BEARING"></div>
       <div class="fld"><label for="ata">System</label><select id="ata"><option value="">Any ATA chapter</option></select></div>
       <div class="fld"><label for="nature">Found</label><select id="nature"><option value="">Anything found</option></select></div>
       <div class="fld"><label for="crew">Crew action</label><select id="crew"><option value="">Anything the crew did</option></select></div>
@@ -451,7 +460,7 @@ table.kv hr{border:0;border-top:1px dashed #d8d2c6;margin:6px 0}
       <div class="fld"><label for="discovered">How found</label><select id="discovered"><option value="">Found by any method</option></select></div>
       <div class="fld"><label for="stage">Stage of flight</label><select id="stage"><option value="">Any stage of flight</option></select></div>
       <div class="fld"><label for="zone">Zone on the aircraft</label><select id="zone"><option value="">Anywhere on the aircraft</option></select></div>
-      <div class="fld"><label for="tail">Tail number</label><input id="tail" placeholder="e.g. N583"></div>
+      <div class="fld"><label for="tail">Tail number</label><input id="tail" aria-label="Tail number" placeholder="Tail number, e.g. 583UP"></div>
       <div class="fld"><label for="corrosion">Corrosion</label><select id="corrosion"><option value="">Any corrosion level</option></select></div>
       <div class="fld"><label for="cracked">Cracking</label><select id="cracked"><option value="">Cracked or not</option><option value="1">Cracking recorded</option></select></div>
       <div class="fld"><label for="minhours">At least this many hours</label><select id="minhours"><option value="">Any airframe age</option><option value="20000">20,000 hours or more</option><option value="50000">50,000 hours or more</option><option value="75000">75,000 hours or more</option></select></div>
@@ -4107,12 +4116,26 @@ function sd2BuildOpts(){
 function decodeShown(k,v){
   switch(k){
     case"q":return"“"+v+"”";
-    case"ata":return"ATA["+v+"]";
+    case"ata":{
+      /* the chapter has a name; "ATA[57]" is the lookup written out loud */
+      var a=(sd2CODES&&sd2CODES.ata&&sd2CODES.ata[v])||null;
+      return (a&&(a.label||a))||("chapter "+v);
+    }
     case"tail":return"N"+v;
     case"cracked":return"recorded";
     case"minhours":return sd2Num(+v)+" hours";
     case"from":case"to":return sd2Pretty(v);
-    case"operator":{var f=sd2Facets.operator&&sd2Facets.operator[v];return((f&&f.label)||v)+" ("+v+")";}
+    case"operator":{
+      /* The names live in the code table from api/glossary, 1,213 of them.
+         sd2Facets.operator is built from a plain list of designators with
+         no names in it, so its label is the code and the chip read
+         "CALA (CALA)" where the reference reads "Continental Airlines Inc
+         (CALA)". */
+      var t=(sd2CODES&&sd2CODES.operator&&sd2CODES.operator[v])||null;
+      var nm=(t&&(t.label||t.short))||null;
+      if(!nm){var f=sd2Facets.operator&&sd2Facets.operator[v]; nm=(f&&f.label!==v)?f.label:null;}
+      return (nm?nm+" ("+v+")":v);
+    }
     default:return String(sd2Code(k,v));
   }
 }
@@ -4151,7 +4174,12 @@ function buildChips(){
 function clauseText_06(k,v){
   switch(k){
     case"q":return'where a mechanic wrote “'+v+'”';
-    case"operator":{var f=sd2Facets.operator&&sd2Facets.operator[v];return(f&&f.label)||v;}
+    case"operator":{
+      var t2=(sd2CODES&&sd2CODES.operator&&sd2CODES.operator[v])||null;
+      if(t2&&(t2.label||t2.short))return t2.label||t2.short;
+      var f=sd2Facets.operator&&sd2Facets.operator[v];
+      return (f&&f.label!==v?f.label:null)||v;
+    }
     case"tail":return"N"+v;
     case"cracked":return"with cracking recorded";
     case"minhours":return sd2Num(+v)+" hours or more on the airframe";
@@ -4800,10 +4828,16 @@ function rowHtml(x){
   if(month&&month!==LASTMONTH){h+=spineHtml(month);LASTMONTH=month;}
   h+='<tr class="rep" data-month="'+month+'" data-zone="'+escAttr(zone)+'">';
   h+='<td>'+esc(ukDate(x.DifficultyDate))+'<span class="sub">N'+esc(reg||'—')+'</span></td>';
-  var oc=x.OperatorCode||x.Operator||x.AirCarrierCode||'';
+  /* The field is OperatorDesignator. Read under three names it does not use,
+     every row said "no operator named" while the data holds MASA, FDEA,
+     ABXA. Only 5.6% of the file genuinely names no operator, so this was
+     not a blank column but a false statement about the report. */
+  var oc=x.OperatorDesignator||x.OperatorCode||x.Operator||x.AirCarrierCode||'';
   if(oc)h+='<td><span class="c" onclick="setFilter(\'operator\',\''+escAttr(oc)+'\')">'+esc(opName(oc)||oc)+'</span></td>';
   else h+='<td><span class="absent term" data-opgap="1" data-label="no operator named" data-tip="'+escAttr(OPGAP)+'" title="'+escAttr(OPGAP)+'">no operator named</span></td>';
-  var mk=(x.Make||'').trim(),md=(x.Model||'').trim(),nm=(mk+' '+md).trim();
+  /* likewise AircraftMake and AircraftModel: every row read "not recorded"
+     over rows holding BOEING, EMB, AIRBUS. */
+  var mk=(x.AircraftMake||x.Make||'').trim(),md=(x.AircraftModel||x.Model||'').trim(),nm=(mk+' '+md).trim();
   h+='<td>'+(nm?'<span class="c" onclick="setFilter(\'model\',\''+escAttr(md||mk)+'\')">'+esc(nm)+'</span>':'<span class="absent">not recorded</span>')+'</td>';
   h+=reg?'<td><span class="c" onclick="rrTail(\''+escAttr(reg)+'\')">N'+esc(reg)+'</span></td>'
         :'<td><span class="absent">no N-number</span></td>';
@@ -5451,7 +5485,27 @@ SD_CORPUS_P.then(function(){
     ".wu-plain .src{display:block;margin-top:5px;font:11.5px/1.4 system-ui,sans-serif;color:#756f69}";
   document.head.appendChild(css);
 
+  /* The endpoint takes nineteen fields. Read off the visible cells it got nine,
+     and the reading could not mention the airframe's hours, its cycles, the part
+     number, the zone, the corrosion level or the crack length, because none of
+     those is in a column. The row carries its control number, and one report has
+     its own endpoint holding all of it. */
+  function controlOf(wu){
+    var tr = wu.closest("tr"); var rep = tr && tr.previousElementSibling;
+    var host = rep || tr;
+    var n = host && host.querySelector("[data-case]");
+    if (n && n.dataset.case) return n.dataset.case;
+    var b = host && host.querySelector("[onclick^='openCase']");
+    if (b) { var m = /openCase\(['"]([^'"]+)/.exec(b.getAttribute("onclick")||""); if (m) return m[1]; }
+    return null;
+  }
+
+  var FIELDS19 = ["date","operator","make","model","system","part","part_number",
+                  "condition","nature","crew","stage","discovered","zone","zone_label",
+                  "corrosion","cracks","crack_length","hours","cycles"];
+
   function factsFor(wu){
+    /* the cells, as a fallback if the control number is not on the row */
     var tr = wu.closest("tr"); var rep = tr && tr.previousElementSibling;
     var out = {};
     if (rep && rep.cells) {
@@ -5463,6 +5517,52 @@ SD_CORPUS_P.then(function(){
     }
     Object.keys(out).forEach(function(k){ if(!out[k]) delete out[k]; });
     return out;
+  }
+
+  function fullFacts(wu){
+    var id = controlOf(wu);
+    if (!id) return Promise.resolve(factsFor(wu));
+    return fetch("api/case/" + encodeURIComponent(id))
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if (!d || d.error) return factsFor(wu);
+        var one = function(x){ return (x && typeof x === "object") ? (x.label || x.faa || "") : (x || ""); };
+        var many = function(a){ return Array.isArray(a) ? a.map(one).filter(Boolean).join("; ") : one(a); };
+        var out = {
+          date: d.DifficultyDate,
+          operator: (d._operator && d._operator.label) || d.OperatorDesignator,
+          make: d._aircraft_make || d.AircraftMake,
+          model: d.AircraftModel,
+          system: (d._jasc && d._jasc.label) || d.JASCCode,
+          part: d.PartName,
+          part_number: d.PartNumber,
+          condition: d.PartCondition,
+          nature: many(d._nature_all),
+          crew: many(d._crew_all),
+          stage: one(d._stage),
+          discovered: one(d._discovered),
+          zone: d.PartLocation,
+          /* the case endpoint sends the raw zone and no decoded twin, so the
+             words come from the zone menu, which the page builds once from the
+             FAA's own table. One source for a name, everywhere. */
+          zone_label: (function(z){
+            if (!z) return "";
+            var sel = document.getElementById("zone");
+            if (sel) for (var i = 0; i < sel.options.length; i++)
+              if (sel.options[i].value === z)
+                return sel.options[i].textContent.replace(/\s*\([^)]*\)\s*$/, "").trim();
+            return "";
+          })(d.PartLocation),
+          corrosion: one(d._corrosion) || d.CorrosionLevel,
+          cracks: d.NumberOfCracks,
+          crack_length: d.CrackLength,
+          hours: d.AircraftTotalTime,
+          cycles: d.AircraftTotalCycles
+        };
+        FIELDS19.forEach(function(k){ if (!out[k]) delete out[k]; });
+        return out;
+      })
+      .catch(function(){ return factsFor(wu); });
   }
 
   function addButtons(){
@@ -5500,9 +5600,12 @@ SD_CORPUS_P.then(function(){
     var raw = txt ? txt.innerText.replace(/\s+/g, " ").trim() : "";
     if (!raw) return;
     b.disabled = true; b.textContent = "Reading it…";
-    var body = factsFor(wu); body.text = raw;
-    fetch("api/gloss", {method:"POST", headers:{"Content-Type":"application/json"},
-                        body: JSON.stringify(body)})
+    fullFacts(wu)
+      .then(function(body){
+        body.text = raw;
+        return fetch("api/gloss", {method:"POST", headers:{"Content-Type":"application/json"},
+                                   body: JSON.stringify(body)});
+      })
       .then(function(r){ return r.json(); })
       .then(function(d){
         var out = document.createElement("div");
@@ -5565,7 +5668,7 @@ SD_CORPUS_P.then(function(){
   setTimeout(addButtons,1500); setTimeout(addButtons,4000);
 })();
 
-/* ---- 17: both blocks merged, written by the model ---- */
+/* ---- 17 ---- */
 (function () {
   'use strict';
   var doc = document;
@@ -6170,7 +6273,7 @@ SD_CORPUS_P.then(function(){
   else rvBoot();
 })();
 
-/* ---- 10: how to read each panel ---- */
+/* ---- 10 ---- */
 
 /* ---- panel guidance for the SDR rebuild ----
    Idempotent: every note is marked data-sdrs-note, existing notes are

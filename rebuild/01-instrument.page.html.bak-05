@@ -268,7 +268,11 @@ from aircraftdefects.com, rebuilt line by line by GLM-5.3-Flash.">
 
 .l3wrap{overflow-x:auto;max-width:100%;margin-top:6px;border:1px solid #d8d2c6;border-radius:6px}
 table.l3{border-collapse:collapse;width:100%;font-size:12.5px}
-table.l3 td{padding:4px 8px;border-top:1px solid #ece6da;white-space:nowrap}
+table.l3{width:100%;table-layout:auto}
+table.l3 td{padding:4px 8px;border-top:1px solid #ece6da;white-space:nowrap;vertical-align:top}
+/* the last column carries a sentence, not a value: nowrap pushed it off
+   the page and left a scrollbar under a readable table */
+table.l3 td:last-child{white-space:normal;line-height:1.45}
 table.l3 tr:first-child td{border-top:0}
 </style>
 <div id="hero-root"><div id="hero"></div></div>

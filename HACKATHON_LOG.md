@@ -1,192 +1,116 @@
-# Build log
+# Log
 
-Every step in order, including the wrong turns and the retraction. Written as it
-happened, 28 to 29 August 2026.
-
----
-
-## 0. Where this came from
-
-Not from the hackathon. From a stale number.
-
-Checking a public tool of mine against its own API, I found the page saying
-**170,201 reports** while the API said **1,541,548**. A literal left behind when the
-database grew from three years to twenty-six. It had been wrong for months, in
-eleven places, on a site whose whole argument is that public records should be
-legible.
-
-**Lesson kept:** the fix was not to type the right number in. It was to stop typing
-numbers. The page now asks the database its own size on every load.
+What happened, in order, with the numbers. Nothing here is marked done on the
+strength of an API returning 200.
 
 ---
 
-## 1. Check the model can run before designing for it
+## 28 August — the brief writes itself
+
+The model is given flat source material about the corpus and asked what should be
+built, before anything is built. Not "here are features, implement them": the
+prompt asks it to work out what a journalist, a researcher and a relative of
+someone who died each need, and to refuse the ideas the data cannot support.
+
+It refuses three: most dangerous airline, what caused the crash, was my flight
+safe. The file has no fleet sizes and no flying hours, so it has no denominators,
+and it says so before proposing anything. That refusal is now a constraint in
+every later brief.
+
+Kept: [`design/`](design/), the prompt and the answer, with the reasoning.
+
+## 29 August, morning — streaming, and a retraction
+
+Two long jobs die on a 502 and a reset connection. The first explanation is
+prompt size and it is wrong: the successful run had three times the input of the
+failing one. The cause is a silent socket. `stream: true` everywhere.
+
+Separately, a measurement published the day before is retracted. It claimed 14.5%
+of a sample was misread, on the verdict of an adjudicator that turned out to be a
+constant rather than a judge: it agreed with everything put to it. Both the 14.5%
+and the 2.0% that replaced it are withdrawn in the README rather than quietly
+corrected. **F1.**
+
+## 29 August, midday — six specifications
+
+Six agents read the reference implementation and write down what it *does*, not
+what its source says. 9,556 words across six files, one per surface, written as
+decisions with the reason attached.
+
+That framing immediately finds a live bug. The zone lookup is keyed on `200`
+where the API returns `ZONE 200`, so every count reads zero, every shape gets the
+floor of the opacity ramp, and the aircraft comes out one flat colour. The same
+line puts `zone=100` on every click, which the server rejects outright, so the
+filter had never worked either. Two symptoms, one line. **F5.**
+
+The server's refusal is what made it visible. Had it ignored the bad value, the
+page would have shown the unfiltered 1,757,827 under a zone heading: a wrong
+number that looks right.
+
+Corrected with the evidence attached rather than an instruction. Nine distinct
+alphas afterwards, 0.900 for the upper fuselage down to 0.131 for the lavatories,
+the landing-gear strut correctly unfilled and only the three wheels shaded.
+
+While splicing that fix: the page had never rendered at all. It is a component,
+not a page, its CSS scoped under `#hero-root`, and its boot does
+`if(!ROOT) return`. Served on its own there was no such element, so it returned
+in silence. Empty body, no console error, HTTP 200.
+
+## 29 August, afternoon — count it instead
+
+Six agents had described the reference well enough to find a bug. None of them
+had counted the build, so nobody knew the whole lower half of the page was
+missing.
+
+[`build/parity_diff.py`](build/parity_diff.py) drives both through five states in
+a browser and counts elements. [`build/parity_options.py`](build/parity_options.py)
+goes finer and lists what is inside them.
 
 ```
-zai-org/GLM-5.3-Flash    321,323,031,390 params, FP8, 62 weight files
-smallest 4-bit MLX       178 GB
-M4 Pro                    48 GB RAM
-M2 Max                    96 GB RAM
+                        reference   build
+  select menus                 22       1
+  options inside them      11,444       6
+  tabs                         20       4
+  panels                       16       0
+  report rows                 100       0
+  write-ups                   100       0
+  decoded terms               396       0
+  month bars, rail shut       380       0
+  crew ladder rows              8      10
 ```
 
-It fits on neither machine. Mixture of experts, 320B total with 18B active, which
-helps speed and not memory: every weight still has to be resident. So: API.
+Two things the eye had missed. The crew ladder draws ten rows where the
+specification caps at eight, so more is a violation and not an improvement. And
+the two pages spell their rails differently in `?hero=`, so a link copied from
+one opens the wrong rail on the other, which matters because shareable links are
+the whole citation model. **F6, F7.**
 
-Four minutes of arithmetic saved a day of downloading.
+The 396-versus-0 decoded terms was not a rendering fault: the page never called
+`/api/glossary` at all. A question never asked.
 
----
+Phase B, which this file had marked done, is re-opened. It had been established
+by looking and describing rather than by counting.
 
-## 2. The API contract, and the trap in it
+## 29 August, evening — three briefs, three silent collisions
 
-```
-POST https://api.z.ai/api/paas/v4/chat/completions
-Authorization: Bearer <key>
-model: glm-5.3-flash
-```
+Three specifications go out and come back. None of them drops in cleanly, and
+none of the failures produces an error message.
 
-**GLM-5.3 is text only. GLM-5.3-Flash is the multimodal one.** A tool whose input
-is a photograph would have failed silently on the flagship model.
+A `const` and a `function` of the same name is a SyntaxError, so nothing at all
+runs. Two `function`s of the same name is worse: the later wins silently, and
+`pct(a,b)` became `pct(rows,n)`, after which a rail stopped opening with nothing
+in the console. A boot with no `readyState` guard set its own booted flag and
+never tried again, because the mount point was declared after the script.
 
-Reasoning cannot be disabled on this family and defaults to `max`. Paying a
-deep-reasoning model to transcribe ten boxes is money burned, so extraction runs at
-`low` and design at `max`.
+[`rebuild/splice.py`](rebuild/splice.py) now excises the hard collisions and
+renames the soft ones on the way in. **F8.**
 
-**The billing trap.** A 20,000,000 token bundle was bought, and every call still
-returned `429 code 1113 insufficient balance`. The bundle covered `glm-5.3` and
-`glm-4.7-flash`, not `glm-5.3-flash`. Six model ids tested against one endpoint in
-one second: two returned 200, four returned 1113. That isolates the variable to the
-model, which points at billing scope rather than code. The error says *insufficient
-balance*; a 429 reads as rate limiting; the natural assumption is throttling or a
-malformed payload. It is neither.
+The brief for the search half was truncated: 378,982 characters of reasoning plus
+66,122 of writing hit the 128,000-token ceiling and the file ends mid-function.
+Re-run as two halves at `high` rather than `max`.
 
----
-
-## 3. Decide what the model is allowed to do
-
-The only design decision that matters.
-
-The tempting version: hand it the record and ask it to explain the report. It works,
-it demos beautifully, and it is unusable for journalism, because it will expand a
-code it has never seen into something plausible and not flag it.
-
-So: **the model reads, the tables decide.** Meaning comes from the FAA's own tables.
-A code not in them renders as the raw code, in red, labelled undecoded.
-
----
-
-## 4. The Prewash: let it design
-
-One short line in, a full prompt out, `execute prompt`, then a grounding check. See
-[PREWASH_METHOD.md](PREWASH_METHOD.md). It proposed nine builds, refused five
-including an open-ended chat over the data, and refused to decide whether relatives
-should see a per-tail history.
-
----
-
-## 5. Build 8 shipped on a different column than specified
-
-Its plan rested on `HowDiscoveredCode` showing most findings caught during scheduled
-inspection. Its own grounding check flagged that as asserted rather than known. The
-database disagreed: 47% *someone looked at it*, 23% *other*, 19% *unknown*.
-
-The idea was right and the column was wrong. `StageOfOperationCode` carries the
-signal: `IN`, on the ground in inspection or maintenance, covers 1,303,444 of
-1,757,828 records. **74% of all reports were written with the aircraft on the
-ground.**
-
----
-
-## 6. Give it the real source
-
-85,326 tokens of the parent tool went in: the Flask app, its 219KB front end, and
-the new backend. 850 seconds later, a complete page in the house style.
-
-I flagged two things in it as wrong. Both were right. The Google Fonts load and a
-Wikipedia link are both in the parent's own source, copied faithfully. My own
-hand-written page was the one that deviated.
-
----
-
-## 7. Measure the disagreements, then retract the measurement
-
-200 long reports, 29 flagged, **14.5%**. Published here for about an hour.
-
-Then an adversarial check: three adjudicators per flag, each told to refute it, a
-flag surviving on two of three. Four survived. That would be 2.0%.
-
-```
-literal      upheld 16, refuted 13
-charitable   upheld  0, refuted 29
-sequence     upheld  5, refuted 24
-```
-
-**The charitable adjudicator refuted every flag it ever saw.** An instrument that
-always returns the same answer measures nothing. It was told *"if a defensible
-reading exists, the flag fails"*, and for a broad FAA code definition a defensible
-reading almost always exists. So two-of-three silently became literal-and-sequence,
-and 2.0% is an artefact.
-
-Neither number stands. Full write-up in [docs/FINDINGS.md](docs/FINDINGS.md).
-
-**The method lesson is the more useful finding:** an adversarial panel is only worth
-running if its verdicts vary. Check that every judge has ever disagreed with itself
-before trusting the panel. One line, and it should be the first line.
-
----
-
-## 8. Build a ledger instead
-
-A rate needs a denominator, a denominator needs a calibrated instrument, and there
-is not one. A ledger needs neither.
-
-[/z/conflicts](https://aircraftdefects.com/z/conflicts) fills from ordinary use and
-says in its first paragraph that its size measures attention, not prevalence.
-
----
-
-## Things that went wrong
-
-**A `return` alone on its line.** Rewriting a renderer on the parent tool, `return`
-sat at the end of a line with the template literal starting on the next. Automatic
-semicolon insertion made it return `undefined` and the tab bar rendered zero tabs.
-`node --check` passed. The page returned 200. Every API was fine. Only driving it in
-a real browser caught it.
-
-**`$` with `querySelector` and bare ids.** `$("pick")` searched for a `<pick>` element
-and returned null, so every button on the new tool was inert. The page loaded, styled
-correctly, and looked healthy. Found by a user clicking, which is what I should have
-done before saying it was ready.
-
-**`.format()` on a tuple.** A measured sentence was meant to replace a placeholder in
-a glossary term. `.format()` was applied to the tuple containing the string rather
-than the string, and a blanket `except Exception: pass` swallowed the error, so the
-API served the literal text `OPERATOR_GAP_SENTENCE`.
-
-**A date range clamped in one direction.** Selecting a year set the end date to 31
-December unconditionally, so 2026 captioned itself as running to December over a
-count that stopped in August. Fixing it naively then produced *1 Dec 2026 to 20 Aug
-2026*, a range running backwards, for any period entirely in the future.
-
-**A summary capped at 40 words.** The plain-English gloss was told "one or two short
-sentences, maximum 40 words". On a write-up describing eight events in sequence, that
-limit is the bug: it dropped the thump in cruise, the precautionary declaration, the
-fly-by, the suspected tyre blowout and the fire equipment. Length now follows the
-source.
-
-**Assuming where a data gap was.** I predicted a 2006-era operator list would be blind
-to new airlines. Measured: for 2025 it already named 98.5% of reports. The hole was at
-the other end, 82% for 1999, the largest gap being TWA, gone before the codebook was
-printed.
-
----
-
-## Counts
-
-```
-commits                    7
-python                 1,543 lines
-page                     274 lines
-tokens through GLM   198,227
-reasoning kept       314,399 chars
-model turns kept           5, each with its full trace
-```
+**State at the end of the day.** Four rails working and measured: the month strip
+stays drawn when the rail is shut, the gutters carry values, all four rails state
+what their figures amount to, the crew ladder is back to eight, the specimen
+reads as decoded English. Sixteen tabs and thirty-one panels below it. The
+records themselves are still being built.

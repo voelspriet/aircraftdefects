@@ -1,136 +1,86 @@
-# The Prewash
+# The method: instructions, not code
 
-You never write the long prompt yourself.
+The model is never handed an implementation to copy. It is handed a written
+specification of what a surface has to do, and it decides how.
 
-You type one short line saying what you want a prompt *for*. The model writes the
-prompt. You read it. Then you say `execute prompt`.
+That sounds like a small distinction. It is the whole project.
 
----
+## A specification is a list of decisions
 
-## The three steps
+An implementation tells you what happens. It does not tell you which parts were
+chosen and which are accident. A model reading code faithfully reproduces both,
+and has no way to know that one of them mattered.
 
-```
-1.  <short line asking for a prompt>     the model writes the prompt, you read it
-2.  execute prompt                        it runs the prompt it wrote
-3.  <grounding check>                     it marks every sentence stated or inferred
-```
+So the specifications in [`rebuild/specs/`](rebuild/specs/) are written as
+decisions, with the reason attached:
 
-Step 3 is not optional. It is the step that caught a fabricated statistic in this
-project, in an answer that was otherwise well argued and confident.
+> Both bars are scaled against the corpus maximum, never against the selection's
+> own. The selection is always drawn as a fraction of the whole, so a small
+> selection looks small. When that makes it invisible, add a labelled magnified
+> line with the factor printed rather than silently rescaling.
 
----
+> The cap is eight rows. Ten codes are counted and up to two are silently
+> omitted, deliberately, with no "more" affordance, unlike the neighbouring rail
+> which discloses its cap twice.
 
-## Why writing the prompt yourself defeats it
+> A month is only called a month when the whole month is in the selection.
 
-A detailed prompt carries its author's assumptions in its adjectives.
+Nine thousand five hundred and fifty-six words of that, across six files, one per
+surface.
 
-Ask a model to *find the most alarming safety patterns in this aviation data* and
-it will find alarm. Not because it is dishonest, but because that is the question
-it was handed. The output will look like analysis and be a reflection of the
-question. You will not see the reflection, because you wrote the question and it
-felt neutral when you wrote it.
+## Every brief carries evidence, not instructions
 
-Hand it a short line and flat material instead, and it has to frame the question
-itself. The framing becomes an artefact you can read, argue with, and reject. That
-is the whole value: **the framing becomes visible**.
-
----
-
-## Flat source material
-
-The material in [`design/ask_glm.py`](design/ask_glm.py) is deliberately inert.
-Counts, column names, three verbatim examples, and the three things the dataset
-does not contain. No adjectives. No ranking. No hint about what would be
-interesting.
-
-Compare the two ways of describing the same field:
-
-> **Loaded:** *Roughly 1.5 million free-text write-ups nobody has ever read at
-> scale. This is the untapped goldmine.*
-
-> **Flat:** *Discrepancy is free text written by the person filing. Present in most
-> records. Three verbatim examples: ...*
-
-The first tells the model what to conclude. The second lets it decide whether that
-field matters, and it did, without being told.
-
----
-
-## What it produced here
-
-The human input to step 1 was one sentence:
-
-> Give me a prompt to work out what to build on this dataset for these users.
-
-From counts and column names alone, the model identified the three traps in the
-dataset and built its own prompt around them: missing denominators, missing causes,
-and a grieving non-expert audience. None of those words appeared in the material.
-
-The prompt it wrote put a **data reality audit before any product idea**, made
-rejection its own scored phase, and required a section headed **"What this product
-will never claim."** Nobody asked for that section.
-
-It also did arithmetic nobody requested. Given 3,945 operator designators of which
-1,213 resolve, it wrote *"2,732 of 3,945 operator designators resolve to no name"*
-and turned that into a product rule.
-
-And it corrected the brief. The material placed a 1M-token context window beside a
-1.76M-record dataset. The model caught the implication:
-
-> 1M-token context (large slices of the dataset fit per pass; all 1.76M records do
-> not)
-
-and made batched pipelines a precondition instead of a later discovery.
-
----
-
-## The grounding check
-
-Step 3 is one sentence:
-
-> Take your previous answer and mark each sentence as either stated in the source
-> material or inferred by you. For anything inferred, say it is not established by
-> the source.
-
-On this project it produced 7,265 characters of self-audit, and inside it:
-
-> "HowDiscoveredCode shows most findings are caught during scheduled inspection"
-> — **[I] NOT established by the source.** The source lists HowDiscoveredCode as a
-> column but gives no distribution. **I asserted a distribution I do not have.**
-
-That claim was load-bearing inside one of its own recommended builds. Without step
-3 the wrong column ships.
-
-**What step 3 cannot do:** it flagged the claim as unverified. It could not tell
-that it was false. Only the database could, and it was: that column is 47% *someone
-looked at it*, 23% *other*, 19% *unknown*. The grounding check narrows what you
-must check. It does not replace checking.
-
----
-
-## Targeted, one per task
-
-The Prewash is not one generic line reused forever. Each task gets its own short
-line, and the loop repeats at every step:
+A brief that says "the aircraft is not shaded" is an opinion. A brief that says
+this is a work order:
 
 ```
-give me a prompt to work out what to build on this dataset for these users
-give me a prompt to work out what the visual and file capabilities could do here
-give me a prompt to check your last answer against the source, line by line
+The live API returns:      code='ZONE 200'  label=Upper fuselage  n=84453
+Your code, line 247:       const ZONE_ORDER=["100","200","300",...]
+The lookup asks for '200'. Every by.has() is false, every n is 0, so every
+shape gets the floor of your opacity ramp.
+
+The same line breaks the filter. Your marks carry take="zone|100", so:
+  zone=100        -> {"error":"rejected filter values", ...}
+  zone=ZONE%20100 -> total = 60966
 ```
 
-Short in, long out. Never the reverse.
+The model then fixes the cause rather than the symptom, and twice it has found a
+third consequence I had not measured. It noticed that the typed search route
+carried the same bare code and would be rejected the same way; and that the paper
+cabin windows would intercept hovers over the fuselage beneath them.
 
----
+## Every brief ends with what it must survive
 
-## Applied to a build, not just a plan
+Not "make it good". Three or four checks, phrased as observations a browser can
+make:
 
-The same method wrote the interface. The model was handed 85,326 tokens of the
-parent tool's real source, the working Flask app and its 219KB front end, with a
-plain statement of what the page had to answer. Not a description of the house
-style: the house style itself.
+- Seven paths showing at least four visibly different opacities, ZONE 200 darkest
+- Clicking the crown produces a request carrying `zone=ZONE 200` and a table of
+  84,453
+- The sentence reads "Upper fuselage accounts for 84,453 of the 212,940 reports
+  written in the FAA's numbered zones, or 39.7%", computed from the data and not
+  hard-coded
 
-Fourteen minutes later it returned a complete page that matched the palette, the
-fonts and the restraint. It carried over conventions nobody named, including
-*"Free-text locations are kept and marked, never forced into a zone"*, which is the
-parent tool's discipline stated in the parent tool's voice.
+Then the browser actually makes them. Three times in one day the code was
+syntactically perfect, returned HTTP 200, logged nothing, and did nothing at all.
+Only driving the page caught it.
+
+## Give it the whole budget
+
+`max_tokens` covers the reasoning and the writing together. A brief of five
+thousand words at maximum effort spent 378,982 characters thinking and was cut
+off mid-function with 66,122 characters written. The ceiling is not a quality
+dial; it is a budget, and the effort level spends it.
+
+The fix is to split the brief and lower the effort, not to shorten the
+specification.
+
+## Keep the thinking
+
+Every reasoning trace is committed, 1.59 million characters of it. The split
+between what the model thought and what it wrote is then visible rather than
+inferred, and when it departs from the specification it is asked to say so. Its
+departures are in the repository next to the code, and several of them were
+improvements: the closed month strip shades by count because a flat grey bar
+cannot show a distribution, and a duplicate check that would drop the part
+whenever the system was blank was caught before it shipped.

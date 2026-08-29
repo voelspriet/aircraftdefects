@@ -400,6 +400,17 @@ html,body{margin:0;padding:0;background:#f2eee6}
    the reference's 640 at a 900px window, a third of the picture. */
 @media (max-width:960px){.rail .track.two{grid-template-columns:1fr}.rail>.reading{grid-column:1}}
 
+.ihead{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.picker{display:flex;gap:2px}
+.picker button{background:none;border:0;border-bottom:2px solid transparent;padding:3px 10px 5px;
+  cursor:pointer;text-align:left;font:inherit;color:var(--ash)}
+.picker button .q{display:block;font:600 11px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em}
+.picker button .pn{display:block;font-size:9.5px;color:#5f584f;margin-top:1px}
+.picker button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--rust);
+  background:#f6f2ea;border-radius:4px 4px 0 0}
+.picker button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+@media(max-width:760px){.picker{width:100%}.picker button{flex:1;padding:3px 4px 5px}}
+
 
 #sdControls{margin:16px 0 0;font:15px/1.45 Georgia,serif;color:#2b2622}
 #sdControls label{display:block;font:600 11px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#6f6a63;margin-bottom:3px}
@@ -591,8 +602,8 @@ table.kv hr{border:0;border-top:1px dashed #d8d2c6;margin:6px 0}
       <div class="fld"><label for="zone">Zone on the aircraft</label><select id="zone"><option value="">Anywhere on the aircraft</option></select></div>
       <div class="fld"><label for="tail">Tail number</label><input id="tail" placeholder="e.g. N583"></div>
       <div class="fld"><label for="corrosion">Corrosion</label><select id="corrosion"><option value="">Any corrosion level</option></select></div>
-      <div class="fld"><label for="cracked">Cracking</label><select id="cracked"><option value="">Cracked or not</option><option value="1">Cracked</option></select></div>
-      <div class="fld"><label for="minhours">At least this many hours</label><input id="minhours" inputmode="numeric" placeholder="e.g. 50000"></div>
+      <div class="fld"><label for="cracked">Cracking</label><select id="cracked"><option value="">Cracked or not</option><option value="1">Cracking recorded</option></select></div>
+      <div class="fld"><label for="minhours">At least this many hours</label><select id="minhours"><option value="">Any airframe age</option><option value="20000">20,000 hours or more</option><option value="50000">50,000 hours or more</option><option value="75000">75,000 hours or more</option></select></div>
     </div>
   </details>
   <div id="starters" aria-label="Starter questions"></div>
@@ -2913,7 +2924,18 @@ function drawHero(d, phone){
   };
   var openKey=heroKey(), nar=narrowed(), h="";
   if((d.total||0)===0) h+=zeroHTML(d);
-  h+='<div class="stamp">'+esc(d.stamp||"FAA Service Difficulty Reports")+'</div>';
+  h+='<div class="ihead"><div class="stamp">'+esc(d.stamp||"FAA Service Difficulty Reports")+'</div>';
+  /* The reference puts a tablist beside the stamp. Without it a rail can only
+     be reached by clicking the rail itself, which leaves no keyboard route at
+     all and no announcement of which of the four is open. */
+  h+='<div class="picker" role="tablist" aria-label="Which rail is open">'+
+     [["when","WHEN","month by month"],["where","WHERE","on the aircraft"],
+      ["whose","WHO","airline and tail"],["forced","WHAT IT FORCED","what the crew did"]]
+     .map(function(r){var on=openKey===r[0];
+       return '<button type="button" role="tab" data-pick="'+r[0]+'"'+
+         ' aria-selected="'+(on?"true":"false")+'" tabindex="'+(on?"0":"-1")+'">'+
+         '<span class="q">'+r[1]+'</span><span class="pn">'+r[2]+'</span></button>';}).join("")+
+     '</div></div>';
   h+='<p class="stand">'+standingSentence(d)+'</p>';
   h+='<div class="aim" id="iAim" aria-live="polite"></div>';
   h+='<div class="rails">';
@@ -3908,10 +3930,23 @@ function buildFleet(){
 }
 function fillFlOp(){
   var s=vEl('fl-op'); if(!s) return;
+  /* The facet key is operators, plural, a plain list of designators with
+     neither names nor counts. Read as 'operator' it came back empty, so the
+     menu listed raw codes alphabetically with (0) beside every airline. The
+     controls half already builds this list correctly, with names and in report
+     order; copying it keeps the two from drifting apart. */
+  var src=document.getElementById('operator');
+  if(src && src.options.length>1){
+    s.innerHTML='<option value="">Pick an airline code</option>'+
+      [].slice.call(src.options,1).map(function(o){
+        return '<option value="'+VH(o.value)+'">'+VH(o.textContent)+'</option>';
+      }).join('');
+    return;
+  }
   var rows=normOps(facetList(FAC,'operator')).sort(function(a,b){ return (b.n-a.n)||String(a.label).localeCompare(String(b.label)); });
-  s.innerHTML='<option value="">Any operator</option>'+rows.map(function(r){
+  s.innerHTML='<option value="">Pick an airline code</option>'+rows.map(function(r){
     var lab=(r.label&&r.label!==r.code)?(r.label+' ('+r.code+')'):r.code;
-    return '<option value="'+VH(r.code)+'">'+VH(lab)+' ('+VN(r.n)+')</option>';
+    return '<option value="'+VH(r.code)+'">'+VH(lab)+'</option>';
   }).join('');
 }
 function runFleet(){
@@ -3937,7 +3972,7 @@ function loadLeads(){
   var b=pbody('p-leads'); if(!b) return;
   b.innerHTML='<div id="ld-leads"><p class="pnote">Reading the whole file for angles…</p></div>'+
     '<div class="ctl"><div><label for="spike-by">Then watch a sudden rise in</label><select id="spike-by">'+
-    optsHTML([['','Choose a grouping'],['ata','By system'],['part','By part'],['model','By model'],['operator','By airline']])+
+    optsHTML([['ata','By aircraft system'],['part','By part'],['model','By model'],['operator','By airline'],['jasc','By system']])+
     '</select></div></div><div id="ld-spikes"><p class="pnote">Choose a grouping above to look for spikes. Nothing is fetched until you do.</p></div>';
   vEl('spike-by').addEventListener('change',loadSpikes);
   vget('api/leads').then(function(d){
@@ -4003,9 +4038,9 @@ function loadEm(){
 function loadClusters(){
   var b=pbody('p-clusters'); if(!b) return;
   b.innerHTML='<div class="ctl"><div><label for="cl-min">At least this many aircraft on one day</label><select id="cl-min">'+
-    optsHTML([['3','3 or more'],['4','4 or more'],['6','6 or more'],['10','10 or more']])+
+    optsHTML([['3','3 aircraft or more'],['4','4 or more'],['6','6 or more'],['10','10 or more']])+
     '</select></div><div><label for="cl-kind">Kind</label><select id="cl-kind">'+
-    optsHTML([['all','Everything'],['sched','Recurring, probably scheduled'],['event','One-off, probably unscheduled']])+
+    optsHTML([['event','One-offs only'],['all','Everything'],['sched','Recurring, probably scheduled']])+
     '</select></div></div><div id="cl-out"></div>'+
     '<p class="pnote">A heavy check on one aircraft writes many rows: a mechanic files every finding separately. This panel counts aircraft, not rows.</p>';
   vEl('cl-min').addEventListener('change',loadCl); vEl('cl-kind').addEventListener('change',loadCl); loadCl();
@@ -4083,7 +4118,7 @@ function loadStructure(){
 function loadAge(){
   var b=pbody('p-age'); if(!b) return;
   b.innerHTML='<div class="ctl"><div><label for="ag-by">Group by</label><select id="ag-by">'+
-    optsHTML([['hours','By hours on the airframe'],['cycles','By takeoff-and-landing cycles']])+
+    optsHTML([['hours','By hours flown'],['cycles','By takeoff-and-landing cycles']])+
     '</select></div></div><div id="ag-out"></div>';
   vEl('ag-by').addEventListener('change',loadAg); loadAg();
 }
@@ -4444,6 +4479,28 @@ function mountViews(){
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mountViews);
 else mountViews();
 
+(function(){
+  var PICK=["when","where","whose","forced"];
+  document.addEventListener("click",function(e){
+    var b=e.target.closest&&e.target.closest("[data-pick]");
+    if(b){ e.preventDefault(); setHero(b.dataset.pick); }
+  });
+  /* roving tabindex: one stop for the whole strip, arrows walk it. */
+  document.addEventListener("keydown",function(e){
+    var b=e.target&&e.target.closest&&e.target.closest("[data-pick]");
+    if(!b) return;
+    var i=PICK.indexOf(b.dataset.pick), j=i;
+    if(e.key==="ArrowRight"||e.key==="ArrowDown") j=(i+1)%PICK.length;
+    else if(e.key==="ArrowLeft"||e.key==="ArrowUp") j=(i+PICK.length-1)%PICK.length;
+    else if(e.key==="Home") j=0;
+    else if(e.key==="End") j=PICK.length-1;
+    else if(e.key==="Enter"||e.key===" "){ e.preventDefault(); setHero(b.dataset.pick); return; }
+    else return;
+    e.preventDefault(); setHero(PICK[j]);
+    var n=document.querySelector('[data-pick="'+PICK[j]+'"]'); if(n) n.focus();
+  });
+})();
+
 /* ---- 06-controls ---- */
 /* ================= CONTROLS HALF ================= */
 
@@ -4461,6 +4518,7 @@ var CLAUSE_ORDER=["q","jasc","ata","part","condition","zone","operator","make","
 var FOLLOWS_FILTER=["p-search","p-patterns","p-found"];
 var VIEW_GROUPS={"Narrows to what you selected":FOLLOWS_FILTER.slice(),"Ignore your selection":[],"Reference":[]};
 var SKIPS={nature:["0"],crew:["0","K"],discovered:["0"],corrosion:["1"],stage:["00"],zone:["ZONE 000"]};
+var CLOSED_TABLE={nature:1,crew:1,discovered:1,stage:1,zone:1,corrosion:1};
 var sd2CodeKeys={operator:["operator"],nature:["nature"],crew:["precaution","crew"],condition:["condition","part_condition"],
  discovered:["discovered"],stage:["stage","stage_of_flight"],zone:["part_location","zone"],
  corrosion:["corrosion"],jasc:["jasc"],ata:["ata"]};
@@ -4628,9 +4686,14 @@ function sd2NormFacets(f){
   for(var k in f){
     if(k==="counts"||k==="range"||k==="opgap")continue;
     var m={},it=f[k];
-    if(Array.isArray(it))it.forEach(function(o){
-      if(o&&typeof o==="object"){var v=o.v||o.value||o.code;if(v!=null)m[v]={label:o.label||v,n:o.n||o.count||0};}
-      else if(o!=null&&o!=="")m[o]={label:String(o),n:0};
+    /* The order these arrive in is the only ordering there is for the fields
+       that carry no counts, and an object cannot hold it: JavaScript enumerates
+       integer-like keys first, in numeric order, so a part condition filed as
+       "19681" jumped ahead of CORRODED at the head of a 3,131-entry menu.
+       The position is carried on the entry instead. */
+    if(Array.isArray(it))it.forEach(function(o,ix){
+      if(o&&typeof o==="object"){var v=o.v||o.value||o.code;if(v!=null)m[v]={label:o.label||v,n:o.n||o.count||0,i:ix};}
+      else if(o!=null&&o!=="")m[o]={label:String(o),n:0,i:ix};
     });
     else for(var v in it){var e=it[v];m[v]=typeof e==="object"?{label:e.label||v,n:e.n||e.count||0}:{label:v,n:e};}
     out[ALIAS[k]||k]=m;
@@ -4653,11 +4716,15 @@ function opts(field,emptyLabel,skips){
   var all={};
   function add(v){
     if(skips&&skips.indexOf(v)>=0)return;
-    /* where the FAA publishes a code table, that table is the list. Filed
-       values outside it are still shown in a row, as filed, but they do not
-       belong in a picker: corrosion offered 0, 5, 6, 7, 8 and 9 beside its
-       three real levels, and the crew menu offered "-", "N" and "P". */
-    if(tab&&tab[v]==null)return;
+    /* Where the FAA publishes a closed table of codes, that table is the list:
+       corrosion offered 0, 5, 6, 7, 8 and 9 beside its three real levels, and
+       the crew menu offered "-", "N" and "P".
+
+       Not for operators. That table is a name cross-reference, not an
+       enumeration of valid designators: only 1,214 of the 3,947 that occur are
+       in it. Applied there it silently dropped two thirds of the airlines in
+       the file, which is a worse fault than the one it fixes. */
+    if(CLOSED_TABLE[field]&&tab&&tab[v]==null)return;
     all[v]=counts[v]?counts[v].n:0;
   }
   Object.keys(counts).forEach(add);
@@ -4669,7 +4736,8 @@ function opts(field,emptyLabel,skips){
     /* an airline is named, with its designator in brackets, because the code is
        what a reporter has to quote and the name is what they recognise. */
     if(field==="operator"&&lab&&lab!==v)lab=lab+" ("+v+")";
-    return{v:v,lab:lab,n:all[v]};
+    var e=counts[v];
+    return{v:v,lab:lab,n:all[v],i:(e&&e.i!=null)?e.i:1e9};
   });
   /* The endpoint answers with plain lists for operator, make and condition:
      names in report order, no numbers. Sorting them by a count that is always
@@ -4678,7 +4746,9 @@ function opts(field,emptyLabel,skips){
      they are shown and they sort; where they do not, the order stands and the
      bracket is left off rather than filled with a lie. */
   var haveCounts=arr.some(function(o){return o.n>0;});
-  if(haveCounts)arr.sort(function(a,b){return b.n-a.n||(a.lab<b.lab?-1:1);});
+  arr.sort(haveCounts
+    ? function(a,b){return b.n-a.n||(a.lab<b.lab?-1:1);}
+    : function(a,b){return a.i-b.i||(a.lab<b.lab?-1:1);});
   var h='<option value="">'+sd2Esc(emptyLabel)+"</option>";
   arr.forEach(function(o){
     h+='<option value="'+sd2Esc(o.v)+'"'+(haveCounts&&o.n===0?' class="empty"':"")+">"+

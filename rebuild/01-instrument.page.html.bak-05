@@ -254,6 +254,17 @@ from aircraftdefects.com, rebuilt line by line by GLM-5.3-Flash.">
    drawing was squeezed into whatever the legend left over: 312px against
    the reference's 640 at a 900px window, a third of the picture. */
 @media (max-width:960px){.rail .track.two{grid-template-columns:1fr}.rail>.reading{grid-column:1}}
+
+.ihead{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.picker{display:flex;gap:2px}
+.picker button{background:none;border:0;border-bottom:2px solid transparent;padding:3px 10px 5px;
+  cursor:pointer;text-align:left;font:inherit;color:var(--ash)}
+.picker button .q{display:block;font:600 11px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em}
+.picker button .pn{display:block;font-size:9.5px;color:#5f584f;margin-top:1px}
+.picker button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--rust);
+  background:#f6f2ea;border-radius:4px 4px 0 0}
+.picker button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+@media(max-width:760px){.picker{width:100%}.picker button{flex:1;padding:3px 4px 5px}}
 </style>
 <div id="hero-root"><div id="hero"></div></div>
 <script>
@@ -1678,7 +1689,18 @@ function drawHero(d, phone){
   };
   var openKey=heroKey(), nar=narrowed(), h="";
   if((d.total||0)===0) h+=zeroHTML(d);
-  h+='<div class="stamp">'+esc(d.stamp||"FAA Service Difficulty Reports")+'</div>';
+  h+='<div class="ihead"><div class="stamp">'+esc(d.stamp||"FAA Service Difficulty Reports")+'</div>';
+  /* The reference puts a tablist beside the stamp. Without it a rail can only
+     be reached by clicking the rail itself, which leaves no keyboard route at
+     all and no announcement of which of the four is open. */
+  h+='<div class="picker" role="tablist" aria-label="Which rail is open">'+
+     [["when","WHEN","month by month"],["where","WHERE","on the aircraft"],
+      ["whose","WHO","airline and tail"],["forced","WHAT IT FORCED","what the crew did"]]
+     .map(function(r){var on=openKey===r[0];
+       return '<button type="button" role="tab" data-pick="'+r[0]+'"'+
+         ' aria-selected="'+(on?"true":"false")+'" tabindex="'+(on?"0":"-1")+'">'+
+         '<span class="q">'+r[1]+'</span><span class="pn">'+r[2]+'</span></button>';}).join("")+
+     '</div></div>';
   h+='<p class="stand">'+standingSentence(d)+'</p>';
   h+='<div class="aim" id="iAim" aria-live="polite"></div>';
   h+='<div class="rails">';
@@ -2673,10 +2695,23 @@ function buildFleet(){
 }
 function fillFlOp(){
   var s=vEl('fl-op'); if(!s) return;
+  /* The facet key is operators, plural, a plain list of designators with
+     neither names nor counts. Read as 'operator' it came back empty, so the
+     menu listed raw codes alphabetically with (0) beside every airline. The
+     controls half already builds this list correctly, with names and in report
+     order; copying it keeps the two from drifting apart. */
+  var src=document.getElementById('operator');
+  if(src && src.options.length>1){
+    s.innerHTML='<option value="">Pick an airline code</option>'+
+      [].slice.call(src.options,1).map(function(o){
+        return '<option value="'+VH(o.value)+'">'+VH(o.textContent)+'</option>';
+      }).join('');
+    return;
+  }
   var rows=normOps(facetList(FAC,'operator')).sort(function(a,b){ return (b.n-a.n)||String(a.label).localeCompare(String(b.label)); });
-  s.innerHTML='<option value="">Any operator</option>'+rows.map(function(r){
+  s.innerHTML='<option value="">Pick an airline code</option>'+rows.map(function(r){
     var lab=(r.label&&r.label!==r.code)?(r.label+' ('+r.code+')'):r.code;
-    return '<option value="'+VH(r.code)+'">'+VH(lab)+' ('+VN(r.n)+')</option>';
+    return '<option value="'+VH(r.code)+'">'+VH(lab)+'</option>';
   }).join('');
 }
 function runFleet(){
@@ -2702,7 +2737,7 @@ function loadLeads(){
   var b=pbody('p-leads'); if(!b) return;
   b.innerHTML='<div id="ld-leads"><p class="pnote">Reading the whole file for angles…</p></div>'+
     '<div class="ctl"><div><label for="spike-by">Then watch a sudden rise in</label><select id="spike-by">'+
-    optsHTML([['','Choose a grouping'],['ata','By system'],['part','By part'],['model','By model'],['operator','By airline']])+
+    optsHTML([['ata','By aircraft system'],['part','By part'],['model','By model'],['operator','By airline'],['jasc','By system']])+
     '</select></div></div><div id="ld-spikes"><p class="pnote">Choose a grouping above to look for spikes. Nothing is fetched until you do.</p></div>';
   vEl('spike-by').addEventListener('change',loadSpikes);
   vget('api/leads').then(function(d){
@@ -2768,9 +2803,9 @@ function loadEm(){
 function loadClusters(){
   var b=pbody('p-clusters'); if(!b) return;
   b.innerHTML='<div class="ctl"><div><label for="cl-min">At least this many aircraft on one day</label><select id="cl-min">'+
-    optsHTML([['3','3 or more'],['4','4 or more'],['6','6 or more'],['10','10 or more']])+
+    optsHTML([['3','3 aircraft or more'],['4','4 or more'],['6','6 or more'],['10','10 or more']])+
     '</select></div><div><label for="cl-kind">Kind</label><select id="cl-kind">'+
-    optsHTML([['all','Everything'],['sched','Recurring, probably scheduled'],['event','One-off, probably unscheduled']])+
+    optsHTML([['event','One-offs only'],['all','Everything'],['sched','Recurring, probably scheduled']])+
     '</select></div></div><div id="cl-out"></div>'+
     '<p class="pnote">A heavy check on one aircraft writes many rows: a mechanic files every finding separately. This panel counts aircraft, not rows.</p>';
   vEl('cl-min').addEventListener('change',loadCl); vEl('cl-kind').addEventListener('change',loadCl); loadCl();
@@ -2848,7 +2883,7 @@ function loadStructure(){
 function loadAge(){
   var b=pbody('p-age'); if(!b) return;
   b.innerHTML='<div class="ctl"><div><label for="ag-by">Group by</label><select id="ag-by">'+
-    optsHTML([['hours','By hours on the airframe'],['cycles','By takeoff-and-landing cycles']])+
+    optsHTML([['hours','By hours flown'],['cycles','By takeoff-and-landing cycles']])+
     '</select></div></div><div id="ag-out"></div>';
   vEl('ag-by').addEventListener('change',loadAg); loadAg();
 }
@@ -3208,6 +3243,28 @@ function mountViews(){
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mountViews);
 else mountViews();
+
+(function(){
+  var PICK=["when","where","whose","forced"];
+  document.addEventListener("click",function(e){
+    var b=e.target.closest&&e.target.closest("[data-pick]");
+    if(b){ e.preventDefault(); setHero(b.dataset.pick); }
+  });
+  /* roving tabindex: one stop for the whole strip, arrows walk it. */
+  document.addEventListener("keydown",function(e){
+    var b=e.target&&e.target.closest&&e.target.closest("[data-pick]");
+    if(!b) return;
+    var i=PICK.indexOf(b.dataset.pick), j=i;
+    if(e.key==="ArrowRight"||e.key==="ArrowDown") j=(i+1)%PICK.length;
+    else if(e.key==="ArrowLeft"||e.key==="ArrowUp") j=(i+PICK.length-1)%PICK.length;
+    else if(e.key==="Home") j=0;
+    else if(e.key==="End") j=PICK.length-1;
+    else if(e.key==="Enter"||e.key===" "){ e.preventDefault(); setHero(b.dataset.pick); return; }
+    else return;
+    e.preventDefault(); setHero(PICK[j]);
+    var n=document.querySelector('[data-pick="'+PICK[j]+'"]'); if(n) n.focus();
+  });
+})();
 
 window.drawInstrument=drawInstrument;
 })();

@@ -52,8 +52,8 @@ Where things go:
       <div class="fld"><label for="zone">Zone on the aircraft</label><select id="zone"><option value="">Anywhere on the aircraft</option></select></div>
       <div class="fld"><label for="tail">Tail number</label><input id="tail" placeholder="e.g. N583"></div>
       <div class="fld"><label for="corrosion">Corrosion</label><select id="corrosion"><option value="">Any corrosion level</option></select></div>
-      <div class="fld"><label for="cracked">Cracking</label><select id="cracked"><option value="">Cracked or not</option><option value="1">Cracked</option></select></div>
-      <div class="fld"><label for="minhours">At least this many hours</label><input id="minhours" inputmode="numeric" placeholder="e.g. 50000"></div>
+      <div class="fld"><label for="cracked">Cracking</label><select id="cracked"><option value="">Cracked or not</option><option value="1">Cracking recorded</option></select></div>
+      <div class="fld"><label for="minhours">At least this many hours</label><select id="minhours"><option value="">Any airframe age</option><option value="20000">20,000 hours or more</option><option value="50000">50,000 hours or more</option><option value="75000">75,000 hours or more</option></select></div>
     </div>
   </details>
 
@@ -156,6 +156,7 @@ var CLAUSE_ORDER=["q","jasc","ata","part","condition","zone","operator","make","
 var FOLLOWS_FILTER=["p-search","p-patterns","p-found"];
 var VIEW_GROUPS={"Narrows to what you selected":FOLLOWS_FILTER.slice(),"Ignore your selection":[],"Reference":[]};
 var SKIPS={nature:["0"],crew:["0","K"],discovered:["0"],corrosion:["1"],stage:["00"],zone:["ZONE 000"]};
+var CLOSED_TABLE={nature:1,crew:1,discovered:1,stage:1,zone:1,corrosion:1};
 var sd2CodeKeys={operator:["operator"],nature:["nature"],crew:["precaution","crew"],condition:["condition","part_condition"],
  discovered:["discovered"],stage:["stage","stage_of_flight"],zone:["part_location","zone"],
  corrosion:["corrosion"],jasc:["jasc"],ata:["ata"]};
@@ -330,9 +331,14 @@ function sd2NormFacets(f){
   for(var k in f){
     if(k==="counts"||k==="range"||k==="opgap")continue;
     var m={},it=f[k];
-    if(Array.isArray(it))it.forEach(function(o){
-      if(o&&typeof o==="object"){var v=o.v||o.value||o.code;if(v!=null)m[v]={label:o.label||v,n:o.n||o.count||0};}
-      else if(o!=null&&o!=="")m[o]={label:String(o),n:0};
+    /* The order these arrive in is the only ordering there is for the fields
+       that carry no counts, and an object cannot hold it: JavaScript enumerates
+       integer-like keys first, in numeric order, so a part condition filed as
+       "19681" jumped ahead of CORRODED at the head of a 3,131-entry menu.
+       The position is carried on the entry instead. */
+    if(Array.isArray(it))it.forEach(function(o,ix){
+      if(o&&typeof o==="object"){var v=o.v||o.value||o.code;if(v!=null)m[v]={label:o.label||v,n:o.n||o.count||0,i:ix};}
+      else if(o!=null&&o!=="")m[o]={label:String(o),n:0,i:ix};
     });
     else for(var v in it){var e=it[v];m[v]=typeof e==="object"?{label:e.label||v,n:e.n||e.count||0}:{label:v,n:e};}
     out[ALIAS[k]||k]=m;
@@ -355,11 +361,15 @@ function opts(field,emptyLabel,skips){
   var all={};
   function add(v){
     if(skips&&skips.indexOf(v)>=0)return;
-    /* where the FAA publishes a code table, that table is the list. Filed
-       values outside it are still shown in a row, as filed, but they do not
-       belong in a picker: corrosion offered 0, 5, 6, 7, 8 and 9 beside its
-       three real levels, and the crew menu offered "-", "N" and "P". */
-    if(tab&&tab[v]==null)return;
+    /* Where the FAA publishes a closed table of codes, that table is the list:
+       corrosion offered 0, 5, 6, 7, 8 and 9 beside its three real levels, and
+       the crew menu offered "-", "N" and "P".
+
+       Not for operators. That table is a name cross-reference, not an
+       enumeration of valid designators: only 1,214 of the 3,947 that occur are
+       in it. Applied there it silently dropped two thirds of the airlines in
+       the file, which is a worse fault than the one it fixes. */
+    if(CLOSED_TABLE[field]&&tab&&tab[v]==null)return;
     all[v]=counts[v]?counts[v].n:0;
   }
   Object.keys(counts).forEach(add);
@@ -371,7 +381,8 @@ function opts(field,emptyLabel,skips){
     /* an airline is named, with its designator in brackets, because the code is
        what a reporter has to quote and the name is what they recognise. */
     if(field==="operator"&&lab&&lab!==v)lab=lab+" ("+v+")";
-    return{v:v,lab:lab,n:all[v]};
+    var e=counts[v];
+    return{v:v,lab:lab,n:all[v],i:(e&&e.i!=null)?e.i:1e9};
   });
   /* The endpoint answers with plain lists for operator, make and condition:
      names in report order, no numbers. Sorting them by a count that is always
@@ -380,7 +391,9 @@ function opts(field,emptyLabel,skips){
      they are shown and they sort; where they do not, the order stands and the
      bracket is left off rather than filled with a lie. */
   var haveCounts=arr.some(function(o){return o.n>0;});
-  if(haveCounts)arr.sort(function(a,b){return b.n-a.n||(a.lab<b.lab?-1:1);});
+  arr.sort(haveCounts
+    ? function(a,b){return b.n-a.n||(a.lab<b.lab?-1:1);}
+    : function(a,b){return a.i-b.i||(a.lab<b.lab?-1:1);});
   var h='<option value="">'+sd2Esc(emptyLabel)+"</option>";
   arr.forEach(function(o){
     h+='<option value="'+sd2Esc(o.v)+'"'+(haveCounts&&o.n===0?' class="empty"':"")+">"+

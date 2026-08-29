@@ -430,3 +430,41 @@ inside it.
 
 Eight menus now match option for option: aimKind, ata, nature, crew, discovered,
 stage, zone, corrosion. Operator, make and condition match in content and order.
+
+## F12. A harness that does not open the drawers (29 Aug 2026)
+
+The option run reported nine menus as missing. A click would have built every one
+of them: the panels are lazily loaded, so only the panel that happens to be open
+has its controls in the DOM. `build/parity_panels.py` walks every tab on both
+pages and collects what each one offers.
+
+With the drawers open the picture changed, and three real faults surfaced.
+
+**A regression I had introduced myself.** The rule "only codes from the FAA's own
+table" is right for corrosion, crew, stage and zone, which are closed
+enumerations. It is wrong for operators: that table is a name cross-reference,
+not a list of valid designators, and only 1,214 of the 3,947 that occur are in
+it. Applied there it silently dropped two thirds of the airlines in the file, a
+worse fault than the one it fixed. The count is now the tell: 3,947 against
+3,947 says the list is whole.
+
+**A part condition filed as "19681" was at the head of a 3,131-entry menu.** The
+order these lists arrive in is the only ordering they have, and an object cannot
+hold it: JavaScript enumerates integer-like keys first, in numeric order. The
+position is carried on the entry now instead of implied by the key.
+
+**The fleet panel's own airline menu listed raw codes with "(0)" beside every
+one.** It read the facet under `operator` where the endpoint says `operators`, so
+it came back empty and fell through to an alphabetical list of designators. It
+now copies the menu the controls half already builds correctly, which also keeps
+the two from drifting apart.
+
+**And there was no rail picker at all.** The reference puts a `role="tablist"`
+beside the stamp with four tabs and a roving tabindex. Without it a rail could
+only be reached by clicking the rail itself: no keyboard route, and nothing
+announcing which of the four was open.
+
+Eighteen of twenty-two menus now match option for option, and the tab strip is
+20 against 20. The four that remain have identical membership and identical
+order at the head; they differ in the tail, among entries the endpoint returns
+without counts, where the reference and the rebuild break ties differently.

@@ -336,10 +336,23 @@ function buildFleet(){
 }
 function fillFlOp(){
   var s=vEl('fl-op'); if(!s) return;
+  /* The facet key is operators, plural, and it is a plain list of designators
+     with neither names nor counts. Read as 'operator' it came back empty, so the
+     menu listed raw codes alphabetically with (0) beside every airline.
+     The controls half already builds this list correctly, once, with names and
+     in report order; copying it keeps the two from drifting apart. */
+  var src=document.getElementById('operator');
+  if(src && src.options.length>1){
+    s.innerHTML='<option value="">Pick an airline code</option>'+
+      [].slice.call(src.options,1).map(function(o){
+        return '<option value="'+VH(o.value)+'">'+VH(o.textContent)+'</option>';
+      }).join('');
+    return;
+  }
   var rows=normOps(facetList(FAC,'operator')).sort(function(a,b){ return (b.n-a.n)||String(a.label).localeCompare(String(b.label)); });
-  s.innerHTML='<option value="">Any operator</option>'+rows.map(function(r){
+  s.innerHTML='<option value="">Pick an airline code</option>'+rows.map(function(r){
     var lab=(r.label&&r.label!==r.code)?(r.label+' ('+r.code+')'):r.code;
-    return '<option value="'+VH(r.code)+'">'+VH(lab)+' ('+VN(r.n)+')</option>';
+    return '<option value="'+VH(r.code)+'">'+VH(lab)+'</option>';
   }).join('');
 }
 function runFleet(){
@@ -365,7 +378,7 @@ function loadLeads(){
   var b=pbody('p-leads'); if(!b) return;
   b.innerHTML='<div id="ld-leads"><p class="pnote">Reading the whole file for angles…</p></div>'+
     '<div class="ctl"><div><label for="spike-by">Then watch a sudden rise in</label><select id="spike-by">'+
-    optsHTML([['','Choose a grouping'],['ata','By system'],['part','By part'],['model','By model'],['operator','By airline']])+
+    optsHTML([['ata','By aircraft system'],['part','By part'],['model','By model'],['operator','By airline'],['jasc','By system']])+
     '</select></div></div><div id="ld-spikes"><p class="pnote">Choose a grouping above to look for spikes. Nothing is fetched until you do.</p></div>';
   vEl('spike-by').addEventListener('change',loadSpikes);
   vget('api/leads').then(function(d){
@@ -431,9 +444,9 @@ function loadEm(){
 function loadClusters(){
   var b=pbody('p-clusters'); if(!b) return;
   b.innerHTML='<div class="ctl"><div><label for="cl-min">At least this many aircraft on one day</label><select id="cl-min">'+
-    optsHTML([['3','3 or more'],['4','4 or more'],['6','6 or more'],['10','10 or more']])+
+    optsHTML([['3','3 aircraft or more'],['4','4 or more'],['6','6 or more'],['10','10 or more']])+
     '</select></div><div><label for="cl-kind">Kind</label><select id="cl-kind">'+
-    optsHTML([['all','Everything'],['sched','Recurring, probably scheduled'],['event','One-off, probably unscheduled']])+
+    optsHTML([['event','One-offs only'],['all','Everything'],['sched','Recurring, probably scheduled']])+
     '</select></div></div><div id="cl-out"></div>'+
     '<p class="pnote">A heavy check on one aircraft writes many rows: a mechanic files every finding separately. This panel counts aircraft, not rows.</p>';
   vEl('cl-min').addEventListener('change',loadCl); vEl('cl-kind').addEventListener('change',loadCl); loadCl();
@@ -511,7 +524,7 @@ function loadStructure(){
 function loadAge(){
   var b=pbody('p-age'); if(!b) return;
   b.innerHTML='<div class="ctl"><div><label for="ag-by">Group by</label><select id="ag-by">'+
-    optsHTML([['hours','By hours on the airframe'],['cycles','By takeoff-and-landing cycles']])+
+    optsHTML([['hours','By hours flown'],['cycles','By takeoff-and-landing cycles']])+
     '</select></div></div><div id="ag-out"></div>';
   vEl('ag-by').addEventListener('change',loadAg); loadAg();
 }

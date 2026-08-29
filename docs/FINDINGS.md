@@ -468,3 +468,28 @@ Eighteen of twenty-two menus now match option for option, and the tab strip is
 20 against 20. The four that remain have identical membership and identical
 order at the head; they differ in the tail, among entries the endpoint returns
 without counts, where the reference and the rebuild break ties differently.
+
+## F13. The abbreviations went unexplained (29 Aug 2026)
+
+The whole point of the write-up beneath every row is that a reporter can read
+what the mechanic wrote. `POST-FLT INSP, (1EA) OVRHD SUPRNMRY AREA EMERGENCY
+LIGHT INOP. RE-LAMPED, IAW AMM: 33-51-04-2` is unreadable without the trade's
+own shorthand explained, and the reference underlines every term in it.
+
+The rebuild underlined 101 things against the reference's 396, and all 101 of
+them were something else: `no operator named`, repeated down the page.
+
+`/api/glossary` answers with three parts. `codes` holds one table per coded
+field. `terms` holds the mechanics' abbreviations as `key -> [Term, meaning]`.
+`ata` holds the chapter names. Read as a flat list, `terms` had no `.length`, so
+the fallback walked the three top-level keys and built three nonsense entries
+called ata, codes and terms.
+
+Both halves of the page had made the same mistake about the same endpoint in
+different ways, and neither threw. The controls half read the whole object where
+the tables are nested under `codes`, so every chip printed a raw code. The rows
+half read a dictionary as an array, so no abbreviation was ever wrapped.
+
+That is now four faults traced to one endpoint's shape, which is the strongest
+argument yet for putting response shapes into the specifications rather than
+leaving them to be inferred.

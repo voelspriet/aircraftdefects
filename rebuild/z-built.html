@@ -5936,9 +5936,34 @@ function bindGrid(){var tb=document.getElementById('rr-table');if(!tb||tb.datase
 /* ── boot ── */
 function loadGlossary(){
   return fetch('/api/glossary').then(function(r){return r.json();}).then(function(d){
-    var list=Array.isArray(d)?d:(d&&(d.terms||d.entries||d.glossary||d.items))||[];
-    if(!list.length&&d&&typeof d==='object'){
-      list=[];Object.keys(d).forEach(function(k){if(d[k]&&typeof d[k]==='object'){var e={code:k};for(var p in d[k])e[p]=d[k][p];list.push(e);}});}
+    /* The endpoint answers with three parts: codes, holding one table per coded
+       field; terms, holding the mechanics' abbreviations as key -> [Term,
+       meaning]; and ata. Read as a flat list, terms had no .length, so the
+       fallback walked the three top-level keys and built three nonsense
+       entries. Every abbreviation in every write-up then went unexplained:
+       396 underlined terms in the reference against 101 here, and all of those
+       101 were something else. */
+    var list=[];
+    if(Array.isArray(d)) list=d;
+    else if(d&&typeof d==='object'){
+      var T=d.terms;
+      if(T&&!Array.isArray(T)) Object.keys(T).forEach(function(k){
+        var v=T[k];
+        list.push(Array.isArray(v)
+          ? {code:k,label:v[0]||k,faa:v[1]||''}
+          : {code:k,label:(v&&(v.label||v.term))||k,faa:(v&&(v.faa||v.definition))||''});
+      });
+      var C=d.codes;
+      if(C&&typeof C==='object') Object.keys(C).forEach(function(g){
+        var tab=C[g]; if(!tab||typeof tab!=='object'||Array.isArray(tab))return;
+        Object.keys(tab).forEach(function(k){
+          var v=tab[k];
+          list.push({code:k,group:g,
+            label:(v&&(v.label||v.short))||String(v),
+            faa:(v&&v.faa)||'', note:(v&&v.note)||''});
+        });
+      });
+    }
     list.forEach(function(e){
       var code=e.code||e.term||e.key||e.id,grp=e.group||e.grp||e.type||'';
       if(!code)return;

@@ -63,8 +63,18 @@ hardest:
       found during maintenance" is a glossary entry, not a blind spot. The parent
       reserves that list for real gaps. Replaced with the late-arrival caveat,
       which is one.
+- [x] **every value clickable** — 514 of them on one page, across eight fields:
+      zones, ATA chapters, crew actions, stages, nature of condition, part
+      conditions, part names, how it was found. Done by walking the DOM after the
+      data arrives and matching on the values the API returned, not on class
+      names, so it survives the page being rewritten by a model.
+- [x] **date bounding in the interface** — from and up-to, with a take-that-period
+      button, alongside the filter chips.
+- [x] **starter questions** — ten of them, the ones a journalist actually chases:
+      smoke or fumes in the cabin, cracks, engine shut down in flight, unscheduled
+      landing, aborted take-off, oxygen masks, cabin pressure, level 3 corrosion,
+      landing gear, engines.
 - [ ] per-report click-through, the FAA's own filing then the verbatim words
-- [ ] date bounding from the interface, not only from the URL
 - [ ] the outgoing panels that carry a selection: patterns, leads, same day,
       corrosion, old airframes, engines, compare, codes, method
 - [ ] browsing the WHO rankings, so a tail can be discovered and not only confirmed

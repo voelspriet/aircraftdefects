@@ -1237,8 +1237,120 @@ async function loadRepeats(){
     return of_.call(this, input, init);
   };
 
-  window.addEventListener("DOMContentLoaded", chips);
-  chips();
+  /* Make the values on the page clickable without touching the code that renders
+     them. After the data arrives, walk the DOM and tag any element whose text
+     carries a value the API just returned. Matching on the data rather than on
+     class names means this survives the page being rewritten. */
+  const FIELD_OF = {zones:"zone", systems:"ata", operators:"operator",
+                    aircraft:"tail", types:"make", nature:"nature",
+                    condition:"condition", parts:"part", found_by:"discovered",
+                    stage:"stage", actions:"crew"};
+
+  function tagValues(d){
+    if(!d) return;
+    const want = [];
+    const push = (blk, key) => {
+      if(!blk) return;
+      (blk.rows || blk || []).forEach(r=>{
+        if(!r || !r.label) return;
+        want.push({field: FIELD_OF[key], code: r.code || r.label, label: r.label});
+      });
+    };
+    push(d.where && d.where.zones, "zones");
+    push(d.where && d.where.systems, "systems");
+    push(d.who && d.who.operators, "operators");
+    push(d.who && d.who.aircraft, "aircraft");
+    push(d.what && d.what.nature, "nature");
+    push(d.what && d.what.condition, "condition");
+    push(d.what && d.what.parts, "parts");
+    push(d.what && d.what.found_by, "found_by");
+    push(d.what && d.what.stage, "stage");
+    (d.forced && d.forced.actions || []).forEach(a=>
+      want.push({field:"crew", code:a.label, label:a.label}));
+
+    const byLabel = new Map();
+    want.forEach(w=>{ if(w.field && w.label) byLabel.set(w.label.trim(), w); });
+    if(!byLabel.size) return;
+
+    document.querySelectorAll("li,tr,div,span,button,a").forEach(el=>{
+      if(el.hasAttribute("data-zfilter")) return;
+      if(el.children.length > 4) return;
+      const t = (el.textContent||"").trim();
+      if(!t || t.length > 90) return;
+      for(const [lab,w] of byLabel){
+        if(t === lab || t.startsWith(lab + " ") || t.startsWith(lab + "\n")){
+          /* crew actions are stored by label, and the API takes the code */
+          let v = w.code;
+          if(w.field === "crew"){
+            const codes = {"Unscheduled landing":"A","Emergency descent":"B",
+              "Aborted take-off":"C","Engine shut down in flight":"E",
+              "Fire extinguisher fired":"F","Oxygen masks dropped":"G",
+              "Cabin lost pressure":"I","Fuel dumped":"J","Aborted approach":"L",
+              "Autorotation":"R"};
+            if(!codes[lab]) return;
+            v = codes[lab];
+          }
+          if(w.field === "tail") v = String(v).replace(/^N/,"");
+          window.zNarrowMark(el, w.field, v, lab);
+          break;
+        }
+      }
+    });
+  }
+
+  /* Date bounding and the starter questions, which the parent has and this did not. */
+  const STARTERS = [
+    ["Smoke or fumes in the cabin", {nature:"B"}],
+    ["Cracks found", {cracked:"1"}],
+    ["Engine shut down in flight", {crew:"E"}],
+    ["Unscheduled landing", {crew:"A"}],
+    ["Aborted take-off", {crew:"C"}],
+    ["Oxygen masks dropped", {crew:"G"}],
+    ["Cabin lost pressure", {crew:"I"}],
+    ["Urgent corrosion, level 3", {corrosion:"3"}],
+    ["Landing gear", {ata:"32"}],
+    ["Engines", {ata:"72"}],
+  ];
+  function controls(){
+    if(document.getElementById("zctl")) return;
+    const bar = document.getElementById("znarrow"); if(!bar) return;
+    const c = document.createElement("div"); c.id="zctl";
+    c.innerHTML = `<div class="zc-row">
+        <label class="zc-lab">FROM</label><input type="date" id="zfrom" value="${P.get("from")||""}">
+        <label class="zc-lab">UP TO</label><input type="date" id="zto" value="${P.get("to")||""}">
+        <button class="zn-chip" id="zdate">Take that period</button>
+      </div>
+      <div class="zc-row zc-start"><span class="zc-lab">START FROM</span>${
+        STARTERS.map((s,i)=>`<button class="zc-q" data-i="${i}">${s[0]}</button>`).join("")}</div>`;
+    bar.parentNode.insertBefore(c, bar.nextSibling);
+    document.getElementById("zdate").onclick=()=>{
+      const u=new URL(location);
+      const f=document.getElementById("zfrom").value, t=document.getElementById("zto").value;
+      f?u.searchParams.set("from",f):u.searchParams.delete("from");
+      t?u.searchParams.set("to",t):u.searchParams.delete("to");
+      location.href=u.toString();
+    };
+    c.querySelectorAll(".zc-q").forEach(b=>b.onclick=()=>{
+      const u=new URL(location);
+      Object.entries(STARTERS[+b.dataset.i][1]).forEach(([k,v])=>u.searchParams.set(k,v));
+      location.href=u.toString();
+    });
+  }
+
+  const of2 = window.fetch;
+  window.fetch = function(...a){
+    return of2.apply(this,a).then(r=>{
+      try{
+        if(String(a[0]).includes("api/entity")){
+          r.clone().json().then(d=>setTimeout(()=>tagValues(d), 700)).catch(()=>{});
+        }
+      }catch(e){}
+      return r;
+    });
+  };
+
+  window.addEventListener("DOMContentLoaded", ()=>{chips();controls();});
+  chips(); controls();
 })();
 </script>
 <style>
@@ -1251,6 +1363,15 @@ async function loadRepeats(){
 .zn-chip span{opacity:.6;margin-left:3px}
 .zn-chip.zn-all{border-color:var(--line,#ded7ca);background:var(--card,#fff);color:var(--mut,#6f6960)}
 .z-click{cursor:pointer}
+#zctl{margin:0 0 14px}
+.zc-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:7px 0}
+.zc-lab{font-family:Archivo,system-ui,sans-serif;font-size:10.5px;letter-spacing:.15em;
+  font-weight:800;color:var(--mut,#6f6960)}
+#zctl input[type=date]{font:inherit;font-size:13px;padding:5px 9px;border-radius:7px;
+  border:1px solid var(--line,#ded7ca);background:var(--card,#fff)}
+.zc-q{font:inherit;font-size:13px;padding:4px 11px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--line,#ded7ca);background:var(--card,#fff);color:inherit}
+.zc-q:hover{border-color:var(--rust,#9c4a1e);color:var(--rust,#9c4a1e)}
 .z-click:hover{background:#fff6f1;outline:1px solid var(--rust,#9c4a1e);outline-offset:1px;border-radius:5px}
 </style>
 

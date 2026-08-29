@@ -158,6 +158,11 @@ details.card[open]>summary{margin-bottom:8px}
     the crew to do. The same public corpus as the <a href="/">lookup desk</a>.<span id="hsub"></span></div>
 </header>
 <main class="wrap">
+<section id="zhero-wrap" hidden>
+  <div id="zhero-tabs" class="zhero-tabs" role="tablist"></div>
+  <div id="zhero" class="zhero"></div>
+</section>
+
 
   <div class="card ask">
     <div class="picker" role="group" aria-label="What kind of thing to ask about">
@@ -179,10 +184,328 @@ details.card[open]>summary{margin-bottom:8px}
   different lens. Codes are decoded from the FAA's own lookup tables; airline names come from the
   FAA's December 2006 cross-reference and can be stale, so check current ownership before publishing.
   Inspired by Rory Kennedy's
-  <a href="https://en.wikipedia.org/wiki/Downfall:_The_Case_Against_Boeing" target="_blank" rel="noopener">Downfall: The Case Against Boeing</a>.
+  <a href="https://en.wikipedia.org/wiki/Freefall:_A_Reckoning_for_Boeing" target="_blank" rel="noopener">Freefall: A Reckoning for Boeing</a>.
   Built by Henk van Ess &copy; 2026.</p>
 </main>
 <div id="tip" role="tooltip"></div>
+
+<!-- ============================================================
+     zhero.js — hero panels for the /z entity pages.
+     One module, one export: drawZHero(box, kind, data).
+     kind: "horizon" | "anatomy" | "swarm" | "ledger"
+     Draws with the parent instrument's own shapes (rail + gutter,
+     month strip, 3x3 zone grid, ladders, block bar) and its own
+     palette variables. No libraries, no build step.
+     ============================================================ -->
+<script>
+(function(){
+"use strict";
+
+/* ---- the CSS, injected once -------------------------------- */
+const CSS=`
+.zinstrument{margin:0}
+.zipad{background:var(--paper,#faf8f3);border:1px solid #e2dbcc;border-radius:10px;
+  padding:16px 18px 14px;color:var(--ink,#1f1c18);
+  font:14px/1.45 Archivo,system-ui,sans-serif}
+.zihead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.zstamp{font:600 10px/1.4 Archivo,system-ui,sans-serif;letter-spacing:.1em;
+  color:var(--ash,#8a8377)}
+.zsentence{font-size:16px;line-height:1.4;margin:2px 0 2px}
+.zaim{min-height:18px;font:11.5px/1.5 'IBM Plex Mono',ui-monospace,monospace;
+  color:var(--rust-text,#b4552d);margin:2px 0 10px}
+.zrail{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:start;
+  border-top:1px solid #e4ddcf;padding-top:9px}
+.zgut .q{font:600 11px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em;
+  color:var(--ink,#1f1c18)}
+.zgut .pn{font-size:9.5px;color:var(--ash,#8a8377);margin-top:1px}
+.ztrack{min-width:0}
+.ztrack.two{display:grid;grid-template-columns:1fr 330px;gap:18px}
+.znote{font-size:11.5px;color:#5f584f;line-height:1.45;margin-top:7px;
+  padding-top:6px;border-top:1px dashed #e0d8c9}
+.zempty{font-size:12px;color:var(--ash,#8a8377);padding:4px 0}
+/* the when strip: the parent's month rail, at rest */
+.zstrip{display:flex;align-items:flex-end;gap:2px;overflow-x:auto;
+  overscroll-behavior-x:contain;min-height:66px;padding-bottom:2px}
+.zmo{flex:1 0 auto;min-width:5px;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-end;gap:3px;cursor:default}
+.zmo i{display:block;width:100%;min-height:1px;background:var(--rust,#b4552d)}
+.zmo span{font:8.5px/1 'IBM Plex Mono',ui-monospace,monospace;
+  color:var(--ash,#8a8377);white-space:nowrap}
+.zmo span.tick{width:4px;height:1px;background:#cfc7b7}
+/* the where map: the parent's 3x3 zone grid, its pads underneath */
+.zmap{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:340px}
+.zcell{display:flex;flex-direction:column;justify-content:space-between;gap:6px;
+  min-height:64px;padding:8px;border-radius:4px;cursor:default;
+  border:1px solid rgba(180,85,45,.35);
+  background:rgba(180,85,45,var(--f,.08))}
+.zcell span{font:600 9.5px/1.25 Archivo,system-ui,sans-serif;letter-spacing:.05em}
+.zcell b{font:11px/1 'IBM Plex Mono',ui-monospace,monospace;font-weight:400;
+  text-align:right}
+.zcell:hover,.zcell:focus-visible{border-color:var(--rust,#b4552d);
+  box-shadow:inset 0 0 0 1px var(--rust,#b4552d)}
+.zmap.pads{margin-top:6px;max-width:340px}
+.zcell.pad{min-height:42px;background:none;border-style:dashed;
+  border-color:#d4ccbc}
+.zcell.pad:hover,.zcell.pad:focus-visible{border-color:var(--ink,#1f1c18);
+  box-shadow:none}
+/* the who and what ladders: the parent's row / bar / count shape */
+.zladder{display:flex;flex-direction:column;gap:3px}
+.zrow{display:grid;grid-template-columns:minmax(60px,190px) 1fr 64px;gap:10px;
+  align-items:center;padding:2px 0;cursor:default}
+.zrow .zl{font-size:11.5px;color:var(--ink,#1f1c18);min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zrow .zb{display:block;height:8px;background:#eae4d6;border-radius:2px;
+  overflow:hidden}
+.zrow .zb i{display:block;height:100%;background:var(--rust,#b4552d)}
+.zrow b{font:11px/1 'IBM Plex Mono',ui-monospace,monospace;font-weight:400;
+  text-align:right;color:var(--ink,#1f1c18)}
+.zrow:hover .zl,.zrow:focus-visible .zl{color:var(--rust-text,#b4552d)}
+.zsub{font:600 10px/1 Archivo,system-ui,sans-serif;letter-spacing:.08em;
+  color:var(--ash,#8a8377);margin:12px 0 6px}
+.zsub:first-child{margin-top:0}
+/* the forced block: the parent's fblock bar */
+.zfblock{position:relative;display:block;height:22px;background:#eae4d6;
+  border-radius:3px;overflow:hidden;margin-bottom:9px}
+.zfblock i{position:absolute;top:0;bottom:0;left:0;background:var(--rust,#b4552d)}
+.zfblock span{position:absolute;inset:0;display:flex;align-items:center;
+  padding:0 8px;font:11px/1 'IBM Plex Mono',ui-monospace,monospace;
+  color:var(--ink,#1f1c18)}
+.zcell:focus-visible,.zrow:focus-visible{outline:2px solid var(--ink,#1f1c18);
+  outline-offset:1px}
+@media(max-width:760px){
+  .zrail{grid-template-columns:1fr;gap:6px}
+  .ztrack.two{grid-template-columns:1fr}
+}`;
+let _css=false;
+function ensureCSS(){
+  if(_css)return; _css=true;
+  const s=document.createElement("style");
+  s.setAttribute("data-zhero","");
+  s.textContent=CSS;
+  document.head.appendChild(s);
+}
+
+/* ---- small helpers, kept local so nothing here clobbers the parent's globals */
+const MONTHS=["","January","February","March","April","May","June","July",
+  "August","September","October","November","December"];
+const esc=v=>String(v==null?"":v).replace(/[&<>"']/g,c=>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num=n=>Number(n||0).toLocaleString("en");
+function monthLabel(m){const p=String(m).split("-");
+  return (MONTHS[+p[1]]||m)+" "+p[0];}
+function rowsOf(b){return (b&&b.rows)||[];}
+function sumRows(b){return rowsOf(b).reduce((s,r)=>s+(+r.n||0),0);}
+function totalOf(d){return +((d.framing&&d.framing.total)||0)||0;}
+function mxOf(list){return Math.max(1,...list.map(r=>+r.n||0));}
+
+/* the parent's zone grid order, reused verbatim */
+const GRID=[["ZONE 800","ZONE 200","ZONE 100"],
+            ["ZONE 500","ZONE 400","ZONE 600"],
+            ["ZONE 300","ZONE 700","ZONE 900"]];
+
+/* ---- the caveat, written underneath, in the parent's own note type -------- */
+function coverage(b,what,totalFor){
+  const notes=[];
+  if(b&&b.complete===false)
+    notes.push(`the ${esc(what)} count is from the sample read, not the whole file`);
+  const c=+((b&&b.counted)||0), s=sumRows(b);
+  if(c>s)notes.push(`the list shows the ${num(s)} most-reported of ${num(c)}`);
+  if(totalFor&&c<totalFor)
+    notes.push(`${num(c)} of ${num(totalFor)} reports are counted here`);
+  return notes.length?`<div class="znote">${notes.join("; ")}.</div>`:"";
+}
+
+/* ---- shared shapes --------------------------------------------------------- */
+function gutter(q,pn){
+  return `<div class="zgut"><div class="q">${esc(q)}</div>`+
+    (pn?`<div class="pn">${esc(pn)}</div>`:"")+`</div>`;
+}
+function ladder(list){
+  const mx=mxOf(list);
+  return `<div class="zladder">${list.map(r=>
+    `<div class="zrow" tabindex="0"
+      data-zaim="${esc(r.label)} &middot; ${num(r.n)} reports">
+      <span class="zl">${esc(r.label)}</span>
+      <span class="zb"><i style="width:${(mx?+r.n/mx*100:0).toFixed(1)}%"></i></span>
+      <b>${num(r.n)}</b></div>`).join("")}</div>`;
+}
+
+/* ---- horizon: the months rail ---------------------------------------------- */
+function railHorizon(d){
+  const ms=((d.when&&d.when.months)||[]).map(m=>({month:m.month,n:+m.n||0}));
+  if(!ms.length)return `<div class="zempty">no month in this selection holds a report</div>`;
+  const mx=mxOf(ms);
+  return `<div class="zstrip" role="img"
+    aria-label="Reports per month, ${esc(monthLabel(ms[0].month))} to ${esc(monthLabel(ms[ms.length-1].month))}">`+
+    ms.map(m=>`<div class="zmo" tabindex="0"
+        data-zaim="${esc(monthLabel(m.month))} &middot; ${num(m.n)} reports">
+        <i style="height:${(m.n/mx*46).toFixed(1)}px"></i>${
+        m.month.slice(5)==="01"
+          ?`<span>${esc("'"+m.month.slice(2,4))}</span>`
+          :`<span class="tick"></span>`}</div>`).join("")+
+    `</div>`;
+}
+
+/* ---- anatomy: the zone grid, with its unplaced pad and the systems column -- */
+function railAnatomy(d){
+  const w=d.where||{};
+  const z=w.zones||{rows:[]}, sy=w.systems||{rows:[]};
+  const total=totalOf(d);
+  const placed=+(z.counted||0)||sumRows(z);
+  const by={}; rowsOf(z).forEach(r=>{by[r.code]=r;});
+  const zmx=mxOf(rowsOf(z));
+  const cells=GRID.flat().map(code=>{
+    const r=by[code]||{code,label:code,n:0};
+    return `<div class="zcell" tabindex="0" style="--f:${(0.10+0.80*(+r.n/zmx)).toFixed(3)}"
+      data-zaim="${esc(r.label)} &middot; ${num(r.n)} of ${num(placed||sumRows(z))} placed findings">
+      <span>${esc(r.label)}</span><b>${num(r.n)}</b></div>`;
+  }).join("");
+  const unplaced=total?Math.max(0,total-placed):0;
+  const pads=`<div class="zmap pads">
+    <div class="zcell pad" tabindex="0"
+      data-zaim="${num(unplaced)} reports say where in words, or nothing, so no zone is drawn for them">
+      <span>no zone drawn</span><b>${num(unplaced)}</b></div></div>`;
+  const zoneCol=`<div class="zmap">${cells}</div>${pads}`+
+    coverage(z,"zone",total)+
+    (placed&&total&&placed<total
+      ?`<div class="znote">${num(placed)} of ${num(total)} reports place a zone; the rest are not drawn here.</div>`:"");
+  const sysCol=rowsOf(sy).length
+    ?`<div class="zsub">ATA CHAPTER</div>`+ladder(rowsOf(sy))+coverage(sy,"system")
+    :`<div class="zempty">no system chapter is drawn for this selection</div>`;
+  return `<div class="ztrack two"><div>${zoneCol}</div><div>${sysCol}</div></div>`;
+}
+
+/* ---- swarm: airlines, airframes, types ------------------------------------- */
+function railSwarm(d){
+  const w=d.who||{};
+  const parts=[];
+  const sec=(b,title)=>{
+    if(!rowsOf(b).length)return;
+    parts.push(`<div class="zsub">${esc(title)}</div>`+ladder(rowsOf(b))+
+      coverage(b,title.toLowerCase()));
+  };
+  sec(w.operators,"Airlines");
+  sec(w.aircraft,"Airframes");
+  sec(w.types,"Types");
+  return parts.length?parts.join("")
+    :`<div class="zempty">no airline, airframe or type is drawn for this selection</div>`;
+}
+
+/* ---- ledger: what the crew was forced to do -------------------------------- */
+function railLedger(d){
+  const f=d.forced||{}, fr=d.framing||{};
+  const acts=(f.actions||[]).map(a=>({label:a.label,n:+a.n||0}));
+  const none=+f.none||0;
+  const forced=sumRows({rows:acts});
+  const denom=forced+none;
+  const totalKnown=+(fr.total)||0;
+  const onGround=+(fr.on_ground)||0;
+  const notes=[];
+  if(f.complete===false)notes.push("the count is from the sample read, not the whole file");
+  if(totalKnown&&onGround)
+    notes.push(`${num(onGround)} of ${num(totalKnown)} were already on the ground when it happened`);
+  if(!denom)return `<div class="zempty">no crew action is recorded for this selection</div>`+
+    (notes.length?`<div class="znote">${notes.join("; ")}.</div>`:"");
+  const rows=acts.concat(none?[{label:"no crew action recorded",n:none}]:[]);
+  return `<div class="zfblock" tabindex="0"
+      data-zaim="${num(forced)} of ${num(denom)} reports forced the crew to act">
+      <i style="width:${(forced/denom*100).toFixed(1)}%"></i>
+      <span>${num(forced)} of ${num(denom)} forced a crew action</span></div>`+
+    ladder(rows)+
+    (notes.length?`<div class="znote">${notes.join("; ")}.</div>`:"");
+}
+
+/* ---- the sentence and the caption's rest text ------------------------------- */
+function sentence(kind,d){
+  const total=totalOf(d);
+  if(kind==="horizon"){
+    const ms=(d.when&&d.when.months)||[];
+    const n=ms.reduce((s,m)=>s+(+m.n||0),0);
+    return ms.length
+      ?`Reading ${num(n)} reports across ${num(ms.length)} months.`
+      :`No month in this selection holds a report.`;
+  }
+  if(kind==="anatomy"){
+    const z=(d.where&&d.where.zones)||{};
+    const placed=+(z.counted||0)||sumRows(z);
+    return total&&placed<total
+      ?`${num(placed)} of ${num(total)} reports say where on the aircraft. This is where.`
+      :`Where on the aircraft the ${num(placed)} findings sit.`;
+  }
+  if(kind==="swarm"){
+    const w=d.who||{};
+    const o=+(w.operators&&w.operators.counted)||sumRows(w.operators);
+    const a=+(w.aircraft&&w.aircraft.counted)||sumRows(w.aircraft);
+    return total
+      ?`${num(total)} reports, filed by ${num(o)} airlines across ${num(a)} airframes.`
+      :`${num(o)} airlines and ${num(a)} airframes in this selection.`;
+  }
+  /* ledger */
+  const f=d.forced||{};
+  const forced=sumRows({rows:f.actions||[]}), none=+f.none||0;
+  return forced+none
+    ?`${num(forced)} of ${num(forced+none)} reports forced the crew to act.`
+    :`No crew action is recorded for this selection.`;
+}
+const HAND={
+  horizon:"Point at a month to read its count. The strip runs oldest to newest.",
+  anatomy:"Point at a zone to read what was found there.",
+  swarm:"Point at an airline, an airframe or a type to read its count.",
+  ledger:"Point at an action to read how often the crew had to take it."
+};
+const KIND={horizon:["WHEN","month by month",railHorizon],
+            anatomy:["WHERE","on the aircraft",railAnatomy],
+            swarm:["WHO","airline and airframe",railSwarm],
+            ledger:["WHAT IT FORCED","what the crew did",railLedger]};
+
+/* ---- the caption: point at a mark, the instrument says what it counts ------- */
+function wireAim(box,def){
+  const cap=box.querySelector(".zaim"); if(!cap)return;
+  const show=t=>{cap.innerHTML=t;};
+  box.addEventListener("mouseover",e=>{
+    const t=e.target.closest&&e.target.closest("[data-zaim]");
+    if(t)show(t.getAttribute("data-zaim"));
+  });
+  box.addEventListener("mouseout",e=>{
+    if(e.target.closest&&e.target.closest("[data-zaim]"))show(def);
+  });
+  box.addEventListener("focusin",e=>{
+    const t=e.target.closest&&e.target.closest("[data-zaim]");
+    if(t)show(t.getAttribute("data-zaim"));
+  });
+  box.addEventListener("focusout",()=>show(def));
+}
+
+/* ---- the export -------------------------------------------------------------- */
+function drawZHero(box,kind,data){
+  ensureCSS();
+  if(!box)return;
+  const d=data||{};
+  const r=KIND[kind];
+  if(!r){box.innerHTML="";return;}
+  const [q,pn,fn]=r;
+  const def=HAND[kind]||"";
+  /* the stamp, dated from the months when the data carries them */
+  const ms=(d.when&&d.when.months)||[];
+  const stamp=ms.length
+    ?` &middot; ${esc(monthLabel(ms[0].month).toUpperCase())} TO ${esc(monthLabel(ms[ms.length-1].month).toUpperCase())}`
+    :"";
+  box.className="zinstrument";
+  box.innerHTML=`<div class="zipad">
+    <div class="zihead"><div class="zstamp">FAA SERVICE DIFFICULTY REPORTS${stamp}</div></div>
+    <div class="zsentence">${sentence(kind,d)}</div>
+    <div class="zaim">${def}</div>
+    <div class="zrail">${gutter(q,pn)}<div class="ztrack">${fn(d)}</div></div>
+  </div>`;
+  /* the newest months sit at the right end; start there, as the parent's rail does */
+  const strip=box.querySelector(".zstrip");
+  if(strip&&strip.scrollWidth>strip.clientWidth)strip.scrollLeft=strip.scrollWidth;
+  wireAim(box,def);
+}
+
+window.drawZHero=drawZHero;
+})();
+</script>
 
 <script>
 "use strict";
@@ -778,5 +1101,279 @@ async function loadRepeats(){
   else renderLanding();
 })();
 </script>
+
+<script>
+/* The four rails, drawn by the module GLM wrote from the parent's own drawHero().
+   Hooked onto fetch rather than onto the page's internals, so it does not depend
+   on a variable name in code the model wrote and may rewrite. */
+(function(){
+  const RAILS=[["horizon","WHEN","month by month"],
+               ["anatomy","WHERE","on the aircraft"],
+               ["swarm","WHO","airline and tail"],
+               ["ledger","FORCED","what the crew did"]];
+  let kind = new URLSearchParams(location.search).get("hero") || "anatomy";
+  if(!RAILS.some(r=>r[0]===kind)) kind="anatomy";
+  let last=null;
+  function tabs(){
+    const t=document.getElementById("zhero-tabs"); if(!t) return;
+    t.innerHTML=RAILS.map(([k,lab,sub])=>
+      `<button class="zhero-tab" data-k="${k}" role="tab" aria-selected="${k===kind}">
+         <span class="zt-lab">${lab}</span><span class="zt-sub">${sub}</span></button>`).join("");
+    t.querySelectorAll(".zhero-tab").forEach(b=>b.onclick=()=>{
+      kind=b.dataset.k; tabs(); paint();
+      const u=new URL(location); u.searchParams.set("hero",kind); history.replaceState(null,"",u);
+    });
+  }
+  function paint(){
+    const box=document.getElementById("zhero"), wrap=document.getElementById("zhero-wrap");
+    if(!box||!last||typeof drawZHero!=="function") return;
+    wrap.hidden=false;
+    try{ drawZHero(box, kind, last); }catch(e){ box.innerHTML=""; wrap.hidden=true; }
+  }
+  const of_=window.fetch;
+  window.fetch=function(...a){
+    return of_.apply(this,a).then(r=>{
+      try{
+        if(String(a[0]).includes("api/entity")){
+          r.clone().json().then(d=>{ last=d; tabs(); paint(); }).catch(()=>{});
+        }
+      }catch(e){}
+      return r;
+    });
+  };
+  tabs();
+})();
+</script>
+<style>
+#zhero-wrap{margin:18px 0 6px}
+.zhero-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.zhero-tab{display:flex;flex-direction:column;align-items:flex-start;gap:1px;
+  font:inherit;cursor:pointer;padding:7px 13px;border-radius:9px;
+  border:1px solid var(--line,#ded7ca);background:var(--card,#fff);text-align:left}
+.zhero-tab[aria-selected=true]{border-color:var(--rust,#9c4a1e);background:#fff6f1}
+.zt-lab{font-family:Archivo,system-ui,sans-serif;font-size:11px;letter-spacing:.14em;
+  font-weight:800;color:var(--rust,#9c4a1e)}
+.zt-sub{font-size:12.5px;color:var(--mut,#6f6960)}
+.zhero{min-height:150px}
+</style>
+
+
+<script>
+/* Click to narrow.
+   The parent tool is an instrument you operate: click a zone, a crew action, an
+   airline, and the whole corpus cuts down. /z was a page you read. This makes any
+   value on it a filter, and shows what is currently applied so it can be undone.
+
+   It works by delegation on the document rather than by hooking the renderers,
+   because the page was written by a model and may be rewritten by one. Anything
+   that already carries a code in a data attribute becomes clickable; the rest is
+   matched on the shape the page uses for a value row. */
+(function(){
+  const P = new URLSearchParams(location.search);
+  const FILTERS = ["zone","jasc","ata","nature","crew","stage","discovered",
+                   "condition","part","corrosion","q","from","to","operator","tail","make"];
+
+  function chips(){
+    let bar = document.getElementById("znarrow");
+    const on = FILTERS.filter(f=>P.get(f));
+    if(!bar){
+      bar = document.createElement("div"); bar.id="znarrow";
+      const m = document.querySelector("main") || document.body;
+      m.insertBefore(bar, m.firstChild);
+    }
+    bar.innerHTML = on.length ? `<span class="zn-lab">NARROWED TO</span>` + on.map(f=>
+      `<button class="zn-chip" data-drop="${f}">${f}: ${P.get(f)} <span>&times;</span></button>`
+      ).join("") + `<button class="zn-chip zn-all" data-drop="*">clear all</button>` : "";
+    bar.querySelectorAll("[data-drop]").forEach(b=>b.onclick=()=>{
+      const u=new URL(location);
+      if(b.dataset.drop==="*") FILTERS.forEach(f=>u.searchParams.delete(f));
+      else u.searchParams.delete(b.dataset.drop);
+      location.href=u.toString();
+    });
+  }
+
+  function go(field, value){
+    const u = new URL(location);
+    u.searchParams.set(field, value);
+    location.href = u.toString();
+  }
+
+  /* A value row on this page renders its code somewhere in the element. Rather
+     than guess at class names, look for the code the API already gave us. */
+  document.addEventListener("click", function(e){
+    const el = e.target.closest("[data-zfilter]");
+    if(!el) return;
+    e.preventDefault(); e.stopPropagation();
+    go(el.dataset.zfilter, el.dataset.zvalue);
+  }, true);
+
+  window.zNarrowMark = function(root, field, value, label){
+    if(!root) return;
+    root.setAttribute("data-zfilter", field);
+    root.setAttribute("data-zvalue", value);
+    root.classList.add("z-click");
+    root.title = "Keep only " + (label||value);
+  };
+  /* The page builds its own /api/entity URL and knows nothing about these
+     filters. Rather than edit code a model wrote and may rewrite, the filters are
+     appended to the request on its way out. Same result, no coupling. */
+  const of_ = window.fetch;
+  window.fetch = function(input, init){
+    try{
+      let u = typeof input === "string" ? input : (input && input.url);
+      if(u && u.includes("api/entity")){
+        const url = new URL(u, location.href);
+        let added = false;
+        FILTERS.forEach(f=>{
+          const v = P.get(f);
+          if(v && !url.searchParams.has(f)){ url.searchParams.set(f, v); added = true; }
+        });
+        if(added){
+          if(typeof input === "string") input = url.pathname.replace(/^\/z\//,"") + url.search;
+          else input = new Request(url.toString(), input);
+        }
+      }
+    }catch(e){}
+    return of_.call(this, input, init);
+  };
+
+  /* Make the values on the page clickable without touching the code that renders
+     them. After the data arrives, walk the DOM and tag any element whose text
+     carries a value the API just returned. Matching on the data rather than on
+     class names means this survives the page being rewritten. */
+  const FIELD_OF = {zones:"zone", systems:"ata", operators:"operator",
+                    aircraft:"tail", types:"make", nature:"nature",
+                    condition:"condition", parts:"part", found_by:"discovered",
+                    stage:"stage", actions:"crew"};
+
+  function tagValues(d){
+    if(!d) return;
+    const want = [];
+    const push = (blk, key) => {
+      if(!blk) return;
+      (blk.rows || blk || []).forEach(r=>{
+        if(!r || !r.label) return;
+        want.push({field: FIELD_OF[key], code: r.code || r.label, label: r.label});
+      });
+    };
+    push(d.where && d.where.zones, "zones");
+    push(d.where && d.where.systems, "systems");
+    push(d.who && d.who.operators, "operators");
+    push(d.who && d.who.aircraft, "aircraft");
+    push(d.what && d.what.nature, "nature");
+    push(d.what && d.what.condition, "condition");
+    push(d.what && d.what.parts, "parts");
+    push(d.what && d.what.found_by, "found_by");
+    push(d.what && d.what.stage, "stage");
+    (d.forced && d.forced.actions || []).forEach(a=>
+      want.push({field:"crew", code:a.label, label:a.label}));
+
+    const byLabel = new Map();
+    want.forEach(w=>{ if(w.field && w.label) byLabel.set(w.label.trim(), w); });
+    if(!byLabel.size) return;
+
+    document.querySelectorAll("li,tr,div,span,button,a").forEach(el=>{
+      if(el.hasAttribute("data-zfilter")) return;
+      if(el.children.length > 4) return;
+      const t = (el.textContent||"").trim();
+      if(!t || t.length > 90) return;
+      for(const [lab,w] of byLabel){
+        if(t === lab || t.startsWith(lab + " ") || t.startsWith(lab + "\n")){
+          /* crew actions are stored by label, and the API takes the code */
+          let v = w.code;
+          if(w.field === "crew"){
+            const codes = {"Unscheduled landing":"A","Emergency descent":"B",
+              "Aborted take-off":"C","Engine shut down in flight":"E",
+              "Fire extinguisher fired":"F","Oxygen masks dropped":"G",
+              "Cabin lost pressure":"I","Fuel dumped":"J","Aborted approach":"L",
+              "Autorotation":"R"};
+            if(!codes[lab]) return;
+            v = codes[lab];
+          }
+          if(w.field === "tail") v = String(v).replace(/^N/,"");
+          window.zNarrowMark(el, w.field, v, lab);
+          break;
+        }
+      }
+    });
+  }
+
+  /* Date bounding and the starter questions, which the parent has and this did not. */
+  const STARTERS = [
+    ["Smoke or fumes in the cabin", {nature:"B"}],
+    ["Cracks found", {cracked:"1"}],
+    ["Engine shut down in flight", {crew:"E"}],
+    ["Unscheduled landing", {crew:"A"}],
+    ["Aborted take-off", {crew:"C"}],
+    ["Oxygen masks dropped", {crew:"G"}],
+    ["Cabin lost pressure", {crew:"I"}],
+    ["Urgent corrosion, level 3", {corrosion:"3"}],
+    ["Landing gear", {ata:"32"}],
+    ["Engines", {ata:"72"}],
+  ];
+  function controls(){
+    if(document.getElementById("zctl")) return;
+    const bar = document.getElementById("znarrow"); if(!bar) return;
+    const c = document.createElement("div"); c.id="zctl";
+    c.innerHTML = `<div class="zc-row">
+        <label class="zc-lab">FROM</label><input type="date" id="zfrom" value="${P.get("from")||""}">
+        <label class="zc-lab">UP TO</label><input type="date" id="zto" value="${P.get("to")||""}">
+        <button class="zn-chip" id="zdate">Take that period</button>
+      </div>
+      <div class="zc-row zc-start"><span class="zc-lab">START FROM</span>${
+        STARTERS.map((s,i)=>`<button class="zc-q" data-i="${i}">${s[0]}</button>`).join("")}</div>`;
+    bar.parentNode.insertBefore(c, bar.nextSibling);
+    document.getElementById("zdate").onclick=()=>{
+      const u=new URL(location);
+      const f=document.getElementById("zfrom").value, t=document.getElementById("zto").value;
+      f?u.searchParams.set("from",f):u.searchParams.delete("from");
+      t?u.searchParams.set("to",t):u.searchParams.delete("to");
+      location.href=u.toString();
+    };
+    c.querySelectorAll(".zc-q").forEach(b=>b.onclick=()=>{
+      const u=new URL(location);
+      Object.entries(STARTERS[+b.dataset.i][1]).forEach(([k,v])=>u.searchParams.set(k,v));
+      location.href=u.toString();
+    });
+  }
+
+  const of2 = window.fetch;
+  window.fetch = function(...a){
+    return of2.apply(this,a).then(r=>{
+      try{
+        if(String(a[0]).includes("api/entity")){
+          r.clone().json().then(d=>setTimeout(()=>tagValues(d), 700)).catch(()=>{});
+        }
+      }catch(e){}
+      return r;
+    });
+  };
+
+  window.addEventListener("DOMContentLoaded", ()=>{chips();controls();});
+  chips(); controls();
+})();
+</script>
+<style>
+#znarrow{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:12px 0}
+#znarrow:empty{margin:0}
+.zn-lab{font-family:Archivo,system-ui,sans-serif;font-size:10.5px;letter-spacing:.15em;
+  font-weight:800;color:var(--mut,#6f6960)}
+.zn-chip{font:inherit;font-size:13px;padding:4px 11px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--rust,#9c4a1e);background:#fff6f1;color:var(--rust,#9c4a1e)}
+.zn-chip span{opacity:.6;margin-left:3px}
+.zn-chip.zn-all{border-color:var(--line,#ded7ca);background:var(--card,#fff);color:var(--mut,#6f6960)}
+.z-click{cursor:pointer}
+#zctl{margin:0 0 14px}
+.zc-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:7px 0}
+.zc-lab{font-family:Archivo,system-ui,sans-serif;font-size:10.5px;letter-spacing:.15em;
+  font-weight:800;color:var(--mut,#6f6960)}
+#zctl input[type=date]{font:inherit;font-size:13px;padding:5px 9px;border-radius:7px;
+  border:1px solid var(--line,#ded7ca);background:var(--card,#fff)}
+.zc-q{font:inherit;font-size:13px;padding:4px 11px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--line,#ded7ca);background:var(--card,#fff);color:inherit}
+.zc-q:hover{border-color:var(--rust,#9c4a1e);color:var(--rust,#9c4a1e)}
+.z-click:hover{background:#fff6f1;outline:1px solid var(--rust,#9c4a1e);outline-offset:1px;border-radius:5px}
+</style>
+
 </body>
 </html>

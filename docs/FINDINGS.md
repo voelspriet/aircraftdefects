@@ -882,3 +882,24 @@ link written for the reference did not find the tab.
 Still open from this round: the case sheet is a card in the flow rather than an
 overlay, four desktop rails still render behind the phone layout at 390px, and
 nine selects are missing their aria-label.
+
+## F27. The sheet became a sheet again (29 Aug 2026)
+
+`#case-wrap` did not exist on the rebuild, though CSS for it shipped and styled
+an element that was never created. The report opened as a card in the page flow:
+the document grew from 21,957 to 23,523px, and at 390px the sheet was inserted at
+document y 1557 while the page sat at y 7250, so it opened 5,693px above the
+viewport. A reader tapped Case sheet and nothing appeared to happen.
+
+It is now the reference's overlay: fixed to inset:0 with the same scrim,
+rgba(12,16,22,.72), holding a 900px card. Measured at 1440 and 390: viewport top
+0, in view, scrim identical.
+
+And the phone layout no longer renders behind four desktop rails. The reference
+draws one or the other and never both; the rebuild drew the phone instrument and
+then the desktop rails underneath it. Nought rails at 390px now, four at 1440,
+which is what the reference does.
+
+Thirteen of the rebuild's fourteen selects carry an aria-label. The reference has
+twenty-two selects because its analysis panels are loaded; the difference is not
+a missing label but a panel that has not been opened.

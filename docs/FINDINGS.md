@@ -166,3 +166,43 @@ worth having and the citation backbone is safe.
 
 That is twice in one day the model raised a well-aimed doubt and was wrong on the
 fact. The doubts are worth having. The facts need the database.
+
+## F5. One line broke both the picture and the filter (29 Aug 2026)
+
+GLM's rebuilt instrument drew the aircraft but never shaded it. Every zone came
+out the same flat colour, which removes the entire reason the drawing exists.
+
+Root cause, line 247 of `rebuild/01-instrument.html`:
+
+    const ZONE_ORDER=["100","200","300","400","500","600","700","800","900"];
+
+The API returns `code:'ZONE 200'`, not `'200'`. The lookup Map is keyed on the
+prefixed value, so every `by.has(code)` was false, every count read 0, and every
+shape got the floor of the opacity ramp.
+
+The same line broke the zone filter, which nobody had noticed. The marks carried
+`take="zone|100"`, so the page sent `zone=100`, and the server answered:
+
+    {"error":"rejected filter values",
+     "message":"These values are not valid for this data: zone=100,
+                so no query was run.", "rejected":{"zone":"100"}}
+
+against `zone=ZONE%20100`, which returns 60,966.
+
+Two symptoms, one cause. Worth recording for two reasons.
+
+**The parent's fail-closed rule earned its keep.** `_filters()` rejects an
+unrecognised value instead of ignoring it. Had it ignored `zone=100`, the page
+would have shown the unfiltered 1,757,827 under a zone heading: a wrong number
+that looks right, which is the kind that reaches print. The 400 made a silent
+error loud.
+
+**It is an argument about how to write a specification.** `code:'ZONE 200'` is a
+fact about the data, not an implementation detail. A spec written from the source
+code describes shapes; a spec written from the behaviour describes values. The
+six rail specifications in `rebuild/specs/` are written the second way for
+exactly this reason.
+
+Correction sent to GLM with the evidence attached rather than an instruction,
+and with three acceptance checks it had to build for. See
+`rebuild/02-where.prompt.txt`.

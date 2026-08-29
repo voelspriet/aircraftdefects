@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One thing, five answers — SDR Desk /z</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--ink:#1d1d1f;--paper:#f7f5f0;--ash:#756f69;--smoke:#6b6560;--rust:#c44b28;
+  --rust-text:#b8431f;--line:#e2ded5;--card:#fff;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --serif:'Instrument Serif',Georgia,serif;--sans:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 var(--sans)}
+a{color:var(--rust-text)}
+code{font-family:var(--mono)}
+header{background:var(--ink);color:#fff;padding:16px 20px}
+header h1{margin:0;font:600 19px Archivo,system-ui,sans-serif}
+header .sub{color:#c3bdb4;font-size:13px;margin-top:4px;max-width:820px}
+header .sub a{color:#ffc6a8}
+header .sub b{color:#fff;font-weight:600}
+.wrap{max-width:1080px;margin:0 auto;padding:16px 20px 70px}
+.muted{color:var(--ash)}
+.dim{color:var(--ash)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:14px 16px;margin:10px 0}
+.card h3{font:600 11px Archivo,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ash);margin:0 0 8px}
+.card ul{margin:0;padding-left:18px;font-size:14px}
+.card li{margin:5px 0;line-height:1.5}
+button,.btn{font:inherit;padding:7px 12px;border:1px solid var(--line);border-radius:3px;background:#fff;
+  color:var(--ink);cursor:pointer;text-decoration:none;display:inline-block}
+button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+button:disabled{opacity:.5;cursor:default}
+button:focus-visible,a:focus-visible,.btn:focus-visible,summary:focus-visible,
+.c:focus-visible,.mo:focus-visible,.bk.c:focus-visible{outline:2px solid var(--rust);outline-offset:2px;border-radius:2px}
+input{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:3px;background:#fff;color:var(--ink)}
+.picker{display:flex;gap:2px;background:rgba(29,29,31,.05);border-radius:6px;padding:3px;flex:none}
+.picker button{border:0;background:none;padding:6px 12px;border-radius:4px;cursor:pointer;
+  font:600 11px Archivo,system-ui,sans-serif;letter-spacing:.08em;color:#5c554c}
+.picker button.on{background:#fff;color:var(--rust-text);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.ask{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ask #v{flex:1;min-width:220px}
+.ask #vm{max-width:200px}
+.hint{font-size:12.5px;color:var(--smoke);margin:6px 2px 0;max-width:900px;line-height:1.5}
+.starter{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 4px}
+.starter button{font-size:13px}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+/* the headline */
+.stamp{font:600 10.5px Archivo,system-ui,sans-serif;letter-spacing:.18em;color:var(--ash);margin:20px 0 2px}
+h1.title{font:400 40px/1.05 var(--serif);margin:2px 0 6px;font-weight:400}
+.figline{font:13px var(--mono);color:#5f584f;margin:0 0 4px}
+.figline b{font-size:15px;color:var(--rust-text);font-weight:500}
+.reading{margin:10px 0;padding:9px 13px;border-left:2px solid var(--rust);background:#faf7f3;
+  font:15px/1.55 Georgia,'Times New Roman',serif;max-width:76ch}
+.reading b,.fsent b,.sumtext b{font-family:var(--mono);font-size:.9em;color:var(--rust-text);font-weight:500}
+.eq{font:400 26px/1.2 var(--serif);margin:0 0 8px;font-weight:400}
+/* the five sections */
+section.five{margin:28px 0 8px;border-top:2px solid var(--line);padding-top:10px}
+section.f5{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--rust);
+  border-radius:4px;padding:14px 16px;margin-top:28px}
+.slab{font:600 10.5px Archivo,system-ui,sans-serif;letter-spacing:.18em;color:var(--ash)}
+.sq{font:400 24px/1.2 var(--serif);margin:4px 0 6px;font-weight:400}
+.slede{font-size:13px;color:var(--smoke);max-width:800px;margin:0 0 8px;line-height:1.5}
+.sub4{font:600 11px Archivo,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink);margin:14px 0 4px}
+.tgrp{margin:2px 0 6px}
+.fnote{font-size:11.5px;color:var(--ash);line-height:1.5;margin:6px 0 0}
+/* complete against sample: the two answers get two colours, never one smoothed tone */
+.scope{font-size:12.5px;margin:6px 0 8px;padding:6px 10px;border-radius:4px;line-height:1.5;max-width:860px}
+.scope.full{background:#f2f5f1;color:#3f4a3c;border:1px solid #dfe6dc}
+.scope.sample{background:#fdf3ee;color:#7c3a1f;border:1px solid #eec9b8}
+/* bars */
+.bars{display:flex;flex-direction:column;gap:3px}
+.brow{display:grid;grid-template-columns:minmax(110px,220px) 1fr 74px;gap:8px;align-items:center;font-size:13px}
+.brow .bk{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.brow .bk.c{cursor:pointer;border-bottom:1px solid transparent}
+.brow .bk.c:hover{color:var(--rust);border-bottom-color:rgba(196,75,40,.55)}
+.brow .bt{background:#efece4;border-radius:3px;height:11px;min-width:60px;display:block;overflow:hidden}
+.brow .bb{display:block;height:100%;background:var(--rust);border-radius:3px;min-width:2px}
+.brow .bb.noneb{background:repeating-linear-gradient(45deg,#cfc8ba 0 4px,#efece4 4px 8px)}
+.brow .bn{text-align:right;font:12px var(--mono);color:#5f584f;font-variant-numeric:tabular-nums}
+.bmore{font-size:11.5px;color:var(--ash);margin:3px 0 0}
+/* WHEN */
+.mchart{margin:4px 0 0}
+.mscroll{min-width:100%}
+.mrow{display:flex;gap:1px;align-items:flex-end;height:96px}
+.mo{flex:1;min-width:3px;position:relative;height:100%}
+.mo i{position:absolute;bottom:0;left:0;right:0;background:var(--rust);border-radius:1px;opacity:.85}
+.mo.pk i{opacity:1;outline:1.5px solid var(--ink);outline-offset:1px}
+.maxi{display:flex;gap:1px;font:9.5px var(--mono);color:var(--ash);margin-top:3px}
+.maxi span{flex:1;min-width:0;text-align:left;overflow:hidden;white-space:nowrap}
+.maim{font:12px var(--mono);color:var(--rust-text);margin-top:5px;min-height:18px}
+/* FORCED */
+.fsent{font:400 21px/1.4 var(--serif);max-width:46em;margin:4px 0 12px}
+/* records */
+.record{background:var(--card);border:1px solid var(--line);border-radius:4px;margin:10px 0;overflow:hidden}
+.rhead{padding:10px 14px 8px;display:flex;flex-wrap:wrap;gap:4px 16px;align-items:baseline;
+  border-bottom:1px solid #f0ede6;font-size:13px}
+.rc{min-width:0}
+.mono{font-family:var(--mono)}
+.rtags{padding:7px 14px;display:flex;flex-wrap:wrap;gap:5px 16px;font-size:12.5px}
+.pair{display:inline-flex;gap:6px;align-items:baseline;min-width:0}
+.pair i{font:600 9.5px Archivo,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ash);font-style:normal;flex:none}
+.tag{background:#f1eee7;border-radius:3px;padding:1px 6px;font-size:11.5px;color:#5f584f}
+.tag[data-tip]{border-bottom:1px dotted #c9c1b4;cursor:help}
+.cd{font:10.5px var(--mono);color:var(--ash);background:#f1eee7;padding:1px 4px;border-radius:3px}
+.c{cursor:pointer;border-bottom:1px solid transparent}
+.c:hover{color:var(--rust);border-bottom-color:rgba(196,75,40,.55)}
+.absent{color:var(--ash);font-style:italic}
+.wu{background:#faf8f4;border-left:2px solid #e0d9cc;padding:8px 12px;margin:0 14px}
+.wu .txt{font-family:var(--mono);font-size:12.5px;line-height:1.6;white-space:pre-wrap;color:#403b35}
+.rfoot{display:flex;gap:12px;align-items:center;padding:9px 14px 11px}
+.rid{margin-left:auto;color:var(--ash);font:11.5px var(--mono)}
+/* the one generated thing, kept visibly apart from the evidence */
+.glossout{margin:0 14px 12px;border:1px dashed #cfc8ba;background:#fbf9f3;border-radius:4px;padding:9px 12px}
+.glab{font:600 10px Archivo,system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ash);margin-bottom:4px}
+.gtxt{font-size:14.5px;line-height:1.5;margin:0}
+.gnote{font-size:11.5px;color:var(--ash);margin:6px 0 0;line-height:1.5}
+.sumbox .sumtext{font:400 20px/1.4 var(--serif);margin:2px 0 6px}
+/* repeats */
+details.card>summary{cursor:pointer;font:600 13.5px Archivo,system-ui,sans-serif}
+details.card[open]>summary{margin-bottom:8px}
+.rg{padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.55}
+.rg:last-child{border-bottom:0}
+.rids{font:11px var(--mono);color:var(--ash);margin-top:3px;overflow-wrap:anywhere}
+/* landing */
+.land .big{font:400 32px/1.1 var(--serif);margin:2px 0 10px;font-weight:400}
+.lede2{font-size:14px;color:var(--smoke);max-width:760px;margin:0 0 10px}
+.fivelist{display:grid;grid-template-columns:118px 1fr;gap:7px 14px;font-size:14px;max-width:780px;margin:0 0 10px}
+.fivelist .k{font:600 10.5px Archivo,system-ui,sans-serif;letter-spacing:.12em;color:var(--rust-text);padding-top:3px}
+/* the tooltip */
+#tip{position:fixed;display:none;max-width:340px;background:var(--ink);color:#fff;font-size:12.5px;
+  line-height:1.5;padding:9px 12px;border-radius:7px;z-index:99;box-shadow:0 12px 30px rgba(10,14,20,.4)}
+#tip b{display:block;margin-bottom:2px}
+.credit{margin:26px 0 10px;font-size:12px;color:var(--ash);text-align:center;line-height:1.6}
+.credit a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:700px){
+  .brow{grid-template-columns:minmax(88px,130px) 1fr 58px;font-size:12px}
+  h1.title{font-size:30px}
+  .fivelist{grid-template-columns:92px 1fr}
+  .mrow{height:80px}
+  .fsent{font-size:18px}
+  .ask #vm{max-width:none;flex:1}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;
+    scroll-behavior:auto!important}
+}
+</style>
+<!--INSTRUMENT-CSS-->
+</head>
+<body>
+<header>
+  <h1>One thing, five answers</h1>
+  <div class="sub">A tail number, an airline or an aircraft type in — and the FAA's Service Difficulty
+    Reports answer five ways: when, where on the aircraft, whose, what was found, and what it forced
+    the crew to do. The same public corpus as the <a href="/">lookup desk</a>.<span id="hsub"></span></div>
+</header>
+<main class="wrap">
+<div id="hero-root"><div id="hero"></div></div>
+
+
+  <div class="card ask">
+    <div class="picker" role="group" aria-label="What kind of thing to ask about">
+      <button type="button" class="on" data-k="tail">TAIL</button>
+      <button type="button" data-k="operator">AIRLINE</button>
+      <button type="button" data-k="make">AIRCRAFT TYPE</button>
+    </div>
+    <input id="v" autocomplete="off" aria-label="The thing to ask about"
+      placeholder="Tail number, e.g. N583UP">
+    <input id="vm" autocomplete="off" aria-label="Model, optional, exactly as filed" hidden
+      placeholder="Model, e.g. 7378H4">
+    <button class="primary" id="askBtn">Ask</button>
+  </div>
+  <p class="hint" id="khint"></p>
+
+  <div id="out"></div>
+
+  <p class="credit">The same public corpus as the <a href="/">SDR Desk lookup</a>, read through a
+  different lens. Codes are decoded from the FAA's own lookup tables; airline names come from the
+  FAA's December 2006 cross-reference and can be stale, so check current ownership before publishing.
+  Inspired by Rory Kennedy's
+  <a href="https://en.wikipedia.org/wiki/Freefall:_A_Reckoning_for_Boeing" target="_blank" rel="noopener">Freefall: A Reckoning for Boeing</a>.
+  Built by Henk van Ess &copy; 2026.</p>
+</main>
+<div id="tip" role="tooltip"></div>
+
+<!-- ============================================================
+<!-- removed: drawZHero, the module it mounted -->
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num=n=>{if(n==null||n==="")return "";const x=Number(n);return isNaN(x)?String(n):x.toLocaleString("en")};
+const MON3=["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONF=["","January","February","March","April","May","June","July","August","September","October","November","December"];
+function ukDate(us){const p=String(us||"").split("/");
+  return p.length===3?(+p[1])+" "+(MON3[+p[0]]||"?")+" "+p[2]:String(us||"")}
+function monthName(m){const a=String(m||"").split("-");const i=+a[1];
+  return (MON3[i]||a[1]||m)+" "+a[0]}
+const boldDigits=s=>esc(s).replace(/\d[\d,]*/g,x=>"<b>"+x+"</b>");
+
+let CODEZ={},KINDUI="tail",LAST=null,LASTQ=null,PEAKLINE="";
+
+const KHINT={
+  tail:"The registration, with or without the leading N — e.g. N583UP or 583UP. One airframe, its whole write-up history in this file.",
+  operator:"The FAA's four-letter designator — UAL, not \u201CUnited\u201D, and not the two-letter code on a ticket. The lookup desk at / lists every code with its name beside it.",
+  make:"The make as filed — BOEING, AIRBUS — and, optionally, the model exactly as filed: 7378H4, never 737-800. Leave the model empty for the whole make."};
+
+function setKindUI(k){
+  KINDUI=k;
+  document.querySelectorAll(".picker [data-k]").forEach(x=>x.classList.toggle("on",x.dataset.k===k));
+  $("vm").hidden=k!=="make";
+  $("v").placeholder=k==="tail"?"Tail number, e.g. N583UP"
+    :k==="operator"?"Four-letter operator code, e.g. UAL"
+    :"Make as filed, e.g. BOEING";
+  $("khint").textContent=KHINT[k];
+}
+document.querySelectorAll(".picker [data-k]").forEach(b=>{
+  b.addEventListener("click",()=>setKindUI(b.dataset.k));
+});
+$("askBtn").addEventListener("click",()=>{
+  const v=$("v").value.trim();
+  if(!v){$("khint").textContent="Type something first — a tail, a four-letter code or a make.";
+    $("v").focus();return}
+  const md=KINDUI==="make"?$("vm").value.trim():"";
+  ask(KINDUI,v,md);
+});
+["v","vm"].forEach(id=>$(id).addEventListener("keydown",e=>{
+  if(e.key==="Enter"){e.preventDefault();$("askBtn").click()}}));
+
+async function loadCodes(){
+  try{const r=await fetch("/z/api/codes");CODEZ=await r.json()||{}}
+  catch(e){CODEZ={}}
+}
+
+/* ---- the tooltip: the FAA's own wording, beside the code, wherever it appears */
+function codeTip(table,code,label){
+  const e=(CODEZ[table]||{})[String(code||"").trim().toUpperCase()];
+  const bits=[];
+  const lab=(e&&(e.label||e.faa))||label||code||"";
+  bits.push("<b>"+esc(lab)+"</b>");
+  if(e&&e.faa&&String(e.faa).toUpperCase()!==String(e.label||"").toUpperCase()&&e.faa!==lab)
+    bits.push("FAA wording: "+esc(e.faa));
+  if(e&&e.note)bits.push(esc(e.note));
+  return bits.join("<br>");
+}
+function showTipFor(el){
+  const t=el.getAttribute("data-tip");if(!t)return;
+  const tip=$("tip");tip.innerHTML=t;tip.style.display="block";
+  const r=el.getBoundingClientRect(),w=tip.offsetWidth||320;
+  let x=r.right+10;
+  if(x+w>window.innerWidth-8)x=Math.max(8,r.left-w-10);
+  tip.style.left=x+"px";
+  tip.style.top=Math.max(8,Math.min(r.top,window.innerHeight-(tip.offsetHeight||80)-8))+"px";
+}
+document.addEventListener("mouseover",e=>{
+  const el=e.target.closest&&e.target.closest("[data-tip]");
+  if(el)showTipFor(el);
+  else if(!e.target.closest||!e.target.closest("#tip"))$("tip").style.display="none";
+});
+document.addEventListener("mouseout",e=>{
+  const el=e.target.closest&&e.target.closest("[data-tip]");
+  if(el)$("tip").style.display="none";
+});
+document.addEventListener("focusin",e=>{
+  const el=e.target.closest&&e.target.closest("[data-tip]");
+  if(el)showTipFor(el);
+});
+document.addEventListener("focusout",e=>{
+  if(e.target.closest&&e.target.closest("[data-tip]"))$("tip").style.display="none";
+});
+
+/* ---- scope lines: complete against sampled, never blurred ----------------- */
+function scopeHTML(t){
+  if(!t||t.counted==null)return "";
+  return t.complete
+    ?'<div class="scope full">Counted over every report in the selection that records this field — '
+      +num(t.counted)+'.</div>'
+    :'<div class="scope sample">Counted only over the newest '+num(t.counted)
+      +' reports read, of '+(LAST?num(LAST.total):"?")+' in the selection. The rest were not read for this figure.</div>';
+}
+function sampleText(d){return "Counted over the newest "+num(d.analysed)+" reports read, of "
+  +num(d.total)+" in the selection."}
+
+function barsHTML(rows,mx,opt){
+  opt=opt||{};
+  return '<div class="bars">'+rows.map(r=>{
+    const clickable=!!opt.click;
+    const attrs=(clickable?' tabindex="0" role="button" data-ask="'+esc(opt.click(r))+'"':"")+
+                (r._tip?' data-tip="'+esc(r._tip)+'"':"");
+    const codeTag=(!opt.plain&&r.code&&r.code!==r.label)?' <code class="cd">'+esc(r.code)+"</code>":"";
+    const undec=r.undecoded?' <span class="muted">as filed</span>':"";
+    const w=Math.max(1.5,(r.n/(mx||1))*100).toFixed(2);
+    return '<div class="brow"><span class="bk'+(clickable?" c":"")+'"'+attrs+">"
+      +esc(r.label)+codeTag+undec+'</span><span class="bt"><i class="bb" style="width:'+w
+      +'%"></i></span><b class="bn">'+num(r.n)+"</b></div>";
+  }).join("")+"</div>";
+}
+function tallyBlock(h4,t,opt){
+  opt=opt||{};
+  const rows=(t&&t.rows)||[];
+  if(!rows.length)return '<h4 class="sub4">'+h4+'</h4><p class="muted">'
+    +(opt.none||"Nothing recorded on the reports read.")+"</p>";
+  const cap=opt.cap||10;
+  const shown=rows.slice(0,cap);
+  const mx=Math.max(1,...shown.map(r=>r.n));
+  let b='<h4 class="sub4">'+h4+"</h4>"+scopeHTML(t)+barsHTML(shown,mx,opt);
+  if(rows.length>shown.length){
+    const rn=rows.slice(cap).reduce((s,r)=>s+(r.n||0),0);
+    b+='<div class="bmore">'+num(rows.length-shown.length)+" more distinct values in this count, "
+      +num(rn)+" reports among them.</div>";
+  }
+  return b;
+}
+function sec(label,question,lede,body,cls){
+  return '<section class="five '+(cls||"")+'"><div class="slab">'+label+'</div><h3 class="sq">'
+    +question+"</h3>"+(lede?'<p class="slede">'+lede+"</p>":"")+body+"</section>";
+}
+
+/* ---- WHEN ------------------------------------------------------------------ */
+function whenBody(d){
+  const ms=(d.when&&d.when.months)||[];
+  if(!ms.length)return '<p class="muted">No dated reports.</p>';
+  const max=Math.max(1,...ms.map(m=>m.n));
+  const pk=d.when&&d.when.peak;
+  PEAKLINE=pk?("Busiest: "+monthName(pk.month)+", "+num(pk.n)+" reports."):"";
+  const wide=ms.length>90;
+  const bars=ms.map(m=>'<span class="mo'+(pk&&m.month===pk.month?" pk":"")
+    +'" tabindex="0" data-aim="'+esc(monthName(m.month))+" \u00b7 "+num(m.n)+' reports" title="'
+    +esc(monthName(m.month))+": "+num(m.n)+'"><i style="height:'
+    +Math.max(2,(m.n/max)*92).toFixed(1)+'px"></i></span>').join("");
+  const axis=ms.map(m=>"<span>"+(m.month.slice(5)==="01"?esc(m.month.slice(0,4)):"")+"</span>").join("");
+  return '<div class="mchart"><div class="mscroll"'+(wide?' style="min-width:'+(ms.length*7)+'px"':"")
+    +'><div class="mrow">'+bars+'</div><div class="maxi">'+axis+"</div></div></div>"
+    +'<div class="maim" id="maim">'+esc(PEAKLINE)+"</div>"
+    +'<p class="fnote">Months count dated reports only'
+    +(wide?", and "+num(ms.length)+" months will not fit, so the strip scrolls sideways":"")
+    +". The newest months are still filling up — reports reach the FAA days to months after the event — so a dip at the right can be the post arriving late rather than fewer faults.</p>";
+}
+document.addEventListener("mouseover",e=>{
+  const m=e.target.closest&&e.target.closest(".mo");
+  if(m){const a=$("maim");if(a)a.textContent=m.dataset.aim||""}
+});
+document.addEventListener("mouseout",e=>{
+  const m=e.target.closest&&e.target.closest(".mo");
+  if(m){const a=$("maim");if(a)a.textContent=PEAKLINE}
+});
+document.addEventListener("focusin",e=>{
+  const m=e.target.closest&&e.target.closest(".mo");
+  if(m){const a=$("maim");if(a)a.textContent=m.dataset.aim||""}
+});
+
+/* ---- WHERE ----------------------------------------------------------------- */
+function whereBody(d){
+  const w=d.where||{};
+  let b="";
+  b+='<div class="tgrp">'+tallyBlock("Zones and places",w.zones,{cap:12,
+    none:"No location recorded on the reports read.",
+    tip:r=>r.undecoded
+      ?"Not one of the FAA's zone codes — the mechanic's own words for a place, shown exactly as filed."
+      :codeTip("part_location",r.code,r.label)})+"</div>";
+  if(w.no_zone)b+='<p class="fnote">In '+num(w.no_zone)+" of the "+num(d.analysed)
+    +" read, no location is recorded at all.</p>";
+  b+='<div class="tgrp">'+tallyBlock("Systems, as ATA chapters",w.systems,{cap:12,
+    none:"No system code recorded."})+"</div>";
+  return b;
+}
+
+/* ---- WHO ------------------------------------------------------------------- */
+function whoBody(d){
+  const who=d.who||{};
+  const opN={};
+  (d.records||[]).forEach(r=>{if(r.operator_code&&!(r.operator_code in opN))
+    opN[r.operator_code]=r.operator||null});
+  let b="";
+  const orowsAll=(who.operators&&who.operators.rows)||[];
+  const orows=orowsAll.slice(0,10).map(r=>{
+    const nm=opN[r.code]||null;
+    return {code:r.code,label:nm||r.code,n:r.n,_tip:nm
+      ?"Name from the FAA's December 2006 cross-reference. Carriers merge and rename; check before publishing."
+      :"This designator resolves to no name in the lists carried here. The reports are real; the name is missing."};
+  });
+  const ot={complete:!!(who.operators&&who.operators.complete),
+            counted:who.operators&&who.operators.counted,rows:orows};
+  b+='<div class="tgrp">'+tallyBlock("Airlines filing these reports",ot,
+    {none:"No operator recorded.",click:r=>"operator|"+r.code})+"</div>";
+  const ac=((who.aircraft&&who.aircraft.rows)||[]).slice(0,10)
+    .map(r=>({code:r.code,label:"N"+r.code,n:r.n}));
+  const at={complete:false,counted:who.aircraft&&who.aircraft.counted,rows:ac};
+  b+='<div class="tgrp">'+tallyBlock("Individual airframes, most written-up first",at,
+    {plain:true,none:"No tail numbers on the reports read.",click:r=>"tail|"+r.code})+"</div>";
+  const ty=((who.types&&who.types.rows)||[]).slice(0,10)
+    .map(r=>({code:r.code,label:r.code,n:r.n}));
+  const tt={complete:false,counted:who.types&&who.types.counted,rows:ty};
+  b+='<div class="tgrp">'+tallyBlock("Types, as filed",tt,
+    {plain:true,none:"No type recorded.",
+     click:r=>{const i=r.code.indexOf(" ");
+       return "make|"+(i<0?r.code:r.code.slice(0,i))+"|"+(i<0?"":r.code.slice(i+1))}})+"</div>";
+  return b;
+}
+
+/* ---- WHAT ------------------------------------------------------------------ */
+function whatBody(d){
+  const w=d.what||{};
+  let b="";
+  b+='<div class="tgrp">'+tallyBlock("What was found (nature of condition)",w.nature,{cap:10,
+    none:"No nature code recorded.",tip:r=>codeTip("nature",r.code,r.label)})+"</div>";
+  b+='<p class="fnote">A report can name up to three nature codes, so these bars can overlap.</p>';
+  b+='<div class="tgrp">'+tallyBlock("Condition of the part",w.condition,
+    {cap:10,plain:true,none:"No condition recorded."})+"</div>";
+  b+='<div class="tgrp">'+tallyBlock("Parts, as the mechanics named them",w.parts,
+    {cap:10,plain:true,none:"No part named."})+"</div>";
+  b+='<div class="tgrp">'+tallyBlock("How it was found",w.found_by,{cap:10,
+    none:"No discovery code.",tip:r=>codeTip("discovered",r.code,r.label)})+"</div>";
+  b+='<div class="tgrp">'+tallyBlock("Stage of operation",w.stage,{cap:12,
+    none:"No stage code.",tip:r=>codeTip("stage",r.code,r.label)})+"</div>";
+  return b;
+}
+
+/* ---- WHAT IT FORCED -------------------------------------------------------- */
+function forcedBody(d){
+  const f=d.forced||{};
+  const acts=(f.actions||[]).map(a=>({label:a.label,n:a.n}));
+  const none=typeof f.none==="number"?f.none:null;
+  const all=acts.concat(none!=null?[{label:"No listed action",n:none,none:true}]:[]);
+  if(!all.length)return '<p class="muted">Nothing recorded.</p>';
+  const mx=Math.max(1,...all.map(r=>r.n));
+  return '<p class="fsent">'+boldDigits(f.sentence||"")+"</p>"
+    +'<div class="bars">'+all.map(r=>{
+      const w=Math.max(1.5,(r.n/mx)*100).toFixed(2);
+      return '<div class="brow"><span class="bk">'+esc(r.label)
+        +'</span><span class="bt"><i class="bb'+(r.none?" noneb":"")
+        +'" style="width:'+w+'%"></i></span><b class="bn">'+num(r.n)+"</b></div>";
+    }).join("")+"</div>"
+    +'<p class="fnote">A report can carry up to four action codes, so the action bars can add to more '
+    +"than the number of reports; the \u201Cno listed action\u201D row counts reports where none appears. "
+    +esc(sampleText(d))+"</p>";
+}
+
+/* ---- THE RECORDS ----------------------------------------------------------- */
+function recHTML(r,i){
+  const miss='<span class="absent">not recorded</span>';
+  const head=[];
+  head.push('<span class="rc mono">'+(r.date?esc(ukDate(r.date)):miss)+"</span>");
+  head.push('<span class="rc">'+(r.tail
+    ?'<span class="c" tabindex="0" role="button" data-ask="tail|'+esc(r.tail)+'">N'+esc(r.tail)+"</span>"
+    :miss)+"</span>");
+  let op;
+  if(r.operator&&r.operator_code)
+    op='<span class="c" tabindex="0" role="button" data-ask="operator|'+esc(r.operator_code)+'">'
+      +esc(r.operator)+'</span> <code class="cd">'+esc(r.operator_code)+"</code>";
+  else if(r.operator)
+    op='<span class="absent">'+esc(r.operator)+" (no designator filed)</span>";
+  else if(r.operator_code)
+    op='<span class="c" tabindex="0" role="button" data-ask="operator|'+esc(r.operator_code)+'">'
+      +esc(r.operator_code)+'</span> <span class="muted">name not resolved</span>';
+  else op='<span class="absent">no operator named</span>';
+  head.push("<span class=\"rc\">"+op+"</span>");
+  const tyStr=((r.make||"")+" "+(r.model||"")).trim();
+  head.push('<span class="rc">'+(tyStr
+    ?'<span class="c" tabindex="0" role="button" data-ask="make|'+esc(r.make||"")+"|"+esc(r.model||"")+'">'
+      +esc(tyStr)+"</span>":miss)+"</span>");
+  head.push('<span class="rc">'+(r.system?esc(r.system):miss)
+    +(r.system_code?' <code class="cd">'+esc(r.system_code)+"</code>":"")+"</span>");
+  head.push('<span class="rc">'+(r.part?esc(r.part):miss)
+    +(r.part_number?' <code class="cd">P/N '+esc(r.part_number)+"</code>":"")+"</span>");
+  const hc=[];
+  if(r.hours)hc.push(esc(r.hours)+" h");
+  if(r.cycles)hc.push(num(r.cycles)+" cyc");
+  if(hc.length)head.push('<span class="rc mono dim">'+hc.join(" \u00b7 ")+"</span>");
+
+  const tag=(s,tip)=>'<span class="tag"'+(tip?' data-tip="'+esc(tip)+'"':"")+">"+esc(s)+"</span>";
+  const pair=(k,v)=>'<span class="pair"><i>'+k+"</i>"+v+"</span>";
+  const tags=[];
+  tags.push(pair("what was found",(r.nature&&r.nature.length)
+    ?r.nature.map(x=>tag(x)).join(" "):'<span class="absent">no code</span>'));
+  tags.push(pair("crew",(r.crew&&r.crew.length)
+    ?r.crew.map(x=>tag(x)).join(" "):'<span class="absent">no action listed</span>'));
+  tags.push(pair("stage",r.stage?tag(r.stage):'<span class="absent">no code</span>'));
+  tags.push(pair("found by",r.discovered?tag(r.discovered):'<span class="absent">no code</span>'));
+  let zb;
+  if(r.zone_label&&r.zone&&r.zone_label!==r.zone)
+    zb=tag(r.zone_label)+' <code class="cd">'+esc(r.zone)+"</code>";
+  else if(r.zone)zb=tag(r.zone)+(r.zone_label?"":' <span class="muted">as filed</span>');
+  else zb='<span class="absent">no location</span>';
+  tags.push(pair("where",zb));
+  if(r.corrosion)tags.push(pair("corrosion",tag(r.corrosion)));
+  if(r.cracks||r.crack_length)
+    tags.push(pair("cracks",tag((r.cracks||"?")+" crack"+(r.cracks==="1"?"":"s")
+      +(r.crack_length?", longest "+r.crack_length+" in":""))));
+
+  const glossBtn=r.text
+    ?'<button class="ghost" data-gloss="'+i+'">Say this in plain English</button>'
+    :'<button class="ghost" disabled title="No write-up text in this record">Say this in plain English</button>';
+  return '<article class="record"><div class="rhead">'+head.join("")+'</div>'
+    +'<div class="rtags">'+tags.join("")+"</div>"
+    +'<div class="wu"><div class="txt">'
+    +(r.text?esc(r.text):'<span class="absent">No write-up text in the record.</span>')+"</div></div>"
+    +'<div class="rfoot">'+glossBtn+'<span class="rid">record '+esc(r.id||"")+"</span></div>"
+    +'<div class="glossout" id="g-'+i+'" hidden></div></article>';
+}
+function recordsBody(d,k){
+  const rs=d.records||[];
+  const scope='<div class="scope sample">Read and decoded: the newest '+num(d.analysed)+" of "
+    +num(d.total)+" in the selection; shown here, the newest "+num(rs.length)+" of those."
+    +(k==="tail"?" The CSV export above carries every report on this airframe, with a citation header.":"")
+    +"</div>";
+  if(!rs.length)return scope+'<p class="muted">No records returned.</p>';
+  return scope+rs.map((r,i)=>recHTML(r,i)).join("");
+}
+
+/* ---- the page -------------------------------------------------------------- */
+function render(d){
+  const k=LASTQ.kind,out=$("out");
+  if(!d.total){out.innerHTML=emptyHTML(d,k);return}
+  const bits=[];
+  bits.push('<div class="stamp">FAA SERVICE DIFFICULTY REPORTS \u00b7 ONE THING, FIVE ANSWERS</div>');
+  bits.push('<h1 class="title">'+esc(d.title)+"</h1>");
+  const w=d.when||{};
+  bits.push('<p class="figline"><b>'+num(d.total)+"</b> report"+(d.total===1?"":"s")
+    +(w.first?", "+esc(monthName(w.first))+" to "+esc(monthName(w.last)):"")+"."
+    +(d.capped?" The newest "+num(d.analysed)+" were read in full.":"")+"</p>");
+  if(d.framing&&d.framing.sentence)
+    bits.push('<div class="reading">'+boldDigits(d.framing.sentence)+"</div>");
+  if(k==="tail"){
+    const t=tailParam();
+    bits.push('<div class="bar">'
+      +'<button class="ghost" id="sumBtn" onclick="loadSummary(this)">Show the verified summary</button>'
+      +'<a class="btn" href="/z/api/export/'+encodeURIComponent(t)+'.csv">Export CSV</a>'
+      +'<span class="muted">The export carries a citation header and one row per write-up.</span></div>'
+      +'<div id="sumout"></div>');
+  }
+  bits.push('<div class="card cannot"><h3>What this page cannot show</h3><ul>'
+    +(d.cannot_show||[]).map(x=>"<li>"+esc(x)+"</li>").join("")+"</ul></div>");
+  bits.push(sec("WHEN","When did it happen?",
+    "Month by month, over the whole span the file covers. A spike has a date; this is where to find it.",
+    whenBody(d)));
+  bits.push(sec("WHERE","Where on the aircraft?",
+    "The FAA's numbered zones where they are given, and the systems that keep coming up. Free-text "
+    +"locations are kept and marked, never forced into a zone.",whereBody(d)));
+  bits.push(sec("WHO","Whose aircraft?",
+    "The airlines that filed, the individual airframes, and the types as filed. Click any of them to "
+    +"make it the thing instead.",whoBody(d)));
+  bits.push(sec("WHAT","What was found?",
+    "The FAA's own codes, decoded where they appear, and the part names as written.",whatBody(d)));
+  bits.push(sec("WHAT IT FORCED","What did it make the crew do?",
+    "Not what broke — what it forced. This is the question the FAA buries hardest, so it is answered "
+    +"on its own, not as a footnote under WHAT.",forcedBody(d),"f5"));
+  bits.push(sec("THE RECORDS","The write-ups themselves",
+    "Newest first. The mechanic's words are the evidence; the decoded codes sit above them and the "
+    +"record id below. Click a tail, an airline or a type to follow that thread instead. "
+    +"\u201CSay this in plain English\u201D asks a model to restate one record from its decoded fields; "
+    +"it is told to abstain rather than guess, and the verbatim text stays the evidence.",
+    recordsBody(d,k)));
+  if(k==="tail")
+    bits.push('<details class="card rep" id="repd"><summary>Same system, written up more than once on '
+      +'this airframe</summary><div id="repout"><p class="muted">Reading\u2026</p></div></details>');
+  out.innerHTML=bits.join("");
+}
+function emptyHTML(d,k){
+  let hint;
+  if(k==="tail")hint="It may never have carried a United States registration, or nothing was ever "
+    +"filed about it. Tail numbers are filed without the leading N — try it without.";
+  else if(k==="operator")hint="The designator must be the FAA's own four-letter code — UAL, not "
+    +"\u201CUnited\u201D. The lookup desk at / lists every code with its name beside it.";
+  else hint="The make is filed as a code — BOEING, AIRBUS — and the model exactly as filed: 7378H4, "
+    +"never 737-800.";
+  return '<div class="card"><h2 class="eq">Nothing in the file matches '
+    +esc((d&&d.title)||"that")+".</h2><p>"+hint+"</p>"
+    +'<p class="muted">An empty answer here is an answer about this file, not about the world. '
+    +"It is not evidence that nothing happened.</p></div>";
+}
+function renderLanding(){
+  $("out").innerHTML='<div class="card land">'
+    +'<p class="big">One thing in. Five answers out.</p>'
+    +'<p class="lede2">Name a tail number, an airline or an aircraft type. The FAA\u2019s Service '
+    +"Difficulty Reports answer five questions about it, in the order a reporter asks them:</p>"
+    +'<div class="fivelist">'
+    +'<span class="k">WHEN</span><span>Month by month, across the whole span. A spike has a date.</span>'
+    +'<span class="k">WHERE</span><span>Where on the aircraft — the FAA\u2019s zones, and the systems '
+    +"that keep coming up.</span>"
+    +'<span class="k">WHO</span><span>Which airlines filed, which individual airframes, which types.</span>'
+    +'<span class="k">WHAT</span><span>What was found, in the FAA\u2019s codes and the mechanics\u2019 '
+    +"own words.</span>"
+    +'<span class="k">WHAT IT FORCED</span><span>What the defect made the crew do — a shutdown, a '
+    +"diversion, masks on. The FAA buries this hardest; here it is its own answer.</span>"
+    +"</div>"
+    +'<p class="muted">Nothing is asked yet, so nothing is shown. Take a starter or type your own.</p>'
+    +'<div class="starter">'
+    +'<button data-ask="operator|UAL">United Airlines (UAL)</button>'
+    +'<button data-ask="operator|AAL">American Airlines (AAL)</button>'
+    +'<button data-ask="make|BOEING|">Boeing, all types</button>'
+    +'<button data-ask="make|AIRBUS|">Airbus, all types</button>'
+    +"</div>"
+    +'<p class="muted">For an airframe, type the registration — with or without the N.</p></div>';
+}
+
+async function ask(k,v,md,push){
+  if(!v)return;
+  $("out").innerHTML='<div class="card"><p class="muted">Reading the file\u2026</p></div>';
+  LASTQ={kind:k,v:v,model:md||""};
+  let d;
+  try{
+    const q=new URLSearchParams({kind:k,v:v});
+    if(md)q.set("model",md);
+    const r=await fetch("/z/api/entity?"+q.toString());
+    if(!r.ok){let msg="HTTP "+r.status;
+      try{const j=await r.json();if(j&&j.error)msg=j.error}catch(e){}
+      throw new Error(msg)}
+    d=await r.json();
+  }catch(e){
+    $("out").innerHTML='<div class="card"><p><strong>The desk did not answer.</strong> '
+      +esc(String(e.message||e))+". Nothing is shown rather than something wrong.</p></div>";
+    return;
+  }
+  LAST=d;render(d);
+  if(push!==false){
+    const u=new URLSearchParams({kind:k,v:v});
+    if(md)u.set("model",md);
+    history.pushState(null,"","?"+u.toString());
+  }
+  window.scrollTo({top:0,behavior:"auto"});
+}
+window.addEventListener("popstate",()=>{
+  const u=new URLSearchParams(location.search);
+  const k=["tail","operator","make"].includes(u.get("kind"))?u.get("kind"):"tail";
+  setKindUI(k);
+  const v=u.get("v");
+  if(v){$("v").value=v;$("vm").value=u.get("model")||"";ask(k,v,u.get("model")||"",false)}
+  else{LAST=null;LASTQ=null;renderLanding()}
+});
+
+/* ---- one grammar for every clickable value --------------------------------- */
+document.addEventListener("click",e=>{
+  const a=e.target.closest&&e.target.closest("[data-ask]");
+  if(a){const p=a.dataset.ask.split("|");ask(p[0],p[1]||"",p[2]||"");return}
+  const g=e.target.closest&&e.target.closest("[data-gloss]");
+  if(g){doGloss(g.dataset.gloss,g);return}
+});
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter"&&e.key!==" ")return;
+  const t=e.target;
+  if(t&&t.dataset&&t.dataset.ask&&t.tagName!=="BUTTON"&&t.tagName!=="A"){
+    e.preventDefault();const p=t.dataset.ask.split("|");ask(p[0],p[1]||"",p[2]||"");
+  }
+});
+
+/* ---- the one generated thing, under the words it came from ------------------ */
+async function doGloss(i,btn){
+  const r=LAST&&LAST.records&&LAST.records[i];if(!r)return;
+  const box=$("g-"+i);if(!box)return;
+  if(r._gloss){paintGloss(i,btn);return}
+  btn&&(btn.disabled=true);
+  const old=btn?btn.textContent:"";
+  if(btn)btn.textContent="Asking the model\u2026";
+  let d=null,err=null;
+  try{
+    const res=await fetch("/z/api/gloss",{method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({text:r.text,system:r.system,part:r.part,condition:r.condition,
+        nature:(r.nature||[]).join("; "),stage:r.stage,discovered:r.discovered,
+        zone_label:r.zone_label})});
+    d=await res.json();
+    if(!res.ok)err=(d&&d.error)?d.error:("HTTP "+res.status);
+  }catch(e){err=String(e&&e.message||e)}
+  r._gloss={d:d,err:err};
+  if(btn){btn.disabled=false;btn.textContent=old}
+  paintGloss(i,btn);
+}
+function paintGloss(i,btn){
+  const r=LAST&&LAST.records&&LAST.records[i];if(!r)return;
+  const box=$("g-"+i);if(!box)return;
+  box.hidden=false;
+  if(btn)btn.style.display="none";
+  const g=r._gloss||{};
+  if(g.err){
+    box.innerHTML='<div class="glab">Plain English — not available</div>'
+      +'<p class="gtxt muted">The service did not answer ('+esc(String(g.err))
+      +"). The mechanic's words above stand on their own.</p>";
+    return;
+  }
+  const d=g.d||{};
+  if(d.abstained||!d.plain){
+    box.innerHTML='<div class="glab">Plain English — declined</div>'
+      +'<p class="gtxt muted">'+(d.reason?esc(d.reason)
+        :"The write-up is too abbreviated to restate without adding something.")+"</p>"
+      +'<p class="gnote">Declining is the honest answer here: the model is told to abstain rather '
+      +"than guess.</p>";
+  }else{
+    box.innerHTML='<div class="glab">In plain English</div>'
+      +'<p class="gtxt">'+esc(d.plain)+"</p>"
+      +'<p class="gnote">Written by '+esc(d.model||"a model")
+      +" from the decoded fields and the words above. It adds nothing — and it can still be wrong. "
+      +"The verbatim text is the record; read the two against each other.</p>";
+  }
+}
+
+/* ---- the verified summary: arithmetic checked before it is allowed out ----- */
+function tailParam(){
+  const v=LASTQ&&LASTQ.kind==="tail"?LASTQ.v:"";
+  return String(v).toUpperCase().replace(/[^A-Z0-9]/g,"").replace(/^N/,"");
+}
+async function loadSummary(btn){
+  const box=$("sumout");
+  if(!box||!LASTQ||LASTQ.kind!=="tail")return;
+  const t=tailParam();
+  btn&&(btn.disabled=true);
+  const old=btn?btn.textContent:"";
+  if(btn)btn.textContent="Recounting\u2026";
+  let html;
+  try{
+    const res=await fetch("/z/api/summary/"+encodeURIComponent(t));
+    if(!res.ok){
+      let msg="HTTP "+res.status;
+      try{const j=await res.json();if(j&&j.error)msg=j.error}catch(e){}
+      html='<div class="card sumbox"><div class="glab">Verified summary — withheld</div>'
+        +'<p class="gtxt">The verifier disagreed with the arithmetic, so no summary was rendered. '
+        +"That is the catch working: nothing is shown rather than something wrong. "
+        +'<span class="muted">('+esc(msg)+")</span></p></div>";
+    }else{
+      const d=await res.json();
+      if(d.found===0)html='<div class="card sumbox"><p class="gtxt muted">Nothing to summarise.</p></div>';
+      else html='<div class="card sumbox"><div class="glab">Verified summary — no model wrote any of it</div>'
+        +'<p class="sumtext">'+boldDigits(d.summary||"")+"</p>"
+        +'<p class="gnote">'+esc(d.note||"")+"</p></div>";
+    }
+  }catch(e){html='<div class="card sumbox"><p class="gtxt muted">The desk did not answer.</p></div>'}
+  box.innerHTML=html;
+  if(btn){btn.disabled=false;btn.textContent=old;
+    if(html.indexOf("sumtext")>=0)btn.style.display="none"}
+}
+
+/* ---- repeats, for airframes only ------------------------------------------- */
+let REPLOADED=false;
+document.addEventListener("toggle",e=>{
+  if(e.target&&e.target.id==="repd"&&e.target.open&&!REPLOADED){REPLOADED=true;loadRepeats()}
+},true);
+async function loadRepeats(){
+  const box=$("repout");if(!box)return;
+  const t=tailParam();
+  let html;
+  try{
+    const res=await fetch("/z/api/repeats/"+encodeURIComponent(t));
+    const d=await res.json();
+    if(!res.ok)html='<p class="muted">The desk did not answer ('+esc(String(res.status))+").</p>";
+    else{
+      const gs=d.groups||[];
+      html=(d.note?'<p class="muted">'+esc(d.note)+"</p>":"")
+        +(gs.length?gs.map(g=>{
+          const hrs=g.hours_between!=null
+            ?" About <b>"+num(g.hours_between)+"</b> flying hours between the first and the last."
+            :' <span class="muted">Flying hours not recorded on both reports.</span>';
+          return '<div class="rg"><b>'+esc(g.system||"system not recorded")+"</b>"
+            +(g.part?" — "+esc(g.part):"")
+            +": written up <b>"+num(g.times)+"</b> time"+(g.times===1?"":"s")+", "
+            +esc(ukDate(g.first)||g.first||"")+" to "+esc(ukDate(g.last)||g.last||"")+"."+hrs
+            +'<div class="rids">records: '+esc((g.ids||[]).join(", "))+"</div></div>";
+        }).join("")
+        :'<p class="muted">No system-and-part pair appears more than once in the reports read on '
+        +"this airframe.</p>");
+    }
+  }catch(e){html='<p class="muted">The desk did not answer.</p>'}
+  box.innerHTML=html;
+}
+
+/* ---- boot ------------------------------------------------------------------ */
+(async function boot(){
+  const u=new URLSearchParams(location.search);
+  const kind=["tail","operator","make"].includes(u.get("kind"))?u.get("kind"):"tail";
+  setKindUI(kind);
+  const codes=loadCodes();
+  fetch("/z/api/health").then(r=>r.json()).then(h=>{
+    if(h&&h.corpus!=null){const s=$("hsub");
+      if(s)s.innerHTML=" The file holds <b>"+num(h.corpus)+"</b> reports."}
+  }).catch(()=>{});
+  const v=u.get("v");
+  await codes;
+  if(v){$("v").value=v;if(u.get("model"))$("vm").value=u.get("model");
+    ask(kind,v,u.get("model")||"",false)}
+  else renderLanding();
+})();
+</script>
+
+
+<!-- removed: the fetch-hooked rail module -->
+<style>
+#zhero-wrap{margin:18px 0 6px}
+.zhero-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.zhero-tab{display:flex;flex-direction:column;align-items:flex-start;gap:1px;
+  font:inherit;cursor:pointer;padding:7px 13px;border-radius:9px;
+  border:1px solid var(--line,#ded7ca);background:var(--card,#fff);text-align:left}
+.zhero-tab[aria-selected=true]{border-color:var(--rust,#9c4a1e);background:#fff6f1}
+.zt-lab{font-family:Archivo,system-ui,sans-serif;font-size:11px;letter-spacing:.14em;
+  font-weight:800;color:var(--rust,#9c4a1e)}
+.zt-sub{font-size:12.5px;color:var(--mut,#6f6960)}
+.zhero{min-height:150px}
+</style>
+
+
+<script>
+/* Click to narrow.
+   The parent tool is an instrument you operate: click a zone, a crew action, an
+   airline, and the whole corpus cuts down. /z was a page you read. This makes any
+   value on it a filter, and shows what is currently applied so it can be undone.
+
+   It works by delegation on the document rather than by hooking the renderers,
+   because the page was written by a model and may be rewritten by one. Anything
+   that already carries a code in a data attribute becomes clickable; the rest is
+   matched on the shape the page uses for a value row. */
+(function(){
+  const P = new URLSearchParams(location.search);
+  const FILTERS = ["zone","jasc","ata","nature","crew","stage","discovered",
+                   "condition","part","corrosion","q","from","to","operator","tail","make"];
+
+  function chips(){
+    let bar = document.getElementById("znarrow");
+    const on = FILTERS.filter(f=>P.get(f));
+    if(!bar){
+      bar = document.createElement("div"); bar.id="znarrow";
+      const m = document.querySelector("main") || document.body;
+      m.insertBefore(bar, m.firstChild);
+    }
+    bar.innerHTML = on.length ? `<span class="zn-lab">NARROWED TO</span>` + on.map(f=>
+      `<button class="zn-chip" data-drop="${f}">${f}: ${P.get(f)} <span>&times;</span></button>`
+      ).join("") + `<button class="zn-chip zn-all" data-drop="*">clear all</button>` : "";
+    bar.querySelectorAll("[data-drop]").forEach(b=>b.onclick=()=>{
+      const u=new URL(location);
+      if(b.dataset.drop==="*") FILTERS.forEach(f=>u.searchParams.delete(f));
+      else u.searchParams.delete(b.dataset.drop);
+      location.href=u.toString();
+    });
+  }
+
+  function go(field, value){
+    const u = new URL(location);
+    u.searchParams.set(field, value);
+    location.href = u.toString();
+  }
+
+  /* A value row on this page renders its code somewhere in the element. Rather
+     than guess at class names, look for the code the API already gave us. */
+  document.addEventListener("click", function(e){
+    const el = e.target.closest("[data-zfilter]");
+    if(!el) return;
+    e.preventDefault(); e.stopPropagation();
+    go(el.dataset.zfilter, el.dataset.zvalue);
+  }, true);
+
+  window.zNarrowMark = function(root, field, value, label){
+    if(!root) return;
+    root.setAttribute("data-zfilter", field);
+    root.setAttribute("data-zvalue", value);
+    root.classList.add("z-click");
+    root.title = "Keep only " + (label||value);
+  };
+  /* The page builds its own /api/entity URL and knows nothing about these
+     filters. Rather than edit code a model wrote and may rewrite, the filters are
+     appended to the request on its way out. Same result, no coupling. */
+  const of_ = window.fetch;
+  window.fetch = function(input, init){
+    try{
+      let u = typeof input === "string" ? input : (input && input.url);
+      if(u && u.includes("api/entity")){
+        const url = new URL(u, location.href);
+        let added = false;
+        FILTERS.forEach(f=>{
+          const v = P.get(f);
+          if(v && !url.searchParams.has(f)){ url.searchParams.set(f, v); added = true; }
+        });
+        if(added){
+          if(typeof input === "string") input = url.pathname.replace(/^\/z\//,"") + url.search;
+          else input = new Request(url.toString(), input);
+        }
+      }
+    }catch(e){}
+    return of_.call(this, input, init);
+  };
+
+  /* Make the values on the page clickable without touching the code that renders
+     them. After the data arrives, walk the DOM and tag any element whose text
+     carries a value the API just returned. Matching on the data rather than on
+     class names means this survives the page being rewritten. */
+  const FIELD_OF = {zones:"zone", systems:"ata", operators:"operator",
+                    aircraft:"tail", types:"make", nature:"nature",
+                    condition:"condition", parts:"part", found_by:"discovered",
+                    stage:"stage", actions:"crew"};
+
+  function tagValues(d){
+    if(!d) return;
+    const want = [];
+    const push = (blk, key) => {
+      if(!blk) return;
+      (blk.rows || blk || []).forEach(r=>{
+        if(!r || !r.label) return;
+        want.push({field: FIELD_OF[key], code: r.code || r.label, label: r.label});
+      });
+    };
+    push(d.where && d.where.zones, "zones");
+    push(d.where && d.where.systems, "systems");
+    push(d.who && d.who.operators, "operators");
+    push(d.who && d.who.aircraft, "aircraft");
+    push(d.what && d.what.nature, "nature");
+    push(d.what && d.what.condition, "condition");
+    push(d.what && d.what.parts, "parts");
+    push(d.what && d.what.found_by, "found_by");
+    push(d.what && d.what.stage, "stage");
+    (d.forced && d.forced.actions || []).forEach(a=>
+      want.push({field:"crew", code:a.label, label:a.label}));
+
+    const byLabel = new Map();
+    want.forEach(w=>{ if(w.field && w.label) byLabel.set(w.label.trim(), w); });
+    if(!byLabel.size) return;
+
+    document.querySelectorAll("li,tr,div,span,button,a").forEach(el=>{
+      if(el.hasAttribute("data-zfilter")) return;
+      if(el.children.length > 4) return;
+      const t = (el.textContent||"").trim();
+      if(!t || t.length > 90) return;
+      for(const [lab,w] of byLabel){
+        if(t === lab || t.startsWith(lab + " ") || t.startsWith(lab + "\n")){
+          /* crew actions are stored by label, and the API takes the code */
+          let v = w.code;
+          if(w.field === "crew"){
+            const codes = {"Unscheduled landing":"A","Emergency descent":"B",
+              "Aborted take-off":"C","Engine shut down in flight":"E",
+              "Fire extinguisher fired":"F","Oxygen masks dropped":"G",
+              "Cabin lost pressure":"I","Fuel dumped":"J","Aborted approach":"L",
+              "Autorotation":"R"};
+            if(!codes[lab]) return;
+            v = codes[lab];
+          }
+          if(w.field === "tail") v = String(v).replace(/^N/,"");
+          window.zNarrowMark(el, w.field, v, lab);
+          break;
+        }
+      }
+    });
+  }
+
+  /* Date bounding and the starter questions, which the parent has and this did not. */
+  const STARTERS = [
+    ["Smoke or fumes in the cabin", {nature:"B"}],
+    ["Cracks found", {cracked:"1"}],
+    ["Engine shut down in flight", {crew:"E"}],
+    ["Unscheduled landing", {crew:"A"}],
+    ["Aborted take-off", {crew:"C"}],
+    ["Oxygen masks dropped", {crew:"G"}],
+    ["Cabin lost pressure", {crew:"I"}],
+    ["Urgent corrosion, level 3", {corrosion:"3"}],
+    ["Landing gear", {ata:"32"}],
+    ["Engines", {ata:"72"}],
+  ];
+  function controls(){
+    if(document.getElementById("zctl")) return;
+    const bar = document.getElementById("znarrow"); if(!bar) return;
+    const c = document.createElement("div"); c.id="zctl";
+    c.innerHTML = `<div class="zc-row">
+        <label class="zc-lab">FROM</label><input type="date" id="zfrom" value="${P.get("from")||""}">
+        <label class="zc-lab">UP TO</label><input type="date" id="zto" value="${P.get("to")||""}">
+        <button class="zn-chip" id="zdate">Take that period</button>
+      </div>
+      <div class="zc-row zc-start"><span class="zc-lab">START FROM</span>${
+        STARTERS.map((s,i)=>`<button class="zc-q" data-i="${i}">${s[0]}</button>`).join("")}</div>`;
+    bar.parentNode.insertBefore(c, bar.nextSibling);
+    document.getElementById("zdate").onclick=()=>{
+      const u=new URL(location);
+      const f=document.getElementById("zfrom").value, t=document.getElementById("zto").value;
+      f?u.searchParams.set("from",f):u.searchParams.delete("from");
+      t?u.searchParams.set("to",t):u.searchParams.delete("to");
+      location.href=u.toString();
+    };
+    c.querySelectorAll(".zc-q").forEach(b=>b.onclick=()=>{
+      const u=new URL(location);
+      Object.entries(STARTERS[+b.dataset.i][1]).forEach(([k,v])=>u.searchParams.set(k,v));
+      location.href=u.toString();
+    });
+  }
+
+  const of2 = window.fetch;
+  window.fetch = function(...a){
+    return of2.apply(this,a).then(r=>{
+      try{
+        if(String(a[0]).includes("api/entity")){
+          r.clone().json().then(d=>setTimeout(()=>tagValues(d), 700)).catch(()=>{});
+        }
+      }catch(e){}
+      return r;
+    });
+  };
+
+  window.addEventListener("DOMContentLoaded", ()=>{chips();controls();});
+  chips(); controls();
+})();
+</script>
+<style>
+#znarrow{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:12px 0}
+#znarrow:empty{margin:0}
+.zn-lab{font-family:Archivo,system-ui,sans-serif;font-size:10.5px;letter-spacing:.15em;
+  font-weight:800;color:var(--mut,#6f6960)}
+.zn-chip{font:inherit;font-size:13px;padding:4px 11px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--rust,#9c4a1e);background:#fff6f1;color:var(--rust,#9c4a1e)}
+.zn-chip span{opacity:.6;margin-left:3px}
+.zn-chip.zn-all{border-color:var(--line,#ded7ca);background:var(--card,#fff);color:var(--mut,#6f6960)}
+.z-click{cursor:pointer}
+#zctl{margin:0 0 14px}
+.zc-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:7px 0}
+.zc-lab{font-family:Archivo,system-ui,sans-serif;font-size:10.5px;letter-spacing:.15em;
+  font-weight:800;color:var(--mut,#6f6960)}
+#zctl input[type=date]{font:inherit;font-size:13px;padding:5px 9px;border-radius:7px;
+  border:1px solid var(--line,#ded7ca);background:var(--card,#fff)}
+.zc-q{font:inherit;font-size:13px;padding:4px 11px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--line,#ded7ca);background:var(--card,#fff);color:inherit}
+.zc-q:hover{border-color:var(--rust,#9c4a1e);color:var(--rust,#9c4a1e)}
+.z-click:hover{background:#fff6f1;outline:1px solid var(--rust,#9c4a1e);outline-offset:1px;border-radius:5px}
+</style>
+
+</body>
+<!--INSTRUMENT-JS-->
+</html>

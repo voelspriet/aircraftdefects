@@ -79,6 +79,11 @@ def ask(name, prompt, effort="max", max_tokens=128000):
 
 
 if __name__ == "__main__":
+    # 04-search was truncated: 378,982 characters of reasoning plus 66,122 of
+    # writing hit the 128,000-token ceiling, and the file ends mid-function.
+    # max_tokens covers thinking and writing together, so on a long brief the
+    # effort level is a budget decision, not only a quality one.
     name = sys.argv[1]
     spec = pathlib.Path(sys.argv[2]).read_text()
-    ask(name, spec)
+    effort = sys.argv[3] if len(sys.argv) > 3 else "max"
+    ask(name, spec, effort=effort)

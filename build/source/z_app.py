@@ -54,20 +54,53 @@ def key():
     return k
 
 
-def glm(prompt, schema=None, effort="low", max_tokens=1200):
-    """One call. Structured output where a schema is given, so the model cannot
-    ramble into a field that will be rendered as fact."""
+def glm(prompt, schema=None, effort="low", max_tokens=1200, tools=None):
+    """One call, streamed.
+
+    Streaming is not a nicety here. Without it the request holds a connection open
+    while the model thinks and writes, and nothing crosses the wire until the very
+    last moment. Their gateway closed two such requests on us: a 502 from
+    alibaba-ga on one, a reset connection on the retry, both on jobs that ran long.
+    The first thing I blamed was prompt size, wrongly: the run that succeeded had
+    three times the input of the run that failed. What separated them was how long
+    the line stayed silent.
+
+    With stream=True the tokens arrive as they are produced, no proxy sees an idle
+    socket, and a job may take as long as it needs. The vendor recommends it for
+    this model for exactly this reason.
+    """
     body = {"model": MODEL, "temperature": 1, "top_p": 0.95,
             "thinking": {"type": "enabled", "clear_thinking": False},
             "reasoning_effort": effort, "max_tokens": max_tokens,
+            "stream": True,
             "messages": [{"role": "user", "content": prompt}]}
     if schema:
         body["response_format"] = {"type": "json_object"}
-    r = requests.post(ZAI, json=body, timeout=180, headers={
+    if tools:
+        body["tools"] = tools
+        body["tool_stream"] = True
+
+    r = requests.post(ZAI, json=body, timeout=1800, stream=True, headers={
         "Authorization": "Bearer " + key(), "Content-Type": "application/json"})
     if r.status_code != 200:
         raise RuntimeError("z.ai %s %s" % (r.status_code, r.text[:200]))
-    txt = r.json()["choices"][0]["message"].get("content") or ""
+
+    out = []
+    for line in r.iter_lines(decode_unicode=True):
+        if not line or not line.startswith("data:"):
+            continue
+        chunk = line[5:].strip()
+        if chunk == "[DONE]":
+            break
+        try:
+            d = json.loads(chunk)
+        except ValueError:
+            continue
+        for ch in d.get("choices", []):
+            piece = (ch.get("delta") or {}).get("content")
+            if piece:
+                out.append(piece)
+    txt = "".join(out)
     if not schema:
         return txt
     m = re.search(r"\{.*\}", txt, re.S)
@@ -213,8 +246,21 @@ write-up, with what it means. Two kinds, and the difference matters:
 Mark every entry. Never mark something "record" to make it look better sourced. If you
 are not confident an airport code is that airport, leave it out entirely.
 
+One record has two halves and a reader needs both. Above the write-up sits the
+FAA's own filing: the coded boxes, the airframe's hours and flights, where on the
+aircraft, how it was found, what stage the aircraft was in, what the crew did. Those
+are the part a non-specialist cannot read at all, and a rephrasing that skips them
+explains the easy half.
+
+So say the filing too, in one or two plain sentences, using only the decoded values
+you were given. Do not repeat a value that is empty, and say plainly when a field
+records nothing: "no crew action is recorded" is information, and silence is not.
+Hours and flight cycles belong here when present, because they say how much life the
+aircraft had behind it.
+
 Return JSON only:
-{"plain": "<the account, or null if abstaining>",
+{"filing": "<what the coded boxes say, in plain sentences, or null>",
+ "plain": "<the account, or null if abstaining>",
  "abstained": true|false,
  "reason": "<if abstained, why, in six words or fewer>",
  "code_tension": "<one sentence naming the code and what the text says instead, or null>",
@@ -227,8 +273,11 @@ def gloss():
     text = (d.get("text") or "").strip()
     if not text:
         return jsonify(error="no text"), 400
-    facts = {k: d.get(k) for k in ("system", "part", "condition", "nature",
-                                   "stage", "discovered", "zone_label") if d.get(k)}
+    facts = {k: d.get(k) for k in ("system", "part", "part_number", "condition",
+                                   "nature", "crew", "stage", "discovered",
+                                   "zone", "zone_label", "corrosion",
+                                   "crack_length", "cracks", "hours", "cycles",
+                                   "make", "model", "operator", "date") if d.get(k)}
     prompt = ("%s\n\nCodes the filer entered, decoded by the FAA's own tables:\n%s\n\n"
               "The write-up, verbatim:\n%s"
               % (GLOSS_RULES, json.dumps(facts, ensure_ascii=False), text))
@@ -243,7 +292,10 @@ def gloss():
         return jsonify(error=str(e)[:200]), 502
     if not out:
         return jsonify(abstained=True, reason="no usable reply"), 200
-    return jsonify(plain=out.get("plain"), abstained=bool(out.get("abstained")),
+    if out.get("code_tension"):
+        log_conflict(d, out["code_tension"])
+    return jsonify(filing=out.get("filing"), plain=out.get("plain"),
+                   abstained=bool(out.get("abstained")),
                    reason=out.get("reason"), code_tension=out.get("code_tension"),
                    jargon=out.get("jargon") or [],
                    model=MODEL, effort="high" if long_ else "low")
@@ -456,6 +508,12 @@ def health():
                            "9": "operator page"})
 
 
+@app.get("/z/conflicts")
+@app.get("/z/conflicts/")
+def conflicts_page():
+    return send_from_directory(app.static_folder, "conflicts.html")
+
+
 @app.get("/z/")
 @app.get("/z")
 def index():
@@ -519,6 +577,17 @@ def tally(rows, get, table=None):
     return out
 
 
+# Any value on the page can become the filter. The parent tool is a thing you
+# operate, not a page you read: you click a zone, drag a period, click a crew
+# action, and the whole corpus narrows. /z answered one question about one subject
+# and offered no way to cut it, which is the single biggest thing a reporter loses.
+NARROW = {"zone": "zone", "jasc": "jasc", "ata": "ata", "nature": "nature",
+          "crew": "crew", "stage": "stage", "discovered": "discovered",
+          "condition": "condition", "part": "part", "operator": "operator",
+          "tail": "tail", "make": "make", "model": "model", "corrosion": "corrosion",
+          "q": "q", "from": "from", "to": "to"}
+
+
 @app.get("/z/api/entity")
 def entity():
     kind = (request.args.get("kind") or "").strip().lower()
@@ -536,6 +605,16 @@ def entity():
         params["make"] = val.upper()
         if model_:
             params["model"] = model_.upper()
+
+    # Anything the reader clicked comes through as an extra filter and narrows
+    # every one of the five answers, not just the list of records.
+    narrowed = {}
+    for k, v in request.args.items():
+        if k in NARROW and (v or "").strip() and k not in ("tail", "operator", "make", "model"):
+            narrowed[k] = v.strip()
+        elif k in ("tail", "operator", "make", "model") and k != kind and (v or "").strip():
+            narrowed[k] = v.strip()
+    params.update(narrowed)
 
     d = api("/api/search", limit=400, **params)
     rows = d.get("rows") or []
@@ -594,15 +673,30 @@ def entity():
 
     return jsonify(
         kind=kind, value=val, title=title,
+        narrowed=narrowed,
+        narrowable=sorted(NARROW),
         total=d.get("total"), analysed=len(rows),
         capped=(d.get("total") or 0) > len(rows),
         when={"months": months,
               "first": months[0]["month"] if months else None,
               "last": months[-1]["month"] if months else None,
               "peak": max(months, key=lambda m: m["n"]) if months else None},
-        where={"zones": sampled(tally(rows, lambda r: [r.get("PartLocation")], "part_location")),
+        where={"zones": sampled([z for z in tally(rows, lambda r: [r.get("PartLocation")],
+                                       "part_location") if not z["undecoded"]]),
+               # The drawing can only place a numbered zone. Everything else is a
+               # place named in words, and the parent tool keeps the two apart
+               # rather than letting empty zone boxes imply an answer. On some
+               # airframes every location is in words and nothing can be drawn at
+               # all, which has to be said, not shown as nine zeroes.
+               "places_in_words": sampled([z for z in tally(rows,
+                                          lambda r: [r.get("PartLocation")],
+                                          "part_location") if z["undecoded"]]),
                "systems": agg_system or sampled(tally(rows, lambda r: [r.get("JASCCode")], "jasc")),
-               "no_zone": sum(1 for r in rows if not (r.get("PartLocation") or "").strip())},
+               "no_zone": sum(1 for r in rows if not (r.get("PartLocation") or "").strip()),
+               "drawable": sum(1 for r in rows if (r.get("PartLocation") or "").strip().upper().startswith("ZONE ")),
+               "in_words": sum(1 for r in rows
+                               if (r.get("PartLocation") or "").strip()
+                               and not (r.get("PartLocation") or "").strip().upper().startswith("ZONE "))},
         who={"operators": agg_ops or sampled(tally(rows, lambda r: [r.get("OperatorDesignator")], "operator")),
              "aircraft": sampled(tally(rows, lambda r: [r.get("RegistryNNumber")])),
              "types": sampled(tally(rows, lambda r: [((r.get("AircraftMake") or "") + " " +
@@ -635,3 +729,98 @@ def codes():
     want = ["nature", "precaution", "stage", "discovered", "part_location",
             "corrosion", "operator_type", "sdr_type", "submitter", "time_since"]
     return jsonify({t: code_list(t) for t in want})
+
+
+# ============================================================================
+# Conflicting reports: a ledger, not a rate.
+#
+# The measurement attempt failed twice. A first pass put the disagreement rate at
+# 14.5%, an adversarial check cut it to 2.0%, and the check turned out to have an
+# adjudicator that refuted every flag it ever saw, which makes it a constant
+# rather than a judge. See docs/FINDINGS.md. Neither number stands.
+#
+# So stop trying to produce a rate. A rate needs a denominator, a denominator needs
+# a calibrated instrument, and there isn't one. A ledger needs neither. Every time
+# a reader asks for a plain-English account and the model notices the ticked box
+# disagreeing with the paragraph, that case is written down with its record number,
+# and anyone can open the original and judge it.
+#
+# What accumulates is evidence, one document at a time, found by people reading.
+# Nothing here is a claim about how common this is.
+
+import sqlite3
+
+DB = os.path.join(HERE, "conflicts.db")
+
+
+def db():
+    c = sqlite3.connect(DB, timeout=20)
+    c.execute("""CREATE TABLE IF NOT EXISTS conflicts(
+        id TEXT PRIMARY KEY, tail TEXT, date TEXT, operator TEXT, field TEXT,
+        code_says TEXT, text_says TEXT, note TEXT, discrepancy TEXT,
+        found_at TEXT, confirmed INTEGER DEFAULT 0, disputed INTEGER DEFAULT 0)""")
+    return c
+
+
+def log_conflict(rec, note):
+    """Written when a reader's own lookup surfaces one. Keyed on the record number,
+    so the same report read a hundred times is one entry, not a hundred."""
+    if not rec.get("id") or not note:
+        return
+    try:
+        c = db()
+        c.execute("""INSERT OR IGNORE INTO conflicts
+            (id, tail, date, operator, field, code_says, text_says, note, discrepancy, found_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                  (rec.get("id"), rec.get("tail"), rec.get("date"),
+                   rec.get("operator") or rec.get("operator_code"), None, None, None,
+                   note, (rec.get("text") or "")[:2000],
+                   time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())))
+        c.commit(); c.close()
+    except Exception:
+        pass
+
+
+@app.get("/z/api/conflicts")
+def conflicts():
+    c = db()
+    rows = c.execute("""SELECT id, tail, date, operator, note, discrepancy, found_at,
+                               confirmed, disputed FROM conflicts
+                        ORDER BY found_at DESC LIMIT 500""").fetchall()
+    n = c.execute("SELECT COUNT(*) FROM conflicts").fetchone()[0]
+    c.close()
+    return jsonify(
+        total=n,
+        entries=[{"id": r[0], "tail": r[1], "date": r[2], "operator": r[3], "note": r[4],
+                  "discrepancy": r[5], "found_at": r[6], "confirmed": r[7], "disputed": r[8],
+                  "source_url": "https://aircraftdefects.com/?q=" + requests.utils.quote(
+                      (r[5] or "")[:60])} for r in rows],
+        what_this_is=(
+            "Reports where the coded box a filer ticked disagrees with the description the "
+            "same filer wrote underneath it. Each one was noticed while somebody was reading "
+            "that report, by the model that rephrased it. Nothing is added by a sweep."),
+        what_this_is_not=[
+            "Not a rate. There is no denominator here and there is not meant to be. Two "
+            "attempts to measure how often this happens both failed, and the failures are "
+            "written up in the repository rather than buried.",
+            "Not evidence of anything hidden. Filing is voluntary work on top of the repair, "
+            "the codes are a dropdown beside a free-text box, and careless coding is the "
+            "boring explanation and almost certainly the right one.",
+            "Not verified. A model noticed each of these. Open the record and judge it "
+            "yourself; the record number is on every row.",
+            "Not a safety signal about any operator or aircraft."])
+
+
+@app.post("/z/api/conflicts/<cid>/judge")
+def judge(cid):
+    """A reader who opened the record can say whether it holds. Both directions are
+    recorded, because a disputed entry is as useful as a confirmed one."""
+    v = (request.get_json(force=True, silent=True) or {}).get("verdict")
+    if v not in ("confirmed", "disputed"):
+        return jsonify(error="verdict must be confirmed or disputed"), 400
+    c = db()
+    c.execute("UPDATE conflicts SET %s = %s + 1 WHERE id = ?" % (v, v), (cid,))
+    c.commit()
+    row = c.execute("SELECT confirmed, disputed FROM conflicts WHERE id=?", (cid,)).fetchone()
+    c.close()
+    return jsonify(id=cid, confirmed=row[0] if row else 0, disputed=row[1] if row else 0)

@@ -246,8 +246,21 @@ write-up, with what it means. Two kinds, and the difference matters:
 Mark every entry. Never mark something "record" to make it look better sourced. If you
 are not confident an airport code is that airport, leave it out entirely.
 
+One record has two halves and a reader needs both. Above the write-up sits the
+FAA's own filing: the coded boxes, the airframe's hours and flights, where on the
+aircraft, how it was found, what stage the aircraft was in, what the crew did. Those
+are the part a non-specialist cannot read at all, and a rephrasing that skips them
+explains the easy half.
+
+So say the filing too, in one or two plain sentences, using only the decoded values
+you were given. Do not repeat a value that is empty, and say plainly when a field
+records nothing: "no crew action is recorded" is information, and silence is not.
+Hours and flight cycles belong here when present, because they say how much life the
+aircraft had behind it.
+
 Return JSON only:
-{"plain": "<the account, or null if abstaining>",
+{"filing": "<what the coded boxes say, in plain sentences, or null>",
+ "plain": "<the account, or null if abstaining>",
  "abstained": true|false,
  "reason": "<if abstained, why, in six words or fewer>",
  "code_tension": "<one sentence naming the code and what the text says instead, or null>",
@@ -260,8 +273,11 @@ def gloss():
     text = (d.get("text") or "").strip()
     if not text:
         return jsonify(error="no text"), 400
-    facts = {k: d.get(k) for k in ("system", "part", "condition", "nature",
-                                   "stage", "discovered", "zone_label") if d.get(k)}
+    facts = {k: d.get(k) for k in ("system", "part", "part_number", "condition",
+                                   "nature", "crew", "stage", "discovered",
+                                   "zone", "zone_label", "corrosion",
+                                   "crack_length", "cracks", "hours", "cycles",
+                                   "make", "model", "operator", "date") if d.get(k)}
     prompt = ("%s\n\nCodes the filer entered, decoded by the FAA's own tables:\n%s\n\n"
               "The write-up, verbatim:\n%s"
               % (GLOSS_RULES, json.dumps(facts, ensure_ascii=False), text))
@@ -278,7 +294,8 @@ def gloss():
         return jsonify(abstained=True, reason="no usable reply"), 200
     if out.get("code_tension"):
         log_conflict(d, out["code_tension"])
-    return jsonify(plain=out.get("plain"), abstained=bool(out.get("abstained")),
+    return jsonify(filing=out.get("filing"), plain=out.get("plain"),
+                   abstained=bool(out.get("abstained")),
                    reason=out.get("reason"), code_tension=out.get("code_tension"),
                    jargon=out.get("jargon") or [],
                    model=MODEL, effort="high" if long_ else "low")
@@ -560,6 +577,17 @@ def tally(rows, get, table=None):
     return out
 
 
+# Any value on the page can become the filter. The parent tool is a thing you
+# operate, not a page you read: you click a zone, drag a period, click a crew
+# action, and the whole corpus narrows. /z answered one question about one subject
+# and offered no way to cut it, which is the single biggest thing a reporter loses.
+NARROW = {"zone": "zone", "jasc": "jasc", "ata": "ata", "nature": "nature",
+          "crew": "crew", "stage": "stage", "discovered": "discovered",
+          "condition": "condition", "part": "part", "operator": "operator",
+          "tail": "tail", "make": "make", "model": "model", "corrosion": "corrosion",
+          "q": "q", "from": "from", "to": "to"}
+
+
 @app.get("/z/api/entity")
 def entity():
     kind = (request.args.get("kind") or "").strip().lower()
@@ -577,6 +605,16 @@ def entity():
         params["make"] = val.upper()
         if model_:
             params["model"] = model_.upper()
+
+    # Anything the reader clicked comes through as an extra filter and narrows
+    # every one of the five answers, not just the list of records.
+    narrowed = {}
+    for k, v in request.args.items():
+        if k in NARROW and (v or "").strip() and k not in ("tail", "operator", "make", "model"):
+            narrowed[k] = v.strip()
+        elif k in ("tail", "operator", "make", "model") and k != kind and (v or "").strip():
+            narrowed[k] = v.strip()
+    params.update(narrowed)
 
     d = api("/api/search", limit=400, **params)
     rows = d.get("rows") or []
@@ -635,15 +673,30 @@ def entity():
 
     return jsonify(
         kind=kind, value=val, title=title,
+        narrowed=narrowed,
+        narrowable=sorted(NARROW),
         total=d.get("total"), analysed=len(rows),
         capped=(d.get("total") or 0) > len(rows),
         when={"months": months,
               "first": months[0]["month"] if months else None,
               "last": months[-1]["month"] if months else None,
               "peak": max(months, key=lambda m: m["n"]) if months else None},
-        where={"zones": sampled(tally(rows, lambda r: [r.get("PartLocation")], "part_location")),
+        where={"zones": sampled([z for z in tally(rows, lambda r: [r.get("PartLocation")],
+                                       "part_location") if not z["undecoded"]]),
+               # The drawing can only place a numbered zone. Everything else is a
+               # place named in words, and the parent tool keeps the two apart
+               # rather than letting empty zone boxes imply an answer. On some
+               # airframes every location is in words and nothing can be drawn at
+               # all, which has to be said, not shown as nine zeroes.
+               "places_in_words": sampled([z for z in tally(rows,
+                                          lambda r: [r.get("PartLocation")],
+                                          "part_location") if z["undecoded"]]),
                "systems": agg_system or sampled(tally(rows, lambda r: [r.get("JASCCode")], "jasc")),
-               "no_zone": sum(1 for r in rows if not (r.get("PartLocation") or "").strip())},
+               "no_zone": sum(1 for r in rows if not (r.get("PartLocation") or "").strip()),
+               "drawable": sum(1 for r in rows if (r.get("PartLocation") or "").strip().upper().startswith("ZONE ")),
+               "in_words": sum(1 for r in rows
+                               if (r.get("PartLocation") or "").strip()
+                               and not (r.get("PartLocation") or "").strip().upper().startswith("ZONE "))},
         who={"operators": agg_ops or sampled(tally(rows, lambda r: [r.get("OperatorDesignator")], "operator")),
              "aircraft": sampled(tally(rows, lambda r: [r.get("RegistryNNumber")])),
              "types": sampled(tally(rows, lambda r: [((r.get("AircraftMake") or "") + " " +

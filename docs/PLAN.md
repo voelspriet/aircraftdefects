@@ -37,21 +37,40 @@ Verified: gloss returns in 6.2s at `low`, five jargon terms, no gateway errors.
 
 ## B. Parity with the parent tool — **in progress**
 
-`/z` must carry everything aircraftdefects.com does, not a subset. The checklist,
-each item to be driven in a browser rather than assumed:
+The inventory was not made by me reading two pages. Three screenshots of the
+parent and one of /z went to GLM-5.3-Flash with one question: what does the first
+let a person *do* that the second does not. The vendor documents exactly this
+workflow, comparing a render against a reference and working off the differences,
+and it is the one place in this project where vision does something text cannot.
 
-- [ ] the AIM AT box, and taking a value from it
-- [ ] starter questions, all eighteen
-- [ ] the sixteen panels: search, patterns, aircraft, how it was found, fleet,
-      leads, new defects, same day, same defect, corrosion, old airframes,
-      engines, what the crew did, compare, codes, method
-- [ ] date filters, and More filters
-- [ ] Export CSV and Copy link
-- [ ] dragging across the month strip to take a period
-- [ ] clicking a zone on the aircraft
-- [ ] every value clickable: zones, systems, parts, conditions, stages, crew
-      actions, not only the WHO rail
-- [ ] the "no rows yet, on purpose" discipline
+Its verdict, ranked by what a working journalist loses most, is in
+[`build/visual-parity.md`](../build/visual-parity.md). The sentence that landed
+hardest:
+
+> the first tool is a filter you operate; the fourth is a page you read.
+
+- [x] **click to narrow** — any value now becomes a filter, and they stack.
+      Delta 148,192 → with unscheduled landing 5,673 → from 2020 1,848. A bar at
+      the top shows what is applied, with a cross on each and a clear all.
+      Filters ride along on the request rather than through the page's own code,
+      which was written by a model and may be rewritten by one.
+- [x] **zones separated from places named in words** — the anatomy drawing showed
+      nine zone boxes reading zero on an airframe where *every* location is
+      written in words. The model caught it: "it draws numbers it then disowns."
+      The API now returns `drawable`, `in_words` and `no_zone` separately, so the
+      page can say nothing can be drawn instead of drawing nothing.
+- [x] **a definition removed from the limitations list** — "a write-up is a defect
+      found during maintenance" is a glossary entry, not a blind spot. The parent
+      reserves that list for real gaps. Replaced with the late-arrival caveat,
+      which is one.
+- [ ] per-report click-through, the FAA's own filing then the verbatim words
+- [ ] date bounding from the interface, not only from the URL
+- [ ] the outgoing panels that carry a selection: patterns, leads, same day,
+      corrosion, old airframes, engines, compare, codes, method
+- [ ] browsing the WHO rankings, so a tail can be discovered and not only confirmed
+- [ ] the AIM AT box and the starter questions
+- [ ] dragging across the month strip
+- [ ] "One thing, five answers" promises five rails and four are drawn
 
 ---
 

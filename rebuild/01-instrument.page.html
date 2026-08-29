@@ -1720,7 +1720,11 @@ if(!document.getElementById("hero-css2")){
 .aim .undoit{font:inherit;background:none;border:0;padding:0;color:inherit;text-decoration:underline;cursor:pointer}
 .rails{margin-top:8px;border-top:1px solid var(--line)}
 .rail{position:relative;display:grid;grid-template-columns:184px minmax(0,1fr);gap:4px 16px;padding:10px 0;border-bottom:1px solid var(--line)}
-.rail:not(.open){cursor:pointer}
+/* the reference gives a shut rail 5px above and below and an open one
+   7 and 8. At 10 everywhere, four rails cost 40px of nothing and the page
+   at rest stood a third longer than it needed to. */
+.rail:not(.open){cursor:pointer;padding:5px 0}
+.rail.open{padding:7px 0 8px}
 .rail>.track,.rail>.hint,.rail>.reading,.rail>.margin{grid-column:2}
 .rail .track{position:relative;min-width:0;min-height:14px}
 .rail:not(.open) .track{overflow:hidden;align-self:center}
@@ -1730,7 +1734,10 @@ if(!document.getElementById("hero-css2")){
 .gut.rest{display:flex;align-items:baseline;gap:8px}
 .gut.rest .gv{display:inline}
 
-.months{position:relative;display:flex;gap:2px;align-items:flex-end}
+/* an earlier rule pins .months at 66px, so a shut rail stood three times
+   the reference's height with 14px bars aligned to the bottom of empty
+   space. The bars decide the height. */
+.months{position:relative;display:flex;gap:2px;align-items:flex-end;height:auto;flex-wrap:nowrap}
 .months .mo{height:84px}
 .rail:not(.open) .months .mo{height:14px}
 .mo{position:relative;flex:1;min-width:0;cursor:pointer}
@@ -3438,7 +3445,7 @@ var CLAUSE_ORDER=["q","jasc","ata","part","condition","zone","operator","make","
 var FOLLOWS_FILTER=["p-search","p-patterns","p-found"];
 var VIEW_GROUPS={"Narrows to what you selected":FOLLOWS_FILTER.slice(),"Ignore your selection":[],"Reference":[]};
 var SKIPS={nature:["0"],crew:["0","K"],discovered:["0"],corrosion:["1"],stage:["00"],zone:["ZONE 000"]};
-var sd2CodeKeys={nature:["nature"],crew:["precaution","crew"],condition:["condition","part_condition"],
+var sd2CodeKeys={operator:["operator"],nature:["nature"],crew:["precaution","crew"],condition:["condition","part_condition"],
  discovered:["discovered"],stage:["stage","stage_of_flight"],zone:["part_location","zone"],
  corrosion:["corrosion"],jasc:["jasc"],ata:["ata"]};
 
@@ -3630,6 +3637,11 @@ function opts(field,emptyLabel,skips){
   var all={};
   function add(v){
     if(skips&&skips.indexOf(v)>=0)return;
+    /* where the FAA publishes a code table, that table is the list. Filed
+       values outside it are still shown in a row, as filed, but they do not
+       belong in a picker: corrosion offered 0, 5, 6, 7, 8 and 9 beside its
+       three real levels, and the crew menu offered "-", "N" and "P". */
+    if(tab&&tab[v]==null)return;
     all[v]=counts[v]?counts[v].n:0;
   }
   Object.keys(counts).forEach(add);
@@ -3638,12 +3650,23 @@ function opts(field,emptyLabel,skips){
     var lab;
     if(tab&&tab[v]!=null)lab=typeof tab[v]==="object"?tab[v].label||v:tab[v];
     else lab=(counts[v]&&counts[v].label)||v;
+    /* an airline is named, with its designator in brackets, because the code is
+       what a reporter has to quote and the name is what they recognise. */
+    if(field==="operator"&&lab&&lab!==v)lab=lab+" ("+v+")";
     return{v:v,lab:lab,n:all[v]};
-  }).sort(function(a,b){return b.n-a.n||(a.lab<b.lab?-1:1);});
+  });
+  /* The endpoint answers with plain lists for operator, make and condition:
+     names in report order, no numbers. Sorting them by a count that is always
+     zero threw away the only ordering there was, and every option then read
+     "(no reports)" about an airline with tens of thousands. Where counts exist
+     they are shown and they sort; where they do not, the order stands and the
+     bracket is left off rather than filled with a lie. */
+  var haveCounts=arr.some(function(o){return o.n>0;});
+  if(haveCounts)arr.sort(function(a,b){return b.n-a.n||(a.lab<b.lab?-1:1);});
   var h='<option value="">'+sd2Esc(emptyLabel)+"</option>";
   arr.forEach(function(o){
-    h+='<option value="'+sd2Esc(o.v)+'"'+(o.n===0?' class="empty"':"")+">"+
-       sd2Esc(o.lab)+" ("+(o.n?sd2Num(o.n):"no reports")+")</option>";
+    h+='<option value="'+sd2Esc(o.v)+'"'+(haveCounts&&o.n===0?' class="empty"':"")+">"+
+       sd2Esc(o.lab)+(haveCounts?" ("+(o.n?sd2Num(o.n):"no reports")+")":"")+"</option>";
   });
   sel.innerHTML=h;
 }
@@ -3652,7 +3675,7 @@ function sd2BuildOpts(){
   opts("make","Any manufacturer");
   opts("model","Any model");
   opts("part","Any part");
-  opts("ata","Any ATA chapter");
+  opts("ata","Any aircraft system");
   opts("nature","Anything found",SKIPS.nature);
   opts("crew","Anything the crew did",SKIPS.crew);
   opts("condition","Any part condition");
@@ -3940,8 +3963,20 @@ function sd2Aim(id){
   return ns[0];
 }
 function sd2InjectAim(){
-  [".ipad",".phextra"].forEach(function(sel){
-    var host=document.querySelector(sel);if(!host)return;
+  /* the reference names its instrument padding .ipad; this one does not have
+     it, so the box was never injected and the typed route was missing
+     altogether. It also goes outside the instrument, which redraws itself on
+     every filter and would wipe anything appended inside it. */
+  var hosts=[".ipad",".phextra"].map(function(s){return document.querySelector(s);})
+              .filter(Boolean);
+  if(!hosts.length){
+    var root=document.getElementById("hero-root")||document.getElementById("hero");
+    if(root&&root.parentNode&&!document.querySelector(".aimwrap")){
+      var w0=document.createElement("div");w0.className="aimwrap";w0.innerHTML=AIM_HTML;
+      root.parentNode.insertBefore(w0,root.nextSibling);sd2WireAim(w0);
+    }
+  }
+  hosts.forEach(function(host){
     var w=document.createElement("div");w.className="aimwrap";w.innerHTML=AIM_HTML;
     host.appendChild(w);sd2WireAim(w);
   });

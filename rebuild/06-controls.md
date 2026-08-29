@@ -156,7 +156,7 @@ var CLAUSE_ORDER=["q","jasc","ata","part","condition","zone","operator","make","
 var FOLLOWS_FILTER=["p-search","p-patterns","p-found"];
 var VIEW_GROUPS={"Narrows to what you selected":FOLLOWS_FILTER.slice(),"Ignore your selection":[],"Reference":[]};
 var SKIPS={nature:["0"],crew:["0","K"],discovered:["0"],corrosion:["1"],stage:["00"],zone:["ZONE 000"]};
-var sd2CodeKeys={nature:["nature"],crew:["precaution","crew"],condition:["condition","part_condition"],
+var sd2CodeKeys={operator:["operator"],nature:["nature"],crew:["precaution","crew"],condition:["condition","part_condition"],
  discovered:["discovered"],stage:["stage","stage_of_flight"],zone:["part_location","zone"],
  corrosion:["corrosion"],jasc:["jasc"],ata:["ata"]};
 
@@ -355,6 +355,11 @@ function opts(field,emptyLabel,skips){
   var all={};
   function add(v){
     if(skips&&skips.indexOf(v)>=0)return;
+    /* where the FAA publishes a code table, that table is the list. Filed
+       values outside it are still shown in a row, as filed, but they do not
+       belong in a picker: corrosion offered 0, 5, 6, 7, 8 and 9 beside its
+       three real levels, and the crew menu offered "-", "N" and "P". */
+    if(tab&&tab[v]==null)return;
     all[v]=counts[v]?counts[v].n:0;
   }
   Object.keys(counts).forEach(add);
@@ -363,12 +368,23 @@ function opts(field,emptyLabel,skips){
     var lab;
     if(tab&&tab[v]!=null)lab=typeof tab[v]==="object"?tab[v].label||v:tab[v];
     else lab=(counts[v]&&counts[v].label)||v;
+    /* an airline is named, with its designator in brackets, because the code is
+       what a reporter has to quote and the name is what they recognise. */
+    if(field==="operator"&&lab&&lab!==v)lab=lab+" ("+v+")";
     return{v:v,lab:lab,n:all[v]};
-  }).sort(function(a,b){return b.n-a.n||(a.lab<b.lab?-1:1);});
+  });
+  /* The endpoint answers with plain lists for operator, make and condition:
+     names in report order, no numbers. Sorting them by a count that is always
+     zero threw away the only ordering there was, and every option then read
+     "(no reports)" about an airline with tens of thousands. Where counts exist
+     they are shown and they sort; where they do not, the order stands and the
+     bracket is left off rather than filled with a lie. */
+  var haveCounts=arr.some(function(o){return o.n>0;});
+  if(haveCounts)arr.sort(function(a,b){return b.n-a.n||(a.lab<b.lab?-1:1);});
   var h='<option value="">'+sd2Esc(emptyLabel)+"</option>";
   arr.forEach(function(o){
-    h+='<option value="'+sd2Esc(o.v)+'"'+(o.n===0?' class="empty"':"")+">"+
-       sd2Esc(o.lab)+" ("+(o.n?sd2Num(o.n):"no reports")+")</option>";
+    h+='<option value="'+sd2Esc(o.v)+'"'+(haveCounts&&o.n===0?' class="empty"':"")+">"+
+       sd2Esc(o.lab)+(haveCounts?" ("+(o.n?sd2Num(o.n):"no reports")+")":"")+"</option>";
   });
   sel.innerHTML=h;
 }
@@ -377,7 +393,7 @@ function sd2BuildOpts(){
   opts("make","Any manufacturer");
   opts("model","Any model");
   opts("part","Any part");
-  opts("ata","Any ATA chapter");
+  opts("ata","Any aircraft system");
   opts("nature","Anything found",SKIPS.nature);
   opts("crew","Anything the crew did",SKIPS.crew);
   opts("condition","Any part condition");
@@ -665,8 +681,20 @@ function sd2Aim(id){
   return ns[0];
 }
 function sd2InjectAim(){
-  [".ipad",".phextra"].forEach(function(sel){
-    var host=document.querySelector(sel);if(!host)return;
+  /* the reference names its instrument padding .ipad; this one does not have
+     it, so the box was never injected and the typed route was missing
+     altogether. It also goes outside the instrument, which redraws itself on
+     every filter and would wipe anything appended inside it. */
+  var hosts=[".ipad",".phextra"].map(function(s){return document.querySelector(s);})
+              .filter(Boolean);
+  if(!hosts.length){
+    var root=document.getElementById("hero-root")||document.getElementById("hero");
+    if(root&&root.parentNode&&!document.querySelector(".aimwrap")){
+      var w0=document.createElement("div");w0.className="aimwrap";w0.innerHTML=AIM_HTML;
+      root.parentNode.insertBefore(w0,root.nextSibling);sd2WireAim(w0);
+    }
+  }
+  hosts.forEach(function(host){
     var w=document.createElement("div");w.className="aimwrap";w.innerHTML=AIM_HTML;
     host.appendChild(w);sd2WireAim(w);
   });

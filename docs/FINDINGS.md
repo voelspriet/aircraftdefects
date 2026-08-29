@@ -391,3 +391,42 @@ in a row before the cause was found in the right file.
 Cumulative layout shift runs between 0.24 and 0.87 on **both** pages, so the text
 reflows as things load in each of them. That is not a regression, and it is not
 acceptable in either; it is now a known item rather than an impression.
+
+## F11. The menus were the right length and the wrong words (29 Aug 2026)
+
+The option enumeration reported operator at 3,947 against the reference's 3,947,
+condition at 3,131 against 3,131, make at 248 against 248. Every count matched.
+Every label was wrong.
+
+    reference   Southwest Airlines Co (SWAA)
+    rebuild     SWAA (no reports)
+
+Three causes in one function.
+
+**No code table for operators.** The lookup had entries for nature, crew,
+condition, stage, zone and corrosion, and none for operator, so the label fell
+back to the designator. The name is what a reporter recognises and the code is
+what they have to quote, so the reference prints both.
+
+**A count that does not exist, printed anyway.** The endpoint answers with plain
+lists for operator, make and condition: names in report order, no numbers. Every
+option therefore read "(no reports)" about airlines with tens of thousands.
+
+**Sorting by that count threw away the only ordering there was.** The lists
+arrive ordered by frequency. Sorted by a number that is always zero, they came
+back alphabetical by accident of the tiebreak.
+
+Where counts exist they are shown and they sort; where they do not, the order
+stands and the bracket is left off rather than filled with a lie.
+
+Two more from the same pass. **Codes outside the FAA's own table were offered as
+choices**: corrosion listed 0, 5, 6, 7, 8 and 9 beside its three real levels, and
+the crew menu offered "-", "N" and "P". A value filed outside the table is still
+shown in a row, as filed, but it does not belong in a picker. **And the typed
+route was missing entirely**, because the aim box looked for the reference's
+`.ipad` container, which this page does not have. It now mounts outside the
+instrument, which redraws itself on every filter and would wipe anything appended
+inside it.
+
+Eight menus now match option for option: aimKind, ata, nature, crew, discovered,
+stage, zone, corrosion. Operator, make and condition match in content and order.

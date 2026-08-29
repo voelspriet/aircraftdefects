@@ -955,6 +955,10 @@ async function loadRepeats(){
     ["Engines", {ata:"72"}],
   ];
   function controls(){
+    /* the earlier date bar and starter row, superseded by the desk's own
+       controls: nineteen fields, eighteen starters, chips and a count line.
+       Two filter bars stacked on one page is worse than either. */
+    return;
     if(document.getElementById("zctl")) return;
     const bar = document.getElementById("znarrow"); if(!bar) return;
     const c = document.createElement("div"); c.id="zctl";

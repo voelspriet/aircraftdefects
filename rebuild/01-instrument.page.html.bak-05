@@ -1501,7 +1501,11 @@ if(!document.getElementById("hero-css2")){
 .aim .undoit{font:inherit;background:none;border:0;padding:0;color:inherit;text-decoration:underline;cursor:pointer}
 .rails{margin-top:8px;border-top:1px solid var(--line)}
 .rail{position:relative;display:grid;grid-template-columns:184px minmax(0,1fr);gap:4px 16px;padding:10px 0;border-bottom:1px solid var(--line)}
-.rail:not(.open){cursor:pointer}
+/* the reference gives a shut rail 5px above and below and an open one
+   7 and 8. At 10 everywhere, four rails cost 40px of nothing and the page
+   at rest stood a third longer than it needed to. */
+.rail:not(.open){cursor:pointer;padding:5px 0}
+.rail.open{padding:7px 0 8px}
 .rail>.track,.rail>.hint,.rail>.reading,.rail>.margin{grid-column:2}
 .rail .track{position:relative;min-width:0;min-height:14px}
 .rail:not(.open) .track{overflow:hidden;align-self:center}
@@ -1511,7 +1515,10 @@ if(!document.getElementById("hero-css2")){
 .gut.rest{display:flex;align-items:baseline;gap:8px}
 .gut.rest .gv{display:inline}
 
-.months{position:relative;display:flex;gap:2px;align-items:flex-end}
+/* an earlier rule pins .months at 66px, so a shut rail stood three times
+   the reference's height with 14px bars aligned to the bottom of empty
+   space. The bars decide the height. */
+.months{position:relative;display:flex;gap:2px;align-items:flex-end;height:auto;flex-wrap:nowrap}
 .months .mo{height:84px}
 .rail:not(.open) .months .mo{height:14px}
 .mo{position:relative;flex:1;min-width:0;cursor:pointer}

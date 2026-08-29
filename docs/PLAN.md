@@ -1,6 +1,8 @@
 # Work plan
 
-Five phases, in order. Each is ticked off here as it is finished, with what was
+Five phases, in order, and the order is not negotiable: B is finished when the
+harnesses agree, then C, then D, then E, then F. Instructed 30 August, after I
+proposed skipping C to E in favour of F. Each is ticked off here as it is finished, with what was
 found and what was fixed. Nothing is marked done on the strength of an API
 returning 200: a surface counts as working when it has been driven in a real
 browser.

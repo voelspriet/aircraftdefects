@@ -125,9 +125,45 @@ Candidates, none built yet:
 - [ ] **The day the fleet flinched.** Same operator, same system, several aircraft,
       one day. Drawn as the aircraft involved, on that date, so the shape of a
       batch of parts going wrong is visible as a shape.
-- [ ] **The paperwork gap.** Reports arrive up to 1,201 days after the event. Drawn
-      as the distance between when something happened and when it was written down,
-      which is a picture of an institution's reflexes.
+- [ ] **The paperwork gap.** Measured, 29 August, and it is a story on its own.
+      The file carries two dates: when the defect was found, and when it was filed.
+      Nobody has put them side by side.
+
+      ```
+      median lag          7 days
+      90th percentile   610 days
+      99th percentile 1,745 days
+      longest         1,911 days   5.2 years
+      over a year    215,890       12.3%
+      ```
+
+      The year-by-year median is not a gradient, it is a switch being thrown:
+
+      ```
+      1995   1,732 days      nearly five years
+      1996   1,367
+      1997   1,007
+      1998     645
+      1999     276
+      2000      37
+      2001      16
+      2007       4
+      2026       3
+      ```
+
+      Between 1999 and 2001 it falls from 276 days to 16. That is the paper years
+      ending, visible in the data, and it carries a warning for anyone using the
+      early file: **1995 to 1999 are back-entered archive, not fresh reports.**
+      They were typed in years later, at the changeover.
+
+      Two things to draw, and both matter: **when it broke**, which is the WHEN
+      rail, and **how long it took to be written down**, which is a different
+      question about the institution rather than the aircraft.
+
+- [ ] **The 124.** 124 reports were filed *before* the defect they describe
+      happened. None of them can be real. This is the file's own error bar, and it
+      has never been counted. Investigate what they are: transposed dates,
+      typos in a year, or a systematic off-by-something in one operator's system.
 
 The one rule, same as everywhere else: where a picture can only place part of the
 selection, it says so underneath, in the same size type.

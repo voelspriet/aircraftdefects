@@ -3978,8 +3978,28 @@ function loadLeads(){
   vget('api/leads').then(function(d){
     var rows=objRows(firstArr(d));
     var html=rows.slice(0,8).map(function(r){
-      var title=String(r.title||rL(r)||'Lead');
-      var txt=String(r.text||r.body||r.detail||r.why||'');
+      /* a lead is an airframe: {tail, operator, make, model, recent, earlier,
+         busiest_day, busiest_day_n, days_filed_on, one_day_burst}. There is no
+         title field, so eight cards all read "Lead". The sentence is built from
+         what the row actually holds, and says the comparison rather than
+         implying a cause. */
+      var title, txt;
+      if(r.tail||r.model){
+        title=(r.tail?"N"+String(r.tail).replace(/^N/i,""):"")+
+              (r.model?(r.tail?" \u00b7 ":"")+[r.make,r.model].filter(Boolean).join(" "):"");
+        var opName2=(typeof OPNAMES!=="undefined"&&r.operator&&OPNAMES[r.operator])||r.operator||"";
+        var bits=[];
+        if(r.recent!=null&&r.earlier!=null)
+          bits.push(VN(r.recent)+" reports in the last 90 days against "+VN(r.earlier)+" in its whole earlier record");
+        if(opName2) bits.push("filed by "+opName2);
+        if(r.one_day_burst&&r.busiest_day)
+          bits.push(VN(r.busiest_day_n)+" of them on "+r.busiest_day+", so this is one inspection rather than a run of faults");
+        else if(r.days_filed_on!=null) bits.push("across "+VN(r.days_filed_on)+" days");
+        txt=bits.join(". ")+".";
+      }else{
+        title=String(r.title||rL(r)||'Lead');
+        txt=String(r.text||r.body||r.detail||r.why||'');
+      }
       var n=rN(r), acts='';
       if(r.filters&&typeof r.filters==='object'&&!Array.isArray(r.filters)){
         acts=Object.keys(r.filters).map(function(k){
@@ -4101,8 +4121,18 @@ function loadStructure(){
     d=d||{}; var html='';
     var lv=d.levels||d.by_level||d.corrosion;
     var rows=Array.isArray(lv)?lv:(lv&&typeof lv==='object'?Object.keys(lv).map(function(k){ return {code:k,n:lv[k]}; }):[]);
-    rows.forEach(function(r){ var c=String(rC(r));
-      html+=statCard(rN(r), vcode('corrosion',c)||('Corrosion level '+c), 'corrosion', c); });
+    /* the row is {level, meaning, reports, aircraft}: the code is in .level and
+       the plain words in .meaning, which is null for the levels the FAA does not
+       define. Read through the generic accessors the code came back empty and
+       nine cards all read "Corrosion level" with no level on them. */
+    rows.forEach(function(r){
+      var c=String(r.level!=null?r.level:(r.code!=null?r.code:rC(r)));
+      /* meaning is null for the levels the FAA does not define and an object
+         carrying label and faa for the three it does. */
+      var mn=r.meaning, lab=(mn&&typeof mn==='object')?(mn.label||mn.short||mn.faa):mn;
+      lab=lab||vcode('corrosion',c)||('Corrosion level '+c);
+      var nn=(r.reports!=null?r.reports:rN(r));
+      html+=statCard(nn, lab, 'corrosion', c); });
     var cr=d.cracked!=null?d.cracked:(d.with_cracks!=null?d.with_cracks:(d.cracks!=null?d.cracks:null));
     if(cr!=null) html+=statCard(cr,'Cracking recorded','cracked','1');
     if(!html){ var alt=objRows(firstArr(d)); if(alt.length) html=barList(alt,null,{}); }

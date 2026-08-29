@@ -493,3 +493,32 @@ half read a dictionary as an array, so no abbreviation was ever wrapped.
 That is now four faults traced to one endpoint's shape, which is the strongest
 argument yet for putting response shapes into the specifications rather than
 leaving them to be inferred.
+
+## F14. The panels fetched, rendered, and said nothing (29 Aug 2026)
+
+`build/parity_content.py` opens every tab on both pages and measures what the
+panel actually says: characters, rows, figures. The panels were fetching their
+endpoints and returning 200, and several of them were still empty of meaning.
+
+**Story leads printed the word "Lead" eight times.** A lead is an airframe:
+`{tail, operator, make, model, recent, earlier, busiest_day, busiest_day_n,
+days_filed_on, one_day_burst}`. There is no title field, so a lookup for one fell
+through to a placeholder. It now reads, from what the row holds:
+
+> N868GT · BOEING 7478F — 87 reports in the last 90 days against 0 in its whole
+> earlier record. Filed by UIEA. 86 of them on 2026-06-27, so this is one
+> inspection rather than a run of faults.
+
+That last clause is the point of the panel. A burst on a single day is a heavy
+check, not a failing aircraft, and a lead that does not say so is a false lead.
+
+**The corrosion levels read "Corrosion level" nine times, with no level.** The
+row names its own field: the code is in `level`, and `meaning` is null for the
+levels the FAA does not define and an object carrying `label` and `faa` for the
+three it does. Read through generic accessors it came back empty, and after a
+half-fix it printed `[object Object]`.
+
+**`/api/phrases` answers 400 with "narrow the selection first".** That is the
+endpoint refusing to compute over-represented vocabulary against the whole
+corpus, which is correct: every word is at lift 1.0 there. The panel treats it as
+an error. It should say what the endpoint says.

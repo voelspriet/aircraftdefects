@@ -280,3 +280,81 @@ Three lessons, in order of how expensive they were:
   3,947 options, missing" is a work item.
 - Both harnesses are in `build/` and run in about ninety seconds, so this is
   checkable on every change rather than argued about.
+
+## F8. Three ways two good blocks can kill each other (29 Aug 2026)
+
+Three briefs came back and none of them dropped in cleanly. The failures are
+worth recording because none of them produced an error message.
+
+**A const and a function of the same name.** The original declares `esc`, `num`,
+`opName` and `params` with `const`. The new block declared them as functions. In
+one scope that is a SyntaxError, so nothing at all runs: empty body, HTTP 200,
+nothing in the console.
+
+**Two functions of the same name.** Two blocks, written by the same model in
+separate sessions with no knowledge of each other, both declared `pct`. One takes
+`(a, b)` and returns a percentage; the other takes `(rows, n)` and returns a bar
+width. The later declaration wins, silently, and a rail stopped opening. This is
+the more dangerous of the two: the hard collision fails immediately and loudly in
+the sense that nothing works, while the soft one fails only at the call site.
+
+`rebuild/splice.py` now excises the hard collisions and renames the soft ones on
+the way in.
+
+**A boot with no readyState guard.** The new instrument boots at parse time and
+looks for its mount. The host page had the script before the div, so the element
+did not exist yet; it set its own booted flag and never tried again. In silence.
+The fourth silent failure of the day, and the pattern is always the same: a
+defensive early return that is correct in isolation and costs a measurement round
+every time.
+
+Also recorded: the brief for the search half was **truncated**. 378,982
+characters of reasoning plus 66,122 of writing hit the 128,000-token ceiling and
+the file ends mid-function. `max_tokens` covers thinking and writing together, so
+on a long brief the effort level is a budget decision and not only a quality one.
+Re-run as two halves at `high` rather than `max`.
+
+## F9. Six guessed field names in one afternoon (29 Aug 2026)
+
+The model writes correct code against data it cannot see, and where it cannot see
+it, it guesses. Every guess this afternoon produced code that ran, logged
+nothing, and quietly dropped what it could not find.
+
+| read as | the data says | what was lost |
+|---|---|---|
+| `z \| zone \| id \| k` | `code` | every zone row, so the aircraft drew nothing |
+| `["100","200",…]` | `ZONE 200` | the shading, and the zone filter |
+| `f.operators` as `[{v,n}]` | a plain array of strings | 3,947 airline options |
+| `f[k]` keyed plural | controls keyed singular | every facet menu |
+| glossary read whole | tables nested under `codes` | every decode, so chips printed raw codes |
+| `OperatorCode`, `Make`, `HoursOnAircraft` | `OperatorDesignator`, `AircraftMake`, `AircraftTotalTime` | six rows of the case sheet |
+| `/api/search?ctrl=` | `/api/case/<control>` | the case sheet said the FAA had not answered |
+
+None of these threw. The last one is the sharpest: an unknown filter name is
+refused outright by the server, exactly as designed, and the sheet reported that
+refusal as the FAA having no record of the report. A correct refusal, displayed
+as a fact about the world.
+
+**The lesson is about specifications, not about the model.** A field name is a
+fact about the data, not an implementation detail, and a specification written
+from behaviour will not contain one unless someone puts it there. The six
+specifications describe what each surface does and why; they do not carry the
+response shapes. That is now the gap to close.
+
+Two more, from joining halves that were specified separately:
+
+**Each half built a whole.** The controls and the rows were briefed as two halves
+of one desk, each told to assume the other. Each then wrote its own search, its
+own count line and its own corpus total, so the rows loaded with nothing chosen
+and captioned a hundred of them "match your selection" over an empty selection.
+
+**The gate was open because the URL carried the view.** The page's `params()`
+returns the whole query string, `hero` included, where the reference reads the
+form controls, in which `hero` cannot appear. So opening a rail counted as
+choosing something and the on-purpose gate never closed. Which rail is open is a
+view, not a selection.
+
+**And the order of two lines cost every filter in every link.** The controls
+restored values from the URL before building the options, so every select refused
+every value and marked it unresolved. The silent refusal the code exists to catch
+was being caused by the order it ran in.

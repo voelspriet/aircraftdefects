@@ -1,0 +1,84 @@
+I measured the computed style of seventeen elements on both pages, at 1440px,
+same filter, same rail open. Seventeen of seventeen differ. This is why the
+rebuild does not look like the original even where every figure on it is right.
+
+# The measurement
+
+# Type and colour, measured on both
+
+Driven at 1440px, zone ZONE 500, December 2025, WHO open.
+
+| element | ouder | kloon |
+|---|---|---|
+| staande zin | Instrument Serif 34px/400 rgb(29, 29, 31) h=37 | Georgia 34px/400 rgb(38, 34, 29) h=44  **≠** |
+| clausule | Instrument Serif 34px/400 rgb(29, 29, 31) h=46 | Georgia 34px/400 rgb(38, 34, 29) h=44  **≠** |
+| getal | IBM Plex Mono 31.28px/500 rgb(184, 67, 31) h=41 | Georgia 34px/400 rgb(163, 64, 31) h=38  **≠** |
+| aside | Instrument Serif 21.08px/400 rgb(117, 111, 105) h=28 | Georgia 15px/400 rgb(139, 133, 122) h=17  **≠** |
+| railkiezer | -apple-system 15px/400 rgb(29, 29, 31) h=42 | Archivo 15px/400 rgb(33, 29, 20) h=44  **≠** |
+| tab | -apple-system 15px/400 rgb(255, 255, 255) h=36 | Archivo 15px/400 rgb(33, 29, 20) h=38  **≠** |
+| aim-regel | IBM Plex Mono 13px/400 rgb(184, 67, 31) h=20 | IBM Plex Mono 13px/400 rgb(93, 74, 114) h=0  **≠** |
+| handregel | Archivo 13px/600 rgb(29, 29, 31) h=18 | -  **≠** |
+| gutter open | -apple-system 15px/400 rgb(29, 29, 31) h=46 | Archivo 15px/400 rgb(33, 29, 20) h=49  **≠** |
+| gutter dicht | -apple-system 15px/400 rgb(29, 29, 31) h=16 | Archivo 15px/400 rgb(33, 29, 20) h=16  **≠** |
+| ladderrij | -apple-system 11.5px/400 rgb(29, 29, 31) h=14 | Archivo 11.5px/400 rgb(33, 29, 20) h=14  **≠** |
+| leesalinea | Georgia 15px/400 rgb(29, 29, 31) h=61 | Georgia 15px/400 rgb(33, 29, 20) h=61  **≠** |
+| marge | IBM Plex Mono 11.5px/400 rgb(95, 88, 79) h=45 | IBM Plex Mono 11.5px/400 rgb(140, 132, 116) h=27  **≠** |
+| specimen | -apple-system 15px/400 rgb(29, 29, 31) h=64 | Archivo 15px/400 rgb(33, 29, 20) h=88  **≠** |
+| decodeerregel | Archivo 12.5px/600 rgb(184, 67, 31) h=19 | Archivo 12.5px/600 rgb(143, 53, 23) h=19  **≠** |
+| recordrij | -apple-system 13px/400 rgb(29, 29, 31) h=72 | -apple-system 13.5px/400 rgb(34, 32, 28) h=66  **≠** |
+| write-up | -apple-system 13px/400 rgb(29, 29, 31) h=56 | -apple-system 13px/400 rgb(61, 58, 51) h=62  **≠** |
+
+
+# What it comes down to
+
+**The display face is wrong.** The original sets the standing sentence in
+Instrument Serif at 34px. The rebuild falls back to Georgia. The font is already
+requested by the page's own stylesheet link; it is not being asked for by name in
+the rule that matters.
+
+**The count inside the sentence is monospace, and rust.** IBM Plex Mono at
+31.28px in rgb(184,67,31), set inside a 34px serif line. A figure in a different
+face is doing something deliberate: it says this number is a measurement and not
+a word. The rebuild sets it in the same serif as the sentence, so it reads as
+part of the prose.
+
+**The ink is a different colour.** rgb(29,29,31) throughout the original,
+rgb(33,29,20) and rgb(38,34,29) in the rebuild. Near-black with a blue cast
+against near-black with a brown one. Small on one element, visible across a page.
+
+**The aside is two thirds the size it should be.** 21.08px in the original,
+15px here, and it carries "1,757,682 set aside", which is the second half of the
+sentence and not a footnote.
+
+**The aim line is purple.** rgb(93,74,114) where the original has rust,
+rgb(184,67,31). Rust is reserved in this design for a chosen selection; the aim
+line is where the instrument speaks about what you are pointing at, so it is rust
+too. Nothing else on the page should be purple.
+
+**The hand line is missing.** Archivo 13px semibold in rgb(29,29,31): "Click an
+airline or an airframe to follow it." It changes with the open rail and it is the
+only instruction on the instrument.
+
+**The margin is too pale and half the height.** rgb(95,88,79) in the original
+against rgb(140,132,116) here, and 45px against 27, because a note is missing
+from it.
+
+# What to return
+
+One block of CSS, and JavaScript only where something has to be produced rather
+than restyled. It drops into the page inside its IIFE. Match every row of the
+table above.
+
+Two rules for this one. Do not change any wording, any figure, or any layout: the
+elements are in the right places and say the right things. And do not set a
+colour that is not already in the original's palette, which is
+
+    ink        rgb(29,29,31)      paper      #f7f5f0
+    ash        rgb(117,111,105)   smoke      rgb(95,88,79)
+    rust       #c44b28            rust text  rgb(184,67,31)
+    line       #e2ded5            ghost      #d8d2c6
+
+What I will check: the same seventeen measurements, and each one matching. And
+that the page still reads the same words it does now.
+
+Explain only where you departed. No preamble.

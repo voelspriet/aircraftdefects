@@ -1,0 +1,70 @@
+Your type block is on the page and none of it is winning. Two causes, both
+measured in the browser.
+
+# 1. The face is not loaded
+
+    the page requests   Archivo:wght@600;800
+    your rule asks for  Instrument Serif
+    what renders        Georgia
+
+`Instrument Serif` is named in your CSS and never fetched, so every rule that
+asks for it falls through to the next name in the stack. The original loads it
+from Google Fonts alongside Archivo and IBM Plex Mono:
+
+    https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700
+      &family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400
+      &family=Instrument+Serif:ital@0;1&display=swap
+
+The page already has a stylesheet link. Add what is missing to it, or add a
+second link. Nothing renders in the right face until the face is there.
+
+# 2. Your two blocks are fighting each other
+
+    winning rule   .rv-sentence { Georgia, "Iowan Old Style", "Times New Roman", serif }
+    losing rule    .stand { Instrument Serif, ... }
+
+The block you wrote for the instrument's setting gives the sentence the class
+`rv-sentence` and sets Georgia on it. The block you wrote for the type sets
+Instrument Serif on `.stand`. Same element, and the first one wins.
+
+Decide once, in one block, and make the type rules address every class the
+element actually carries: the sentence is
+`<p class="stand rv-sentence" data-rv="1">`.
+
+# What has to end up true
+
+    element        face and size                  colour
+    the sentence   Instrument Serif 34px          rgb(29,29,31)
+    the count      IBM Plex Mono 31.28px w500     rgb(184,67,31)
+    the aside      Instrument Serif 21.08px       rgb(117,111,105)
+    the aim line   IBM Plex Mono 13px             rgb(184,67,31)
+    the hand line  Archivo 13px w600              rgb(29,29,31)
+    the margin     IBM Plex Mono 11.5px           rgb(95,88,79)
+    the reading    Georgia 15px                   rgb(29,29,31)
+    ladder rows    system-ui 11.5px               rgb(29,29,31)
+
+Two of these are worth saying why.
+
+The count is monospace inside a serif sentence, and rust. A figure set in another
+face says this is a measurement rather than a word, and rust is this design's
+colour for a chosen selection. Set in the same serif as the sentence it reads as
+prose.
+
+The aim line is currently rgb(93,74,114), a purple. Nothing on this page is
+purple. It is where the instrument says what you are pointing at, so it is rust.
+
+# What to return
+
+One block, replacing your type block. It may also correct the sentence's own
+classes if that is the cleaner way to stop the two rules fighting. Change no
+wording, no figure and no layout.
+
+What I will check: those eight measurements, each matching, and the page still
+reading the same words.
+
+One more thing, from the ladder: it now prints "Southwest Airlines Co (SWAA)
+(SWAA)". The menu label already ends in the designator, so appending it again
+doubles it. Take the name from the menu, strip a trailing parenthetical, then add
+the designator once from the row's own data-take attribute.
+
+Explain only what you changed. No preamble.

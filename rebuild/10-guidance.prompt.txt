@@ -1,0 +1,163 @@
+Every panel on your rebuild draws its figures. None of them says how to read
+them, and the original says a great deal.
+
+I took every sentence each page prints, across every tab, and compared them.
+Sixty-three sentences appear in the original and in no form on yours. They are
+not decoration. They are the difference between a tool a journalist can publish
+from and a set of rankings anyone can misquote.
+
+# What is missing, panel by panel
+
+Below is what the original says, as evidence of what has to be conveyed. Do not
+copy the wording: write each panel's guidance yourself, in the page's own voice.
+Where a sentence carries a figure, compute it from the endpoint rather than
+repeating the number here, because these were measured on one selection and the
+guidance has to hold for every selection.
+
+## Patterns
+
+  Set filters on the Search tab and these follow.
+  Click any bar to filter on it.
+  Each bar is the number of reports naming that code in any slot, which is the number you land on if you click it.
+  Kept, because they are what the FAA received.
+  Other 67,430 axis cut here, 5.2 times the next bar (No test, 13,065) What the crew did A report can list up to four of these, so the bars overlap and can add up to more than the 84,453 reports here.
+  Each bar is the number of reports naming that action in any slot, which is the number you land on if you click it.
+  Kept, because they are what the FAA received.
+  Kept, because they are what the FAA received.
+
+## Aircraft
+
+  Type a tail number, or click one anywhere in the tool.
+
+## How it was found
+
+  A crack found by eddy current or X-ray was invisible from the outside.
+  Splitting a system's findings by method tells you whether trouble is being caught by instruments before anyone could see it, or noticed only once it showed.
+  Not every report falls either way: functional checks and unrecorded methods make up a large share, and they are listed too.
+  This follows whatever you have filtered on the Search tab.
+  84,453 reports in the current selection 2.3% (1,951) were found by an instrument such as eddy current or X-ray.
+  The remaining 34.8% were functional checks, or filed as other or unknown.
+  Instrumented methods (borescope, dye penetrant, eddy current, magnetic particle, thermal, ultrasonic, X-ray) find damage that cannot be seen from outside.
+
+## Fleet
+
+  One airline, one type A count of reports means little on its own.
+  What matters is how many separate aircraft it touched.
+  Ten write-ups on one airframe is a bad machine.
+  Ten write-ups across ten airframes is a fleet problem.
+  (3KUA) 11FA Horizon Aviation of Virginia, Inc.
+
+## Story leads
+
+  Both tables compare the last 90 days with what came before.
+  Aircraft with a sudden cluster More write-ups in the last 90 days than in this aircraft's whole earlier record here.
+  Read the dates before calling it a trend.
+
+## New defects
+
+  Defects that are new A defect that is new tells you more than one that is merely common.
+  These are parts and systems being written up now that barely appeared before, so the pattern is still forming.
+  Small numbers, read them as a tip rather than a finding.
+
+## Same day, many aircraft
+
+  Same airline, same system, same day When one airline writes up the same system on several different aircraft on a single day, the cause is rarely the aircraft.
+  It is a batch of parts, a procedure, a supplier or a shared inspection.
+  This is the pattern that turns a maintenance note into a story.
+  3 aircraft or more 4 or more 6 or more 10 or more One-offs only Everything Recurring, probably scheduled A big cluster is not automatically an incident.
+  When the same airline clusters on the same system on many separate days, you are usually looking at a scheduled inspection working through the fleet.
+  The 'other days like this' column is there to tell the two apart: a low number is the interesting case.
+  78 look like scheduled inspections and are hidden.
+
+## Same defect
+
+  One part number, failing the same way, on many aircraft and at more than one airline.
+  That is a fleet problem, not an incident.
+
+## Corrosion & cracks
+
+  Level 2 means it went past what the manufacturer allows and needed repair.
+  Level 1 stays within limits and is not reportable, which is why you never see it here.
+  Each one obliged the operator to tell the regulator within three days.
+  The grey band under each row is the mechanic's own words.
+  29 Oct 2024 Arctic Transportation Services Inc CESSNA 208B N707RA Fuselage Main, Attach Fittings FITTING Open report L/H AIRFRAME LOWER STRUT FITTING FOUND TO BE CORRODED/PITTED.
+
+## Old airframes
+
+  Hours and cycles are two different kinds of old.
+  A short-haul aircraft piles up cycles fast and hours slowly, and since every flight pressurises and depressurises the hull, it is cycles that drive cracking.
+  Hours wear out the things that simply run.
+  It is the proportion of reports in each age band that record corrosion at all, which compares like with like.
+  The raw counts do not, because the bands hold very different numbers of aircraft.
+  Bands marked small hold too few reports to carry a percentage, so ignore their share.
+
+## Engines
+
+  Only about three in a hundred reports name the engine, so this is a count inside a small subset, not a failure rate per engine in service.
+  Use it to find cases to check, never to rank manufacturers.
+  Only 12.7% of reports name an engine, so these are counts within that subset, not failure rates per engine in service.
+
+## What the crew did
+
+  Not what broke, but what it forced.
+  By airline By model By manufacturer Ranked by how many reports carried a crew action.
+  A high share on a few hundred reports is not the same finding as a high share on tens of thousands, so read the Reports column beside it.
+  A share is per report filed, not per flight.
+
+## Compare
+
+  Two airlines or models side by side.
+  These are raw counts: a bigger airline files more reports, so this is a starting point, not a score.
+
+
+# The four that matter most, and why
+
+**Old airframes.** "It is the proportion of reports in each age band that record
+corrosion at all, which compares like with like. The raw counts do not, because
+the bands hold very different numbers of aircraft." Without this the panel is a
+bar chart saying middle-aged aircraft break most, which is only true because
+there are more of them.
+
+**Engines.** "Only about three in a hundred reports name the engine, so this is a
+count inside a small subset, not a failure rate per engine in service. Use it to
+find cases to check, never to rank manufacturers."
+
+**What the crew did.** "Not what broke, but what it forced." And: "A high share
+on a few hundred reports is not the same finding as a high share on tens of
+thousands, so read the Reports column beside it."
+
+**Same day, many aircraft.** "When one airline writes up the same system on
+several different aircraft on a single day, the cause is rarely the aircraft. It
+is a batch of parts, a procedure, a supplier or a shared inspection." And the
+counter-warning: "When the same airline clusters on the same system on many
+separate days, you are usually looking at a scheduled inspection working through
+the fleet. The 'other days like this' column is there to tell the two apart: a
+low number is the interesting case."
+
+That last pair is the shape to aim for throughout. Say what the panel shows, then
+say the reading that would be wrong, then say what tells the two apart.
+
+# Where it goes
+
+Each panel gets a short block under its heading, before its figures: one or two
+sentences on what it shows and why it is worth looking at, and one on how it can
+be misread. Where a caveat belongs to a specific column or table, put it beside
+that table rather than at the top.
+
+Keep it plain. No headings inside it, no bullet lists, no bold. The original
+writes in sentences and so should this.
+
+# What to return
+
+One self-contained block of JavaScript and CSS that adds the guidance to the
+panels, dropping into the page inside its IIFE. It must be idempotent: the
+panels redraw, and anything that decorates them will be asked to run again over
+what it has already touched. Mark what you have done or replace rather than
+append.
+
+Do not declare a name the page already uses. Prefix everything.
+
+What I will check: every panel named above carries guidance; no figure in it is
+hard-coded; switching tabs twice does not duplicate a word of it.
+
+Explain only where you departed from this. No preamble.

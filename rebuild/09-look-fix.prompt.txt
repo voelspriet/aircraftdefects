@@ -1,0 +1,44 @@
+Your block for the instrument's setting is in and measured. Four of the nine
+landed: the AIM AT box is there, the seam button reads "Read the 145 →", the row
+is 66px against the reference's 73, and the specimen has lost its quotation
+marks.
+
+Two faults, both visible in a browser at 1440px on
+/z/?hero=whose&zone=ZONE 500&from=2025-12-01&to=2025-12-31
+
+# 1. The names are printed three times
+
+    yours       Southwest Airlines Co (SWAA)Southwest Airlines Co (SWAA)SWAA
+    should be   Southwest Airlines Co (SWAA)
+
+The block runs more than once against the same rows and appends each time. The
+instrument redraws itself on every filter change, on every rail switch and on
+resize, so anything that decorates it will be asked to run again over rows it has
+already touched.
+
+Make it idempotent: mark what has been done, or replace rather than append, or
+read the designator from the row's own data attribute rather than from the text
+you have already rewritten. The last is the safest, because the text is no longer
+the source of truth once you have edited it.
+
+# 2. The zone label carries the menu's report count
+
+    yours       145 reports, Left wing (10,954), December 2025.
+    should be   145 reports, left wing, December 2025.
+
+The zone menu labels its options "Left wing (10,954)" so a reader can see what is
+worth choosing. That count belongs to the whole corpus, not to this selection, so
+printing it inside a sentence about 145 reports states a second, unrelated figure
+as though it qualified the first. Strip the bracket, and lower-case the label:
+the reference reads "left wing" in the run of the sentence.
+
+Check the same for the airline: the sentence must not pick up a count either.
+
+# What I will check
+
+- The ladder reads "Southwest Airlines Co (SWAA)" once, after switching rails
+  twice and applying a filter.
+- The sentence reads "145 reports, left wing, December 2025. 1,757,682 set aside."
+- No figure appears in the sentence that is not about this selection.
+
+Return the corrected block, whole. Explain only what you changed. No preamble.

@@ -51,3 +51,26 @@ SD_CORPUS_P.then(function(){
         && !sd2HasFilter() && !REVEALED) renderOnPurpose();
   } catch(e) {}
 });
+
+/* The desk sits above the tab strip, outside it: #p-search exists and is empty,
+   so the Search tab shows nothing and the controls stay on screen under every
+   other panel. The reference puts them in the panel they belong to. Moved once,
+   after both halves have mounted. */
+(function(){
+  function tuck(){
+    var host=document.getElementById("p-search");
+    if(!host) return false;
+    var body=host.querySelector('[id$="-body"]')||host;
+    var moved=false;
+    ["sdControls","starters","rr-sec"].forEach(function(id){
+      var n=document.getElementById(id);
+      if(n && !host.contains(n)) { body.appendChild(n); moved=true; }
+    });
+    return moved;
+  }
+  if(document.readyState==="loading")
+    document.addEventListener("DOMContentLoaded",function(){ setTimeout(tuck,50); });
+  else setTimeout(tuck,50);
+  /* the panels mount lazily, so try again once they are up */
+  var tries=0, iv=setInterval(function(){ if(tuck()||++tries>40) clearInterval(iv); }, 250);
+})();

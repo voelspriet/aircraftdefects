@@ -664,3 +664,21 @@ written nulls, which print as the same dash.
 
 Two independent faults producing one indistinguishable symptom, on the page a
 reader goes to when they want to know whether to trust the rest.
+
+## F20. The Search tab showed nothing, because the desk was outside it (29 Aug 2026)
+
+`p-search` existed, was visible, and held nothing. The controls, the starter
+questions and the record table sat above the tab strip instead of inside the
+panel they belong to, so clicking Search did nothing and the filters stayed on
+screen underneath every other panel: a reader on Corrosion still had a search
+form and a hundred rows below it.
+
+It comes straight from how the work was split. The desk was built in two briefs
+that each assumed the other, and the panels in a third that assumed both. None of
+the three owned the question of where the desk goes, and each put its own markup
+where it stood. Nothing about that shows up as an error, or as a missing count,
+or as an empty panel: everything was on the page, in the wrong container.
+
+Twenty findings, and this is the second to come from splitting one surface into
+briefs (F13 was the other, where both halves misread the same endpoint in
+different ways). Splitting the work is right; the seam is where to look.

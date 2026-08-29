@@ -1,0 +1,53 @@
+
+/* ---- rebuild layer: the names are ours, the measures are the page's ---- */
+
+#tabs{border-bottom:0;padding-bottom:0;margin:10px 0 12px}
+
+/* the standing sentence lives in #count.sdcount; the hero's own slot stays in the
+   DOM but out of view, and the hidden #sentence keeper sits beside the freshness line */
+#iSentence{display:none}
+#count.sdcount{display:block;flex:1 1 100%;font-family:'Instrument Serif',Georgia,serif;
+  font-size:34px;line-height:1.1;color:var(--ink);max-width:26em;margin:2px 0 0}
+#count.sdcount .fig{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;
+  font-size:.92em;font-variant-numeric:tabular-nums;color:var(--rust-text,#b8431f)}
+#count.sdcount .aside{font-size:.62em;color:var(--ash)}
+#count.sdcount .broken{display:block;font-size:.5em;color:var(--rust-text,#b8431f)}
+#count.sdcount .clause{border-bottom:1px dotted rgba(29,29,31,.28);cursor:pointer}
+#count.sdcount .clause:hover,#count.sdcount .clause:focus-visible{
+  color:var(--rust-text,#b8431f);border-bottom-color:var(--rust-text,#b8431f)}
+
+/* the strip: three labelled rows. Both axes written down, because the page sets
+   .vg{flex-direction:column}, which reads a 200px flex-basis as a height. */
+#vstrip.vgroups{display:flex;flex-direction:column;position:static;z-index:auto;inset:auto;
+  gap:3px;margin:0;padding:6px 0;border-bottom:1px solid var(--line);background:transparent}
+#vstrip .vg{display:flex;flex-direction:row!important;flex-wrap:nowrap;align-items:baseline;gap:10px}
+#vstrip .vglab{flex:0 0 200px!important;flex-basis:200px;width:200px;max-width:200px;
+  height:auto!important;min-height:0;font:600 10px/1.35 Archivo,system-ui,sans-serif;
+  letter-spacing:.06em;text-transform:uppercase;color:#57514a;text-align:right;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-self:baseline}
+#vstrip .vgbtns{display:flex!important;flex-direction:row!important;flex-wrap:wrap;gap:2px;
+  align-items:baseline;flex:1 1 auto;min-width:0}
+#vstrip .vtab{padding:3px 8px;font-size:12px;line-height:1.3;border-radius:3px;
+  border:1px solid transparent;background:none;color:var(--smoke);cursor:pointer;font-family:inherit}
+#vstrip .vtab:hover{color:var(--ink)}
+#vstrip .vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);font-weight:600}
+#vstrip .vtab:focus-visible{outline:2px solid var(--rust);outline-offset:2px;border-radius:2px}
+@media(max-width:900px){
+  #vstrip .vg{flex-direction:column!important;align-items:flex-start;gap:2px}
+  #vstrip .vglab{flex:0 0 auto!important;width:auto;max-width:none;text-align:left}
+}
+
+/* the instrument keeps the page's own measures; these pin them so no rail inflates */
+.strip{height:12px}
+.rail.open{padding:7px 0 8px}
+.specimen{margin-top:8px;border-top:1px solid var(--line);padding-top:6px}
+.specimen .sl{-webkit-line-clamp:2}
+.margin{margin-top:6px;border-top:1px solid var(--line);padding:5px 0 2px;font-size:11.5px;line-height:1.5}
+.aim{min-height:20px;font-size:13px;line-height:20px;margin-top:6px}
+
+/* the empty state, on its own id instead of inside a table */
+#noRows{background:var(--card);border:1px solid var(--line);padding:26px 16px}
+#noRows p{margin:0 0 12px;font-size:14px;max-width:70ch}
+#noRows .muted{color:var(--ash);font-size:12.5px;max-width:80ch}
+#noRows .bar{margin:0;flex-wrap:wrap}
+

@@ -1756,84 +1756,197 @@ window.addEventListener("load", function(){ sdrStripRails(); sdrFixLabels(); sdr
 
 
 
-/* ---- 22: the sentence, the strip, the measures, written by the model ---- */
+/* ---- 23: the axes, the open rail, the landing card, written by the model ---- */
 
 (function(){
-  function sdEsc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
-    return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+"use strict";
+function sdEsc(s){return (s==null?"":String(s)).replace(/[&<>"']/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function sdNum(n){try{return (typeof num==="function")?num(n):Number(n).toLocaleString("en");}
+  catch(e){return String(n==null?"":n);}}
 
-  /* fault 1: renderOnPurpose writes to #sentence. It exists, empty, always. */
-  function sdKeepSentence(){
-    var s=document.getElementById("sentence");
-    if(!s){
-      s=document.createElement("div"); s.id="sentence"; s.hidden=true;
-      var host=document.getElementById("count");
-      if(host&&host.parentNode)host.parentNode.insertBefore(s,host);
-      else document.body.appendChild(s);
-    }
-  }
+var SD_TABS=[["p-search","Search"],["p-patterns","Patterns"],["p-aircraft","Aircraft"],
+  ["p-fleet","Fleet"],["p-leads","Story leads"],["p-emerging","New defects"],
+  ["p-clusters","Same day, many aircraft"],["p-defect","Same defect"],
+  ["p-structure","Corrosion & cracks"],["p-age","Old airframes"],["p-engines","Engines"],
+  ["p-consequences","What the crew did"],["p-found","How it was found"],
+  ["p-compare","Compare"],["p-terms","Every code explained"],["p-method","Method"]];
+var SD_GROUPS=[
+  ["Narrows to what you selected","Narrows to what you selected",
+    ["p-search","p-patterns","p-aircraft","p-found"]],
+  ["Ignore your selection",
+    "These ignore your selection; each answers from the whole file or from a slice set inside the panel",
+    ["p-fleet","p-leads","p-emerging","p-clusters","p-defect","p-structure","p-age",
+     "p-engines","p-consequences"]],
+  ["Reference","Reference",["p-compare","p-terms","p-method"]]];
+function sdLabel(id){
+  try{ if(typeof TABS!=="undefined"&&TABS&&TABS.length){
+    for(var i=0;i<TABS.length;i++) if(TABS[i][0]===id) return TABS[i][1]; } }catch(e){}
+  for(var j=0;j<SD_TABS.length;j++) if(SD_TABS[j][0]===id) return SD_TABS[j][1];
+  return id;
+}
 
-  /* fault 2: the page sets inline styles on .vgbtns; only inline beats inline */
-  function sdStrip(){
-    var b=document.querySelectorAll("#vstrip .vgbtns");
-    for(var i=0;i<b.length;i++){
-      var s=b[i].style;
-      s.display="flex"; s.flexWrap="wrap"; s.gap="2px"; s.flex="1 1 auto";
-      s.minWidth="0"; s.alignItems="baseline";
-      s.borderBottom="0"; s.margin="0"; s.padding="0";
-    }
-  }
+/* div.panel -> section.panel; children and their listeners move with it */
+function sdSectionize(){
+  [].slice.call(document.querySelectorAll("div.panel")).forEach(function(d){
+    if(!d.id)return;
+    var s=document.createElement("section");
+    s.className=d.className; s.id=d.id;
+    if(d.getAttribute("role"))s.setAttribute("role",d.getAttribute("role"));
+    while(d.firstChild)s.appendChild(d.firstChild);
+    d.parentNode.replaceChild(s,d);
+  });
+}
 
-  /* fault 3: the second line reads whichever element carries the figure */
-  var sdPubTo="";
-  function sdFig(){
-    var c=document.getElementById("count"); if(!c)return "";
-    var f=c.querySelector(".fig"); if(f)return f.textContent.trim();
-    var m=(c.textContent||"").match(/[\d][\d,]*/);
-    return m?m[0]:"";
-  }
-  /* formats the API's own range.to; never derives a date from it */
-  function sdPretty(iso){
-    var M=["","January","February","March","April","May","June","July","August",
-           "September","October","November","December"];
-    var p=String(iso||"").split("-");
-    return p.length===3?(+p[2])+" "+M[+p[1]]+" "+p[0]:String(iso||"");
-  }
-  function sdLine(){
-    var c=document.getElementById("count"); if(!c)return;
-    var fig=sdFig(); if(!fig)return;
-    var cls=[].map.call(c.querySelectorAll(".clause"),function(x){return x.textContent.trim()});
-    var txt=cls.length
-      ? fig+" reports, "+cls.join(", ")+"."
-      : fig+" reports, everything the FAA has published to "
-        +(sdPubTo?sdPretty(sdPubTo):"the newest report in the file")+".";
-    var t=document.querySelector("section.panel.on table.reps")||document.querySelector("table.reps");
-    if(!t)return;
-    var cut=t.parentNode.querySelector(".sdcut");
-    if(!cut){
-      cut=document.createElement("div"); cut.className="sdcut";
-      t.parentNode.insertBefore(cut,t);
-    }
-    if(cut.getAttribute("data-sd")!==txt){
-      cut.setAttribute("data-sd",txt);
-      cut.innerHTML='<span class="sdcs">'+sdEsc(txt)+"</span>";
-    }
-  }
-  function sdPub(){
-    try{
-      fetch("api/facets").then(function(r){return r.json()}).then(function(d){
-        var to=d&&d.range&&d.range.to;
-        if(to&&to!==sdPubTo){sdPubTo=to;sdLine();}
-      }).catch(function(){});
-    }catch(e){}
-  }
+/* the keeper slot: present, empty, hidden */
+function sdSentenceSlot(){
+  if(document.getElementById("sentence"))return;
+  var f=document.getElementById("freshness");
+  var s=document.createElement("div");
+  s.id="sentence"; s.hidden=true; s.setAttribute("aria-hidden","true");
+  if(f&&f.parentNode)f.parentNode.insertBefore(s,f); else document.body.appendChild(s);
+}
 
-  var sdT=null;
-  function sdPass(){ sdKeepSentence(); sdStrip(); sdLine(); }
-  new MutationObserver(function(){clearTimeout(sdT);sdT=setTimeout(sdPass,50);})
-    .observe(document.body,{childList:true,subtree:true});
-  sdPass();
-  sdPub();
+/* the strip */
+function sdBuildStrip(){
+  var host=document.getElementById("tabs"); if(!host)return;
+  var strip=document.getElementById("vstrip");
+  if(!strip){ strip=document.createElement("div"); strip.id="vstrip";
+    strip.className="vgroups"; host.innerHTML=""; host.appendChild(strip); }
+  strip.innerHTML=SD_GROUPS.map(function(g){
+    return '<div class="vg"><span class="vglab" title="'+sdEsc(g[1])+'">'+sdEsc(g[0])+"</span>"+
+      '<span class="vgbtns" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:2px;'+
+      'align-items:baseline;flex:1 1 auto;min-width:0">'+
+      g[2].map(function(id){
+        return '<button type="button" class="vtab" role="tab" data-p="'+id+'" id="tab-'+id+
+          '" aria-controls="'+id+'" aria-selected="false" tabindex="-1">'+sdEsc(sdLabel(id))+"</button>";
+      }).join("")+"</span></div>";
+  }).join("");
+  [].forEach.call(strip.querySelectorAll(".vtab"),function(b){
+    b.addEventListener("click",function(){ try{ show(b.dataset.p); }catch(e){} });
+  });
+  sdRoveStrip();
+}
+function sdRoveStrip(){
+  var tabs=[].slice.call(document.querySelectorAll("#vstrip .vtab")); if(!tabs.length)return;
+  var keep=null;
+  tabs.forEach(function(b){ if(b.getAttribute("aria-selected")==="true")keep=b; });
+  if(!keep)keep=tabs[0];
+  tabs.forEach(function(b){ b.setAttribute("tabindex", b===keep?"0":"-1"); });
+}
+
+/* the sentence keeper: whatever the hero's sentence slot holds is restamped into
+   #count every time the page overwrites it */
+var sdSentenceHTML="", sdRestoring=false, sdCountMO=null;
+function sdStampCount(){
+  var c=document.getElementById("count"); if(!c||!sdSentenceHTML)return;
+  if(c.classList.contains("sdcount")&&c.innerHTML===sdSentenceHTML)return;
+  sdRestoring=true;
+  c.classList.add("sdcount");
+  c.innerHTML=sdSentenceHTML;
+  sdRestoring=false;
+}
+function sdWatchCount(){
+  var c=document.getElementById("count");
+  if(!c||sdCountMO)return;
+  sdCountMO=new MutationObserver(function(){ if(!sdRestoring)sdStampCount(); });
+  sdCountMO.observe(c,{childList:true,characterData:true,subtree:true});
+}
+function sdAfterHero(){
+  try{
+    var s=document.querySelector("#hero .sentence");
+    if(s&&s.innerHTML&&s.innerHTML.trim())sdSentenceHTML=s.innerHTML;
+  }catch(e){}
+  sdStampCount();
+  sdSweep();
+}
+
+/* the landing card stays gone */
+function sdKillLand(){
+  [].slice.call(document.querySelectorAll(".card.land")).forEach(function(n){
+    if(n.parentNode)n.parentNode.removeChild(n);
+  });
+}
+/* the table carries the rebuild's name */
+function sdNameTables(){
+  [].slice.call(document.querySelectorAll("table.reports")).forEach(function(t){
+    t.classList.add("reps");
+  });
+}
+/* the empty state, under its own id, with a renderOnPurpose that reaches it */
+function sdEmptySwap(){
+  var res=document.getElementById("results"); if(!res)return;
+  var emp=res.querySelector("tr.empty"); if(!emp)return;
+  if(!/No rows yet/.test(emp.textContent||""))return;
+  var total=0; try{ if(typeof TOTAL!=="undefined"&&TOTAL)total=TOTAL; }catch(e){}
+  res.innerHTML='<div id="noRows" class="sdnORows">'+
+    "<p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and "+
+    "buries the one you have.</p>"+
+    '<p class="muted">Take a month, a zone, an airline or a tail from the instrument above, pick '+
+    "one of the starter questions, or set a filter. To read the file straight through anyway, use "+
+    "the button at the foot of the instrument.</p>"+
+    '<div class="bar"><button type="button" class="ghost" onclick="renderOnPurpose()">Read all '+
+    sdNum(total)+" anyway</button>"+
+    '<button type="button" class="ghost" onclick="showStarters()">Show me the starter questions</button>'+
+    "</div></div>";
+}
+window.renderOnPurpose=function(){
+  var nr=document.getElementById("noRows");
+  if(nr)nr.setAttribute("data-sdread","1");
+  try{ if(typeof revealAll==="function")revealAll(); }catch(e){}
+};
+
+/* the second line and its published-to date: the page's own fetch first, this if empty */
+function sdSecondLine(){
+  var f=document.getElementById("freshness"); if(!f)return;
+  if(f.textContent&&f.textContent.trim())return;
+  var to=""; try{ if(typeof RANGE!=="undefined"&&RANGE&&RANGE.to)to=RANGE.to; }catch(e){}
+  if(!to)return;
+  var pretty=to;
+  try{ if(typeof prettyDate==="function")pretty=prettyDate(to); }catch(e){}
+  f.innerHTML="Reports published to <b>"+sdEsc(pretty)+"</b>. Counts are of reports filed, not of flights.";
+}
+
+function sdSweep(){ sdKillLand(); sdNameTables(); sdEmptySwap(); sdSecondLine(); }
+
+/* the page's own functions stay the engine; each wrap only adds the sweep after it */
+function sdWrap(name,after){
+  try{
+    var orig=window[name];
+    if(typeof orig!=="function")return;
+    window[name]=function(){
+      var r=orig.apply(this,arguments);
+      try{
+        if(r&&typeof r.then==="function")r.then(function(){after();},function(){after();});
+        else after();
+      }catch(e){}
+      return r;
+    };
+  }catch(e){}
+}
+
+function sdInit(){
+  try{ sdSectionize(); }catch(e){}
+  try{ sdSentenceSlot(); }catch(e){}
+  try{ sdBuildStrip(); }catch(e){}
+  try{ sdWatchCount(); }catch(e){}
+  sdWrap("renderTabs",sdBuildStrip);
+  sdWrap("drawHero",sdAfterHero);
+  sdWrap("show",sdRoveStrip);
+  sdWrap("search",sdSweep);
+  try{ sdSweep(); }catch(e){}
+  var sdKillT=null, sdMO=null;
+  try{
+    sdMO=new MutationObserver(function(){
+      if(sdKillT)return;
+      sdKillT=setTimeout(function(){ sdKillT=null; try{ sdKillLand(); }catch(e){} },200);
+    });
+    sdMO.observe(document.body,{childList:true,subtree:true});
+  }catch(e){}
+}
+if(document.readyState==="loading")
+  document.addEventListener("DOMContentLoaded",sdInit);
+else sdInit();
 })();
 
 
@@ -2606,73 +2719,57 @@ table.reps th{ font-size:11px; background:transparent; color:var(--ash);
 .rail.open[data-rail=when] .track{ overflow-x:auto; overscroll-behavior-x:contain }
 `;document.head.appendChild(s);})();
 
-(function(){var s=document.createElement('style');s.id='sdr-css-22';s.textContent=`
-/* fault 1: #sentence stays in the DOM; empty, it costs no height */
-#sentence:empty{display:none;margin:0;padding:0;border:0}
+(function(){var s=document.createElement('style');s.id='sdr-css-23';s.textContent=`
+/* ---- rebuild layer: the names are ours, the measures are the page's ---- */
 
-/* fault 3: the standing sentence lives in #count */
-#count.sdcount{font:400 34px/1.1 'Instrument Serif',Georgia,serif;color:var(--ink,#1d1d1f);max-width:26em;margin:7px 0 0}
-#count.sdcount .fig,#count.sdcount b.fig{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-weight:500;font-size:.92em;font-variant-numeric:tabular-nums;color:var(--rust-text,#b8431f)}
-#count.sdcount .aside{font-size:.62em;color:var(--ash,#756f69)}
+#tabs{border-bottom:0;padding-bottom:0;margin:10px 0 12px}
+
+/* the standing sentence lives in #count.sdcount; the hero's own slot stays in the
+   DOM but out of view, and the hidden #sentence keeper sits beside the freshness line */
+#iSentence{display:none}
+#count.sdcount{display:block;flex:1 1 100%;font-family:'Instrument Serif',Georgia,serif;
+  font-size:34px;line-height:1.1;color:var(--ink);max-width:26em;margin:2px 0 0}
+#count.sdcount .fig{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;
+  font-size:.92em;font-variant-numeric:tabular-nums;color:var(--rust-text,#b8431f)}
+#count.sdcount .aside{font-size:.62em;color:var(--ash)}
+#count.sdcount .broken{display:block;font-size:.5em;color:var(--rust-text,#b8431f)}
 #count.sdcount .clause{border-bottom:1px dotted rgba(29,29,31,.28);cursor:pointer}
-#count.sdcount .clause:hover,#count.sdcount .clause:focus-visible{color:var(--rust,#c44b28);border-bottom-color:var(--rust,#c44b28)}
+#count.sdcount .clause:hover,#count.sdcount .clause:focus-visible{
+  color:var(--rust-text,#b8431f);border-bottom-color:var(--rust-text,#b8431f)}
 
-.sdcut{display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;
-  position:sticky;top:0;z-index:6;background:var(--paper,#f7f5f0);
-  border-top:2px solid var(--rust,#c44b28);padding:8px 10px}
-.sdcut .sdcs{font:400 20px/1.2 'Instrument Serif',Georgia,serif;color:var(--ink,#1d1d1f);
-  flex:1 1 320px;min-width:280px}
-.sdcut .sdcs .fig{font-family:'IBM Plex Mono',monospace;color:var(--rust-text,#b8431f);font-size:.9em}
-@media(max-width:900px){.sdcut{gap:4px}.sdcut .sdcs{font-size:16px;min-width:0;flex:1 1 100%}}
+/* the strip: three labelled rows. Both axes written down, because the page sets
+   .vg{flex-direction:column}, which reads a 200px flex-basis as a height. */
+#vstrip.vgroups{display:flex;flex-direction:column;position:static;z-index:auto;inset:auto;
+  gap:3px;margin:0;padding:6px 0;border-bottom:1px solid var(--line);background:transparent}
+#vstrip .vg{display:flex;flex-direction:row!important;flex-wrap:nowrap;align-items:baseline;gap:10px}
+#vstrip .vglab{flex:0 0 200px!important;flex-basis:200px;width:200px;max-width:200px;
+  height:auto!important;min-height:0;font:600 10px/1.35 Archivo,system-ui,sans-serif;
+  letter-spacing:.06em;text-transform:uppercase;color:#57514a;text-align:right;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-self:baseline}
+#vstrip .vgbtns{display:flex!important;flex-direction:row!important;flex-wrap:wrap;gap:2px;
+  align-items:baseline;flex:1 1 auto;min-width:0}
+#vstrip .vtab{padding:3px 8px;font-size:12px;line-height:1.3;border-radius:3px;
+  border:1px solid transparent;background:none;color:var(--smoke);cursor:pointer;font-family:inherit}
+#vstrip .vtab:hover{color:var(--ink)}
+#vstrip .vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);font-weight:600}
+#vstrip .vtab:focus-visible{outline:2px solid var(--rust);outline-offset:2px;border-radius:2px}
+@media(max-width:900px){
+  #vstrip .vg{flex-direction:column!important;align-items:flex-start;gap:2px}
+  #vstrip .vglab{flex:0 0 auto!important;width:auto;max-width:none;text-align:left}
+}
 
-/* fault 2: grouped strip, original measures. .vgbtns needs script, not CSS. */
-#vstrip.vgroups{display:block;border-bottom:1px solid var(--line,#e2ded5);margin:10px 0 12px;padding-bottom:6px}
-#vstrip .vg{display:flex;align-items:baseline;gap:10px;margin-bottom:3px}
-#vstrip .vglab{flex:0 0 200px;font:600 10px/1.35 Archivo,system-ui,sans-serif;letter-spacing:.06em;
-  text-transform:uppercase;color:#57514a;text-align:right;white-space:nowrap}
-#vstrip .vtab{padding:4px 10px;font-size:12.5px;border-radius:3px;border:1px solid transparent;
-  background:none;color:var(--smoke,#6b6560);cursor:pointer}
-#vstrip .vtab.on{background:var(--card,#fff);border-color:var(--line,#e2ded5);
-  color:var(--ink,#1d1d1f);font-weight:600}
-@media(max-width:900px){#vstrip .vg{flex-direction:column;gap:2px}
-  #vstrip .vglab{flex:none;text-align:left;white-space:normal}}
-
-/* fault 4: instrument measures, as the original */
-.ipad{padding:14px 20px 8px}
-.rails{margin-top:9px;display:flex;flex-direction:column;gap:2px}
-.rail{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:start;
-  padding:5px 0;border-top:1px solid var(--line,#e2ded5)}
+/* the instrument keeps the page's own measures; these pin them so no rail inflates */
+.strip{height:12px}
 .rail.open{padding:7px 0 8px}
-.rail:not(.open){grid-template-columns:186px 1fr;align-items:center;padding:5px 0}
-.rail .gut.rest{display:flex;align-items:baseline;gap:8px}
-.rail .gut.rest .q{font:600 11px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em;
-  color:var(--ink,#1d1d1f)}
-.rail .gut.rest .val,.rail .gut .val{font-family:'IBM Plex Mono',monospace;font-size:10.5px;
-  color:var(--rust-text,#b8431f)}
-.rail .gut .val{margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.strip{display:flex;gap:1px;height:12px}
-.restbar{height:6px}
-.aim{min-height:20px;font-family:'IBM Plex Mono',monospace;font-size:13px;
-  color:var(--rust-text,#b8431f);margin-top:6px;line-height:20px}
-.hand{font:600 13px/1.4 Archivo,system-ui,sans-serif;color:var(--ink,#1d1d1f);margin-top:2px}
-.aimat{display:flex;align-items:center;gap:8px;margin-top:7px}
-.aimat input{flex:1;max-width:340px;padding:5px 9px;font-size:13px}
-.aimat select{font-size:12.5px;padding:5px 6px;max-width:150px}
-.aimat button{padding:5px 11px;font-size:12px}
-.specimen{margin-top:8px;border-top:1px solid var(--line,#e2ded5);padding-top:6px}
-.specimen .sl{font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;margin-top:3px;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.margin{margin-top:6px;border-top:1px solid var(--line,#e2ded5);padding:5px 0 2px;
-  font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#5f584f;line-height:1.5}
-.seam{display:block;margin:8px 0 0 auto;height:34px}
+.specimen{margin-top:8px;border-top:1px solid var(--line);padding-top:6px}
+.specimen .sl{-webkit-line-clamp:2}
+.margin{margin-top:6px;border-top:1px solid var(--line);padding:5px 0 2px;font-size:11.5px;line-height:1.5}
+.aim{min-height:20px;font-size:13px;line-height:20px;margin-top:6px}
 
-/* fault 4: search panel measures, as the original */
-.starter{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 4px}
-.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:8px;
-  background:var(--card,#fff);border:1px solid var(--line,#e2ded5);padding:12px;border-radius:3px}
-.filters .fld{display:flex;flex-direction:column;gap:2px;font-size:11px;color:var(--ash,#756f69)}
-.filters .fld input{width:100%}
-.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0}
-.chips{margin:8px 0}
+/* the empty state, on its own id instead of inside a table */
+#noRows{background:var(--card);border:1px solid var(--line);padding:26px 16px}
+#noRows p{margin:0 0 12px;font-size:14px;max-width:70ch}
+#noRows .muted{color:var(--ash);font-size:12.5px;max-width:80ch}
+#noRows .bar{margin:0;flex-wrap:wrap}
 
 `;document.head.appendChild(s);})();

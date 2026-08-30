@@ -186,7 +186,10 @@ function q(){return new URLSearchParams(location.search)}
 function sel(){var p=q();Object.keys(VIEW).forEach(function(k){p.delete(k)});return p}
 function num(n){return (n==null?"":String(n)).replace(/\B(?=(\d{3})+(?!\d))/g,",")}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-var ROOT=location.pathname.indexOf("/z")===0?"/z/":"/";document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll('a[href="/z/"]').forEach(function(a){a.setAttribute("href",ROOT)})});
+var ROOT=location.pathname.indexOf("/z")===0?"/z/":"/";
+/* hand-written, 31 August 2026: every record link opens the sheet in this page; the old page is never the target */
+document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest('a[href*="/z/rebuilt?case="]');if(!a)return;var m=a.getAttribute("href").match(/case=([A-Za-z0-9]+)/);if(!m)return;e.preventDefault();e.stopPropagation();
+  fetch("/api/case/"+encodeURIComponent(m[1])).then(function(r){return r.json()}).then(function(raw){if(raw&&raw.OperatorControlNumber){openCase(raw.OperatorControlNumber,decorateRow(raw),raw)}else{location.href=a.href}}).catch(function(){location.href=a.href})},true);document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll('a[href="/z/"]').forEach(function(a){a.setAttribute("href",ROOT)})});
 function go(p){var skip={hero:1,v:1,from:1,to:1};var before=Array.from(q().keys()).filter(function(k){return !skip[k]}).length,after=Array.from(p.keys()).filter(function(k){return !skip[k]}).length;
   try{if(after>before)sessionStorage.setItem("z-scroll","sum");else sessionStorage.removeItem("z-scroll")}catch(x){}
   location.href=location.pathname+(p.toString()?"?"+p.toString():"")+location.hash}

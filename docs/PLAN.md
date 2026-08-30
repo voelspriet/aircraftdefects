@@ -177,19 +177,65 @@ no harness, because its green is believed.
 
 ---
 
-## C. Verify what the model designed — **pending**
+## C. Verify what the model designed — **done**, 30 August
 
 The nine builds it chose, driven in a browser, not tested by curl:
 
-- [ ] airframe history, and the stage framing above it
-- [ ] plain-English gloss, including its refusal to answer
-- [ ] jargon table, and the record versus outside-knowledge marking
-- [ ] code disagreement notice
-- [ ] location from free text, and the discarding of unverifiable spans
-- [ ] part recurrence
-- [ ] repeat findings, and the hours between
-- [ ] operator page, including an unresolved designator
-- [ ] citation, export, and the verified summary refusing to render on a mismatch
+- [x] airframe history, and the stage framing above it. N617FE reads DOUG MD11F,
+      454 reports, upper fuselage, first filed 01/04/2002. The framing sentence
+      is on screen character for character against the endpoint.
+- [x] plain-English gloss, over all nineteen fields
+- [x] jargon table, and the record versus outside-knowledge marking
+- [x] code disagreement notice. The desk states it is not a rate and that only
+      44 of 1,757,827 records have been read this way, and a record that has an
+      entry says so in its own case sheet.
+- [x] location from free text. "Checked 25, placed 20, dropped 0 as
+      unverifiable", each hit carrying the span it was read from. Checked one by
+      hand: RH MAIN FLAP CARRIAGE NR 2 appears verbatim in the write-up above it.
+- [x] part recurrence, rebuilt honestly. See below.
+- [x] repeat findings, and the hours between. Five groups on N373UP.
+- [x] operator page. QR9R shows its code, its 922 reports and the FAA's own note
+      that 2,732 of the 3,945 designators in this file resolve to no name.
+- [x] citation, export, and the verified summary
+
+### What the phase actually was
+
+Not verification. Five of the nine had working endpoints and no way to reach
+them: counted in the served HTML, `api/airframe` 0, `api/operator` 0,
+`api/part` 0, `api/locate` 0, `api/conflicts` 0. Testing them with curl would
+have shown nine passes and said nothing about whether a reader can get to one.
+
+Three faults that only clicking could find.
+
+**Six dead handlers.** Every operator, model and system cell in the record table
+called `setFilter`, and one called `setHero`. Both are declared inside the
+instrument's IIFE, and an inline onclick resolves only against the global scope.
+No console error, correct markup, correct ARIA, and the cells did nothing. Seven
+parity harnesses counting elements and reading text could not see it.
+
+**A false absence.** The case sheet said the part number was not recorded for
+JR2R20260825350, where the endpoint returns PartNumber 17039203426. The block
+read `ComponentPartNumber`, which is null on most records. A guessed field name
+that returns null is worse than one that throws, because null renders as a
+confident absence.
+
+**A build designed against a query the file cannot answer.** `/api/search?part=`
+searches the part NAME: `part=CARRIAGE` gives 326 and `part=17039203426` gives 0.
+No parameter anywhere searches a number, and `/api/same-defect` covers only the
+forty most-written-up parts, the lowest at 412 reports. So the dossier answered
+"0 reports" about a part the reader was reading a report about. It now counts
+what the file records, by name and condition, and says in plain words that this
+file cannot be searched by part number.
+
+### On the two harnesses
+
+`rebuild/agent.py` gives the model four tools and it fixed every fault of the
+form "this number is wrong": the strip from 747px to 100, the phone from 160
+errors to none, the page from 3,448px to 1,802. On work of the form "build this"
+it failed four times running, each time spending its whole step budget exploring
+and shipping only the deploy it was ordered to make first. `ask.py`, one brief
+and one answer, built every feature in this project. The loop that works is: ask
+writes it, agent measures and corrects it.
 
 ---
 

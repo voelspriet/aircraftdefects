@@ -1,0 +1,172 @@
+#sentence{display:none!important}
+#sd-sink{display:none!important}
+.card.land{display:none!important}
+#vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}
+#vstrip.vgroups .vg{display:flex;flex-direction:row;align-items:center;gap:10px;min-width:0}
+#vstrip.vgroups .vglab{flex:0 0 auto;font:600 9.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em;color:#57514a;text-transform:uppercase;white-space:nowrap}
+#vstrip.vgroups .vgbtns{display:flex!important;flex-direction:row!important;gap:2px!important;align-items:center!important;flex-wrap:wrap!important;margin:0!important;padding:0!important;border-bottom:0!important;min-width:0;flex:1 1 auto}
+button.vtab{padding:3px 8px;font-size:11.5px;line-height:1.2;border:1px solid transparent;border-radius:3px;background:none;color:#5c554c;cursor:pointer;white-space:nowrap}
+button.vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);font-weight:600}
+.axis{display:flex;gap:2px;margin-top:3px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ash)}
+.axis span{flex:1;min-width:0}
+.sd-second{font-size:11.5px;color:#6b6560;margin:0 0 3px;text-align:center;letter-spacing:.02em}
+.sd-second b{font-weight:600}
+#hero.instrument{position:relative;background:var(--paper);border:1px solid var(--line);border-bottom:3px solid var(--rust);border-radius:6px;margin:12px 0 0;overflow:hidden;padding:0}
+#hero.instrument > .ipad{padding:10px 20px 6px}
+#count.sdcount{font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1.1;color:var(--ink);max-width:none;margin:4px 0 2px;white-space:normal}
+#count.sdcount .fig{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:.92em;font-variant-numeric:tabular-nums;color:var(--rust-text,#b8431f)}
+#count.sdcount .aside{font-size:.62em;color:var(--ash)}
+#count.sdcount .broken{display:block;font-size:.5em;color:var(--rust)}
+#count.sdcount .clause{border-bottom:1px dotted rgba(29,29,31,.28);cursor:pointer}
+.rail .reading{margin:9px 0 0;padding:8px 12px 8px 13px;border-left:2px solid var(--rust);background:#faf7f3;font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);max-width:none}
+.rail>.reading{grid-column:2}
+@media(max-width:700px){.rail .reading{font-size:14px;padding:7px 10px}}
+@media(min-width:901px){
+#hero.instrument{max-width:1140px!important}
+.rail{align-items:start;grid-template-columns:110px minmax(0,1fr)!important}
+.rail .track{min-width:0;position:relative}
+.rail .track.two{display:grid;grid-template-columns:minmax(0,628px) minmax(0,330px);gap:18px}
+.rail .track.two > svg.plane{width:100%;max-width:640px;height:auto;display:block}
+.rail .col .ch{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;color:var(--ash);margin-bottom:3px}
+.rail .orow{display:grid;grid-template-columns:120px 1fr 52px;gap:8px;align-items:center;font-size:11.5px;height:14px;padding:0 3px;border-radius:3px}
+.rail .orow .on{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:14px}
+.rail .orow .ob{height:6px;background:#e8e3d8;border-radius:3px;overflow:hidden}
+.rail .orow .ob i{display:block;height:100%;background:var(--rust)}
+.rail .orow.wide{grid-template-columns:190px 1fr 56px;height:17px}
+.rail .orow.wide .on{font-size:12px;line-height:17px}
+.rail .fblock{height:22px}
+.rail .frows{margin-top:4px}
+.rail .fnote{font-size:11px;margin-top:3px}
+.rail[data-rail=forced].open .fblock{margin-bottom:5px}
+.rail .legend{font-size:11.5px;gap:0}
+.rail .lrow{padding:0 4px;line-height:1.35}
+.rail .zonenote{font-size:11px;line-height:1.4;margin-top:4px;padding-top:4px}
+}
+#hero .ipad .aimwrap{display:none}
+#hero .ipad .rv-aim{margin-top:6px}
+#hero .ipad .specimen{font-size:11px;line-height:1.35;padding-top:2px;padding-bottom:2px}
+#hero .ipad .margin{font-size:10.5px;line-height:1.3;padding-top:2px;margin-top:3px}
+#hero .ipad .rails{margin-top:6px}
+#sdControls{gap:4px;margin-top:8px}
+#sdControls .bar{gap:6px}
+#sdControls .actions{padding:0}
+#noRows{padding:8px 12px;margin-top:6px}
+#noRows p{margin:3px 0}
+#starterToggle{padding:3px 10px}
+#rr-sec{margin:6px 0 0}
+#rr-sec .cut{font-size:10.5px;line-height:1.25}
+#rr-sec .rr-count{font-size:12px}
+#rr-sec .rr-more{font-size:11px;padding:3px 10px}
+/* sd-extras: blocks the original has no counterpart for, above the tabs */
+#znarrow,.card.ask,#khint{display:none!important}
+/* sd-credit: match the original's spacing and type */
+.credit{font-size:12px;line-height:18.6px;margin:2px 0 10px;padding:0}
+/* sd-wu: keep the gloss out of the clip; clip/fade like the original */
+table.sdtable td{padding:5px 10px}
+tr.wrote td{padding:0 0 14px}
+.wu{position:relative}
+.wu .wu-gloss{position:absolute;left:12px;bottom:0;height:auto;margin:0}
+.wu:not(.clip){padding-bottom:34px}
+.wu:not(.clip)::after{content:"none"}
+.wu.clip{overflow:hidden;max-height:112px}
+.wu.clip::after{content:"";position:absolute;left:0;right:0;bottom:0;height:16px;background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,.92) 70%,#fff)}
+/* sd-dossier: the aircraft dossier, in #p-aircraft */
+#sd-dossier{max-width:1140px;margin:14px auto 0;padding:0 2px;font-size:14px;line-height:1.5}
+#sd-dossier .sd-d-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:2px 0 6px}
+#sd-dossier .sd-d-tail{font-family:'Instrument Serif',Georgia,serif;font-size:30px;color:var(--ink)}
+#sd-dossier .sd-d-make{font-size:12.5px;color:#6b6560}
+#sd-dossier .sd-d-make b{font-weight:600;color:var(--ink)}
+#sd-dossier .sd-d-count{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;color:var(--rust-text,#b8431f)}
+#sd-dossier .sd-d-sec{margin:12px 0 0;padding:10px 14px;border:1px solid var(--line);border-left:3px solid var(--rust);background:var(--card);border-radius:4px}
+#sd-dossier .sd-d-sec h3{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ash);margin:0 0 7px}
+#sd-dossier .sd-d-sec h3.sd-mine{color:#7a5b00}
+#sd-dossier .sd-d-frame{font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}
+#sd-dossier .sd-d-split{display:flex;gap:8px 18px;flex-wrap:wrap;margin:8px 0 0;padding:0;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:#5c554c;list-style:none}
+#sd-dossier .sd-d-split b{color:var(--ink);font-variant-numeric:tabular-nums}
+#sd-dossier .sd-d-ops{font-size:12px;color:#6b6560;margin:7px 0 0}
+#sd-dossier .sd-d-rpt{margin:7px 0 0;padding-left:10px;border-left:2px solid #e8e3d8;font-size:12.5px;color:#5c554c}
+#sd-dossier .sd-d-rpt b{color:var(--ink)}
+#sd-dossier .sd-d-hrs{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--rust-text,#b8431f)}
+#sd-dossier .sd-d-quote{margin:5px 0 0;padding:0 0 0 8px;border-left:2px solid var(--line);font:11px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:#7a746c}
+#sd-dossier .sd-d-sum{font:15px/1.55 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}
+#sd-dossier .sd-d-note{font-size:11.5px;color:#7a5b00;margin:7px 0 0}
+#sd-dossier .sd-d-lim{margin:0;padding-left:18px}
+#sd-dossier .sd-d-lim li{margin:4px 0;font-size:13px;color:var(--ink)}
+#sd-dossier .sd-d-cite{font-size:12px;color:#6b6560;margin:0;word-break:break-word}
+#sd-dossier .sd-d-cite a{color:var(--rust-text,#b8431f)}
+#sd-dossier .sd-d-btns{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+#sd-dossier .sd-d-none{font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}
+@media(max-width:700px){#sd-dossier .sd-d-tail{font-size:24px}#sd-dossier .sd-d-sec{padding:9px 10px}}
+/* sd-dossier2: the operator and part dossiers share the same node; what the
+   panel is holding is said in the kicker, and the second way in to a dossier
+   from the table cells is a marker that leaves setFilter alone */
+#sd-dossier .sd-d-kick{font:600 10px/1.3 Archivo,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--ash);margin:0 0 7px}
+#sd-dossier .sd-d-kick b{color:var(--rust-text,#b8431f)}
+.sd-d-mark{display:inline-block;margin:0 0 0 6px;padding:2px 6px;font:600 9px/1 Archivo,system-ui,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--rust-text,#b8431f);background:var(--card);border:1px solid var(--line);border-radius:3px;cursor:pointer;vertical-align:1px}
+.sd-d-mark:hover{border-color:var(--rust-text,#b8431f);color:var(--ink)}
+.sd-d-mark:focus-visible{outline:2px solid var(--rust-text,#b8431f);outline-offset:1px}
+code.cd.sd-pnlink{cursor:pointer;border-bottom:1px dotted var(--rust-text,#b8431f)}
+code.cd.sd-pnlink:hover{color:var(--rust-text,#b8431f)}
+code.cd.sd-pnlink:focus-visible{outline:2px solid var(--rust-text,#b8431f);outline-offset:1px}
+#sd-dossier .sd-d-bars{list-style:none;margin:8px 0 0;padding:0}
+#sd-dossier .sd-d-bars li{display:grid;grid-template-columns:minmax(90px,190px) minmax(60px,1fr) 64px;gap:8px;align-items:center;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;height:17px}
+#sd-dossier .sd-d-bars .sd-d-barlab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#5c554c;text-align:right}
+#sd-dossier .sd-d-bars .sd-d-bar{height:6px;background:#e8e3d8;border-radius:3px;overflow:hidden;min-width:0}
+#sd-dossier .sd-d-bars .sd-d-bar i{display:block;height:100%;background:var(--rust)}
+#sd-dossier .sd-d-bars .sd-d-barnum{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+@media(max-width:700px){#sd-dossier .sd-d-bars li{grid-template-columns:minmax(64px,110px) minmax(40px,1fr) 52px;font-size:10.5px;height:16px}}
+/* sd-locate: the model's reading of where the write-ups say the defect was.
+   Amber, dashed and serif on purpose, so nothing here may be mistaken for
+   the FAA's own zone codes in the row above. */
+#sd-locbar{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;margin:10px 0 6px;padding:9px 12px;border:1px dashed #c9a24b;background:#fdfaf1;border-radius:4px}
+#sd-locbar .sd-loc-exp{flex:1 1 340px;min-width:0;font-size:11.5px;line-height:1.5;color:#5c554c}
+#sd-locsum{flex-basis:100%;min-width:0}
+#sd-locsum p{margin:3px 0}
+#sd-locsum .sd-loc-line{font-size:12.5px;line-height:1.5;color:var(--ink)}
+#sd-locsum .sd-loc-note{font:italic 13px/1.5 Georgia,'Times New Roman',serif;color:#7a5b00}
+.sd-loc{margin:6px 0 2px;padding:5px 10px;border-left:2px dashed #c9a24b;background:#fdfaf1;font:13px/1.55 Georgia,'Times New Roman',serif;color:#5c554c}
+.sd-loc .sd-loc-tag{display:inline-block;margin:0 8px 0 0;padding:1px 6px;font:600 9px/1.5 Archivo,system-ui,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:#7a5b00;background:#fff;border:1px solid #e6d8ae;border-radius:3px;vertical-align:1px}
+.sd-loc .sd-loc-where{color:var(--ink);font-weight:600;font-style:normal}
+.sd-loc .sd-loc-span{color:#7a5b00;font-style:italic}
+@media(max-width:700px){#sd-locbar{padding:8px 10px}#sd-locbar .sd-loc-exp{font-size:11px}.sd-loc{font-size:12px}}
+/* sd-conf: records where the FAA's coded fields and the mechanic's own words
+   do not agree. A reference block on the desk, beside the credit, an overlay
+   carrying the entries, and a section a case sheet gains when its record has
+   an entry. Both sides are always labelled with whose words they are, and
+   nothing here decides which side is right. */
+#sd-conf-desk{max-width:1140px;margin:18px auto 0;padding:12px 16px;border:1px solid var(--line);border-left:3px solid var(--rust);background:var(--card);border-radius:4px}
+#sd-conf-desk .sd-conf-kick{font:600 10px/1.3 Archivo,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--ash);margin:0 0 6px}
+#sd-conf-desk .sd-conf-lead{font:15px/1.55 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}
+#sd-conf-desk .sd-conf-not{font-size:12px;line-height:1.5;color:#6b6560;margin:6px 0 0}
+#sd-conf-desk .sd-conf-cov{font-size:12px;line-height:1.5;color:#7a5b00;margin:6px 0 0}
+#sd-conf-desk .sd-conf-row{margin:10px 0 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#sd-conf-over{position:fixed;inset:0;z-index:999;background:rgba(29,29,31,.44);display:flex;align-items:flex-start;justify-content:center;padding:4vh 14px 6vh;overflow:auto}
+#sd-conf-over[hidden]{display:none!important}
+.sd-conf-dlg{background:var(--paper,#fff);border:1px solid var(--line);border-top:3px solid var(--rust);border-radius:6px;max-width:760px;width:100%;padding:14px 18px 18px;box-shadow:0 12px 32px rgba(29,29,31,.2)}
+.sd-conf-top{display:flex;gap:12px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+.sd-conf-h{font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1.15;color:var(--ink);margin:0}
+.sd-conf-x{flex:0 0 auto;padding:3px 10px;font:600 11px/1.4 Archivo,system-ui,sans-serif;color:#5c554c;background:none;border:1px solid var(--line);border-radius:3px;cursor:pointer}
+.sd-conf-x:hover{color:var(--ink);border-color:var(--rust-text,#b8431f)}
+.sd-conf-x:focus-visible{outline:2px solid var(--rust-text,#b8431f);outline-offset:1px}
+.sd-conf-sub{font-size:12px;line-height:1.5;color:#6b6560;margin:6px 0 0}
+.sd-conf-und{font:italic 14px/1.55 Georgia,'Times New Roman',serif;color:var(--ink);margin:10px 0 0}
+.sd-conf-e{margin:12px 0 0;padding:10px 12px;border:1px solid var(--line);border-left:3px solid var(--rust);background:var(--card);border-radius:4px}
+.sd-conf-e .sd-conf-sh{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#7a5b00;margin:0 0 6px}
+.sd-conf-e .sd-conf-eh{font:600 11.5px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:var(--ink);margin:0}
+.sd-conf-e .sd-conf-fld{font:11px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:#5c554c;margin:3px 0 0}
+.sd-conf-sides{display:flex;gap:8px 14px;flex-wrap:wrap;margin:8px 0 0}
+.sd-conf-side{flex:1 1 260px;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:var(--paper,#fff)}
+.sd-conf-side .sd-conf-lab{display:block;font:600 9.5px/1.3 Archivo,system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--ash);margin:0 0 4px}
+.sd-conf-side.sd-conf-code p{font:12.5px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:var(--ink);margin:0;overflow-wrap:anywhere}
+.sd-conf-side.sd-conf-words p{font:15px/1.55 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}
+.sd-conf-e .sd-conf-disc{font-size:12.5px;line-height:1.5;color:var(--ink);margin:8px 0 0}
+.sd-conf-e .sd-conf-note{font:italic 13px/1.55 Georgia,'Times New Roman',serif;color:#7a5b00;margin:8px 0 0}
+.sd-conf-e .sd-conf-meta{font-size:11.5px;line-height:1.5;color:#6b6560;margin:6px 0 0;word-break:break-word}
+.sd-conf-e.sd-conf-sheet{margin:10px 0 0}
+.sd-conf-list .sd-conf-e:last-child{margin-bottom:2px}
+@media(max-width:700px){
+.sd-conf-dlg{padding:12px 12px 14px}
+.sd-conf-h{font-size:22px}
+.sd-conf-side{flex-basis:100%}
+.sd-conf-e{padding:9px 10px}
+}

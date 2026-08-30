@@ -7136,7 +7136,7 @@ window.addEventListener("load", function(){ sdrStripRails(); sdrFixLabels(); sdr
 
 
 
-/* ---- 40: the ninth build, made honest, written by the model ---- */
+/* ---- 41: the disagreements, and the way in, written by the model ---- */
 (function(){
 "use strict";
 window.__sderrs=window.__sderrs||[];
@@ -7511,7 +7511,7 @@ function sdPartRow(){
   for(i=0;i<sheets.length;i++){try{sdFillPartRow(sheets[i].row,sheets[i].table)}catch(_){}}
 }
 
-/* ============ sd-dossier: the panel holds one subject at a time — a tail
+/* ============ sd-dossier: the panel holds one subject at a time : a tail
    number, an operator code, or a part. A part dossier is addressed by the
    part number the reader clicked but is SEARCHED by the part's name, taken
    from the case record they clicked it in, because the file behind this
@@ -8171,11 +8171,247 @@ function sdLocStep(){
   sdLocRender();
 }
 
+/* ============ sd-conf: a record where the FAA's coded fields and the
+   mechanic's own words do not agree. /z/api/conflicts is fetched once and
+   kept, keyed by the record id; it is never fetched per sheet. Two ways in:
+   a reference block on the desk, beside the credit, whose one line is the
+   endpoint's own what_this_is and whose caveat is its own what_this_is_not,
+   and a section inside a case sheet whose record has an entry, so a reader
+   looking at that record need not learn elsewhere that it is disputed.
+   Every entry shows the code side and the words side, each labelled with
+   whose words they are, and nothing here decides which side is right: the
+   tool cannot know. Where the list is linked from, the coverage is stated:
+   only these entries have been read this way, out of 1,757,827 records, so
+   an absent entry is not evidence that a record agrees with itself. A
+   record with no entry says nothing at all about disagreements. ========== */
+var SDCONF={fetched:false,busy:false,failed:false,entries:[],map:{},total:0,whatIs:"",whatNot:"",lastFocus:null};
+function sdConfFetch(){
+  if(SDCONF.fetched||SDCONF.busy)return;
+  SDCONF.busy=true;
+  sdGetJSON("conflicts").then(function(j){
+    SDCONF.busy=false;SDCONF.fetched=true;
+    var es=(j&&Array.isArray(j.entries))?j.entries:[],m={},i,e;
+    for(i=0;i<es.length;i++){
+      e=es[i];
+      if(e&&e.id!=null&&String(e.id).trim()!=="")m[String(e.id).trim()]=e;
+    }
+    SDCONF.entries=es;SDCONF.map=m;
+    SDCONF.total=(j&&j.total!=null)?sdNum(j.total):es.length;
+    SDCONF.whatIs=(j&&j.what_this_is!=null)?String(j.what_this_is):"";
+    SDCONF.whatNot=(j&&j.what_this_is_not!=null)?String(j.what_this_is_not):"";
+    kick();
+  }).catch(function(){
+    SDCONF.busy=false;SDCONF.fetched=true;SDCONF.failed=true;
+    kick();
+  });
+}
+function sdConfCount(){return SDCONF.entries.length||SDCONF.total||0}
+function sdConfSides(e){
+  var code=(e.code_says==null)?"":String(e.code_says).trim();
+  var words=(e.text_says==null)?"":String(e.text_says).trim();
+  if(!code&&!words)return '<p class="sd-conf-meta">The entry carries no wording for either side.</p>';
+  var h='<div class="sd-conf-sides">';
+  if(code)h+='<div class="sd-conf-side sd-conf-code"><span class="sd-conf-lab">The FAA\u2019s code says</span><p>'+sdEsc(code)+'</p></div>';
+  if(words)h+='<div class="sd-conf-side sd-conf-words"><span class="sd-conf-lab">The mechanic wrote</span><p>'+sdEsc(words)+'</p></div>';
+  return h+'</div>';
+}
+function sdConfEntry(e){
+  var parts=[],v,hl=[],meta=[];
+  parts.push('<p class="sd-conf-eh">record '+sdEsc(e.id==null?"":String(e.id))+'</p>');
+  v=(e.date==null)?"":String(e.date).trim();if(v)hl.push(sdEsc(v));
+  v=(e.operator==null)?"":String(e.operator).trim();if(v)hl.push("operator "+sdEsc(v));
+  v=(e.tail==null)?"":String(e.tail).trim();if(v)hl.push("tail "+sdEsc(v));
+  if(hl.length)parts.push('<p class="sd-conf-fld">'+hl.join(" \u00b7 ")+'</p>');
+  v=(e.field==null)?"":String(e.field).trim();
+  if(v)parts.push('<p class="sd-conf-fld">coded field: '+sdEsc(v)+'</p>');
+  parts.push(sdConfSides(e));
+  v=(e.discrepancy==null)?"":String(e.discrepancy).trim();
+  if(v)parts.push('<p class="sd-conf-disc">'+sdEsc(v)+'</p>');
+  v=(e.note==null)?"":String(e.note).trim();
+  if(v)parts.push('<p class="sd-conf-note">'+sdEsc(v)+'</p>');
+  v=(e.found_at==null)?"":String(e.found_at).trim();if(v)meta.push("found in: "+sdEsc(v));
+  if(e.confirmed!=null&&e.confirmed!==""&&e.confirmed!==0&&e.confirmed!==false)meta.push("confirmed: "+sdEsc(String(e.confirmed)));
+  if(e.disputed!=null&&e.disputed!==""&&e.disputed!==0&&e.disputed!==false)meta.push("disputed: "+sdEsc(String(e.disputed)));
+  v=(e.source==null)?"":String(e.source).trim();if(v)meta.push("source: "+sdEsc(v));
+  if(meta.length)parts.push('<p class="sd-conf-meta">'+meta.join(" \u00b7 ")+'</p>');
+  return parts.join("");
+}
+/* sd-conf desk: the way in from the desk, placed with the reference
+   material at the foot of the page, not with the panels that narrow to a
+   selection. The lead line is the endpoint's own what_this_is; what it is
+   not is printed under it; the coverage caveat sits beside the button. */
+function sdConfDesk(){
+  var d=byId("sd-conf-desk"),host,lead,notp,cov,btn,n,sig;
+  if(!d){
+    d=document.createElement("section");
+    d.id="sd-conf-desk";
+    d.setAttribute("role","region");
+    d.setAttribute("aria-label","Reference: records where the FAA\u2019s coded fields and the mechanic\u2019s own words do not agree");
+    d.innerHTML='<p class="sd-conf-kick">Reference</p>'
+      +'<p class="sd-conf-lead" data-sd-cis></p>'
+      +'<p class="sd-conf-not" data-sd-cnot hidden></p>'
+      +'<p class="sd-conf-cov" data-sd-ccov hidden></p>'
+      +'<div class="sd-conf-row"><button type="button" class="sdbtn" id="sd-conf-open"></button></div>';
+    host=document.querySelector(".credit");
+    if(host&&host.parentNode)host.parentNode.insertBefore(d,host);
+    else (document.querySelector("main.wrap")||document.body).appendChild(d);
+    d.addEventListener("click",function(ev){
+      if(!ev.target||ev.target.id!=="sd-conf-open")return;
+      ev.preventDefault();
+      try{sdConfOpen()}catch(_){}
+    });
+  }
+  n=sdConfCount();
+  sig="f"+(SDCONF.fetched?1:0)+(SDCONF.failed?1:0)+"n"+n+"|"+SDCONF.whatIs+"|"+SDCONF.whatNot;
+  if(d.getAttribute("data-sd-csig")===sig)return;
+  d.setAttribute("data-sd-csig",sig);
+  lead=d.querySelector("[data-sd-cis]");
+  notp=d.querySelector("[data-sd-cnot]");
+  cov=d.querySelector("[data-sd-ccov]");
+  btn=byId("sd-conf-open");
+  if(!SDCONF.fetched){
+    if(lead)lead.textContent="Reading the file for records where the code and the words disagree\u2026";
+    if(btn){btn.disabled=true;btn.textContent="One moment"}
+    return;
+  }
+  if(SDCONF.failed){
+    if(lead)lead.textContent="The list of disagreements did not answer. Nothing is shown rather than something wrong.";
+    if(notp)notp.hidden=true;
+    if(cov)cov.hidden=true;
+    if(btn){btn.disabled=true;btn.textContent="Not available"}
+    return;
+  }
+  if(lead)lead.textContent=SDCONF.whatIs||"Records where the FAA\u2019s coded fields and the mechanic\u2019s own words do not agree.";
+  if(notp){
+    if(SDCONF.whatNot){notp.hidden=false;notp.textContent=SDCONF.whatNot}
+    else notp.hidden=true;
+  }
+  if(cov){
+    if(n){
+      cov.hidden=false;
+      cov.textContent="Only "+sdFmt(n)+" of the 1,757,827 records in this file have been read this way. A record with no entry has not been checked, not cleared.";
+    }else cov.hidden=true;
+  }
+  if(btn){btn.disabled=!n;btn.textContent=n?("Read the "+sdFmt(n)+" entries"):"No entries"}
+}
+function sdConfOpen(){
+  var ov=byId("sd-conf-over"),x;
+  if(!ov){
+    ov=document.createElement("div");
+    ov.id="sd-conf-over";
+    ov.setAttribute("role","dialog");
+    ov.setAttribute("aria-modal","true");
+    ov.setAttribute("aria-label","Entries where the code and the words disagree");
+    ov.innerHTML='<div class="sd-conf-dlg">'
+      +'<div class="sd-conf-top"><h2 class="sd-conf-h">Where the code and the words disagree</h2>'
+      +'<button type="button" class="sd-conf-x">Close</button></div>'
+      +'<p class="sd-conf-sub" data-sd-csub></p>'
+      +'<p class="sd-conf-und">One of the two readings on each entry is wrong. The file does not say which, and nothing here decides it.</p>'
+      +'<div class="sd-conf-list" data-sd-clist></div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener("click",function(ev){
+      if(ev.target===ov||(ev.target&&ev.target.closest&&ev.target.closest(".sd-conf-x"))){
+        ev.preventDefault();
+        try{sdConfClose()}catch(_){}
+      }
+    });
+    document.addEventListener("keydown",sdConfKey);
+  }
+  sdConfFill();
+  ov.hidden=false;
+  SDCONF.lastFocus=document.activeElement;
+  x=ov.querySelector(".sd-conf-x");
+  if(x)try{x.focus()}catch(_){}
+}
+function sdConfKey(ev){
+  if(ev&&ev.key==="Escape"){
+    var ov=byId("sd-conf-over");
+    if(ov&&!ov.hidden)sdConfClose();
+  }
+}
+function sdConfClose(){
+  var ov=byId("sd-conf-over");
+  if(ov&&!ov.hidden)ov.hidden=true;
+  if(SDCONF.lastFocus&&SDCONF.lastFocus.focus)try{SDCONF.lastFocus.focus()}catch(_){}
+}
+function sdConfFill(){
+  var ov=byId("sd-conf-over");
+  if(!ov)return;
+  var list=ov.querySelector("[data-sd-clist]");
+  var sub=ov.querySelector("[data-sd-csub]");
+  var n=SDCONF.entries.length,i,h="",sig;
+  if(sub){
+    sig=SDCONF.fetched?(SDCONF.failed?"err":"n"+n):"pending";
+    if(sub.getAttribute("data-sd-csig")!==sig){
+      sub.setAttribute("data-sd-csig",sig);
+      if(!SDCONF.fetched)sub.textContent="Reading\u2026";
+      else if(SDCONF.failed)sub.textContent="The list did not answer.";
+      else if(!n)sub.textContent="The endpoint answered with no entries.";
+      else sub.textContent=sdFmt(n)+" entries, each one a record where the coded fields and the written words were read against each other. Only these "+sdFmt(n)+" of the 1,757,827 records in the file have been read this way.";
+    }
+  }
+  if(!list)return;
+  sig=SDCONF.fetched?(SDCONF.failed?"err":"n"+n):"pending";
+  if(list.getAttribute("data-sd-csig")===sig)return;
+  list.setAttribute("data-sd-csig",sig);
+  if(!SDCONF.fetched)h='<p class="sd-conf-meta">Reading\u2026</p>';
+  else if(SDCONF.failed)h='<p class="sd-conf-meta">The list did not answer. Nothing is shown rather than something wrong.</p>';
+  else if(!n)h='<p class="sd-conf-meta">The endpoint answered with no entries.</p>';
+  else for(i=0;i<n;i++)h+='<article class="sd-conf-e">'+sdConfEntry(SDCONF.entries[i])+'</article>';
+  list.innerHTML=h;
+}
+/* sd-conf on the record: the case sheet itself. The entry is matched on the
+   sheet's control number first, then on any record id in the sheet's text.
+   The section sits beside the sheet, never inside the table, so the sheet
+   keeps its seventeen rows including Part number. When the record has no
+   entry, nothing about disagreements is written anywhere on the sheet. */
+function sdConfForSheet(table){
+  var ctl,txt,id;
+  if(!SDCONF.fetched||SDCONF.failed||!SDCONF.entries.length)return null;
+  ctl=sdFindControl(table);
+  if(ctl&&SDCONF.map[ctl])return SDCONF.map[ctl];
+  txt=table.textContent||"";
+  if(!txt)return null;
+  for(id in SDCONF.map){
+    if(Object.prototype.hasOwnProperty.call(SDCONF.map,id)&&id.length>=7&&/\d/.test(id)&&txt.indexOf(id)>=0)return SDCONF.map[id];
+  }
+  return null;
+}
+function sdConfStep(){
+  var sheets=sdSheets(),i,table,e,sec,sig;
+  for(i=0;i<sheets.length;i++){
+    table=sheets[i].table;
+    if(!table.parentNode)continue;
+    e=sdConfForSheet(table);
+    sec=table.nextElementSibling;
+    if(!(sec&&sec.getAttribute&&sec.getAttribute("data-sd-confout")==="1"))sec=null;
+    if(!e){
+      if(sec&&sec.parentNode)sec.parentNode.removeChild(sec);
+      continue;
+    }
+    sig=String(e.id==null?"":e.id);
+    if(sec&&sec.getAttribute("data-sd-csig")===sig)continue;
+    if(!sec){
+      sec=document.createElement("div");
+      sec.className="sd-conf-e sd-conf-sheet";
+      sec.setAttribute("data-sd-confout","1");
+      sec.setAttribute("role","region");
+      sec.setAttribute("aria-label","A disagreement is recorded on this record");
+      table.parentNode.insertBefore(sec,table.nextSibling);
+    }
+    sec.setAttribute("data-sd-csig",sig);
+    sec.innerHTML='<p class="sd-conf-sh">A disagreement is recorded on this record</p>'
+      +sdConfEntry(e)
+      +'<p class="sd-conf-und">The file does not say which side is right, and nothing here decides it.</p>';
+  }
+}
+
 var queued=false;
 function pass(){
   queued=false;
   try{if(window.rrTail!==sdRrTail)window.rrTail=sdRrTail}catch(e){}
   try{sdEnsureGlobals()}catch(e){}
+  try{sdConfFetch()}catch(e){}
   try{purgeLand()}catch(e){}
   try{ensureSentence()}catch(e){}
   try{ensureIpad()}catch(e){}
@@ -8190,6 +8426,8 @@ function pass(){
   try{sdMarkCells()}catch(e){}
   try{sdLocBar()}catch(e){}
   try{sdLocStep()}catch(e){}
+  try{sdConfDesk()}catch(e){}
+  try{sdConfStep()}catch(e){}
   try{sdMirror()}catch(e){}
   try{sdDossierKick()}catch(e){}
 }
@@ -8200,6 +8438,7 @@ else{pass();sdBootFromURL()}
 addEventListener("load",pass);
 addEventListener("resize",kick);
 })();
+
 
 /* ---- 10: how to read each panel, written by the model ---- */
 
@@ -8969,7 +9208,7 @@ table.reps th{ font-size:11px; background:transparent; color:var(--ash);
 .rail.open[data-rail=when] .track{ overflow-x:auto; overscroll-behavior-x:contain }
 `;document.head.appendChild(s);})();
 
-(function(){var s=document.createElement('style');s.id='sdr-css-40';s.textContent=`#sentence{display:none!important}
+(function(){var s=document.createElement('style');s.id='sdr-css-41';s.textContent=`#sentence{display:none!important}
 #sd-sink{display:none!important}
 .card.land{display:none!important}
 #vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}
@@ -9087,7 +9326,7 @@ code.cd.sd-pnlink:focus-visible{outline:2px solid var(--rust-text,#b8431f);outli
 #sd-dossier .sd-d-bars .sd-d-barnum{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
 @media(max-width:700px){#sd-dossier .sd-d-bars li{grid-template-columns:minmax(64px,110px) minmax(40px,1fr) 52px;font-size:10.5px;height:16px}}
 /* sd-locate: the model's reading of where the write-ups say the defect was.
-   Amber, dashed and serif on purpose \\u2014 nothing here may be mistaken for
+   Amber, dashed and serif on purpose, so nothing here may be mistaken for
    the FAA's own zone codes in the row above. */
 #sd-locbar{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;margin:10px 0 6px;padding:9px 12px;border:1px dashed #c9a24b;background:#fdfaf1;border-radius:4px}
 #sd-locbar .sd-loc-exp{flex:1 1 340px;min-width:0;font-size:11.5px;line-height:1.5;color:#5c554c}
@@ -9099,7 +9338,49 @@ code.cd.sd-pnlink:focus-visible{outline:2px solid var(--rust-text,#b8431f);outli
 .sd-loc .sd-loc-tag{display:inline-block;margin:0 8px 0 0;padding:1px 6px;font:600 9px/1.5 Archivo,system-ui,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:#7a5b00;background:#fff;border:1px solid #e6d8ae;border-radius:3px;vertical-align:1px}
 .sd-loc .sd-loc-where{color:var(--ink);font-weight:600;font-style:normal}
 .sd-loc .sd-loc-span{color:#7a5b00;font-style:italic}
-@media(max-width:700px){#sd-locbar{padding:8px 10px}#sd-locbar .sd-loc-exp{font-size:11px}.sd-loc{font-size:12px}}`;document.head.appendChild(s);})();
+@media(max-width:700px){#sd-locbar{padding:8px 10px}#sd-locbar .sd-loc-exp{font-size:11px}.sd-loc{font-size:12px}}
+/* sd-conf: records where the FAA's coded fields and the mechanic's own words
+   do not agree. A reference block on the desk, beside the credit, an overlay
+   carrying the entries, and a section a case sheet gains when its record has
+   an entry. Both sides are always labelled with whose words they are, and
+   nothing here decides which side is right. */
+#sd-conf-desk{max-width:1140px;margin:18px auto 0;padding:12px 16px;border:1px solid var(--line);border-left:3px solid var(--rust);background:var(--card);border-radius:4px}
+#sd-conf-desk .sd-conf-kick{font:600 10px/1.3 Archivo,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--ash);margin:0 0 6px}
+#sd-conf-desk .sd-conf-lead{font:15px/1.55 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}
+#sd-conf-desk .sd-conf-not{font-size:12px;line-height:1.5;color:#6b6560;margin:6px 0 0}
+#sd-conf-desk .sd-conf-cov{font-size:12px;line-height:1.5;color:#7a5b00;margin:6px 0 0}
+#sd-conf-desk .sd-conf-row{margin:10px 0 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#sd-conf-over{position:fixed;inset:0;z-index:999;background:rgba(29,29,31,.44);display:flex;align-items:flex-start;justify-content:center;padding:4vh 14px 6vh;overflow:auto}
+#sd-conf-over[hidden]{display:none!important}
+.sd-conf-dlg{background:var(--paper,#fff);border:1px solid var(--line);border-top:3px solid var(--rust);border-radius:6px;max-width:760px;width:100%;padding:14px 18px 18px;box-shadow:0 12px 32px rgba(29,29,31,.2)}
+.sd-conf-top{display:flex;gap:12px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+.sd-conf-h{font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1.15;color:var(--ink);margin:0}
+.sd-conf-x{flex:0 0 auto;padding:3px 10px;font:600 11px/1.4 Archivo,system-ui,sans-serif;color:#5c554c;background:none;border:1px solid var(--line);border-radius:3px;cursor:pointer}
+.sd-conf-x:hover{color:var(--ink);border-color:var(--rust-text,#b8431f)}
+.sd-conf-x:focus-visible{outline:2px solid var(--rust-text,#b8431f);outline-offset:1px}
+.sd-conf-sub{font-size:12px;line-height:1.5;color:#6b6560;margin:6px 0 0}
+.sd-conf-und{font:italic 14px/1.55 Georgia,'Times New Roman',serif;color:var(--ink);margin:10px 0 0}
+.sd-conf-e{margin:12px 0 0;padding:10px 12px;border:1px solid var(--line);border-left:3px solid var(--rust);background:var(--card);border-radius:4px}
+.sd-conf-e .sd-conf-sh{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#7a5b00;margin:0 0 6px}
+.sd-conf-e .sd-conf-eh{font:600 11.5px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:var(--ink);margin:0}
+.sd-conf-e .sd-conf-fld{font:11px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:#5c554c;margin:3px 0 0}
+.sd-conf-sides{display:flex;gap:8px 14px;flex-wrap:wrap;margin:8px 0 0}
+.sd-conf-side{flex:1 1 260px;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:var(--paper,#fff)}
+.sd-conf-side .sd-conf-lab{display:block;font:600 9.5px/1.3 Archivo,system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--ash);margin:0 0 4px}
+.sd-conf-side.sd-conf-code p{font:12.5px/1.5 'IBM Plex Mono',ui-monospace,monospace;color:var(--ink);margin:0;overflow-wrap:anywhere}
+.sd-conf-side.sd-conf-words p{font:15px/1.55 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}
+.sd-conf-e .sd-conf-disc{font-size:12.5px;line-height:1.5;color:var(--ink);margin:8px 0 0}
+.sd-conf-e .sd-conf-note{font:italic 13px/1.55 Georgia,'Times New Roman',serif;color:#7a5b00;margin:8px 0 0}
+.sd-conf-e .sd-conf-meta{font-size:11.5px;line-height:1.5;color:#6b6560;margin:6px 0 0;word-break:break-word}
+.sd-conf-e.sd-conf-sheet{margin:10px 0 0}
+.sd-conf-list .sd-conf-e:last-child{margin-bottom:2px}
+@media(max-width:700px){
+.sd-conf-dlg{padding:12px 12px 14px}
+.sd-conf-h{font-size:22px}
+.sd-conf-side{flex-basis:100%}
+.sd-conf-e{padding:9px 10px}
+}
+`;document.head.appendChild(s);})();
 
 window.drawInstrument=drawInstrument;
 })();

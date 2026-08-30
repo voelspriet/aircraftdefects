@@ -1,3 +1,84 @@
+A sentence on the page prints a number that contradicts the sentence. Return one
+fenced js block, whole, replacing 43-dom.js.
+
+# What a reader sees
+
+    /z/                     These ignore your selection. Each answers from all
+                            1,757,827 reports, or from a slice you set inside
+                            the panel                              correct
+
+    /z/?operator=SWAA       These ignore your selection. Each answers from all
+                            244,532 reports, ...                   wrong
+
+    /z/?take=zone|ZONE 700  These ignore your selection. Each answers from all
+                            … reports, ...                         no number
+
+244,532 is Southwest's own total: `/z/api/search?operator=SWAA` returns exactly
+that. So the label promises the panels ignore the selection and then prints the
+number that changed because of the selection. The reader is told two
+incompatible things in one sentence.
+
+The panels themselves are innocent. Fleet opens with "All 1,757,827 reports" and
+does exactly what the label claims. It is the label's number that is wrong.
+
+# The cause, in the page's own source
+
+    line 556   let TOTAL=0, CORPUS=0, LOADING=false, ...
+    line 697   TOTAL = raw.total != null ? +raw.total : ... ;
+    line 2657  function totalN(){
+                 try{ if(typeof TOTAL==='number'&&TOTAL) return TOTAL; }catch(_){}
+                 try{ if(heroData&&heroData.total) return heroData.total; }catch(_){}
+                 return 0; }
+    line 2756  var gt=document.querySelector('[data-gtotal]'), tn=totalN();
+               if(gt&&tn) gt.textContent=VN(tn);
+
+`TOTAL` is the current selection's count. `CORPUS` is the whole file, declared on
+the same line and never read by this label. `totalN()` reaches for the selection
+and falls back to `heroData.total`, which is also the selection. There is no path
+in it that returns the corpus.
+
+The ellipsis is the same fault at its other end: with a zone filter both values
+are 0, `if(gt&&tn)` is false, and the `&hellip;` placed in the markup is never
+replaced. A guard that skips on zero leaves a sentence built around a number that
+never arrives.
+
+# What to write
+
+The element is `[data-gtotal]`, one on the page, inside the label of the group
+whose id is `ignore`. It must always show the whole file's count, whatever is
+filtered, because that is what the sentence around it promises.
+
+The corpus figure is available in more than one place: `CORPUS` in the
+instrument's own scope, `d.corpus` on the hero response, and `range.total` from
+`api/facets`, which is what the standing sentence already uses for the same
+number. Take whichever you can reach from a block appended to the page, and never
+take the selection's total.
+
+It must survive a filter change, since the label is repainted on every one, and
+it must never be left as an ellipsis: if the number is not known yet, keep the
+placeholder only until it is, then fill it.
+
+Do not change the sentence's wording. It is correct; only its number is wrong.
+
+# What must still be true
+
+Everything measured and passing: the tail, operator and part dossiers, the locate
+control, the case sheet, the repeat rows with their reasons, the standing
+sentence in every state, the tab strip at or under 130px, 18 controls, 18 starter
+questions, 4 rails, 16 panels, no duplicate ids, no sideways scroll at 390, 768,
+1024 or 1440, no page error.
+
+Check it on three URLs, not one. The landing page is the state where this label
+is already right, so a fix verified only there proves nothing:
+
+    /z/                     1,757,827
+    /z/?operator=SWAA       1,757,827
+    /z/?take=zone|ZONE+700  1,757,827
+
+Write no em dash and no en dash in anything that reaches the page.
+
+--- YOUR CURRENT PAGE BLOCK ---
+
 /* block 44 script, replacing 43-dom.js whole.
    Jobs:
    1. exactly one #iAim, enforced at every write channel, emitter named in console
@@ -7,12 +88,6 @@
    4. a repeat row with no hours figure carries the file's own reason instead
       of the bare phrase, taken from the note the repeats view now sends with
       every blank, and the two causes keep their two different sentences
-   5. the standing sentence's number, [data-gtotal] inside the group whose id
-      is ignore, always shows the whole file's count and never the selection's,
-      filled in from CORPUS, d.corpus on the hero response or range.total from
-      api/facets, repainted after every filter change, placeholder only until
-      the count is known. Checked on /z/, /z/?operator=SWAA and
-      /z/?take=zone|ZONE+700: all three read 1,757,827.
    Plus the root background is synced to the body's computed background. */
 
 (function () {
@@ -313,6 +388,15 @@
 
   /* ---------- 4. a reason on every repeat row that has no hours figure ---------- */
 
+  /* The repeats view now sends a note with every group whose hours_between is
+     null, and the two causes carry two different notes. The rows themselves
+     are drawn elsewhere in the page, so this block meets them twice: it reads
+     the notes as they come back over the network, and when a rendered row
+     shows the bare phrase with no number in front of it, it swaps the phrase
+     for the short reason that matches the note. Both reasons are the file's
+     own limitation, never the tool's, and a figure that is present stands
+     untouched, zero included. */
+
   var REPEATS_PATH = '/z/api/repeats/';
   var PHRASE = 'hours between first and last';
   var FLAG = 'data-hrs44';
@@ -327,6 +411,7 @@
     catch (e) { return ''; }
   }
 
+  /* the short line tracks the note the view sent, one cause per note */
   function shortReason(note) {
     var n = normTxt(note);
     if (n.indexOf('do not agree') !== -1) return REASON_DISAGREE;
@@ -334,6 +419,7 @@
     return null;
   }
 
+  /* match a rendered row to its group by what the row itself shows */
   function findGroup(rowText) {
     var t = normTxt(rowText);
     for (var pass = 0; pass < 2; pass++) {
@@ -377,6 +463,7 @@
         }
       }
       if (!added) return;
+      /* rows patched with the fallback reason can now be done properly */
       var stale = document.querySelectorAll('[' + FLAG + '="fallback"]');
       for (var j = 0; j < stale.length; j++) {
         restoreFallback(stale[j]);
@@ -386,12 +473,7 @@
     } catch (e) {}
   }
 
-  function parseJson(text) {
-    try { return JSON.parse(text); } catch (e) { return null; }
-  }
-
-  /* read the notes however the page asks for them, and while the responses
-     are already in hand, listen for the file's own count (job 5) */
+  /* read the notes however the page asks for them */
   try {
     if (typeof window.fetch === 'function' && !window.__zRepeatHook) {
       var ofetch = window.fetch;
@@ -403,14 +485,11 @@
         } catch (e) {}
         var p = ofetch.apply(this, arguments);
         try {
-          if (p && typeof p.then === 'function') {
+          if (url.indexOf(REPEATS_PATH) !== -1 && p && typeof p.then === 'function') {
             p.then(function (res) {
               try {
                 if (res && typeof res.clone === 'function') {
-                  res.clone().json().then(function (d) {
-                    takeGroups(d);
-                    sniffCorpus(d, url);
-                  }).catch(function () {});
+                  res.clone().json().then(takeGroups).catch(function () {});
                 }
               } catch (e) {}
             }).catch(function () {});
@@ -428,13 +507,9 @@
       XMLHttpRequest.prototype.open = function (method, url) {
         var xhr = this;
         try {
-          var u = String(url || '');
-          if (u.indexOf(REPEATS_PATH) !== -1 || u.indexOf('/z/api/') !== -1) {
+          if (String(url || '').indexOf(REPEATS_PATH) !== -1) {
             xhr.addEventListener('load', function () {
-              try {
-                var d = parseJson(xhr.responseText);
-                if (d) { takeGroups(d); sniffCorpus(d, u); }
-              } catch (e) {}
+              try { takeGroups(JSON.parse(xhr.responseText)); } catch (e) {}
             });
           }
         } catch (e) {}
@@ -468,10 +543,12 @@
 
   function fixHoursNode(node) {
     try {
+      /* if the view's own full note is already on the page, leave it alone */
       if (node.nodeValue.indexOf('cannot be shown') !== -1) return;
     } catch (e) { return; }
     var el = node.parentElement;
     if (!el) return;
+    /* climb to the row, the smallest ancestor that talks about write-ups */
     var row = el, up = 0;
     while (row && up < 8) {
       var txt = '';
@@ -488,6 +565,8 @@
     try { rowText = row.textContent || ''; } catch (e) { return; }
     var idx = rowText.indexOf(PHRASE);
     if (idx === -1) return;
+    /* a bare number right in front of the phrase means the figure stands,
+       and 0 is a figure: both write-ups at the same airframe hours */
     var before = rowText.slice(0, idx).replace(/[\s\u00b7]+$/, '');
     var lastTok = before ? before.split(/\s+/).pop() : '';
     if (/^[\d][\d,]*$/.test(lastTok)) {
@@ -501,109 +580,6 @@
       node.nodeValue = node.nodeValue.split(PHRASE).join(reason);
       row.setAttribute(FLAG, g ? 'note' : 'fallback');
     } catch (e) {}
-  }
-
-  /* ---------- 5. the standing sentence's number is the file, not the selection ---------- */
-
-  /* The label around the ignore group promises the panels answer from the whole
-     file, so its figure must be the corpus. The page paints TOTAL there, which
-     is the current selection, and leaves the ellipsis whenever that selection
-     count is zero. This job owns the element instead: it takes the count only
-     from sources that hold the whole file, CORPUS in the instrument's scope,
-     d.corpus on the hero response, range.total from api/facets, and it rewrites
-     the element after every repaint, placeholder until the count is known and
-     the formatted count after, on every URL, filtered or not. */
-
-  var GT_SEL = '[data-gtotal]';
-  var GT_GROUP = 'ignore';
-  var corpusN = null;
-
-  function gtGood(v) {
-    v = +v;
-    return typeof v === 'number' && isFinite(v) && v > 0;
-  }
-
-  function gtFmt(n) {
-    try {
-      return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    } catch (e) { return String(n); }
-  }
-
-  function takeCorpus(v) {
-    if (corpusN != null || !gtGood(v)) return;
-    corpusN = Math.round(+v);
-    writeGtotal();
-  }
-
-  /* only whole file fields, never a response's selection total */
-  function sniffCorpus(data, url) {
-    try {
-      if (!data || typeof data !== 'object') return;
-      if (gtGood(data.corpus)) { takeCorpus(data.corpus); return; }
-      if (data.range && gtGood(data.range.total)) takeCorpus(data.range.total);
-    } catch (e) {}
-  }
-
-  /* reach for the instrument's own scope, whatever it is willing to hand over.
-     Bare typeof keeps an unset name from throwing, and the try around each
-     read keeps a closure bound name from stopping the others. */
-  function tryGlobals() {
-    if (corpusN != null) return;
-    try { if (typeof CORPUS !== 'undefined' && gtGood(CORPUS)) { takeCorpus(CORPUS); return; } } catch (e) {}
-    try { if (typeof heroData !== 'undefined' && heroData && gtGood(heroData.corpus)) { takeCorpus(heroData.corpus); return; } } catch (e) {}
-    try { if (typeof range !== 'undefined' && range && gtGood(range.total)) takeCorpus(range.total); } catch (e) {}
-  }
-
-  /* prefer the element inside the ignore group, else any [data-gtotal] */
-  function gtotalEl() {
-    var el = null;
-    try {
-      var grp = document.getElementById(GT_GROUP);
-      if (grp) el = grp.querySelector(GT_SEL);
-    } catch (e) {}
-    if (!el) {
-      try { el = document.querySelector(GT_SEL); } catch (e) { el = null; }
-    }
-    return el;
-  }
-
-  function writeGtotal() {
-    if (corpusN == null) return;
-    var txt = gtFmt(corpusN);
-    var els = [];
-    var main = gtotalEl();
-    if (main) els.push(main);
-    try {
-      var all = document.querySelectorAll(GT_SEL);
-      for (var i = 0; i < all.length; i++) {
-        if (els.indexOf(all[i]) === -1) els.push(all[i]);
-      }
-    } catch (e) {}
-    for (var j = 0; j < els.length; j++) {
-      try {
-        if ((els[j].textContent || '') !== txt) els[j].textContent = txt;
-      } catch (e) {}
-    }
-  }
-
-  /* the page repaints the label on every filter change; this runs after each
-     repaint and puts the corpus back, so the sentence keeps its promise */
-  var gtTries = 0;
-  var gtTimer = null;
-  function gtPoll() {
-    tryGlobals();
-    writeGtotal();
-    if (corpusN != null && gtTimer != null) { clearInterval(gtTimer); gtTimer = null; return; }
-    gtTries++;
-    if (gtTimer == null) {
-      gtTimer = setInterval(function () {
-        tryGlobals();
-        writeGtotal();
-        if (corpusN != null || ++gtTries > 200) {
-          if (gtTimer != null) { clearInterval(gtTimer); gtTimer = null; }
-        }
-      }, 100);
-    }
   }
 
   /* ---------- background and scheduling ---------- */
@@ -633,8 +609,6 @@
       try { sweep(); } catch (e) {}
       try { tapFix(document); } catch (e) {}
       try { patchRows(document); } catch (e) {}
-      try { tryGlobals(); } catch (e) {}
-      try { writeGtotal(); } catch (e) {}
       try { syncBg(); } catch (e) {}
     }, 80);
   }
@@ -649,7 +623,6 @@
     try { sweep(); } catch (e) {}
     try { tapFix(document); } catch (e) {}
     try { patchRows(document); } catch (e) {}
-    try { gtPoll(); } catch (e) {}
     try { syncBg(); } catch (e) {}
     if (mo) {
       try {
@@ -665,5 +638,4 @@
   }
   window.addEventListener('load', backstop);
   setTimeout(backstop, 400);
-  setTimeout(backstop, 1200);
 })();

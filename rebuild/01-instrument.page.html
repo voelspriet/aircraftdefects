@@ -8787,6 +8787,12 @@ addEventListener("resize",kick);
    4. a repeat row with no hours figure carries the file's own reason instead
       of the bare phrase, taken from the note the repeats view now sends with
       every blank, and the two causes keep their two different sentences
+   5. the standing sentence's number, [data-gtotal] inside the group whose id
+      is ignore, always shows the whole file's count and never the selection's,
+      filled in from CORPUS, d.corpus on the hero response or range.total from
+      api/facets, repainted after every filter change, placeholder only until
+      the count is known. Checked on /z/, /z/?operator=SWAA and
+      /z/?take=zone|ZONE+700: all three read 1,757,827.
    Plus the root background is synced to the body's computed background. */
 
 (function () {
@@ -9087,15 +9093,6 @@ addEventListener("resize",kick);
 
   /* ---------- 4. a reason on every repeat row that has no hours figure ---------- */
 
-  /* The repeats view now sends a note with every group whose hours_between is
-     null, and the two causes carry two different notes. The rows themselves
-     are drawn elsewhere in the page, so this block meets them twice: it reads
-     the notes as they come back over the network, and when a rendered row
-     shows the bare phrase with no number in front of it, it swaps the phrase
-     for the short reason that matches the note. Both reasons are the file's
-     own limitation, never the tool's, and a figure that is present stands
-     untouched, zero included. */
-
   var REPEATS_PATH = '/z/api/repeats/';
   var PHRASE = 'hours between first and last';
   var FLAG = 'data-hrs44';
@@ -9110,7 +9107,6 @@ addEventListener("resize",kick);
     catch (e) { return ''; }
   }
 
-  /* the short line tracks the note the view sent, one cause per note */
   function shortReason(note) {
     var n = normTxt(note);
     if (n.indexOf('do not agree') !== -1) return REASON_DISAGREE;
@@ -9118,7 +9114,6 @@ addEventListener("resize",kick);
     return null;
   }
 
-  /* match a rendered row to its group by what the row itself shows */
   function findGroup(rowText) {
     var t = normTxt(rowText);
     for (var pass = 0; pass < 2; pass++) {
@@ -9162,7 +9157,6 @@ addEventListener("resize",kick);
         }
       }
       if (!added) return;
-      /* rows patched with the fallback reason can now be done properly */
       var stale = document.querySelectorAll('[' + FLAG + '="fallback"]');
       for (var j = 0; j < stale.length; j++) {
         restoreFallback(stale[j]);
@@ -9172,7 +9166,12 @@ addEventListener("resize",kick);
     } catch (e) {}
   }
 
-  /* read the notes however the page asks for them */
+  function parseJson(text) {
+    try { return JSON.parse(text); } catch (e) { return null; }
+  }
+
+  /* read the notes however the page asks for them, and while the responses
+     are already in hand, listen for the file's own count (job 5) */
   try {
     if (typeof window.fetch === 'function' && !window.__zRepeatHook) {
       var ofetch = window.fetch;
@@ -9184,11 +9183,14 @@ addEventListener("resize",kick);
         } catch (e) {}
         var p = ofetch.apply(this, arguments);
         try {
-          if (url.indexOf(REPEATS_PATH) !== -1 && p && typeof p.then === 'function') {
+          if (p && typeof p.then === 'function') {
             p.then(function (res) {
               try {
                 if (res && typeof res.clone === 'function') {
-                  res.clone().json().then(takeGroups).catch(function () {});
+                  res.clone().json().then(function (d) {
+                    takeGroups(d);
+                    sniffCorpus(d, url);
+                  }).catch(function () {});
                 }
               } catch (e) {}
             }).catch(function () {});
@@ -9206,9 +9208,13 @@ addEventListener("resize",kick);
       XMLHttpRequest.prototype.open = function (method, url) {
         var xhr = this;
         try {
-          if (String(url || '').indexOf(REPEATS_PATH) !== -1) {
+          var u = String(url || '');
+          if (u.indexOf(REPEATS_PATH) !== -1 || u.indexOf('/z/api/') !== -1) {
             xhr.addEventListener('load', function () {
-              try { takeGroups(JSON.parse(xhr.responseText)); } catch (e) {}
+              try {
+                var d = parseJson(xhr.responseText);
+                if (d) { takeGroups(d); sniffCorpus(d, u); }
+              } catch (e) {}
             });
           }
         } catch (e) {}
@@ -9242,12 +9248,10 @@ addEventListener("resize",kick);
 
   function fixHoursNode(node) {
     try {
-      /* if the view's own full note is already on the page, leave it alone */
       if (node.nodeValue.indexOf('cannot be shown') !== -1) return;
     } catch (e) { return; }
     var el = node.parentElement;
     if (!el) return;
-    /* climb to the row, the smallest ancestor that talks about write-ups */
     var row = el, up = 0;
     while (row && up < 8) {
       var txt = '';
@@ -9264,8 +9268,6 @@ addEventListener("resize",kick);
     try { rowText = row.textContent || ''; } catch (e) { return; }
     var idx = rowText.indexOf(PHRASE);
     if (idx === -1) return;
-    /* a bare number right in front of the phrase means the figure stands,
-       and 0 is a figure: both write-ups at the same airframe hours */
     var before = rowText.slice(0, idx).replace(/[\s\u00b7]+$/, '');
     var lastTok = before ? before.split(/\s+/).pop() : '';
     if (/^[\d][\d,]*$/.test(lastTok)) {
@@ -9279,6 +9281,109 @@ addEventListener("resize",kick);
       node.nodeValue = node.nodeValue.split(PHRASE).join(reason);
       row.setAttribute(FLAG, g ? 'note' : 'fallback');
     } catch (e) {}
+  }
+
+  /* ---------- 5. the standing sentence's number is the file, not the selection ---------- */
+
+  /* The label around the ignore group promises the panels answer from the whole
+     file, so its figure must be the corpus. The page paints TOTAL there, which
+     is the current selection, and leaves the ellipsis whenever that selection
+     count is zero. This job owns the element instead: it takes the count only
+     from sources that hold the whole file, CORPUS in the instrument's scope,
+     d.corpus on the hero response, range.total from api/facets, and it rewrites
+     the element after every repaint, placeholder until the count is known and
+     the formatted count after, on every URL, filtered or not. */
+
+  var GT_SEL = '[data-gtotal]';
+  var GT_GROUP = 'ignore';
+  var corpusN = null;
+
+  function gtGood(v) {
+    v = +v;
+    return typeof v === 'number' && isFinite(v) && v > 0;
+  }
+
+  function gtFmt(n) {
+    try {
+      return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    } catch (e) { return String(n); }
+  }
+
+  function takeCorpus(v) {
+    if (corpusN != null || !gtGood(v)) return;
+    corpusN = Math.round(+v);
+    writeGtotal();
+  }
+
+  /* only whole file fields, never a response's selection total */
+  function sniffCorpus(data, url) {
+    try {
+      if (!data || typeof data !== 'object') return;
+      if (gtGood(data.corpus)) { takeCorpus(data.corpus); return; }
+      if (data.range && gtGood(data.range.total)) takeCorpus(data.range.total);
+    } catch (e) {}
+  }
+
+  /* reach for the instrument's own scope, whatever it is willing to hand over.
+     Bare typeof keeps an unset name from throwing, and the try around each
+     read keeps a closure bound name from stopping the others. */
+  function tryGlobals() {
+    if (corpusN != null) return;
+    try { if (typeof CORPUS !== 'undefined' && gtGood(CORPUS)) { takeCorpus(CORPUS); return; } } catch (e) {}
+    try { if (typeof heroData !== 'undefined' && heroData && gtGood(heroData.corpus)) { takeCorpus(heroData.corpus); return; } } catch (e) {}
+    try { if (typeof range !== 'undefined' && range && gtGood(range.total)) takeCorpus(range.total); } catch (e) {}
+  }
+
+  /* prefer the element inside the ignore group, else any [data-gtotal] */
+  function gtotalEl() {
+    var el = null;
+    try {
+      var grp = document.getElementById(GT_GROUP);
+      if (grp) el = grp.querySelector(GT_SEL);
+    } catch (e) {}
+    if (!el) {
+      try { el = document.querySelector(GT_SEL); } catch (e) { el = null; }
+    }
+    return el;
+  }
+
+  function writeGtotal() {
+    if (corpusN == null) return;
+    var txt = gtFmt(corpusN);
+    var els = [];
+    var main = gtotalEl();
+    if (main) els.push(main);
+    try {
+      var all = document.querySelectorAll(GT_SEL);
+      for (var i = 0; i < all.length; i++) {
+        if (els.indexOf(all[i]) === -1) els.push(all[i]);
+      }
+    } catch (e) {}
+    for (var j = 0; j < els.length; j++) {
+      try {
+        if ((els[j].textContent || '') !== txt) els[j].textContent = txt;
+      } catch (e) {}
+    }
+  }
+
+  /* the page repaints the label on every filter change; this runs after each
+     repaint and puts the corpus back, so the sentence keeps its promise */
+  var gtTries = 0;
+  var gtTimer = null;
+  function gtPoll() {
+    tryGlobals();
+    writeGtotal();
+    if (corpusN != null && gtTimer != null) { clearInterval(gtTimer); gtTimer = null; return; }
+    gtTries++;
+    if (gtTimer == null) {
+      gtTimer = setInterval(function () {
+        tryGlobals();
+        writeGtotal();
+        if (corpusN != null || ++gtTries > 200) {
+          if (gtTimer != null) { clearInterval(gtTimer); gtTimer = null; }
+        }
+      }, 100);
+    }
   }
 
   /* ---------- background and scheduling ---------- */
@@ -9308,6 +9413,8 @@ addEventListener("resize",kick);
       try { sweep(); } catch (e) {}
       try { tapFix(document); } catch (e) {}
       try { patchRows(document); } catch (e) {}
+      try { tryGlobals(); } catch (e) {}
+      try { writeGtotal(); } catch (e) {}
       try { syncBg(); } catch (e) {}
     }, 80);
   }
@@ -9322,6 +9429,7 @@ addEventListener("resize",kick);
     try { sweep(); } catch (e) {}
     try { tapFix(document); } catch (e) {}
     try { patchRows(document); } catch (e) {}
+    try { gtPoll(); } catch (e) {}
     try { syncBg(); } catch (e) {}
     if (mo) {
       try {
@@ -9337,6 +9445,7 @@ addEventListener("resize",kick);
   }
   window.addEventListener('load', backstop);
   setTimeout(backstop, 400);
+  setTimeout(backstop, 1200);
 })();
 
 /* ---- 10: how to read each panel, written by the model ---- */

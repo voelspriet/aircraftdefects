@@ -1,3 +1,4 @@
+```js
 /* block 44 script, replacing 43-dom.js whole.
    Jobs:
    1. exactly one #iAim, enforced at every write channel, emitter named in console
@@ -667,3 +668,4 @@
   setTimeout(backstop, 400);
   setTimeout(backstop, 1200);
 })();
+```

@@ -374,6 +374,41 @@ def run(url, is_parent=False):
                     + ("; e.g. " + durblank[0] if durblank else "")
                     if (durneg or durblank) else f"{durtotal} rows over 3 airframes"))
 
+        # --- filtered pages -------------------------------------------------
+        # Everything above this ran on the landing page, where the group label is
+        # correct. On a filtered page it is not: with operator=SWAA it printed
+        # "EACH ANSWERS FROM ALL 244,532 REPORTS", which is Southwest's filtered
+        # total, inside a sentence promising it ignores the selection. With a zone
+        # filter the number was a literal ellipsis. A harness that only ever loads
+        # one URL cannot see either.
+        CORPUS = "1,757,827"
+        label_faults = []
+        # Only URLs the app itself produces. "?take=zone|ZONE 700" is a
+        # data-take ATTRIBUTE value, not a query parameter: loading it returns
+        # 400 from two endpoints and renders "No search was run". Testing an
+        # invented URL invents a bug - it cost a false report on 30 August.
+        # A click on the Landing gear legend row produces "?zone=ZONE+700".
+        for _q, _name in (("?operator=SWAA", "operator"), ("?zone=ZONE+700", "zone")):
+            try:
+                pg.goto(f"{base}/z/{_q}", wait_until="networkidle", timeout=60000)
+                pg.wait_for_timeout(4000)
+            except Exception:
+                label_faults.append(f"{_name}: page would not load"); continue
+            lab = pg.evaluate("""()=>{const l=[...document.querySelectorAll('.vglab')]
+                .find(e=>/IGNORE YOUR SELECTION/i.test(e.innerText||''));
+              return l?(l.innerText||'').trim():null;}""")
+            if not lab:
+                label_faults.append(f"{_name}: label not found"); continue
+            if "…" in lab or "..." in lab:
+                label_faults.append(f"{_name}: number missing, reads '… REPORTS'")
+            elif CORPUS not in lab:
+                import re as _re
+                got = _re.search(r"FROM ALL ([\d,]+) REPORTS", lab)
+                label_faults.append(
+                    f"{_name}: says {got.group(1) if got else '?'} where the sentence promises {CORPUS}")
+        c.add("the ignores-your-selection label keeps the whole-corpus number",
+              not label_faults, "; ".join(label_faults) if label_faults else "operator and zone filters checked")
+
         c.add("no runtime errors", not errs, "; ".join(errs[:2]))
         br.close()
     return c.report()

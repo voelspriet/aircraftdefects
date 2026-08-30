@@ -10,7 +10,7 @@ OUT = os.path.join(HERE, 'out'); os.makedirs(OUT, exist_ok=True)
 DUR = json.load(open(os.path.join(V, 'durations.json')))
 TAIL = 0.7   # air after each voice block
 VF = 'scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,fps=30,format=yuv420p'
-ENC = ['-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-ac', '2']
+ENC = ['-c:v', 'libx264', '-preset', 'medium', '-crf', '16', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-ac', '2']
 
 def run(args):
     r = subprocess.run(['ffmpeg', '-y', '-v', 'error'] + args, capture_output=True, text=True)
@@ -85,14 +85,33 @@ def build_open():
     clipseg(seg('open_raw'), seg('01_open'), 0, overlay=os.path.join(K, 'title.png'), ov_from=6.0)
 
 def build_why():
-    v, d = voice('2a'); run(['-i', os.path.join(K, 'photo_push.mp4'), '-i', v, '-map', '0:v', '-map', '1:a', '-t', '%.3f' % d, '-vf', 'tpad=stop_mode=clone:stop_duration=3,' + VF] + ENC + [seg('02a')])
-    v, d = voice('2b'); still(os.path.join(K, 'raw.png'), d, seg('02b'), v)
-    # 2c: the red A, then the men "looking for patterns", then the relatives, then the A again
-    v, d = voice('2c')
-    a1 = 6.5; c_len = probe(os.path.join(CL, 'C.mp4')); b_len = probe(os.path.join(CL, 'B.mp4')); a2 = max(1.5, d - a1 - c_len - b_len)
-    still(os.path.join(K, 'a.png'), a1, seg('02c_1'), fade=0.3); clipseg(os.path.join(CL, 'C.mp4'), seg('02c_2'), -14); clipseg(os.path.join(CL, 'B.mp4'), seg('02c_3'), -14); still(os.path.join(K, 'a.png'), a2, seg('02c_4'))
-    concat([seg('02c_%d' % i) for i in range(1, 5)], seg('02c_v'))
-    run(['-i', seg('02c_v'), '-i', v, '-filter_complex', '[0:a][1:a]amix=inputs=2:duration=first:normalize=0[a]', '-map', '0:v', '-map', '[a]', '-t', '%.3f' % d] + ENC + [seg('02c')])
+    C4 = os.path.join(HERE, 'cap4')
+    def part(src, start, length, out, level=None):
+        """A piece of a capture or clip, video only unless level (dB) keeps its sound."""
+        if level is None:
+            run(['-ss', '%.3f' % start, '-t', '%.3f' % length, '-i', src, '-f', 'lavfi', '-t', '%.3f' % length, '-i', 'anullsrc=r=48000:cl=stereo', '-vf', VF, '-map', '0:v', '-map', '1:a', '-shortest'] + ENC + [out])
+        else:
+            run(['-ss', '%.3f' % start, '-t', '%.3f' % length, '-i', src, '-vf', VF, '-af', 'volume=%ddB' % level] + ENC + [out])
+    def assemble(pieces, voice_wav, dur, out):
+        concat(pieces, out + '.v.mp4')
+        run(['-i', out + '.v.mp4', '-i', voice_wav, '-filter_complex', '[0:a][1:a]amix=inputs=2:duration=first:normalize=0[a]', '-map', '0:v', '-map', '[a]', '-t', '%.3f' % dur] + ENC + [out])
+    faa1 = os.path.join(C4, 'faa.mp4'); faa2 = os.path.join(C4, 'faa2.mp4')
+    m2 = {w: t for t, w in json.load(open(os.path.join(C4, 'faa2.json')))}; m1 = {w: t for t, w in json.load(open(os.path.join(C4, 'faa.json')))}
+    # 2a: the photo, four seconds; the relatives; the men looking for patterns; the government's form and its rows
+    v, d = voice('2a'); c_len = probe(os.path.join(CL, 'C.mp4')); b_len = probe(os.path.join(CL, 'B.mp4'))
+    run(['-t', '4.0', '-i', os.path.join(K, 'photo_push.mp4'), '-f', 'lavfi', '-t', '4.0', '-i', 'anullsrc=r=48000:cl=stereo', '-vf', VF, '-map', '0:v', '-map', '1:a', '-shortest'] + ENC + [seg('02a_1')])
+    clipseg(os.path.join(CL, 'B.mp4'), seg('02a_2'), -14); clipseg(os.path.join(CL, 'C.mp4'), seg('02a_3'), -14)
+    rest = d - 4.0 - b_len - c_len
+    part(faa2, m2['form'] - 1.0, rest, seg('02a_4'))
+    assemble([seg('02a_1'), seg('02a_2'), seg('02a_3'), seg('02a_4')], v, d, seg('02a'))
+    # 2b: rows of codes scrolling, then the record's own coded form
+    v, d = voice('2b'); t_rows = m2['form'] - 1.0 + rest
+    part(faa2, t_rows, min(m2['scrolled'] - t_rows, d * 0.55), seg('02b_1')); part(faa2, m2['detail'] - 0.5, d - min(m2['scrolled'] - t_rows, d * 0.55), seg('02b_2'))
+    assemble([seg('02b_1'), seg('02b_2')], v, d, seg('02b'))
+    # 2c: the red A; the FAA rows from the film; the two rows the site returns on N704AL
+    v, d = voice('2c'); a_len = probe(os.path.join(CL, 'A.mp4'))
+    still(os.path.join(K, 'a.png'), 4.5, seg('02c_1'), fade=0.3); clipseg(os.path.join(CL, 'A.mp4'), seg('02c_2'), -14); part(faa1, m1['results'] - 0.3, d - 4.5 - a_len, seg('02c_3'))
+    assemble([seg('02c_1'), seg('02c_2'), seg('02c_3')], v, d, seg('02c'))
     v, d = voice('2d'); run(['-i', os.path.join(K, 'counter.webm'), '-i', v, '-map', '0:v', '-map', '1:a', '-t', '%.3f' % d, '-vf', 'tpad=stop_mode=clone:stop_duration=25,' + VF] + ENC + [seg('02d')])
 
 def marks(name):
@@ -129,7 +148,7 @@ def build_site():
     still(os.path.join(K, 'end.png'), 5.0, seg('07_end'), fade=0.5)
 
 def final():
-    order = ['01_open', '02a', '02b', '02c', '02d', '03', '04a', '04b', '04c', '04d', '04e', '04f', '05a', '05b', '06', '07_end']
+    order = ['01_open', '02a', '02b', '02c', '02d', '03', '04a', '04b', '04c', '04d', '04e', '04f', '05', '05a', '05b', '06', '07_end']
     files = [seg(n) for n in order if os.path.exists(seg(n))]
     concat(files, seg('film_raw'))
     run(['-i', seg('film_raw'), '-af', 'loudnorm=I=-18:TP=-1.5:LRA=9', '-c:v', 'copy'] + ENC[6:] + [os.path.join(HERE, 'aircraftdefects-z.mp4')])

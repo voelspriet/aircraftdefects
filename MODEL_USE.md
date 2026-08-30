@@ -105,18 +105,16 @@ The line at the top of this file, "everything on the page is written by the
 model", is the intent and it was not precise enough to be checkable. This section
 is the precise version. Every figure here can be counted from the repository.
 
-    served page, raw                 620,352 characters   (recounted 30 August, after 50)
-      model-written                    592,369   95.5%
-      hand-written                      27,983   4.5%
-        rebuild/bridge.js.bak             13,228
-        rebuild/47-hand.js                 2,618
-        rebuild/48-hand.js                 5,138
-        rebuild/49-hand.js                 2,756
-        rebuild/49-hand.css                  976
-        rebuild/50-hand.js                 1,086
-        rebuild/50-hand.css                2,181
-      plus one hand edit inside a model block: 1,160 characters REMOVED from
-      rebuild/42-dom.js (the height-pinning; backup 42-dom.js.bak-49)
+    served page, raw                620,359 characters
+      model-written                 591,890   95.4%
+      hand-written                   28,469   4.6%
+        rebuild/bridge.js.bak               13,226
+        rebuild/47-hand.js                   2,618
+        rebuild/48-hand.js                   5,137
+        rebuild/49-hand.css                    976
+        rebuild/49-hand.js                   2,756
+        rebuild/50-hand.css                  2,670
+        rebuild/50-hand.js                   1,086
 
 **`rebuild/bridge.js.bak`, 13,226 characters, is hand-written.** It joins the two
 halves the model built separately. The controls were briefed to call `search(off)`

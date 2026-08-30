@@ -19,9 +19,10 @@ questions, a record table carrying the mechanic's own words, a case sheet with
 seventeen named fields as a focus-trapped dialog, sixteen panels, a phone layout,
 and nine research features it designed itself.
 
-It wrote all of it. At the time of writing, 95.5% of the served page is the
-model's, and the 4.5% that is not is itemised in `MODEL_USE.md` with the file
-sizes, because a claim like that is worth nothing unless someone can check it.
+It wrote all of it. The share that is not the model's is itemised in
+`MODEL_USE.md`, file by file with the character counts, and recounted by
+`build/count_provenance.py` so that the number in that table is the repository's
+rather than a claim about it.
 
 Three behaviours are worth naming first, because they are the reason we would use
 this model again for journalism, where being wrong in public is the whole risk.

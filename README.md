@@ -72,7 +72,10 @@ words underneath and every abbreviation explained.
 
 ## What is not the model's
 
-Seven files of the served page are hand-written, 4.5% of it by character count, plus one edit inside a model block.
+Part of the served page is hand-written, plus one edit inside a model block.
+The share is a moving number while faults are still being fixed by hand, so it is
+counted in one place, [`MODEL_USE.md`](MODEL_USE.md), by
+[`build/count_provenance.py`](build/count_provenance.py), and not repeated here.
 `rebuild/bridge.js.bak` joins the two halves the model built separately.
 `rebuild/47-hand.js` fixes two faults found by looking at the screen on 30 August
 that two model rounds did not land: an empty state shown over live results, and
@@ -119,7 +122,7 @@ are in [`docs/FINDINGS.md`](docs/FINDINGS.md).
 | [`app/app.py`](app/app.py) | the service, and the nine research builds |
 | [`rebuild/specs/`](rebuild/specs/) | the specifications the model was given, 12,243 words |
 | [`build/`](build/) | the measurement harnesses |
-| [`MODEL_USE.md`](MODEL_USE.md) | how the model is driven, and what share of the page is its own |
+| [`MODEL_USE.md`](MODEL_USE.md) | how the model is driven, and what share of the page is its own, counted rather than claimed |
 | [`docs/PLAN.md`](docs/PLAN.md) | the work plan, and what is genuinely done |
 
 The working record sits under [`rebuild/`](rebuild/), which has its own guide:

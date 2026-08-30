@@ -1098,7 +1098,7 @@ def glm_stream(prompt, effort="low", max_tokens=1500):
         for ch in d.get("choices", []):
             piece = (ch.get("delta") or {}).get("content")
             if piece:
-                yield ("delta", piece)
+                yield ("delta", piece.replace("**", ""))
     yield ("usage", usage)
 
 
@@ -1360,14 +1360,23 @@ ZAI_SEARCH = "https://api.z.ai/api/paas/v4/web_search"
 def web_search(query, count=10):
     r = requests.post(ZAI_SEARCH, timeout=60, headers={"Authorization": "Bearer " + key(), "Content-Type": "application/json"},
                       json={"search_query": query[:200], "search_engine": "search_pro", "search_recency_filter": "noLimit",
-                            "count": count, "content_size": "medium"})
+                            "count": max(count * 3, 20), "content_size": "medium"})
     if r.status_code != 200:
         raise RuntimeError("web search %s" % r.status_code)
     out = []
     for x in r.json().get("search_result") or []:
-        if x.get("link") and x.get("content"):
-            out.append({"title": x.get("title") or "", "url": x["link"], "text": (x.get("content") or "")[:1200],
-                        "date": x.get("publish_date") or ""})
+        if not (x.get("link") and x.get("content")):
+            continue
+        title = x.get("title") or ""
+        if re.search(r"[\u3040-\u30ff\u4e00-\u9fff\uac00-\ud7af\u0400-\u04ff]", title + x["link"]):
+            continue   # mirrors and translations; the reader wants the source
+        host = re.sub(r"^https?://(www\.)?", "", x["link"]).split("/")[0]
+        if host in ("nutanica.com", "wikizero.net", "gwern.net", "newsbreak.com"):
+            continue
+        rank = 0 if host.endswith(".gov") else 1 if re.search(r"(wikipedia|ntsb|faa|reuters|apnews|nytimes|latimes|usatoday|bbc|theguardian|cnn|cbsnews|nbcnews|seattletimes|netflix|variety|time\.com|hollywoodreporter)", host) else 2
+        out.append({"title": title, "url": x["link"], "text": (x.get("content") or "")[:1200],
+                    "date": x.get("publish_date") or "", "rank": rank})
+    out.sort(key=lambda h: h["rank"])
     return out[:count]
 
 @app.get("/z/api/stream/news")
@@ -1381,6 +1390,7 @@ def stream_news():
         yield _sse("meta", {"what": "the web, not the file"})
         if topic in _NEWS and time.time() - _NEWS[topic]["at"] < 6 * 3600:
             yield _sse("delta", _NEWS[topic]["text"])
+            yield _sse("sources", _NEWS[topic].get("sources") or [])
             yield _sse("done", {"seconds": 0.1, "model": MODEL, "effort": "web, cached"})
             return
         try:
@@ -1401,15 +1411,104 @@ def stream_news():
                     text += x
                     yield _sse("delta", x)
             used = sorted({int(n) for n in re.findall(r"\[(\d{1,2})\]", text) if 0 < int(n) <= len(hits)})
-            srcs = "\n\nSOURCES:\n" + "\n".join("[%d] %s" % (n, hits[n - 1]["url"]) for n in used) if used else ""
-            if srcs:
-                yield _sse("delta", srcs)
-            _NEWS[topic] = {"text": text + srcs, "at": time.time()}
+            srcs = [{"n": n, "url": hits[n - 1]["url"], "title": hits[n - 1]["title"][:120]} for n in used]
+            yield _sse("sources", srcs)
+            _NEWS[topic] = {"text": text, "sources": srcs, "at": time.time()}
             yield _sse("done", {"seconds": round(time.time() - t0, 1), "model": MODEL, "effort": "web, %d results read" % len(hits)})
         except Exception as e:
             yield _sse("error", {"message": str(e)[:200], "seconds": round(time.time() - t0, 1)})
     return Response(stream_with_context(gen()), mimetype="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
+
+
+# ---- hand-written, 31 August 2026: what differs between two airlines ---------
+# The counts come from /api/compare; the model reads 150 write-ups from each
+# side and only phrases the difference in the mechanics' words. Quotes verified.
+@app.get("/z/api/stream/differ")
+def stream_differ():
+    a = (request.args.get("a") or "").strip().upper()[:8]; b = (request.args.get("b") or "").strip().upper()[:8]
+    if not a or not b or a == b:
+        return jsonify(error="two airlines needed"), 400
+    base = {k: v for k, v in request.args.items() if v and k not in ("hero", "view", "case", "v", "a", "b", "operator")}
+    ra = api("/api/search", operator=a, limit=150, **base); rb = api("/api/search", operator=b, limit=150, **base)
+    rows_a = ra.get("rows") or []; rows_b = rb.get("rows") or []
+    try:
+        cmp_ = api("/api/compare", field="operator", a=a, b=b)
+        counts = {a: [(x.get("label"), x.get("n"), round((x.get("share") or 0) * 100, 1)) for x in (cmp_.get("a") or {}).get("systems", [])[:8]],
+                  b: [(x.get("label"), x.get("n"), round((x.get("share") or 0) * 100, 1)) for x in (cmp_.get("b") or {}).get("systems", [])[:8]]}
+    except Exception:
+        counts = {}
+    def lst(rows):
+        return "\n".join("[%s] %s" % (r.get("OperatorControlNumber"), (r.get("Discrepancy") or "").strip()[:450]) for r in rows if (r.get("Discrepancy") or "").strip())
+    na, nb = len(rows_a), len(rows_b)
+    if na < 12 or nb < 12:
+        def gen():
+            yield _sse("meta", {"read": na + nb, "of": (ra.get("total") or 0) + (rb.get("total") or 0), "what": "write-ups"})
+            yield _sse("abstain", {"text": "Too few write-ups on one side to compare (%d and %d read)." % (na, nb)})
+        return Response(stream_with_context(gen()), mimetype="text/event-stream")
+    prompt = ("Two airlines' FAA service difficulty reports. %s filed %s reports, %s filed %s (as counted, not rates; fleet size "
+              "and filing habits differ, so never say one is safer or worse). Their share of reports by system, counted: %s.\n\n"
+              "Below are the newest %d write-ups from %s and the newest %d from %s, verbatim. For a reader who has never seen "
+              "one, write plain prose in three short paragraphs, no headings: what both airlines' write-ups have in common; what "
+              "appears in %s's write-ups and not %s's; what appears in %s's and not %s's. Each paragraph ends with one or two "
+              "short quotes of at most fifteen words in the mechanic's own capitals, each followed by its record number in "
+              "square brackets exactly as given. Expand shorthand the first time. Say 'several' rather than a count you have not "
+              "verified. %s\n\n== %s ==\n%s\n\n== %s ==\n%s"
+              % (a, "{:,}".format(ra.get("total") or 0), b, "{:,}".format(rb.get("total") or 0), json.dumps(counts),
+                 na, a, nb, b, a, b, b, a, ABSTAIN, a, lst(rows_a), b, lst(rows_b)))
+    recs, meta_of = _recs_of(rows_a + rows_b)
+    return _stream_response({"read": na + nb, "of": (ra.get("total") or 0) + (rb.get("total") or 0), "what": "write-ups, %d and %d" % (na, nb)},
+                            prompt, "low", 6000, recs=recs, meta_of=meta_of)
+
+
+# ---- hand-written, 31 August 2026: one airframe, end to end -----------------
+# Every report for one tail in defect-date order. Gaps over a year are inserted
+# by the server as markers so the model cannot bridge them; filing lag is given
+# per record; causal verbs are banned. Quotes verified.
+@app.get("/z/api/stream/airframe")
+def stream_airframe():
+    import datetime as _dt
+    tail = (request.args.get("tail") or "").strip().upper().lstrip("N")[:8]
+    if not tail:
+        return jsonify(error="no tail"), 400
+    d = api("/api/aircraft/N" + tail)
+    rows = d.get("rows") or []
+    def dt(x):
+        m = re.match(r"(\d\d)/(\d\d)/(\d{4})", x or "")
+        return _dt.date(int(m.group(3)), int(m.group(1)), int(m.group(2))) if m else None
+    rows = [r for r in rows if dt(r.get("DifficultyDate"))]
+    rows.sort(key=lambda r: dt(r.get("DifficultyDate")))
+    rows = rows[-300:]
+    n = len(rows)
+    if n < 3:
+        def gen():
+            yield _sse("meta", {"read": n, "of": d.get("count", n), "what": "reports on N" + tail})
+            yield _sse("abstain", {"text": "Only %d report%s on this aircraft: too few for a story. Read them one by one." % (n, "" if n == 1 else "s")})
+        return Response(stream_with_context(gen()), mimetype="text/event-stream")
+    lines = []; prev = None
+    for r in rows:
+        day = dt(r.get("DifficultyDate"))
+        if prev and (day - prev).days > 365:
+            lines.append("---- NOTHING FILED between %s and %s (%d days). This says nothing about the aircraft, only about the file. ----" % (prev.isoformat(), day.isoformat(), (day - prev).days))
+        lag = ""
+        rd = dt(r.get("ReceivedDate") or r.get("DateReceived") or "")
+        if rd:
+            lag = " (reached the FAA %d days later)" % max(0, (rd - day).days)
+        lines.append("[%s] %s%s · %s hours · %s\n%s" % (r.get("OperatorControlNumber"), day.isoformat(), lag, r.get("AircraftTotalTime") or "?", r.get("OperatorDesignator") or "", (r.get("Discrepancy") or "").strip()[:500]))
+        prev = day
+    mk = ((rows[0].get("AircraftMake") or "") + " " + (rows[0].get("AircraftModel") or "")).strip()
+    prompt = ("Every FAA service difficulty report filed on one aircraft, N%s, a %s, in date order, %d reports, oldest first. "
+              "Write its story for a reader who has never seen one of these forms: one short paragraph per turning point "
+              "(at most eight paragraphs), each opening with the date written out, saying in plain words what was found and "
+              "what was done, and ending with one quote of at most fifteen words in the mechanic's own capitals followed by "
+              "its record number in square brackets exactly as given. Where a NOTHING FILED marker appears, write exactly one "
+              "sentence: 'Nothing was filed between X and Y; that says nothing about the aircraft, only about the file.' "
+              "Never use 'because', 'caused', 'led to' or 'due to'; the file records no causes. Never say a later report is "
+              "the same fault as an earlier one unless the write-up itself refers back to it. Say nothing about safety. "
+              "Expand shorthand the first time. %s\n\n%s" % (tail, mk or "aircraft", n, ABSTAIN, "\n\n".join(lines)))
+    recs, meta_of = _recs_of(rows)
+    return _stream_response({"read": n, "of": d.get("count", n), "what": "reports on N" + tail + ", oldest first"},
+                            prompt, "low", 8000, recs=recs, meta_of=meta_of)
 
 @app.get("/z/api/stream/vocab")
 def stream_vocab():

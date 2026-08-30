@@ -2,6 +2,8 @@
 
 **Live: [aircraftdefects.com](https://aircraftdefects.com/) · MIT · GLM-5.3-Flash reads the file live** (the earlier desk is at /try1)
 
+**Demo film (5:33):** https://aircraftdefects.com/z/img/film-v5.mp4
+
 A government can publish everything it holds and still answer none of your
 questions. The FAA publishes 1,757,827 aircraft defect reports going back to
 1995, on 54,634 aircraft, free to read and almost never read. A report says

@@ -1,7 +1,72 @@
 # How GLM-5.3-Flash is driven
 
-Everything on the page is written by the model. This file records how it is
-asked, what that costs, and where it went wrong.
+Two pages are served from this repository, and the model's part in them is
+different, so this file says which is which before anything else.
+
+**aircraftdefects.com/z**, the page a visitor lands on, is a hand-written frame
+(`rebuild/z2.html`, 81,954 characters, written by Claude on 30 and 31 August 2026
+at Henk's decision, after two model rounds against the previous page did not
+land). On that page GLM-5.3-Flash is not the author of the code. It is the
+reader of the file: every teal block is the model reading FAA write-ups live,
+and every one of those calls is listed below with its prompt, its cost and its
+guard.
+
+**aircraftdefects.com/z/rebuilt** is the earlier page, written by the model from
+written specifications (`rebuild/specs/`), and left in place so the two can be
+compared. Its provenance is counted by `build/count_provenance.py` and recorded
+at the end of this file.
+
+**The service**, `app/app.py`, is 90,003 bytes, of which 40,858 (45.4%) sit in
+blocks headed `# ---- hand-written` and the rest is the model's. Count it:
+
+    python3 - <<'EOF'
+    s=open('app/app.py').read();h=0;on=False
+    for l in s.split('\n'):
+        if l.startswith('# ----'): on='hand-written' in l
+        if on: h+=len(l)+1
+    print(len(s),h)
+    EOF
+
+## What the model reads live on /z, call by call
+
+Every block streams (SSE), states what it read ("300 of 12,397 write-ups, newest
+first, not a sample of the rest"), how long it took and how many tokens, and
+abstains in a sentence when the write-ups do not carry an answer. All at
+`reasoning_effort: low`. Measured 31 August 2026.
+
+| block | input | output | guard | measured |
+|---|---|---|---|---|
+| The specimen, "in plain English" | the whole record decoded by the FAA's own tables, plus the write-up, dates spelled out ("5 January 2024", because the model read 01/05/2024 as 1 May) | 110 words for a member of the public, then `TERMS:` for Perplexity links | pre-read at ingest for 15 landing states, cached on disk by record id; 0.1 s from cache | 4.7 to 10.9 s live |
+| Five questions on any case sheet | same record | explain, danger, repair, why, what to check next (the last returns clickable searches) | one record, quotes verified | 2 to 9 s |
+| What recurs here | the newest 300 write-ups of the selection | narrative prose, one quote per paragraph with its record number | Prove it; next three clicks | 30 to 40 s, ~260k tokens |
+| A question the filters cannot hold | the newest 200 write-ups plus the counted breakdowns | says first what the file cannot tell (danger, injuries, rates), then the closest thing it can, with quotes | Prove it; next three; never says "most dangerous" | 13 s, 18,900 tokens |
+| Ask the file (filters) | the question, the FAA code tables, the operator list | draft chips, nothing runs until Run | codes outside the tables are dropped and listed; it invented WN for Southwest on first test | 3 to 6 s |
+| One airframe, end to end | every report on one tail, oldest first, gaps over a year inserted by the server as markers, filing lag per record | one dated paragraph per turning point, each with its record | "because", "caused", "led to", "due to" banned; a gap is printed, never bridged | 27.7 s for 300 reports, 31,800 tokens |
+| What differs, two airlines | the newest 150 write-ups from each, plus the counted shares by system | three paragraphs: shared, only A, only B | counts are the file's; "never say one is safer or worse" | 22.5 s, 24,400 tokens |
+| How the trade says it | up to 60 write-ups carrying the word | what mechanics mean by it, with records | abstains under 10 uses | 5 to 15 s |
+| The Freefall page, "what the NTSB found" and "what the film says" | a z.ai web search run by the server first (mirrors and translations dropped, .gov and named outlets first); the model sees only those results | 220 words, every fact numbered to a result; sources rendered as named links | labelled "the web, not the file"; on first attempt the model skipped the search tool and insisted the film was *Downfall* (2022), which is why the search is now done server-side and the model is held to it | 10 to 19 s |
+
+### Prove it
+
+After every stream ends, the server splits the answer into sentences and finds
+every quote: text in quotation marks, or the mechanics' capitals directly before
+a `[record]`. Each quote is normalised and checked as a literal substring of the
+cited record (or of the single record being read). A sentence with a quote that
+fails is deleted before the page shows the final text; the page prints "41 quotes
+checked, 40 verified, 1 sentence removed", and any sentence that rests on records
+can be clicked to see them, with the quoted fragment. Counted facts such as
+"(AALA, 514)" are not quotes and are left alone; that false positive was found
+and fixed on the first live run. Deterministic, no extra tokens.
+Code: `verify_text()` in `app/app.py`.
+
+### Next three clicks
+
+The recurs and question prompts end with a `NEXT:` JSON tail naming up to three
+narrower slices. The server resolves each against the file and prints the real
+count; a slice with zero reports is dropped. Labelled "the model's suggestions,
+not a ranking".
+
+## The earlier page (/z/rebuilt): how it was written
 
 ## The model
 
@@ -99,28 +164,21 @@ retracted for exactly that reason: its adjudicator turned out to be a constant
 rather than a judge, so it agreed with everything. See F1 in
 [`docs/FINDINGS.md`](docs/FINDINGS.md).
 
-## What is not written by the model
+## What is not written by the model, on /z/rebuilt
 
-The line at the top of this file, "everything on the page is written by the
-model", is the intent and it was not precise enough to be checkable. This section
-is the precise version. Every figure here can be counted from the repository.
+This section counts the earlier page only. Every figure can be counted from the
+repository with `python3 build/count_provenance.py`.
 
-    served page, raw                 646,781 characters   (recounted 30 August, after 51)
-      model-written                    592,629   91.6%
-      hand-written                      54,152   8.4%
-        rebuild/bridge.js.bak             13,228
-        rebuild/47-hand.js                 2,618
-        rebuild/48-hand.js                 5,138
-        rebuild/49-hand.js                 2,756
-        rebuild/49-hand.css                  976
-        rebuild/50-hand.js                 1,086
-        rebuild/50-hand.css                2,670
-        rebuild/51-z2.js                  18,096
-        rebuild/51-z2.css                  7,584
-      plus one hand edit inside a model block: 1,160 characters REMOVED from
-      rebuild/42-dom.js (the height-pinning; backup 42-dom.js.bak-49)
-      The service, app/app.py, is hand-written throughout and always was; the
-      five streaming endpoints and /z/api/ask added on 30 August are marked.
+    served page, raw                 81,867 characters
+      model-written                  53,398   65.2%
+      hand-written                   28,469   34.8%
+        rebuild/bridge.js.bak               13,226
+        rebuild/47-hand.js                   2,618
+        rebuild/48-hand.js                   5,137
+        rebuild/49-hand.css                    976
+        rebuild/49-hand.js                   2,756
+        rebuild/50-hand.css                  2,670
+        rebuild/50-hand.js                   1,086
 
 **`rebuild/bridge.js.bak`, 13,226 characters, is hand-written.** It joins the two
 halves the model built separately. The controls were briefed to call `search(off)`

@@ -1354,7 +1354,7 @@ def stream_question():
 # The file has no context for the door plug. GLM-5.3-Flash with z.ai's web
 # search tool reads the news and the NTSB, and the page labels it as the web,
 # not the file. Streamed in one piece so the same block on the page renders it.
-_NEWS = {}
+_NEWS = {}  # cleared on restart
 ZAI_SEARCH = "https://api.z.ai/api/paas/v4/web_search"
 
 def web_search(query, count=10):
@@ -1371,7 +1371,7 @@ def web_search(query, count=10):
         if re.search(r"[\u3040-\u30ff\u4e00-\u9fff\uac00-\ud7af\u0400-\u04ff]", title + x["link"]):
             continue   # mirrors and translations; the reader wants the source
         host = re.sub(r"^https?://(www\.)?", "", x["link"]).split("/")[0]
-        if host in ("nutanica.com", "wikizero.net", "gwern.net", "newsbreak.com"):
+        if host in ("nutanica.com", "wikizero.net", "gwern.net", "newsbreak.com") or "translate.goog" in host or host.endswith((".fr", ".de", ".es", ".it", ".nl", ".cn", ".my")):
             continue
         rank = 0 if host.endswith(".gov") else 1 if re.search(r"(wikipedia|ntsb|faa|reuters|apnews|nytimes|latimes|usatoday|bbc|theguardian|cnn|cbsnews|nbcnews|seattletimes|netflix|variety|time\.com|hollywoodreporter)", host) else 2
         out.append({"title": title, "url": x["link"], "text": (x.get("content") or "")[:1200],
@@ -1402,7 +1402,7 @@ def stream_news():
         listing = "\n\n".join("[%d] %s (%s) %s\n%s" % (i + 1, h["title"], h["date"], h["url"], h["text"]) for i, h in enumerate(hits))
         prompt = ("Below are web search results, numbered. Using ONLY these results, answer this for a general reader in at "
                   "most 220 words of plain prose, British English, no em dashes, no headings, no bullet points, with dates: "
-                  + topic + "\nAfter each fact put the result number in square brackets. If the results do not cover part of "
+                  + topic + "\nAt the end of each sentence put ONE result number in square brackets, the most authoritative result that supports it; never more than one per sentence. If the results do not cover part of "
                   "the question, say so in one short sentence. Do not use anything you know from elsewhere.\n\n" + listing)
         try:
             text = ""

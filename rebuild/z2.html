@@ -69,6 +69,8 @@ h1 .here{color:var(--rust)}
 @keyframes sw{to{background-position:-200% 0}}@media(prefers-reduced-motion:reduce){.mc__spin{animation:none;background:var(--model)}}
 .mc__stop{font:500 11px/1 var(--mono);border:1px solid var(--model);background:none;color:var(--model);padding:4px 8px;min-height:24px;border-radius:3px;cursor:pointer}
 .mc__body{display:none;margin-top:8px}.mc[data-state=streaming] .mc__body,.mc[data-state=done] .mc__body,.mc[data-state=abstain] .mc__body,.mc[data-state=error] .mc__body,.mc[data-state=cancelled] .mc__body{display:block}
+.crumb{font:400 12px/1.6 var(--mono);color:var(--ash);margin:10px 0 0}.crumb a{color:var(--ash);text-decoration:none;border-bottom:1px dotted var(--ash)}.crumb b{color:var(--ink);font-weight:500}
+.rails.top{margin-top:18px;border-top:0;border-bottom:1px solid var(--line)}.rails.top .rail{padding-top:6px;padding-bottom:12px}.rails.top .n{font-size:18px}
 .rails{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line);margin-top:44px}
 .rail{padding:16px 18px 0 0;border-right:1px solid var(--line);cursor:pointer;background:none;text-align:left;font:inherit;color:inherit}
 .rail:last-child{border-right:0}.rail+.rail{padding-left:18px}
@@ -126,6 +128,8 @@ a.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--
 <a class="skip" href="#leads">Skip to Find leads</a>
 <div class="wrap">
   <div class="mast"><span id="mast">FAA service difficulty reports</span><a href="/z/" style="text-decoration:none;color:var(--rust)" title="Back to the start: every report, nothing chosen">↖ start again · aircraftdefects.com/z</a></div>
+  <div class="rails top" id="railsTop" style="margin:18px 0 0"></div>
+  <p class="crumb" id="crumb"></p>
   <h1 id="h1"><b>…</b> reports</h1>
   <p class="promise">Every one carries a mechanic’s write-up in trade shorthand. <em>GLM-5.3-Flash</em> reads them live to explain to you what actually happened.</p>
 
@@ -237,8 +241,9 @@ function draw(){var h=H,tot=h.total||0,corpus=h.corpus||tot,filtered=sel().toStr
     var span=(h.span&&typeof h.span==="object")?h.span:null;var txt=f&&t?pd(f)+" to "+pd(t):f?"From "+pd(f)+" to today":t?"Up to "+pd(t):"1 January 1995 to "+(span&&span.to?pd(span.to):"today");$("#whenBig").textContent=txt})();
   var v=view();var hero=$("#hero");hero.innerHTML="";
   if(v){renderView(v)}else if(RAIL==="where")hero.appendChild(plane(h));else if(RAIL==="when")hero.appendChild(months(h));else if(RAIL==="who")hero.appendChild(who(h));else hero.appendChild(forced(h));
-  var rails=$("#rails");rails.innerHTML="";rails.style.gridTemplateColumns="repeat(4,1fr)";var all={where:["Where","on the aircraft","nine zones, and what cannot be placed"],when:["When","<b>"+num((h.months||[]).length||380)+"</b> months","the same reports, month by month"],who:["Who","<b>"+num(h.aircraft)+"</b> aircraft","airline and tail"],forced:["What it forced","<b>"+num(h.crew_reports)+"</b> reports","what the crew had to do"]};
-  ["where","when","who","forced"].forEach(function(r){var b=D.createElement("button");b.className="rail"+(r===RAIL&&!v?" on":"");b.innerHTML='<div class="q">'+all[r][0]+(r===RAIL&&!v?' <span style="color:var(--rust)">·</span>':'')+'</div><div class="n">'+all[r][1]+'</div><div class="pn">'+all[r][2]+'</div>';b.onclick=function(){location.hash="";setRail(r)};rails.appendChild(b)});
+  var rails=$("#rails");rails.innerHTML="";rails.style.gridTemplateColumns="repeat(4,1fr)";var top=$("#railsTop");top.innerHTML="";var all={where:["Where","on the aircraft","nine zones, and what cannot be placed"],when:["When","<b>"+num((h.months||[]).length||380)+"</b> months","the same reports, month by month"],who:["Who","<b>"+num(h.aircraft)+"</b> aircraft","airline and tail"],forced:["What it forced","<b>"+num(h.crew_reports)+"</b> reports","what the crew had to do"]};
+  ["where","when","who","forced"].forEach(function(r){var b=D.createElement("button");b.className="rail"+(r===RAIL&&!v?" on":"");b.innerHTML='<div class="q">'+all[r][0]+(r===RAIL&&!v?' <span style="color:var(--rust)">·</span>':'')+'</div><div class="n">'+all[r][1]+'</div><div class="pn">'+all[r][2]+'</div>';b.onclick=function(){location.hash="";setRail(r)};rails.appendChild(b);top.appendChild(b.cloneNode(true));top.lastChild.onclick=b.onclick});
+  var cr=[];cr.push('<a href="/z/">every report</a>');var ch=[];sel().forEach(function(v2,k){ch.push((PRETTY[k]||k)+" "+(ZLABEL[v2]||v2))});if(ch.length)cr.push("<b>"+esc(ch.join(", "))+"</b>");cr.push('<a href="'+location.pathname+location.search+'" data-rail>'+({where:"where",when:"when",who:"who",forced:"what it forced"})[RAIL]+'</a>');if(v)cr.push("<b>"+esc(VIEWS[v][0])+"</b>");$("#crumb").innerHTML=cr.join(" › ");
   leads(h);summary(h)}
 
 var SYS=[ /* ATA chapter, label, where it sits on the drawing (x,y of the label; ax,ay of the anchor on the airframe) */
@@ -278,9 +283,9 @@ function months(h){var w=D.createElement("div");var ms=h.months||[];var mx=Math.
 function ladder(rows,key,labelOf,noteText){var w=D.createElement("div");var l=D.createElement("div");l.className="ladder";var mx=Math.max.apply(null,rows.map(function(r){return r.n||0}).concat([1]));
   rows.slice(0,14).forEach(function(r){var b=D.createElement("button");b.type="button";b.innerHTML='<span class="bar" style="--w:'+Math.round((r.n||0)/mx*100)+'%"><i></i>'+esc(labelOf(r))+'</span><b>'+num(r.n)+'</b>';b.onclick=function(){var p=q();p.set(key,r.key||r.code);go(p)};l.appendChild(b)});
   w.appendChild(l);var c=D.createElement("p");c.className="cannot";c.textContent=noteText;w.appendChild(c);return w}
-function who(h){var w=D.createElement("div");var ops=(h.operator_rows||h.operators||[]).map(function(o){return{key:o.key||o.code,n:o.n,label:o.label||o.name||o.key}});
+function who(h){var w=D.createElement("div");var ops=(h.operator_rows||h.operators||[]).map(function(o){return{key:o.o||o.key||o.code,n:o.n,label:o.label||o.name||o.o||o.key}});
   var e=D.createElement("p");e.className="eyebrow";e.textContent="Airlines, by reports filed";w.appendChild(e);w.appendChild(ladder(ops,"operator",function(r){return r.label},"The airline list counts every report. Airline names come from the FAA’s 2006 cross-reference and can be stale."));
-  var tails=(h.swarm||[]).slice(0,14).map(function(t){return{key:t.key||t.tail,n:t.n,label:"N"+(t.key||t.tail)}});if(tails.length){var e2=D.createElement("p");e2.className="eyebrow";e2.style.marginTop="18px";e2.textContent="Most-reported airframes";w.appendChild(e2);w.appendChild(ladder(tails,"tail",function(r){return r.label},"The tail list shows the 900 most-reported aircraft out of "+num(h.aircraft)+"."))}return w}
+  var tails=(h.swarm||[]).slice(0,14).map(function(t){var k=t.t||t.tail||t.key||t.n_number||"";return{key:k,n:t.n||t.reports,label:"N"+k}});if(tails.length){var e2=D.createElement("p");e2.className="eyebrow";e2.style.marginTop="18px";e2.textContent="Most-reported airframes";w.appendChild(e2);w.appendChild(ladder(tails,"tail",function(r){return r.label},"The tail list shows the 900 most-reported aircraft out of "+num(h.aircraft)+"."))}return w}
 function forced(h){var w=D.createElement("div");var rows=(h.crew||[]).filter(function(c){return c.n>0&&["K","0","O"].indexOf(c.code)<0}).map(function(c){return{code:c.code,n:c.n,label:c.label}});
   var e=D.createElement("p");e.className="eyebrow";e.textContent=num(h.crew_reports)+" of "+num(h.total)+" reports record something the crew had to do";w.appendChild(e);
   w.appendChild(ladder(rows,"crew",function(r){return r.label},"A report can carry more than one action; each is counted once here. Not what broke, but what it forced."));return w}

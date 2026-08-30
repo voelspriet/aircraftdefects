@@ -1,3 +1,5 @@
+import os
+import re
 #!/usr/bin/env python3
 """aircraftdefects.com/z
 
@@ -140,11 +142,23 @@ def crew_actions(r):
     return out
 
 
+def _date_words(d):
+    """FAA dates are MM/DD/YYYY; the model read 01/05/2024 as 1 May. Spell it out."""
+    m = re.match(r"(\d\d)/(\d\d)/(\d{4})", d or "")
+    if not m:
+        return None
+    months = ["January","February","March","April","May","June","July","August","September","October","November","December"]
+    try:
+        return "%d %s %s" % (int(m.group(2)), months[int(m.group(1)) - 1], m.group(3))
+    except Exception:
+        return None
+
 def decorate(r):
     """One raw record, decoded. Every value traceable, nothing invented."""
     return {
         "id": r.get("OperatorControlNumber"),
         "date": r.get("DifficultyDate"),
+        "date_written_out": _date_words(r.get("DifficultyDate")),
         "tail": r.get("RegistryNNumber"),
         "operator_code": r.get("OperatorDesignator"),
         "operator": dec("operator", r.get("OperatorDesignator")),
@@ -1092,15 +1106,114 @@ def _sse(event, data):
     return "event: %s\ndata: %s\n\n" % (event, json.dumps(data, ensure_ascii=False))
 
 
-def _stream_response(meta, prompt, effort, max_tokens):
+# ---- hand-written, 31 August 2026: Prove it -------------------------------
+# Every quote the model writes in the mechanics' capitals is checked, after the
+# stream ends, against the record it cites (or, for a single-record read, the
+# record itself). A sentence with a quote that is not a literal substring of
+# the write-up is dropped before the page shows the final text. Deterministic,
+# no extra tokens. The page shows the counts.
+_CAPS = re.compile(r"[A-Z0-9][A-Z0-9 ,./#&'\-()]{10,}[A-Z0-9)]")
+_RID = re.compile(r"\[([A-Z0-9]{8,24})\]")
+
+def _norm(t):
+    return re.sub(r"[^A-Z0-9]+", " ", (t or "").upper()).strip()
+
+def _sentences(text):
+    out = []
+    for para in re.split(r"\n\s*\n|\n", text):
+        para = para.strip()
+        if not para:
+            continue
+        parts = re.split(r"(?<=[.!?\]])\s+(?=[A-Z][a-z]|[\"'\u2018\u201c])", para)
+        out.append([x.strip() for x in parts if x.strip()])
+    return out
+
+def verify_text(text, recs, meta_of=None):
+    """recs: {id: write-up}. Returns (sentences, stats)."""
+    paras = _sentences(text)
+    normed = {k: _norm(v) for k, v in recs.items()}
+    checked = ok = removed = 0
+    out = []
+    for pi, para in enumerate(paras):
+        for sent in para:
+            ids = _RID.findall(sent)
+            # a quote is text inside quotation marks, or the capitals that sit
+            # directly before a [record]; counted facts like "(AALA, 514)" are not quotes.
+            quotes = [q.strip(" ,.") for q in re.findall(r'["\u201c]([^"\u201d]{8,}?)["\u201d]', sent)]
+            for m in re.finditer(r"([A-Z0-9][A-Z0-9 ,./#&'\-()]{10,})\s*\[[A-Z0-9]{8,24}\]", sent):
+                q = m.group(1).strip(" ,.\"\u201c\u201d")
+                if q and q not in quotes:
+                    quotes.append(q)
+            quotes = [q for q in quotes if len(q.split()) >= 3 and re.search(r"[A-Z]{2}", q)]
+            found, bad = [], False
+            for q in quotes:
+                checked += 1
+                nq = _norm(q)
+                pool = [i for i in ids if i in normed] or (list(normed) if len(normed) == 1 or not ids else [])
+                hit = next((i for i in pool if nq in normed[i]), None)
+                if hit is None and not ids and len(normed) > 1:
+                    hit = next((i for i in normed if nq in normed[i]), None)
+                if hit:
+                    ok += 1; found.append({"id": hit, "quote": q, "ok": True})
+                else:
+                    bad = True; found.append({"id": ids[0] if ids else None, "quote": q, "ok": False})
+            for i in ids:
+                if i in recs and not any(f["id"] == i for f in found):
+                    found.append({"id": i, "quote": None, "ok": True})
+            if bad:
+                removed += 1
+            out.append({"t": sent, "recs": found, "drop": bad, "para": pi})
+    return out, {"checked": checked, "ok": ok, "removed": removed}
+
+_NEXT_FIELDS = ("ata", "operator", "model", "tail", "q", "part", "from", "to", "zone", "crew")
+
+def _next_three(tail_json, base):
+    """Resolve the model's proposed narrower slices against the file; drop zeros."""
+    try:
+        items = json.loads(tail_json)
+    except Exception:
+        return []
+    out = []
+    for it in items[:3] if isinstance(items, list) else []:
+        f = {k: str(v) for k, v in (it.get("filters") or {}).items() if k in _NEXT_FIELDS and v}
+        if not f:
+            continue
+        if "tail" in f:
+            f["tail"] = f["tail"].upper().lstrip("N")
+        params = dict(base); params.update(f); params["limit"] = 1
+        try:
+            n = api("/api/search", **params).get("total", 0)
+        except Exception:
+            n = 0
+        if n:
+            out.append({"filters": f, "n": n, "why": (it.get("why") or "")[:140]})
+    return out
+
+NEXT_ASK = ("\n\nFinally, on a last line of its own, write NEXT: followed by a JSON list of up to three "
+            "narrower slices worth opening, each {\"filters\": {field: value}, \"why\": \"one short reason "
+            "from what you read\"}; fields only from ata (4-digit JASC code), operator (FAA designator as it "
+            "appears in the write-ups' record numbers), model, tail, q (a single word from the write-ups), "
+            "from, to. Nothing after the JSON.")
+
+def _stream_response(meta, prompt, effort, max_tokens, recs=None, meta_of=None, base=None):
     t0 = time.time()
     def gen():
         yield _sse("meta", meta)
+        got = []
         try:
             for kind, x in glm_stream(prompt, effort=effort, max_tokens=max_tokens):
                 if kind == "delta":
+                    got.append(x)
                     yield _sse("delta", x)
                 else:
+                    text = "".join(got)
+                    m = re.search(r"\n?\s*NEXT:\s*(\[[\s\S]*\])\s*$", text)
+                    if m:
+                        text = text[:m.start()].rstrip()
+                        yield _sse("next", _next_three(m.group(1), base or {}))
+                    if recs:
+                        sents, stats = verify_text(text, recs)
+                        yield _sse("verify", {"sentences": sents, "stats": stats, "records": meta_of or {}})
                     yield _sse("done", {"seconds": round(time.time() - t0, 1),
                                         "tokens": (x or {}).get("total_tokens"),
                                         "model": MODEL, "effort": effort})
@@ -1109,6 +1222,14 @@ def _stream_response(meta, prompt, effort, max_tokens):
                                  "seconds": round(time.time() - t0, 1)})
     return Response(stream_with_context(gen()), mimetype="text/event-stream",
                     headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+def _recs_of(rows):
+    recs = {r.get("OperatorControlNumber"): (r.get("Discrepancy") or "") for r in rows if r.get("OperatorControlNumber")}
+    meta = {r.get("OperatorControlNumber"): {"op": r.get("OperatorDesignator"), "tail": r.get("RegistryNNumber"),
+            "date": r.get("DifficultyDate"), "model": ((r.get("AircraftMake") or "") + " " + (r.get("AircraftModel") or "")).strip(), "raw": r}
+            for r in rows if r.get("OperatorControlNumber")}
+    return recs, meta
 
 
 def _selection_rows(limit):
@@ -1154,8 +1275,9 @@ def stream_gloss():
               "\nWrite plain prose only, no JSON, at most 160 words.\n\n"
               + ("Every coded field on this report, decoded:\n" + json.dumps(facts, ensure_ascii=False) + "\n\n" if facts else "")
               + "The write-up, verbatim:\n" + text)
+    rid = (raw.get("OperatorControlNumber") if isinstance(raw, dict) else None) or "THIS"
     return _stream_response({"read": 1, "of": 1, "what": "this report, all fields"},
-                            prompt, "low", 1500)
+                            prompt, "low", 1500, recs={rid: text}, meta_of={})
 
 
 @app.get("/z/api/stream/recurs")
@@ -1180,9 +1302,113 @@ def stream_recurs():
               "than fifteen words in the mechanic's own capitals, followed by its record number in square "
               "brackets exactly as given. Expand shorthand the first time it appears. Say 'several' or 'a few' "
               "rather than a count you have not verified. Say nothing about cause, safety or rates. Do not dump "
-              "codes. %s\n\n%s" % (scope, ABSTAIN, listing))
+              "codes. %s\n\n%s" % (scope, ABSTAIN, listing) + NEXT_ASK)
+    recs, meta_of = _recs_of(rows)
+    base = {k: v for k, v in request.args.items() if v and k not in ("hero", "view", "case", "v")}
     return _stream_response({"read": n, "of": total, "what": "write-ups", "scope": scope},
-                            prompt, "low", 8000)
+                            prompt, "low", 8000, recs=recs, meta_of=meta_of, base=base)
+
+
+
+# ---- hand-written, 31 August 2026: a question the filters cannot hold -------
+# "What plane is the most dangerous" has no field. The model reads the newest
+# write-ups in the selection plus the counted breakdowns, says plainly what the
+# file cannot answer, and answers what it can, quoting records. Quotes are
+# verified; three next clicks follow.
+@app.get("/z/api/stream/question")
+def stream_question():
+    qtext = (request.args.get("q") or "").strip()[:300]
+    if not qtext:
+        return jsonify(error="no question"), 400
+    base = {k: v for k, v in request.args.items() if v and k not in ("hero", "view", "case", "v", "q")}
+    params = dict(base); params["limit"] = 200
+    d = api("/api/search", **params)
+    rows = d.get("rows") or []; total = d.get("total", len(rows))
+    counts = {}
+    for by in ("model", "operator", "crew", "ata"):
+        try:
+            c = api("/api/breakdown", by=by, **base)
+            c = c if isinstance(c, list) else (c.get("rows") or [])
+            counts[by] = [{"key": x.get("label") or x.get("key") or x.get("code"), "n": x.get("n") or x.get("reports")} for x in c[:8]]
+        except Exception:
+            pass
+    texts = [(r.get("OperatorControlNumber"), (r.get("Discrepancy") or "").strip()) for r in rows if (r.get("Discrepancy") or "").strip()]
+    listing = "\n".join("[%s] %s" % (i, t[:500]) for i, t in texts)
+    prompt = ("Someone who has never read an aircraft maintenance report asked: \"%s\"\n\n"
+              "You have a file of FAA service difficulty reports: %s reports in the current selection. Below are the "
+              "counted breakdowns for the whole selection (reports filed, never rates or risk), then the newest %d "
+              "write-ups verbatim. Answer in plain, friendly prose addressed to the reader as you, at most 180 words: "
+              "first one sentence saying honestly what this file cannot tell them (it records what mechanics found and "
+              "fixed, not accidents, injuries or how dangerous anything is), then the closest thing it can show, using the "
+              "counts and the write-ups, naming the aircraft types or airlines with the most reports as most written-up, "
+              "never as most dangerous. Include two or three short quotes of no more than fifteen words in the mechanic's "
+              "own capitals, each followed by its record number in square brackets exactly as given. Never say reporter. %s"
+              "\n\nCounts: %s\n\nWrite-ups:\n%s" % (qtext, "{:,}".format(total), len(texts), ABSTAIN,
+              json.dumps(counts, ensure_ascii=False), listing)) + NEXT_ASK
+    recs, meta_of = _recs_of(rows)
+    return _stream_response({"read": len(texts), "of": total, "what": "write-ups, plus the counts"},
+                            prompt, "low", 4000, recs=recs, meta_of=meta_of, base=base)
+
+
+# ---- hand-written, 31 August 2026: the web, for the Freefall page only -----
+# The file has no context for the door plug. GLM-5.3-Flash with z.ai's web
+# search tool reads the news and the NTSB, and the page labels it as the web,
+# not the file. Streamed in one piece so the same block on the page renders it.
+_NEWS = {}
+ZAI_SEARCH = "https://api.z.ai/api/paas/v4/web_search"
+
+def web_search(query, count=10):
+    r = requests.post(ZAI_SEARCH, timeout=60, headers={"Authorization": "Bearer " + key(), "Content-Type": "application/json"},
+                      json={"search_query": query[:200], "search_engine": "search_pro", "search_recency_filter": "noLimit",
+                            "count": count, "content_size": "medium"})
+    if r.status_code != 200:
+        raise RuntimeError("web search %s" % r.status_code)
+    out = []
+    for x in r.json().get("search_result") or []:
+        if x.get("link") and x.get("content"):
+            out.append({"title": x.get("title") or "", "url": x["link"], "text": (x.get("content") or "")[:1200],
+                        "date": x.get("publish_date") or ""})
+    return out[:count]
+
+@app.get("/z/api/stream/news")
+def stream_news():
+    topic = (request.args.get("topic") or "").strip()[:300]
+    query = (request.args.get("q") or topic).strip()[:200]
+    if not topic:
+        return jsonify(error="no topic"), 400
+    t0 = time.time()
+    def gen():
+        yield _sse("meta", {"what": "the web, not the file"})
+        if topic in _NEWS and time.time() - _NEWS[topic]["at"] < 6 * 3600:
+            yield _sse("delta", _NEWS[topic]["text"])
+            yield _sse("done", {"seconds": 0.1, "model": MODEL, "effort": "web, cached"})
+            return
+        try:
+            hits = web_search(query, 10)
+        except Exception as e:
+            yield _sse("error", {"message": "web search failed: " + str(e)[:120], "seconds": round(time.time() - t0, 1)}); return
+        if len(hits) < 2:
+            yield _sse("abstain", {"text": "The web search found too little to summarise."}); return
+        listing = "\n\n".join("[%d] %s (%s) %s\n%s" % (i + 1, h["title"], h["date"], h["url"], h["text"]) for i, h in enumerate(hits))
+        prompt = ("Below are web search results, numbered. Using ONLY these results, answer this for a general reader in at "
+                  "most 220 words of plain prose, British English, no em dashes, no headings, no bullet points, with dates: "
+                  + topic + "\nAfter each fact put the result number in square brackets. If the results do not cover part of "
+                  "the question, say so in one short sentence. Do not use anything you know from elsewhere.\n\n" + listing)
+        try:
+            text = ""
+            for kind, x in glm_stream(prompt, effort="low", max_tokens=4000):
+                if kind == "delta":
+                    text += x
+                    yield _sse("delta", x)
+            used = sorted({int(n) for n in re.findall(r"\[(\d{1,2})\]", text) if 0 < int(n) <= len(hits)})
+            srcs = "\n\nSOURCES:\n" + "\n".join("[%d] %s" % (n, hits[n - 1]["url"]) for n in used) if used else ""
+            if srcs:
+                yield _sse("delta", srcs)
+            _NEWS[topic] = {"text": text + srcs, "at": time.time()}
+            yield _sse("done", {"seconds": round(time.time() - t0, 1), "model": MODEL, "effort": "web, %d results read" % len(hits)})
+        except Exception as e:
+            yield _sse("error", {"message": str(e)[:200], "seconds": round(time.time() - t0, 1)})
+    return Response(stream_with_context(gen()), mimetype="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 @app.get("/z/api/stream/vocab")
@@ -1220,7 +1446,7 @@ def stream_slice():
              for r in rows if (r.get("Discrepancy") or "").strip()]
     n = len(texts)
     listing = "\n".join("[%s] %s" % (i, t[:400]) for i, t in texts)
-    prompt = ("A reporter is about to export %d FAA service difficulty reports selected by these "
+    prompt = ("Someone is about to export %d FAA service difficulty reports selected by these "
               "filters: %s. Below are %d of them, verbatim. Say, in at most three short "
               "paragraphs: which of these %d do not belong to what the filters seem to intend, "
               "quoting the words and record number; and what the filters will miss because "
@@ -1256,10 +1482,10 @@ def ask_file():
     except Exception:
         ops = []
     tables["operator (designator: name)"] = {o: dec("operator", o) or o for o in ops}
-    prompt = ("A reporter asked this of a file of FAA service difficulty reports: \"%s\"\n\n"
+    prompt = ("Someone asked this of a file of FAA service difficulty reports: \"%s\"\n\n"
               "Turn it into filters. Fields available: %s. Code tables (use only these codes): %s\n\n"
-              "Return JSON only: {\"filters\": {field: value}, \"reading\": \"one sentence saying how "
-              "you read the question\", \"unmapped\": [\"words you could not map\"], "
+              "Return JSON only: {\"filters\": {field: value}, \"reading\": \"one friendly sentence, addressed to the "
+              "reader as you, in everyday words, saying what this file can do with the question and what it cannot; never say reporter\", \"unmapped\": [\"words you could not map\"], "
               "\"cannot\": \"one sentence if the file has no field for what was asked, else null\"}. "
               "Never invent a code. Never answer the question yourself."
               % (q, json.dumps(ASK_FIELDS), json.dumps(tables)[:12000]))
@@ -1285,7 +1511,26 @@ def ask_file():
 # read by the model, so the page opens with the reading in place. Cached by
 # record id; a new record triggers one call. The FAA feed refreshes three
 # times a day, so at most three calls a day.
-_SPEC = {}   # key -> reading, one per selection
+_SPEC_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "spec_cache.json")
+try:
+    _SPEC = json.load(open(_SPEC_PATH))
+except Exception:
+    _SPEC = {}   # record id -> reading; the same report reads the same whatever the selection
+
+def _spec_save():
+    try:
+        json.dump(_SPEC, open(_SPEC_PATH + ".tmp", "w"))
+        os.replace(_SPEC_PATH + ".tmp", _SPEC_PATH)
+    except Exception:
+        pass
+
+SIMPLE = ("Write for a curious member of the public, in short everyday sentences, at most 110 words. Say what "
+          "kind of aircraft and whose it is, when and at what point of the flight the problem showed, what the "
+          "part does in a few plain words, what the crew did, and what the mechanic did about it. No part "
+          "numbers, no manual references, no codes. Expand every abbreviation into words. End with one short "
+          "sentence naming what the report does not say. Then, on a last line of its own, write TERMS: followed by "
+          "a JSON list of up to eight technical terms or part names from your text, exactly as you wrote them, that "
+          "a reader might want to look up.")
 
 @app.get("/z/api/specimen")
 def specimen():
@@ -1297,23 +1542,30 @@ def specimen():
     if not rows:
         return jsonify(none=True, total=d.get("total", 0))
     r = rows[0]; rid = r.get("OperatorControlNumber")
-    key = rid + "|" + json.dumps(params, sort_keys=True)
-    if key in _SPEC:
-        return jsonify(_SPEC[key])
+    if rid in _SPEC:
+        out = dict(_SPEC[rid]); out["total"] = d.get("total"); out["cached"] = True
+        return jsonify(out)
     rec = decorate(r)
     text = rec["text"]
     facts = {k: v for k, v in rec.items() if v and k not in ("text", "id")}
-    prompt = (GLOSS_RULES.split("Separately:")[0] + "\n" + NOVICE + "\n" + ABSTAIN +
-              "\nWrite plain prose only, at most 120 words, no JSON.\n\nEvery coded field on this report, decoded:\n"
+    prompt = (SIMPLE + "\n" + ABSTAIN + "\n\nEvery coded field on this report, decoded:\n"
               + json.dumps(facts, ensure_ascii=False) + "\n\nThe write-up, verbatim:\n" + text)
-    t0 = time.time(); plain = None; err = None
+    t0 = time.time(); plain = None; err = None; terms = []
     try:
-        plain = glm(prompt, effort="low", max_tokens=900)
+        plain = glm(prompt, effort="low", max_tokens=900) or ""
+        m = re.search(r"\n?\s*TERMS:\s*(\[[\s\S]*\])\s*$", plain)
+        if m:
+            try:
+                terms = [str(t) for t in json.loads(m.group(1))][:8]
+            except Exception:
+                terms = []
+            plain = plain[:m.start()].rstrip()
     except Exception as e:
         err = str(e)[:120]
-    out = {"record": rec, "plain": plain, "error": err, "read_at": time.strftime("%H:%M"),
+    out = {"record": rec, "raw": r, "plain": plain, "terms": terms, "error": err, "read_at": time.strftime("%H:%M"),
            "seconds": round(time.time() - t0, 1), "total": d.get("total"), "model": MODEL}
-    _SPEC[key] = out
+    if plain and not err:
+        _SPEC[rid] = out; _spec_save()
     return jsonify(out)
 
 
@@ -1324,7 +1576,8 @@ def specimen_warm():
     import datetime
     y = datetime.date.today().year
     states = [{}] + [{"zone": "ZONE %d00" % i} for i in range(1, 10)] + \
-             [{"from": "%d-01-01" % y}, {"from": "%d-01-01" % (y-1), "to": "%d-12-31" % (y-1)}]
+             [{"from": "%d-01-01" % y}, {"from": "%d-01-01" % (y-1), "to": "%d-12-31" % (y-1)}, {"tail": "704AL", "crew": "A"},
+              {"from": (datetime.date.today() - datetime.timedelta(days=90)).isoformat()}, {"from": datetime.date.today().replace(day=1).isoformat()}]
     done = []
     for st in states:
         with app.test_request_context("/z/api/specimen", query_string=st):
@@ -1362,4 +1615,5 @@ def stream_case():
     prompt = (ASKS[which] + "\n" + NOVICE.split("End with")[0] + "\n" + ABSTAIN +
               "\nPlain prose, no JSON, at most 140 words.\n\nEvery coded field on this report, decoded:\n"
               + json.dumps(facts, ensure_ascii=False) + "\n\nThe write-up, verbatim:\n" + text)
-    return _stream_response({"read": 1, "of": 1, "what": "this report, all fields"}, prompt, "low", 1500)
+    rid = (raw.get("OperatorControlNumber") if isinstance(raw, dict) else None) or "THIS"
+    return _stream_response({"read": 1, "of": 1, "what": "this report, all fields"}, prompt, "low", 1500, recs={rid: text}, meta_of={})

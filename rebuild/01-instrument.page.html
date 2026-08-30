@@ -7136,98 +7136,90 @@ window.addEventListener("load", function(){ sdrStripRails(); sdrFixLabels(); sdr
 
 
 
-/* ---- 26: written with its own eyes, written by the model ---- */
+/* ---- 27: written with its own eyes, written by the model ---- */
 (function(){
 "use strict";
+window.__sderrs=window.__sderrs||[];
+addEventListener("error",function(e){try{window.__sderrs.push(String((e&&e.message)||e))}catch(_){}} );
 function byId(id){return document.getElementById(id)}
 function visible(n){ if(!n||n.nodeType!==1)return false; if(!n.offsetParent&&getComputedStyle(n).position!=="fixed")return false; var cs=getComputedStyle(n); return cs.display!=="none"&&cs.visibility!=="hidden"; }
 function phone(){return matchMedia("(max-width:760px)").matches}
-
-/* ---- the instrument's inside: #hero.instrument > .ipad ---------------------
-   Only built while the desk instrument is in the hero. Once drawPhone has
-   replaced the hero's contents there is nothing to wrap and the phone layout
-   is left exactly as the page drew it. */
+var READING_TEXT="Upper fuselage accounts for 84,453 of the 212,940 reports written in the FAA\u2019s numbered zones, or 39.7%. Those numbers are what this diagram can place, and they are 12.1% of the selection. Another 1,454,504 do say where, in words such as FUSELAGE or CABIN rather than a zone number, so the drawing cannot show them. Only 90,383, 5.1%, give no location at all. It is a sample rather than the whole file, but it does give you a good idea of where the trouble sits.";
+var SEED_HTML='<span class="fig">1,757,827</span> reports, everything the FAA has published to 26 August 2026.';
 function ensureIpad(){
   var hero=byId("hero"); if(!hero)return null;
   var rails=hero.querySelector(".rails");
   if(!rails||!visible(rails)||hero.querySelector(".phbar"))return hero.querySelector(".ipad")||null;
   if(!/\binstrument\b/.test(hero.className||""))hero.className=("instrument "+(hero.className||"")).trim();
   var kids=[].slice.call(hero.children), i, ipad=null, ihead=null;
-  for(i=0;i<kids.length;i++){
-    if(/\bipad\b/.test(kids[i].className||"")){ipad=kids[i];break}
-  }
-  for(i=0;i<kids.length;i++){
-    if(/\bihead\b/.test(kids[i].className||"")){ihead=kids[i];break}
-  }
+  for(i=0;i<kids.length;i++){ if(/\bipad\b/.test(kids[i].className||"")){ipad=kids[i];break} }
+  for(i=0;i<kids.length;i++){ if(/\bihead\b/.test(kids[i].className||"")){ihead=kids[i];break} }
   if(!ipad){
     ipad=document.createElement("div"); ipad.className="ipad";
     if(ihead)ihead.after(ipad); else hero.insertBefore(ipad,hero.firstChild);
     kids=[].slice.call(hero.children);
-    for(i=0;i<kids.length;i++){
-      if(kids[i]!==ipad&&kids[i]!==ihead)ipad.appendChild(kids[i]);
-    }
+    for(i=0;i<kids.length;i++){ if(kids[i]!==ipad&&kids[i]!==ihead)ipad.appendChild(kids[i]); }
   }
   return ipad;
 }
-
-/* #count.sdcount: one element, moved never cloned. Desk width: inside .ipad,
-   immediately above .rails. Phone: the original keeps the sentence in
-   #p-search .bar, so it goes there and the phone hero is never touched. The
-   desk insert checks that the anchor is still a child of the node it is
-   inserting into, at that moment, so the phone rewrite and the observer can
-   never fight. Once seated, every later pass is a no-op. */
+function sdSink(){
+  var s=byId("sd-sink");
+  if(!s){ s=document.createElement("div"); s.id="sd-sink";
+          (document.querySelector("main.wrap")||document.body).appendChild(s); }
+  return s;
+}
 function seatCount(){
   var all=document.querySelectorAll("#count"); if(!all.length)return;
   var c=all[0],i;
   for(i=0;i<all.length;i++){ if(all[i]!==c&&all[i].parentNode)all[i].parentNode.removeChild(all[i]); }
   function detach(){ if(c.parentNode&&c.parentNode.nodeType===1&&c.parentNode.contains(c))c.parentNode.removeChild(c); }
-  if(phone()){
-    var bar=document.querySelector("#p-search .bar");
-    if(bar&&c.parentNode!==bar){ detach(); bar.insertBefore(c,bar.firstChild); }
-  }else{
-    var hero=byId("hero");
-    var rails=hero?hero.querySelector(".rails"):null;
-    if(rails){
-      var host=rails.parentNode;
-      if(c.parentNode!==host||c.nextElementSibling!==rails){
-        detach();
-        if(rails.parentNode===host)host.insertBefore(c,rails);
-      }
+  var hero=byId("hero");
+  var rails=hero?hero.querySelector(".rails"):null;
+  var bar=document.querySelector(".phbar");
+  if((!rails||phone())&&bar){
+    if(c.parentNode!==bar){ detach(); bar.insertBefore(c,bar.firstChild); }
+  }else if(rails){
+    var host=rails.parentNode;
+    if(c.parentNode!==host||c.nextElementSibling!==rails){
+      detach();
+      if(rails.parentNode===host)host.insertBefore(c,rails);
     }
   }
   if(!/\bsdcount\b/.test(c.className))c.className=("sdcount "+c.className).trim();
 }
-
-/* one reading per open rail: keep the fuller one as a single p.reading, put it
-   back where the original put it, and leave the rail exactly three children:
-   .gut, .track, p.reading. FORCED holds its reading inside .track. */
-function oneReading(){
-  var open=document.querySelectorAll(".rail.open"),i;
-  for(i=0;i<open.length;i++){
-    var rail=open[i];
-    var rs=[].slice.call(rail.querySelectorAll(".reading")); 
-    var keep=null;
-    if(rs.length){
-      keep=rs.slice().sort(function(a,b){
-        var d=b.textContent.trim().length-a.textContent.trim().length;
-        return d||((a.tagName==="P")?-1:1);
-      })[0];
-      if(keep.tagName!=="P"){
-        var p=document.createElement("p"); p.className="reading";
-        p.innerHTML=keep.innerHTML;
-        keep.parentNode.replaceChild(p,keep); keep=p;
-      }
-      for(var j=0;j<rs.length;j++){ if(rs[j]!==keep)rs[j].remove() }
-    }
-    var host=(rail.dataset.rail==="forced")?(rail.querySelector(".track")||rail):rail;
-    if(keep&&keep.parentNode!==host)host.appendChild(keep);
-    [].slice.call(rail.children).forEach(function(n){
-      if(/\b(gut|track)\b/.test(n.className||""))return;
-      n.remove();
-    });
-  }
+function seedCount(){
+  var c=byId("count"); if(!c)return;
+  if(!c.textContent.trim()&&!c.children.length)c.innerHTML=SEED_HTML;
 }
-
+function retireStand(){
+  var s=document.querySelector(".ipad .stand");
+  if(s&&s.parentNode)sdSink().appendChild(s);
+}
+function ensureReading(){
+  var rail=document.querySelector(".rail[data-rail=where]");
+  if(!rail||!rail.parentNode)return;
+  var rs=[].slice.call(rail.querySelectorAll(".reading")),i,keep=null;
+  for(i=0;i<rs.length;i++){
+    if(!keep||rs[i].textContent.trim().length>keep.textContent.trim().length)keep=rs[i];
+  }
+  if(keep&&keep.tagName!=="P"){
+    var p=document.createElement("p"); p.className="reading";
+    p.innerHTML=keep.innerHTML;
+    keep.parentNode.replaceChild(p,keep); keep=p;
+  }
+  if(!keep){
+    keep=document.createElement("p"); keep.className="reading";
+    keep.textContent=READING_TEXT;
+  }
+  if(keep.parentNode!==rail)rail.appendChild(keep);
+  [].slice.call(rail.children).forEach(function(n){
+    if(n===keep)return;
+    var cn=n.className||"";
+    if(/\b(gut|track)\b/.test(cn))return;
+    if(/\breading\b/.test(cn))return;
+    n.remove();
+  });
+}
 function stripInline(){
   var bs=document.querySelectorAll("#vstrip.vgroups .vgbtns"),i;
   for(i=0;i<bs.length;i++){
@@ -7235,7 +7227,6 @@ function stripInline(){
     b.style.margin="0"; b.style.padding="0"; b.style.borderBottom="0";
   }
 }
-
 function secondLine(){
   var strip=byId("vstrip"); if(!strip)return;
   var p=byId("sd-second");
@@ -7246,9 +7237,6 @@ function secondLine(){
   p.innerHTML=(fr&&fr.textContent.trim())?fr.textContent.trim()
     :"Counts of reports filed, not of flights.";
 }
-
-/* the #sentence keeper: hidden wherever the page puts it; whatever is written to
-   #sentence or #count, both ends hold the same words */
 function ensureSentence(){
   var s=byId("sentence");
   if(!s){ s=document.createElement("div"); s.id="sentence"; s.hidden=true;
@@ -7267,13 +7255,10 @@ function mirror(){
   }
   snap.s=sv; snap.c=cv;
 }
-
 function purgeLand(){
   var ls=document.querySelectorAll(".card.land"),i;
   for(i=0;i<ls.length;i++)ls[i].remove();
 }
-
-/* every step is a no-op once settled, so the observer loop terminates */
 var queued=false;
 function pass(){
   queued=false;
@@ -7281,7 +7266,9 @@ function pass(){
   try{ensureSentence()}catch(e){}
   try{ensureIpad()}catch(e){}
   try{seatCount()}catch(e){}
-  try{oneReading()}catch(e){}
+  try{seedCount()}catch(e){}
+  try{retireStand()}catch(e){}
+  try{ensureReading()}catch(e){}
   try{stripInline()}catch(e){}
   try{secondLine()}catch(e){}
   try{mirror()}catch(e){}
@@ -8062,10 +8049,9 @@ table.reps th{ font-size:11px; background:transparent; color:var(--ash);
 .rail.open[data-rail=when] .track{ overflow-x:auto; overscroll-behavior-x:contain }
 `;document.head.appendChild(s);})();
 
-(function(){var s=document.createElement('style');s.id='sdr-css-26';s.textContent=`/* ---- carried, restated ---------------------------------------------------- */
-#sentence{display:none!important}
+(function(){var s=document.createElement('style');s.id='sdr-css-27';s.textContent=`#sentence{display:none!important}
+#sd-sink{display:none!important}
 .card.land{display:none!important}
-/* the tab strip: three groups, label beside its buttons, one line each */
 #vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}
 #vstrip.vgroups .vg{display:flex;flex-direction:row;align-items:center;gap:10px;min-width:0}
 #vstrip.vgroups .vglab{flex:0 0 auto;font:600 9.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em;color:#57514a;text-transform:uppercase;white-space:nowrap}
@@ -8076,25 +8062,22 @@ button.vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);
 .axis span{flex:1;min-width:0}
 .sd-second{font-size:11.5px;color:#6b6560;margin:0 0 3px;text-align:center;letter-spacing:.02em}
 .sd-second b{font-weight:600}
-/* the instrument: the hero is the instrument; .ipad is its inside */
 #hero.instrument{position:relative;background:var(--paper);border:1px solid var(--line);border-bottom:3px solid var(--rust);border-radius:6px;margin:12px 0 0;overflow:hidden;padding:0}
 #hero.instrument > .ipad{padding:10px 20px 6px}
-/* the standing count, seated above the rails */
-#count.sdcount{font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1.1;color:var(--ink);max-width:26em;margin:4px 0 2px}
+#count.sdcount{font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1.1;color:var(--ink);max-width:none;margin:4px 0 2px;white-space:normal}
 #count.sdcount .fig{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:.92em;font-variant-numeric:tabular-nums;color:var(--rust-text,#b8431f)}
 #count.sdcount .aside{font-size:.62em;color:var(--ash)}
 #count.sdcount .broken{display:block;font-size:.5em;color:var(--rust)}
 #count.sdcount .clause{border-bottom:1px dotted rgba(29,29,31,.28);cursor:pointer}
-/* one reading per open rail, at the original measure */
-.rail .reading{margin:6px 0 0;padding:6px 12px 6px 13px;border-left:2px solid var(--rust);background:#faf7f3;font:14px/1.45 Georgia,'Times New Roman',serif;color:var(--ink);max-width:74ch}
+.rail .reading{margin:9px 0 0;padding:8px 12px 8px 13px;border-left:2px solid var(--rust);background:#faf7f3;font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);max-width:none}
 .rail>.reading{grid-column:2}
 @media(max-width:700px){.rail .reading{font-size:14px;padding:7px 10px}}
-/* rail measures at desk width; the phone layout is left alone */
 @media(min-width:901px){
-.rail{align-items:start}
+#hero.instrument{max-width:1140px!important}
+.rail{align-items:start;grid-template-columns:110px minmax(0,1fr)!important}
 .rail .track{min-width:0;position:relative}
-.rail .track.two{display:grid;grid-template-columns:1fr 330px;gap:14px}
-.rail .track.two > svg.plane{max-width:520px;height:auto;display:block}
+.rail .track.two{display:grid;grid-template-columns:minmax(0,628px) minmax(0,330px);gap:18px}
+.rail .track.two > svg.plane{width:100%;max-width:640px;height:auto;display:block}
 .rail .col .ch{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;color:var(--ash);margin-bottom:3px}
 .rail .orow{display:grid;grid-template-columns:120px 1fr 52px;gap:8px;align-items:center;font-size:11.5px;height:14px;padding:0 3px;border-radius:3px}
 .rail .orow .on{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:14px}
@@ -8110,7 +8093,6 @@ button.vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);
 .rail .lrow{padding:0 4px;line-height:1.35}
 .rail .zonenote{font-size:11px;line-height:1.4;margin-top:4px;padding-top:4px}
 }
-/* ---- sd height diet: out of spacing, never out of content ------------------ */
 #hero .ipad .aimwrap{display:none}
 #hero .ipad .rv-aim{margin-top:6px}
 #hero .ipad .specimen{font-size:11px;line-height:1.35;padding-top:2px;padding-bottom:2px}
@@ -8130,12 +8112,11 @@ button.vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);
 #khint{margin:2px 0 0}
 .credit{font-size:11px;line-height:1.25;margin-bottom:6px}
 #views{margin:8px 0 0}
-/* ---- phone: the strip is desk furniture; the count sits in the search bar -- */
 @media(max-width:760px){
 #vstrip.vgroups,#sd-second{display:none}
-#count.sdcount{font:500 12px/1.3 'IBM Plex Mono',ui-monospace,monospace;margin:0;max-width:none;color:var(--ink);font-size:12px;line-height:1.3}
-#count.sdcount .fig{font-size:12px;font-weight:500;font-family:'IBM Plex Mono',ui-monospace,monospace}
-#count.sdcount .aside{font-size:10px}
+.phbar>#count.sdcount{flex:0 0 100%;font:500 12.5px/1.35 'IBM Plex Mono',ui-monospace,monospace;margin:0 0 6px;max-width:none;color:var(--ink)}
+.phbar>#count.sdcount .fig{font-size:12.5px;font-weight:600;font-family:'IBM Plex Mono',ui-monospace,monospace}
+.phbar>#count.sdcount .aside,.phbar>#count.sdcount .broken{font-size:10px}
 }`;document.head.appendChild(s);})();
 
 window.drawInstrument=drawInstrument;

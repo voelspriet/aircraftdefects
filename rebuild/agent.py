@@ -90,14 +90,15 @@ def deploy(name, css, js):
     (HERE / (name + "-css.css")).write_text(css or "")
     (HERE / (name + "-dom.js")).write_text(js or "")
     bl = HERE / "build_all.py"; s = bl.read_text()
-    """One agent block on the page at a time: an earlier run's block would
-    otherwise keep shipping underneath this one and the two would argue."""
+    """One agent block on the page at a time. The base stylesheet 18-css.css
+    is permanent; everything else in that list belongs to an earlier agent run
+    and would keep shipping underneath this one. Naming the base explicitly,
+    because matching agent blocks by digits also matched the base and left the
+    list empty: seven deploys died on CSS = [, "27-css.css"] before the model's
+    code was ever read."""
     import re as _re
     s = _re.sub(r'\n *\("\d+-dom\.js",\s+"\d+: written with its own eyes"\),', "", s)
-    s = _re.sub(r'CSS    = \[([^\]]*)\]',
-                lambda m: 'CSS    = [%s]' % ", ".join(
-                    x for x in [y.strip() for y in m.group(1).split(",")]
-                    if x and not _re.match(r'"\d+-css\.css"', x)), s, count=1)
+    s = _re.sub(r'CSS    = \[[^\]]*\]', 'CSS    = ["18-css.css"]', s, count=1)
     tag = '("%s-dom.js"' % name
     if tag not in s:
         s = s.replace('          (("10-guidance.md", "js")',

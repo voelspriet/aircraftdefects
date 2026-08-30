@@ -1354,7 +1354,21 @@ def stream_question():
 # The file has no context for the door plug. GLM-5.3-Flash with z.ai's web
 # search tool reads the news and the NTSB, and the page labels it as the web,
 # not the file. Streamed in one piece so the same block on the page renders it.
-_NEWS = {}  # cleared on restart
+_NEWS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "news_cache.json")
+try:
+    _NEWS = json.load(open(_NEWS_PATH))
+except Exception:
+    _NEWS = {}
+def _news_save():
+    try:
+        json.dump(_NEWS, open(_NEWS_PATH + ".tmp", "w")); os.replace(_NEWS_PATH + ".tmp", _NEWS_PATH)
+    except Exception:
+        pass
+NEWS_TOPICS = [
+  ("NTSB final report Alaska Airlines 1282 door plug probable cause Boeing",
+   "What caused the Alaska Airlines flight 1282 door plug blowout on 5 January 2024 according to the NTSB final report of June 2025, and what happened to Boeing afterwards?"),
+  ("Freefall: A Reckoning for Boeing Netflix Rory Kennedy documentary review",
+   "The Netflix documentary 'Freefall: A Reckoning for Boeing' directed by Rory Kennedy, released 19 August 2026: what is it about, who are the whistleblowers in it, and how have reviewers received it?")]
 ZAI_SEARCH = "https://api.z.ai/api/paas/v4/web_search"
 
 def web_search(query, count=10):
@@ -1388,7 +1402,7 @@ def stream_news():
     t0 = time.time()
     def gen():
         yield _sse("meta", {"what": "the web, not the file"})
-        if topic in _NEWS and time.time() - _NEWS[topic]["at"] < 6 * 3600:
+        if topic in _NEWS and time.time() - _NEWS[topic]["at"] < 24 * 3600:
             yield _sse("delta", _NEWS[topic]["text"])
             yield _sse("sources", _NEWS[topic].get("sources") or [])
             yield _sse("done", {"seconds": 0.1, "model": MODEL, "effort": "web, cached"})
@@ -1413,7 +1427,7 @@ def stream_news():
             used = sorted({int(n) for n in re.findall(r"\[(\d{1,2})\]", text) if 0 < int(n) <= len(hits)})
             srcs = [{"n": n, "url": hits[n - 1]["url"], "title": hits[n - 1]["title"][:120]} for n in used]
             yield _sse("sources", srcs)
-            _NEWS[topic] = {"text": text, "sources": srcs, "at": time.time()}
+            _NEWS[topic] = {"text": text, "sources": srcs, "at": time.time()}; _news_save()
             yield _sse("done", {"seconds": round(time.time() - t0, 1), "model": MODEL, "effort": "web, %d results read" % len(hits)})
         except Exception as e:
             yield _sse("error", {"message": str(e)[:200], "seconds": round(time.time() - t0, 1)})
@@ -1678,6 +1692,13 @@ def specimen_warm():
              [{"from": "%d-01-01" % y}, {"from": "%d-01-01" % (y-1), "to": "%d-12-31" % (y-1)}, {"tail": "704AL", "crew": "A"},
               {"from": (datetime.date.today() - datetime.timedelta(days=90)).isoformat()}, {"from": datetime.date.today().replace(day=1).isoformat()}]
     done = []
+    for q_, topic in NEWS_TOPICS:
+        with app.test_request_context("/z/api/stream/news", query_string={"q": q_, "topic": topic}):
+            try:
+                r = stream_news(); body = b"".join(r.response) if hasattr(r, "response") else b""
+                done.append({"state": {"news": topic[:40]}, "ok": b"event: done" in body})
+            except Exception as e:
+                done.append({"state": {"news": topic[:40]}, "ok": False, "error": str(e)[:80]})
     for st in states:
         with app.test_request_context("/z/api/specimen", query_string=st):
             try:

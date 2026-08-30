@@ -1,0 +1,150 @@
+The airframe page prints date ranges that run backwards and durations that are
+negative. Both views are below, verbatim. Return one fenced python block holding
+the same two views, whole, with only the ordering repaired.
+
+Your last answer rewrote them from scratch against a `RECORDS` global that does
+not exist in this service, and dropped `framing`, `operators`, `systems`,
+`citation`, `capped`, `aircraft` and `cannot_show`. That was my fault: I asked for
+the views "whole" and did not give you their source. Here it is. Change the
+ordering and nothing else.
+
+# What a reader sees
+
+At /z/?tail=617FE, two lines apart on the same page:
+
+    the record table   N617FE  DOUG MD11  FDEA  454  1995-12-11  2026-08-26
+    the headline       first filed 01/04/2002 · last filed 12/24/2001
+
+The true span is 11 December 1995 to 26 August 2026.
+
+# The cause, in the source below
+
+Both views order dates as strings, and the dates are MM/DD/YYYY:
+
+    recs.sort(key=lambda x: (x["date"] or ""), reverse=True)      in airframe
+    g.sort(key=lambda x: (x["date"] or ""))                       in repeats
+
+So the earliest is whatever begins "01/" and the latest whatever begins "12/",
+whatever the year. Five of five airframes print a backwards range:
+
+    N617FE   01/04/2002 -> 12/24/2001     true 12/11/1995 -> 08/26/2026
+    N373UP   01/02/2025 -> 10/07/2022     true 10/07/2022 -> 07/22/2026
+    N842FD   01/12/2022 -> 12/04/2018
+    N947FD   01/03/2025 -> 12/20/2011
+    N360FE   01/03/2018 -> 12/22/2004
+
+The project's own specification names this as the thing it will not print: "A
+period wholly outside the file is left as asked, not clamped. Clamping would
+produce '1 Dec 2026 to 20 Aug 2026', a range that runs backwards."
+
+# The second fault, and the nuance
+
+`repeats` prints the hours between, and 16 of 109 rows across those five
+airframes are negative:
+
+    DOUBLER : Wing, Plate/Skin  46 write-ups  first 06/13/2020  last 10/19/2014
+              -13716 hours between first and last
+
+Ordering by date fixes most and not all. On N373UP:
+
+    both records dated 03/13/2025
+    IPXA2025031723954   hours 9431   text begins "**SUPPLEMENTAL SDR**"
+    IPXA2025031323954   hours 9426
+    hours_between  -5
+
+Correctly ordered, the file still reports fewer airframe hours on the later
+record. That is the FAA's file disagreeing with itself, which happens when a
+supplemental report restates an earlier one. So: order by date, and when the
+hours still run backwards between two correctly ordered records, do not print a
+negative and do not drop the row. Say that the file gives two hour readings that
+do not agree, in a field the page can show, and keep the row.
+
+# What must not change
+
+Every key in both responses stays, with the same name and the same shape:
+`tail`, `found`, `capped`, `aircraft`, `operators`, `systems`, `framing`,
+`first`, `last`, `records`, `citation`, `cannot_show`, and for repeats `groups`,
+`system`, `part`, `times`, `first`, `last`, `hours_between`, `ids`, `records`,
+`note`. Dates stay in the file's own MM/DD/YYYY. `decorate`, `api` and
+`stage_framing` are existing helpers: keep calling them exactly as they are
+called now.
+
+A record whose date will not parse must not silently sort to one end. Leave it
+out of the first and last calculation and keep it in `records`, because dropping
+a report is worse than not dating it.
+
+# What I will check
+
+    /z/api/airframe/N617FE   first 12/11/1995, last 08/26/2026
+    all five tails, first earlier than last
+    no negative hours_between for those five tails
+    where the file's own hours disagree, the response says so in words
+    every key listed above still present, and the dossier still renders with its
+      framing sentence, its cannot_show lines, its repeat groups and its citation
+
+Write no em dash and no en dash in anything that reaches the page.
+
+--- THE TWO VIEWS AS THEY ARE NOW ---
+
+@app.get("/z/api/airframe/<tail>")
+def airframe(tail):
+    t = re.sub(r"[^A-Za-z0-9]", "", tail).upper().lstrip("N")
+    d = api("/api/aircraft/" + t)
+    rows = d.get("rows") or []
+    if not rows:
+        return jsonify(tail="N" + t, found=0,
+                       note="No reports in this file name that tail number. That is not "
+                            "evidence about the aircraft. It may never have been registered "
+                            "in the United States, or nothing was ever filed."), 200
+    recs = [decorate(r) for r in rows]
+    recs.sort(key=lambda x: (x["date"] or ""), reverse=True)
+    ops = Counter(r["operator"] or r["operator_code"] for r in recs if r["operator_code"])
+    return jsonify(
+        tail="N" + t, found=d.get("count", len(recs)), capped=d.get("capped"),
+        aircraft={"make": recs[0]["make"], "model": recs[0]["model"]},
+        operators=[{"name": k, "reports": v} for k, v in ops.most_common()],
+        systems=d.get("systems"),
+        framing=stage_framing(rows),
+        first=recs[-1]["date"], last=recs[0]["date"],
+        records=recs,
+        citation={"source": "FAA Service Difficulty Reports",
+                  "url": "https://aircraftdefects.com/?tail=" + t,
+                  "retrieved": time.strftime("%Y-%m-%d"),
+                  "record_ids": [r["id"] for r in recs[:200]]},
+        cannot_show=[
+            "This file records no accidents and no causes.",
+            "A write-up is a defect that was found and recorded, usually during maintenance.",
+            "A long list is not evidence of an unsafe aircraft, and a short one is not "
+            "evidence of a safe one.",
+            "The file records an airframe's own total hours at the moment of a report, in "
+            "79% of records, but never how many hours a fleet flew. So the hours "
+            "between two write-ups on one aircraft can be measured, and no count "
+            "here can be turned into a rate."])
+
+
+@app.get("/z/api/repeats/<tail>")
+def repeats(tail):
+    """The same system written up more than once on one airframe, with the hours
+    between. Whether that is a repeat finding or two unrelated events is for a
+    reader to judge, so both are shown and neither is labelled."""
+    t = re.sub(r"[^A-Za-z0-9]", "", tail).upper().lstrip("N")
+    rows = [decorate(r) for r in (api("/api/aircraft/" + t).get("rows") or [])]
+    groups = defaultdict(list)
+    for r in rows:
+        k = (r["system_code"] or "") + "|" + (r["part"] or "")
+        if k.strip("|"):
+            groups[k].append(r)
+    out = []
+    for k, g in groups.items():
+        if len(g) < 2:
+            continue
+        g.sort(key=lambda x: (x["date"] or ""))
+        hrs = [x["hours"] for x in g if str(x["hours"] or "").isdigit()]
+        out.append({"system": g[0]["system"], "part": g[0]["part"], "times": len(g),
+                    "first": g[0]["date"], "last": g[-1]["date"],
+                    "hours_between": (int(hrs[-1]) - int(hrs[0])) if len(hrs) > 1 else None,
+                    "ids": [x["id"] for x in g], "records": g})
+    out.sort(key=lambda x: -x["times"])
+    return jsonify(tail="N" + t, groups=out,
+                   note="Written up more than once on this airframe. The file does not say "
+                        "whether a later report is the same finding returning or a new one.")

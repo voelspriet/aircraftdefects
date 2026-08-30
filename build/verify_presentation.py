@@ -273,6 +273,81 @@ def run(url, is_parent=False):
         c.add("every control is at least 24px tall", not tiny,
               f"{len(tiny)} under 24px, e.g. " + ", ".join(f"{o['t']!r} {o['h']}px" for o in tiny[:3]) if tiny else "")
 
+        # ---- 44: numbers the page publishes ---------------------------------
+        # A range that runs backwards is the one thing the project's own
+        # specification names as unprintable, and the airframe page printed one
+        # for every multi-year tail: the dates are MM/DD/YYYY and were ordered as
+        # strings, so the earliest was whatever began "01/". Screen-equals-endpoint
+        # could not see it, because the endpoint was wrong too.
+        import datetime as _dt
+        def _d(s):
+            try: return _dt.datetime.strptime(s, "%m/%d/%Y")
+            except Exception: return None
+        bad_range, bad_hours = [], []
+        for _t in ("N617FE", "N373UP", "N842FD"):
+            a = pg.evaluate("t=>fetch('api/airframe/'+t).then(r=>r.json())", _t)
+            f, l = _d(a.get("first") or ""), _d(a.get("last") or "")
+            if f and l and f > l:
+                bad_range.append(f"{_t} {a['first']} -> {a['last']}")
+            rp = pg.evaluate("t=>fetch('api/repeats/'+t).then(r=>r.json())", _t)
+            for g in (rp.get("groups") or []):
+                h = g.get("hours_between")
+                if isinstance(h, (int, float)) and h < 0:
+                    bad_hours.append(f"{_t} {g.get('part')} {h}")
+        c.add("no published range runs backwards", not bad_range, "; ".join(bad_range[:3]))
+        c.add("no published duration is negative", not bad_hours, "; ".join(bad_hours[:3]))
+
+        # --- 44: dates ordered as dates, not as strings ---------------------
+        # Found on 30 August: /z/api/airframe sorted MM/DD/YYYY as text, so the
+        # smallest was whatever began 01/ and the largest whatever began 12/,
+        # whatever the year. N617FE printed "first filed 01/04/2002 · last filed
+        # 12/24/2001" against a true span of 11 Dec 1995 to 26 Aug 2026, and the
+        # repeat rows carried durations like -13,716 hours. Five of five airframes
+        # were backwards; 16 of 109 repeat rows were negative. The screen matched
+        # the endpoint character for character, so only the records the same
+        # response carries could show it.
+        # urllib over https fails on this machine without an explicit certifi
+        # context: CERTIFICATE_VERIFY_FAILED, unable to get local issuer. It
+        # raises per request, so a bare try/except makes every airframe skip and
+        # the check passes having examined nothing.
+        import json as _json, datetime as _dt, urllib.request as _rq
+        import ssl as _ssl, certifi as _certifi
+        _ctx = _ssl.create_default_context(cafile=_certifi.where())
+        base = url.split("/z/")[0]
+        backwards, wrong, checked = [], [], 0
+        for tail in ("N617FE", "N373UP", "N842FD", "N947FD", "N360FE"):
+            try:
+                with _rq.urlopen(f"{base}/z/api/airframe/{tail}", timeout=30, context=_ctx) as r:
+                    d = _json.load(r)
+            except Exception:
+                continue
+            f, l = d.get("first"), d.get("last")
+            def _p(s):
+                try: return _dt.datetime.strptime(s, "%m/%d/%Y")
+                except Exception: return None
+            ds = [x for x in (_p(r.get("date")) for r in d.get("records", [])) if x]
+            if not (f and l and ds):
+                continue
+            checked += 1
+            pf, pl = _p(f), _p(l)
+            if pf and pl and pf > pl:
+                backwards.append(f"{tail} {f} -> {l}")
+            if pf != min(ds) or pl != max(ds):
+                wrong.append(f"{tail} shows {f}->{l}, true {min(ds):%m/%d/%Y}->{max(ds):%m/%d/%Y}")
+        # A check that examined nothing must fail. Passing on checked==0 is the
+        # false pass this gate exists to prevent, and it happened here first.
+        c.add("no date range runs backwards", checked > 0 and not backwards,
+              (f"{len(backwards)}/{checked} airframes: " + "; ".join(backwards[:3])) if backwards
+              else (f"{checked} airframes checked" if checked else "EXAMINED NOTHING"))
+        c.add("the date range matches the records", checked > 0 and not wrong,
+              "; ".join(wrong[:2]) if wrong
+              else (f"{checked} airframes checked" if checked else "EXAMINED NOTHING"))
+
+        neg = pg.evaluate("""()=>{const m=(document.body.innerText||'')
+            .match(/-\\d[\\d,]*\\s*hours between first and last/g); return m||[];}""")
+        c.add("no duration is negative", not neg,
+              f"{len(neg)} negative durations, e.g. " + "; ".join(neg[:2]) if neg else "")
+
         c.add("no runtime errors", not errs, "; ".join(errs[:2]))
         br.close()
     return c.report()

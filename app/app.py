@@ -165,6 +165,18 @@ def decorate(r):
     }
 
 
+# Existing module context (imports, decorate, api, stage_framing, app) is unchanged.
+# Added: one helper, used by both views, to read the file's own MM/DD/YYYY dates.
+
+def _parse_date(s):
+    """The file's dates are MM/DD/YYYY. Returns a comparable value, or None when
+    the date will not parse, so an undated report can never decide first or last."""
+    try:
+        return time.strptime(s, "%m/%d/%Y")
+    except (TypeError, ValueError):
+        return None
+
+
 @app.get("/z/api/airframe/<tail>")
 def airframe(tail):
     t = re.sub(r"[^A-Za-z0-9]", "", tail).upper().lstrip("N")
@@ -176,7 +188,10 @@ def airframe(tail):
                             "evidence about the aircraft. It may never have been registered "
                             "in the United States, or nothing was ever filed."), 200
     recs = [decorate(r) for r in rows]
-    recs.sort(key=lambda x: (x["date"] or ""), reverse=True)
+    dated = [r for r in recs if _parse_date(r["date"])]
+    undated = [r for r in recs if not _parse_date(r["date"])]
+    dated.sort(key=lambda x: _parse_date(x["date"]), reverse=True)
+    recs = dated + undated
     ops = Counter(r["operator"] or r["operator_code"] for r in recs if r["operator_code"])
     return jsonify(
         tail="N" + t, found=d.get("count", len(recs)), capped=d.get("capped"),
@@ -184,7 +199,8 @@ def airframe(tail):
         operators=[{"name": k, "reports": v} for k, v in ops.most_common()],
         systems=d.get("systems"),
         framing=stage_framing(rows),
-        first=recs[-1]["date"], last=recs[0]["date"],
+        first=dated[-1]["date"] if dated else None,
+        last=dated[0]["date"] if dated else None,
         records=recs,
         citation={"source": "FAA Service Difficulty Reports",
                   "url": "https://aircraftdefects.com/?tail=" + t,
@@ -199,7 +215,6 @@ def airframe(tail):
             "79% of records, but never how many hours a fleet flew. So the hours "
             "between two write-ups on one aircraft can be measured, and no count "
             "here can be turned into a rate."])
-
 
 # -------------------------------------------------------------------- build 2
 # Plain-language gloss of one record. The only generated text in v1.
@@ -429,17 +444,28 @@ def repeats(tail):
     for k, g in groups.items():
         if len(g) < 2:
             continue
-        g.sort(key=lambda x: (x["date"] or ""))
-        hrs = [x["hours"] for x in g if str(x["hours"] or "").isdigit()]
+        dated = [r for r in g if _parse_date(r["date"])]
+        undated = [r for r in g if not _parse_date(r["date"])]
+        dated.sort(key=lambda x: _parse_date(x["date"]))
+        g = dated + undated
+        vals = [int(str(x["hours"])) for x in g if str(x["hours"] or "").isdigit()]
+        hours_between = (vals[-1] - vals[0]) if len(vals) > 1 else None
+        note = None
+        if len(vals) > 1 and vals[-1] < vals[0]:
+            hours_between = None
+        if any(b < a for a, b in zip(vals, vals[1:])):
+            note = ("The file's own hour readings do not agree: a later report "
+                    "records fewer total airframe hours than an earlier one, so the "
+                    "hours between first and last cannot be shown here.")
         out.append({"system": g[0]["system"], "part": g[0]["part"], "times": len(g),
-                    "first": g[0]["date"], "last": g[-1]["date"],
-                    "hours_between": (int(hrs[-1]) - int(hrs[0])) if len(hrs) > 1 else None,
-                    "ids": [x["id"] for x in g], "records": g})
+                    "first": dated[0]["date"] if dated else None,
+                    "last": dated[-1]["date"] if dated else None,
+                    "hours_between": hours_between,
+                    "ids": [x["id"] for x in g], "records": g, "note": note})
     out.sort(key=lambda x: -x["times"])
     return jsonify(tail="N" + t, groups=out,
                    note="Written up more than once on this airframe. The file does not say "
                         "whether a later report is the same finding returning or a new one.")
-
 
 # -------------------------------------------------------------------- build 9
 # Operator page, with the unresolved names shown rather than hidden.

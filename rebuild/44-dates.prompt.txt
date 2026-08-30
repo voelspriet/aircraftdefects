@@ -1,0 +1,105 @@
+The airframe page prints date ranges that run backwards and durations that are
+negative. Return one fenced python block: the two service views below, whole,
+with nothing else changed.
+
+# What a reader sees
+
+At /z/?tail=617FE, two lines apart on the same page:
+
+    the record table   N617FE  DOUG MD11  FDEA  454  1995-12-11  2026-08-26
+    the headline       first filed 01/04/2002 · last filed 12/24/2001
+
+The true span is 11 December 1995 to 26 August 2026. The headline hides
+thirty-one years and prints a range that runs backwards.
+
+# The cause
+
+Both views order dates as strings, and the dates are MM/DD/YYYY:
+
+    app/app.py line 179   recs.sort(key=lambda x: (x["date"] or ""), reverse=True)
+    app/app.py line 432   g.sort(key=lambda x: (x["date"] or ""))
+
+So the earliest is whatever begins "01/" and the latest whatever begins "12/",
+whatever the year. Proof from your own endpoint:
+
+    /z/api/airframe/N617FE
+      first 01/04/2002   last 12/24/2001
+      min and max of the date strings   01/04/2002 and 12/24/2001   exact match
+      min and max as dates              12/11/1995 and 08/26/2026
+
+Five of five airframes show it:
+
+    N617FE   01/04/2002 -> 12/24/2001     true 12/11/1995 -> 08/26/2026
+    N373UP   01/02/2025 -> 10/07/2022     true 10/07/2022 -> 07/22/2026
+    N842FD   01/12/2022 -> 12/04/2018
+    N947FD   01/03/2025 -> 12/20/2011
+    N360FE   01/03/2018 -> 12/22/2004
+
+This is the standard the project already holds itself to, quoted in its own
+specification: "A period wholly outside the file is left as asked, not clamped.
+Clamping would produce '1 Dec 2026 to 20 Aug 2026', a range that runs backwards."
+The tool names a backwards range as the thing it will not print, and prints one
+for every multi-year airframe.
+
+# The second fault, and a nuance that matters
+
+`repeats` orders the same way, and prints the hours between:
+
+    DOUBLER : Wing, Plate/Skin  46 write-ups  first 06/13/2020  last 10/19/2014
+              -13716 hours between first and last
+    FRAME : Fuselage Main       13 write-ups  first 03/10/2004  last 09/17/2002
+              -4751 hours between first and last
+
+16 of 109 repeat rows across five airframes carry a negative duration.
+
+Ordering by date fixes most of them and will not fix all of them, and the
+difference is the interesting part. On N373UP:
+
+    both records dated 03/13/2025
+    IPXA2025031723954   hours 9431   text begins "**SUPPLEMENTAL SDR**"
+    IPXA2025031323954   hours 9426
+    hours_between  -5
+
+Correctly ordered, the file still reports fewer airframe hours on the later
+record than the earlier one. That is not an arithmetic error. It is the FAA's
+file disagreeing with itself, which happens when a supplemental report restates
+an earlier one.
+
+So: order by date, and then, when the hours still run backwards between two
+records that are correctly ordered, do not print a negative number and do not
+silently drop the row. Say what is true: that the file gives two hour readings
+that do not agree, and name the two records so a reader can look. `cannot_show`
+already carries the sentence about airframe hours; this is the same kind of
+honesty one level down.
+
+# What to write
+
+Both views, whole:
+
+    @app.get("/z/api/airframe/<tail>")
+    @app.get("/z/api/repeats/<tail>")
+
+Parse the date once, order by the parsed value everywhere first and last are
+derived, and keep printing the date in the file's own MM/DD/YYYY so nothing else
+on the page changes shape. A record whose date will not parse must not silently
+sort to one end: leave it out of the first and last calculation and keep it in
+the records array, because dropping a report is worse than not dating it.
+
+Do not change any other view, any field name, or any sentence in `cannot_show`
+except to add what the hours nuance needs.
+
+Two other things in the file are already right and must stay: the `years`
+counter in `part` takes the last four characters, which is correct for a year,
+and `decorate` is untouched.
+
+# What I will check
+
+    /z/api/airframe/N617FE   first 12/11/1995, last 08/26/2026
+    the same for the other four tails, first earlier than last in every one
+    no negative hours_between anywhere in /z/api/repeats for those five tails
+    where the file's own hours disagree, the response says so in words
+    /z/api/repeats/N373UP still returns its groups, none dropped
+    the page still renders: the dossier, its framing sentence, its cannot_show
+      lines, the repeat groups and the citation
+
+Write no em dash and no en dash in anything that reaches the page.

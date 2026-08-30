@@ -1124,16 +1124,38 @@ ABSTAIN = ("If the write-ups do not support an answer, say exactly that in one "
            "sentence and stop. Never invent. Never soften. British English, no em dashes.")
 
 
+NOVICE = ("Write for someone who has never worked on an aircraft and has never read one of "
+          "these forms. Use the decoded fields as well as the write-up: say what aircraft and "
+          "airline this is, when and at what stage of flight it was found, how it was found, "
+          "and what the mechanic did. Expand every abbreviation the first time it appears, in "
+          "brackets, and say in one plain clause what the part is for (for example: 'the "
+          "fitting that holds the cargo door's opening arm to the airframe'). If the inspection "
+          "method has a name, say what it does in a few words. Keep every fact; add no cause, no "
+          "danger, no judgement. End with one sentence naming what the report does not say.")
+
+
 @app.get("/z/api/stream/gloss")
 def stream_gloss():
     text = (request.args.get("text") or "").strip()
     if not text:
         return jsonify(error="no text"), 400
-    prompt = GLOSS_RULES.split("Separately:")[0] + "\n" + ABSTAIN + \
-        "\nWrite plain prose only, no JSON.\n\nThe write-up, verbatim:\n" + text
-    long_ = len(text) > 400
-    return _stream_response({"read": 1, "of": 1, "what": "this write-up"},
-                            prompt, "high" if long_ else "low", 1200)
+    # the whole record, decoded by the FAA's own tables, not the sentence alone.
+    # The page hands the raw record over as JSON in `rec`; the search API has no
+    # lookup by control number.
+    facts = {}
+    try:
+        raw = json.loads(request.args.get("rec") or "{}")
+        if isinstance(raw, dict) and raw:
+            rec = decorate(raw)
+            facts = {k: v for k, v in rec.items() if v and k not in ("text", "id")}
+    except Exception:
+        facts = {}
+    prompt = (GLOSS_RULES.split("Separately:")[0] + "\n" + NOVICE + "\n" + ABSTAIN +
+              "\nWrite plain prose only, no JSON, at most 160 words.\n\n"
+              + ("Every coded field on this report, decoded:\n" + json.dumps(facts, ensure_ascii=False) + "\n\n" if facts else "")
+              + "The write-up, verbatim:\n" + text)
+    return _stream_response({"read": 1, "of": 1, "what": "this report, all fields"},
+                            prompt, "low", 1500)
 
 
 @app.get("/z/api/stream/recurs")
@@ -1281,8 +1303,10 @@ def specimen():
         return jsonify(_SPEC["data"])
     rec = decorate(r)
     text = rec["text"]
-    prompt = GLOSS_RULES.split("Separately:")[0] + "\n" + ABSTAIN + \
-        "\nWrite plain prose only, at most 90 words, no JSON. End with one sentence naming what the write-up does not say.\n\nThe write-up, verbatim:\n" + text
+    facts = {k: v for k, v in rec.items() if v and k not in ("text", "id")}
+    prompt = (GLOSS_RULES.split("Separately:")[0] + "\n" + NOVICE + "\n" + ABSTAIN +
+              "\nWrite plain prose only, at most 120 words, no JSON.\n\nEvery coded field on this report, decoded:\n"
+              + json.dumps(facts, ensure_ascii=False) + "\n\nThe write-up, verbatim:\n" + text)
     t0 = time.time(); plain = None; err = None
     try:
         plain = glm(prompt, effort="low", max_tokens=900)

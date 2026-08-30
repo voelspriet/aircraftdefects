@@ -1756,200 +1756,163 @@ window.addEventListener("load", function(){ sdrStripRails(); sdrFixLabels(); sdr
 
 
 
-/* ---- 23: the axes, the open rail, the landing card, written by the model ---- */
-
+/* ---- 26: written with its own eyes, written by the model ---- */
 (function(){
 "use strict";
-function sdEsc(s){return (s==null?"":String(s)).replace(/[&<>"']/g,function(c){
-  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
-function sdNum(n){try{return (typeof num==="function")?num(n):Number(n).toLocaleString("en");}
-  catch(e){return String(n==null?"":n);}}
+function byId(id){return document.getElementById(id)}
+function visible(n){ if(!n||n.nodeType!==1)return false; if(!n.offsetParent&&getComputedStyle(n).position!=="fixed")return false; var cs=getComputedStyle(n); return cs.display!=="none"&&cs.visibility!=="hidden"; }
+function phone(){return matchMedia("(max-width:760px)").matches}
 
-var SD_TABS=[["p-search","Search"],["p-patterns","Patterns"],["p-aircraft","Aircraft"],
-  ["p-fleet","Fleet"],["p-leads","Story leads"],["p-emerging","New defects"],
-  ["p-clusters","Same day, many aircraft"],["p-defect","Same defect"],
-  ["p-structure","Corrosion & cracks"],["p-age","Old airframes"],["p-engines","Engines"],
-  ["p-consequences","What the crew did"],["p-found","How it was found"],
-  ["p-compare","Compare"],["p-terms","Every code explained"],["p-method","Method"]];
-var SD_GROUPS=[
-  ["Narrows to what you selected","Narrows to what you selected",
-    ["p-search","p-patterns","p-aircraft","p-found"]],
-  ["Ignore your selection",
-    "These ignore your selection; each answers from the whole file or from a slice set inside the panel",
-    ["p-fleet","p-leads","p-emerging","p-clusters","p-defect","p-structure","p-age",
-     "p-engines","p-consequences"]],
-  ["Reference","Reference",["p-compare","p-terms","p-method"]]];
-function sdLabel(id){
-  try{ if(typeof TABS!=="undefined"&&TABS&&TABS.length){
-    for(var i=0;i<TABS.length;i++) if(TABS[i][0]===id) return TABS[i][1]; } }catch(e){}
-  for(var j=0;j<SD_TABS.length;j++) if(SD_TABS[j][0]===id) return SD_TABS[j][1];
-  return id;
-}
-
-/* div.panel -> section.panel; children and their listeners move with it */
-function sdSectionize(){
-  [].slice.call(document.querySelectorAll("div.panel")).forEach(function(d){
-    if(!d.id)return;
-    var s=document.createElement("section");
-    s.className=d.className; s.id=d.id;
-    if(d.getAttribute("role"))s.setAttribute("role",d.getAttribute("role"));
-    while(d.firstChild)s.appendChild(d.firstChild);
-    d.parentNode.replaceChild(s,d);
-  });
+/* ---- the instrument's inside: #hero.instrument > .ipad ---------------------
+   Only built while the desk instrument is in the hero. Once drawPhone has
+   replaced the hero's contents there is nothing to wrap and the phone layout
+   is left exactly as the page drew it. */
+function ensureIpad(){
+  var hero=byId("hero"); if(!hero)return null;
+  var rails=hero.querySelector(".rails");
+  if(!rails||!visible(rails)||hero.querySelector(".phbar"))return hero.querySelector(".ipad")||null;
+  if(!/\binstrument\b/.test(hero.className||""))hero.className=("instrument "+(hero.className||"")).trim();
+  var kids=[].slice.call(hero.children), i, ipad=null, ihead=null;
+  for(i=0;i<kids.length;i++){
+    if(/\bipad\b/.test(kids[i].className||"")){ipad=kids[i];break}
+  }
+  for(i=0;i<kids.length;i++){
+    if(/\bihead\b/.test(kids[i].className||"")){ihead=kids[i];break}
+  }
+  if(!ipad){
+    ipad=document.createElement("div"); ipad.className="ipad";
+    if(ihead)ihead.after(ipad); else hero.insertBefore(ipad,hero.firstChild);
+    kids=[].slice.call(hero.children);
+    for(i=0;i<kids.length;i++){
+      if(kids[i]!==ipad&&kids[i]!==ihead)ipad.appendChild(kids[i]);
+    }
+  }
+  return ipad;
 }
 
-/* the keeper slot: present, empty, hidden */
-function sdSentenceSlot(){
-  if(document.getElementById("sentence"))return;
-  var f=document.getElementById("freshness");
-  var s=document.createElement("div");
-  s.id="sentence"; s.hidden=true; s.setAttribute("aria-hidden","true");
-  if(f&&f.parentNode)f.parentNode.insertBefore(s,f); else document.body.appendChild(s);
+/* #count.sdcount: one element, moved never cloned. Desk width: inside .ipad,
+   immediately above .rails. Phone: the original keeps the sentence in
+   #p-search .bar, so it goes there and the phone hero is never touched. The
+   desk insert checks that the anchor is still a child of the node it is
+   inserting into, at that moment, so the phone rewrite and the observer can
+   never fight. Once seated, every later pass is a no-op. */
+function seatCount(){
+  var all=document.querySelectorAll("#count"); if(!all.length)return;
+  var c=all[0],i;
+  for(i=0;i<all.length;i++){ if(all[i]!==c&&all[i].parentNode)all[i].parentNode.removeChild(all[i]); }
+  function detach(){ if(c.parentNode&&c.parentNode.nodeType===1&&c.parentNode.contains(c))c.parentNode.removeChild(c); }
+  if(phone()){
+    var bar=document.querySelector("#p-search .bar");
+    if(bar&&c.parentNode!==bar){ detach(); bar.insertBefore(c,bar.firstChild); }
+  }else{
+    var hero=byId("hero");
+    var rails=hero?hero.querySelector(".rails"):null;
+    if(rails){
+      var host=rails.parentNode;
+      if(c.parentNode!==host||c.nextElementSibling!==rails){
+        detach();
+        if(rails.parentNode===host)host.insertBefore(c,rails);
+      }
+    }
+  }
+  if(!/\bsdcount\b/.test(c.className))c.className=("sdcount "+c.className).trim();
 }
 
-/* the strip */
-function sdBuildStrip(){
-  var host=document.getElementById("tabs"); if(!host)return;
-  var strip=document.getElementById("vstrip");
-  if(!strip){ strip=document.createElement("div"); strip.id="vstrip";
-    strip.className="vgroups"; host.innerHTML=""; host.appendChild(strip); }
-  strip.innerHTML=SD_GROUPS.map(function(g){
-    return '<div class="vg"><span class="vglab" title="'+sdEsc(g[1])+'">'+sdEsc(g[0])+"</span>"+
-      '<span class="vgbtns" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:2px;'+
-      'align-items:baseline;flex:1 1 auto;min-width:0">'+
-      g[2].map(function(id){
-        return '<button type="button" class="vtab" role="tab" data-p="'+id+'" id="tab-'+id+
-          '" aria-controls="'+id+'" aria-selected="false" tabindex="-1">'+sdEsc(sdLabel(id))+"</button>";
-      }).join("")+"</span></div>";
-  }).join("");
-  [].forEach.call(strip.querySelectorAll(".vtab"),function(b){
-    b.addEventListener("click",function(){ try{ show(b.dataset.p); }catch(e){} });
-  });
-  sdRoveStrip();
-}
-function sdRoveStrip(){
-  var tabs=[].slice.call(document.querySelectorAll("#vstrip .vtab")); if(!tabs.length)return;
-  var keep=null;
-  tabs.forEach(function(b){ if(b.getAttribute("aria-selected")==="true")keep=b; });
-  if(!keep)keep=tabs[0];
-  tabs.forEach(function(b){ b.setAttribute("tabindex", b===keep?"0":"-1"); });
-}
-
-/* the sentence keeper: whatever the hero's sentence slot holds is restamped into
-   #count every time the page overwrites it */
-var sdSentenceHTML="", sdRestoring=false, sdCountMO=null;
-function sdStampCount(){
-  var c=document.getElementById("count"); if(!c||!sdSentenceHTML)return;
-  if(c.classList.contains("sdcount")&&c.innerHTML===sdSentenceHTML)return;
-  sdRestoring=true;
-  c.classList.add("sdcount");
-  c.innerHTML=sdSentenceHTML;
-  sdRestoring=false;
-}
-function sdWatchCount(){
-  var c=document.getElementById("count");
-  if(!c||sdCountMO)return;
-  sdCountMO=new MutationObserver(function(){ if(!sdRestoring)sdStampCount(); });
-  sdCountMO.observe(c,{childList:true,characterData:true,subtree:true});
-}
-function sdAfterHero(){
-  try{
-    var s=document.querySelector("#hero .sentence");
-    if(s&&s.innerHTML&&s.innerHTML.trim())sdSentenceHTML=s.innerHTML;
-  }catch(e){}
-  sdStampCount();
-  sdSweep();
-}
-
-/* the landing card stays gone */
-function sdKillLand(){
-  [].slice.call(document.querySelectorAll(".card.land")).forEach(function(n){
-    if(n.parentNode)n.parentNode.removeChild(n);
-  });
-}
-/* the table carries the rebuild's name */
-function sdNameTables(){
-  [].slice.call(document.querySelectorAll("table.reports")).forEach(function(t){
-    t.classList.add("reps");
-  });
-}
-/* the empty state, under its own id, with a renderOnPurpose that reaches it */
-function sdEmptySwap(){
-  var res=document.getElementById("results"); if(!res)return;
-  var emp=res.querySelector("tr.empty"); if(!emp)return;
-  if(!/No rows yet/.test(emp.textContent||""))return;
-  var total=0; try{ if(typeof TOTAL!=="undefined"&&TOTAL)total=TOTAL; }catch(e){}
-  res.innerHTML='<div id="noRows" class="sdnORows">'+
-    "<p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and "+
-    "buries the one you have.</p>"+
-    '<p class="muted">Take a month, a zone, an airline or a tail from the instrument above, pick '+
-    "one of the starter questions, or set a filter. To read the file straight through anyway, use "+
-    "the button at the foot of the instrument.</p>"+
-    '<div class="bar"><button type="button" class="ghost" onclick="renderOnPurpose()">Read all '+
-    sdNum(total)+" anyway</button>"+
-    '<button type="button" class="ghost" onclick="showStarters()">Show me the starter questions</button>'+
-    "</div></div>";
-}
-window.renderOnPurpose=function(){
-  var nr=document.getElementById("noRows");
-  if(nr)nr.setAttribute("data-sdread","1");
-  try{ if(typeof revealAll==="function")revealAll(); }catch(e){}
-};
-
-/* the second line and its published-to date: the page's own fetch first, this if empty */
-function sdSecondLine(){
-  var f=document.getElementById("freshness"); if(!f)return;
-  if(f.textContent&&f.textContent.trim())return;
-  var to=""; try{ if(typeof RANGE!=="undefined"&&RANGE&&RANGE.to)to=RANGE.to; }catch(e){}
-  if(!to)return;
-  var pretty=to;
-  try{ if(typeof prettyDate==="function")pretty=prettyDate(to); }catch(e){}
-  f.innerHTML="Reports published to <b>"+sdEsc(pretty)+"</b>. Counts are of reports filed, not of flights.";
-}
-
-function sdSweep(){ sdKillLand(); sdNameTables(); sdEmptySwap(); sdSecondLine(); }
-
-/* the page's own functions stay the engine; each wrap only adds the sweep after it */
-function sdWrap(name,after){
-  try{
-    var orig=window[name];
-    if(typeof orig!=="function")return;
-    window[name]=function(){
-      var r=orig.apply(this,arguments);
-      try{
-        if(r&&typeof r.then==="function")r.then(function(){after();},function(){after();});
-        else after();
-      }catch(e){}
-      return r;
-    };
-  }catch(e){}
-}
-
-function sdInit(){
-  try{ sdSectionize(); }catch(e){}
-  try{ sdSentenceSlot(); }catch(e){}
-  try{ sdBuildStrip(); }catch(e){}
-  try{ sdWatchCount(); }catch(e){}
-  sdWrap("renderTabs",sdBuildStrip);
-  sdWrap("drawHero",sdAfterHero);
-  sdWrap("show",sdRoveStrip);
-  sdWrap("search",sdSweep);
-  try{ sdSweep(); }catch(e){}
-  var sdKillT=null, sdMO=null;
-  try{
-    sdMO=new MutationObserver(function(){
-      if(sdKillT)return;
-      sdKillT=setTimeout(function(){ sdKillT=null; try{ sdKillLand(); }catch(e){} },200);
+/* one reading per open rail: keep the fuller one as a single p.reading, put it
+   back where the original put it, and leave the rail exactly three children:
+   .gut, .track, p.reading. FORCED holds its reading inside .track. */
+function oneReading(){
+  var open=document.querySelectorAll(".rail.open"),i;
+  for(i=0;i<open.length;i++){
+    var rail=open[i];
+    var rs=[].slice.call(rail.querySelectorAll(".reading")); 
+    var keep=null;
+    if(rs.length){
+      keep=rs.slice().sort(function(a,b){
+        var d=b.textContent.trim().length-a.textContent.trim().length;
+        return d||((a.tagName==="P")?-1:1);
+      })[0];
+      if(keep.tagName!=="P"){
+        var p=document.createElement("p"); p.className="reading";
+        p.innerHTML=keep.innerHTML;
+        keep.parentNode.replaceChild(p,keep); keep=p;
+      }
+      for(var j=0;j<rs.length;j++){ if(rs[j]!==keep)rs[j].remove() }
+    }
+    var host=(rail.dataset.rail==="forced")?(rail.querySelector(".track")||rail):rail;
+    if(keep&&keep.parentNode!==host)host.appendChild(keep);
+    [].slice.call(rail.children).forEach(function(n){
+      if(/\b(gut|track)\b/.test(n.className||""))return;
+      n.remove();
     });
-    sdMO.observe(document.body,{childList:true,subtree:true});
-  }catch(e){}
+  }
 }
-if(document.readyState==="loading")
-  document.addEventListener("DOMContentLoaded",sdInit);
-else sdInit();
+
+function stripInline(){
+  var bs=document.querySelectorAll("#vstrip.vgroups .vgbtns"),i;
+  for(i=0;i<bs.length;i++){
+    var b=bs[i]; if(b.dataset.sdInl)continue; b.dataset.sdInl="1";
+    b.style.margin="0"; b.style.padding="0"; b.style.borderBottom="0";
+  }
+}
+
+function secondLine(){
+  var strip=byId("vstrip"); if(!strip)return;
+  var p=byId("sd-second");
+  if(!p){ p=document.createElement("p"); p.id="sd-second"; p.className="sd-second";
+          strip.parentNode.insertBefore(p,strip.nextSibling); }
+  if(p.dataset.sdDone)return; p.dataset.sdDone="1";
+  var fr=byId("freshness");
+  p.innerHTML=(fr&&fr.textContent.trim())?fr.textContent.trim()
+    :"Counts of reports filed, not of flights.";
+}
+
+/* the #sentence keeper: hidden wherever the page puts it; whatever is written to
+   #sentence or #count, both ends hold the same words */
+function ensureSentence(){
+  var s=byId("sentence");
+  if(!s){ s=document.createElement("div"); s.id="sentence"; s.hidden=true;
+          (document.querySelector("main.wrap")||document.body).appendChild(s); }
+  if(!s.hidden)s.hidden=true;
+  if(s.style.display!=="none")s.style.display="none";
+}
+var snap={s:null,c:null};
+function mirror(){
+  var s=byId("sentence"), c=byId("count");
+  if(!s||!c||s===c)return;
+  var sv=s.innerHTML, cv=c.innerHTML;
+  if(sv!==cv){
+    if(sv!==snap.s&&snap.s!==null){ c.innerHTML=sv; cv=sv; }
+    else { s.innerHTML=cv; sv=cv; }
+  }
+  snap.s=sv; snap.c=cv;
+}
+
+function purgeLand(){
+  var ls=document.querySelectorAll(".card.land"),i;
+  for(i=0;i<ls.length;i++)ls[i].remove();
+}
+
+/* every step is a no-op once settled, so the observer loop terminates */
+var queued=false;
+function pass(){
+  queued=false;
+  try{purgeLand()}catch(e){}
+  try{ensureSentence()}catch(e){}
+  try{ensureIpad()}catch(e){}
+  try{seatCount()}catch(e){}
+  try{oneReading()}catch(e){}
+  try{stripInline()}catch(e){}
+  try{secondLine()}catch(e){}
+  try{mirror()}catch(e){}
+}
+function kick(){ if(queued)return; queued=true; requestAnimationFrame(pass); }
+new MutationObserver(kick).observe(document.documentElement,{childList:true,subtree:true});
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",pass);
+else pass();
+addEventListener("load",pass);
+addEventListener("resize",kick);
 })();
-
-
 
 /* ---- 10: how to read each panel, written by the model ---- */
 
@@ -2719,57 +2682,78 @@ table.reps th{ font-size:11px; background:transparent; color:var(--ash);
 .rail.open[data-rail=when] .track{ overflow-x:auto; overscroll-behavior-x:contain }
 `;document.head.appendChild(s);})();
 
-(function(){var s=document.createElement('style');s.id='sdr-css-23';s.textContent=`
-/* ---- rebuild layer: the names are ours, the measures are the page's ---- */
-
-#tabs{border-bottom:0;padding-bottom:0;margin:10px 0 12px}
-
-/* the standing sentence lives in #count.sdcount; the hero's own slot stays in the
-   DOM but out of view, and the hidden #sentence keeper sits beside the freshness line */
-#iSentence{display:none}
-#count.sdcount{display:block;flex:1 1 100%;font-family:'Instrument Serif',Georgia,serif;
-  font-size:34px;line-height:1.1;color:var(--ink);max-width:26em;margin:2px 0 0}
-#count.sdcount .fig{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;
-  font-size:.92em;font-variant-numeric:tabular-nums;color:var(--rust-text,#b8431f)}
+(function(){var s=document.createElement('style');s.id='sdr-css-26';s.textContent=`/* ---- carried, restated ---------------------------------------------------- */
+#sentence{display:none!important}
+.card.land{display:none!important}
+/* the tab strip: three groups, label beside its buttons, one line each */
+#vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}
+#vstrip.vgroups .vg{display:flex;flex-direction:row;align-items:center;gap:10px;min-width:0}
+#vstrip.vgroups .vglab{flex:0 0 auto;font:600 9.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em;color:#57514a;text-transform:uppercase;white-space:nowrap}
+#vstrip.vgroups .vgbtns{display:flex!important;flex-direction:row!important;gap:2px!important;align-items:center!important;flex-wrap:wrap!important;margin:0!important;padding:0!important;border-bottom:0!important;min-width:0;flex:1 1 auto}
+button.vtab{padding:3px 8px;font-size:11.5px;line-height:1.2;border:1px solid transparent;border-radius:3px;background:none;color:#5c554c;cursor:pointer;white-space:nowrap}
+button.vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);font-weight:600}
+.axis{display:flex;gap:2px;margin-top:3px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ash)}
+.axis span{flex:1;min-width:0}
+.sd-second{font-size:11.5px;color:#6b6560;margin:0 0 3px;text-align:center;letter-spacing:.02em}
+.sd-second b{font-weight:600}
+/* the instrument: the hero is the instrument; .ipad is its inside */
+#hero.instrument{position:relative;background:var(--paper);border:1px solid var(--line);border-bottom:3px solid var(--rust);border-radius:6px;margin:12px 0 0;overflow:hidden;padding:0}
+#hero.instrument > .ipad{padding:10px 20px 6px}
+/* the standing count, seated above the rails */
+#count.sdcount{font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1.1;color:var(--ink);max-width:26em;margin:4px 0 2px}
+#count.sdcount .fig{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:.92em;font-variant-numeric:tabular-nums;color:var(--rust-text,#b8431f)}
 #count.sdcount .aside{font-size:.62em;color:var(--ash)}
-#count.sdcount .broken{display:block;font-size:.5em;color:var(--rust-text,#b8431f)}
+#count.sdcount .broken{display:block;font-size:.5em;color:var(--rust)}
 #count.sdcount .clause{border-bottom:1px dotted rgba(29,29,31,.28);cursor:pointer}
-#count.sdcount .clause:hover,#count.sdcount .clause:focus-visible{
-  color:var(--rust-text,#b8431f);border-bottom-color:var(--rust-text,#b8431f)}
-
-/* the strip: three labelled rows. Both axes written down, because the page sets
-   .vg{flex-direction:column}, which reads a 200px flex-basis as a height. */
-#vstrip.vgroups{display:flex;flex-direction:column;position:static;z-index:auto;inset:auto;
-  gap:3px;margin:0;padding:6px 0;border-bottom:1px solid var(--line);background:transparent}
-#vstrip .vg{display:flex;flex-direction:row!important;flex-wrap:nowrap;align-items:baseline;gap:10px}
-#vstrip .vglab{flex:0 0 200px!important;flex-basis:200px;width:200px;max-width:200px;
-  height:auto!important;min-height:0;font:600 10px/1.35 Archivo,system-ui,sans-serif;
-  letter-spacing:.06em;text-transform:uppercase;color:#57514a;text-align:right;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-self:baseline}
-#vstrip .vgbtns{display:flex!important;flex-direction:row!important;flex-wrap:wrap;gap:2px;
-  align-items:baseline;flex:1 1 auto;min-width:0}
-#vstrip .vtab{padding:3px 8px;font-size:12px;line-height:1.3;border-radius:3px;
-  border:1px solid transparent;background:none;color:var(--smoke);cursor:pointer;font-family:inherit}
-#vstrip .vtab:hover{color:var(--ink)}
-#vstrip .vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);font-weight:600}
-#vstrip .vtab:focus-visible{outline:2px solid var(--rust);outline-offset:2px;border-radius:2px}
-@media(max-width:900px){
-  #vstrip .vg{flex-direction:column!important;align-items:flex-start;gap:2px}
-  #vstrip .vglab{flex:0 0 auto!important;width:auto;max-width:none;text-align:left}
+/* one reading per open rail, at the original measure */
+.rail .reading{margin:6px 0 0;padding:6px 12px 6px 13px;border-left:2px solid var(--rust);background:#faf7f3;font:14px/1.45 Georgia,'Times New Roman',serif;color:var(--ink);max-width:74ch}
+.rail>.reading{grid-column:2}
+@media(max-width:700px){.rail .reading{font-size:14px;padding:7px 10px}}
+/* rail measures at desk width; the phone layout is left alone */
+@media(min-width:901px){
+.rail{align-items:start}
+.rail .track{min-width:0;position:relative}
+.rail .track.two{display:grid;grid-template-columns:1fr 330px;gap:14px}
+.rail .track.two > svg.plane{max-width:520px;height:auto;display:block}
+.rail .col .ch{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;color:var(--ash);margin-bottom:3px}
+.rail .orow{display:grid;grid-template-columns:120px 1fr 52px;gap:8px;align-items:center;font-size:11.5px;height:14px;padding:0 3px;border-radius:3px}
+.rail .orow .on{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:14px}
+.rail .orow .ob{height:6px;background:#e8e3d8;border-radius:3px;overflow:hidden}
+.rail .orow .ob i{display:block;height:100%;background:var(--rust)}
+.rail .orow.wide{grid-template-columns:190px 1fr 56px;height:17px}
+.rail .orow.wide .on{font-size:12px;line-height:17px}
+.rail .fblock{height:22px}
+.rail .frows{margin-top:4px}
+.rail .fnote{font-size:11px;margin-top:3px}
+.rail[data-rail=forced].open .fblock{margin-bottom:5px}
+.rail .legend{font-size:11.5px;gap:0}
+.rail .lrow{padding:0 4px;line-height:1.35}
+.rail .zonenote{font-size:11px;line-height:1.4;margin-top:4px;padding-top:4px}
 }
-
-/* the instrument keeps the page's own measures; these pin them so no rail inflates */
-.strip{height:12px}
-.rail.open{padding:7px 0 8px}
-.specimen{margin-top:8px;border-top:1px solid var(--line);padding-top:6px}
-.specimen .sl{-webkit-line-clamp:2}
-.margin{margin-top:6px;border-top:1px solid var(--line);padding:5px 0 2px;font-size:11.5px;line-height:1.5}
-.aim{min-height:20px;font-size:13px;line-height:20px;margin-top:6px}
-
-/* the empty state, on its own id instead of inside a table */
-#noRows{background:var(--card);border:1px solid var(--line);padding:26px 16px}
-#noRows p{margin:0 0 12px;font-size:14px;max-width:70ch}
-#noRows .muted{color:var(--ash);font-size:12.5px;max-width:80ch}
-#noRows .bar{margin:0;flex-wrap:wrap}
-
-`;document.head.appendChild(s);})();
+/* ---- sd height diet: out of spacing, never out of content ------------------ */
+#hero .ipad .aimwrap{display:none}
+#hero .ipad .rv-aim{margin-top:6px}
+#hero .ipad .specimen{font-size:11px;line-height:1.35;padding-top:2px;padding-bottom:2px}
+#hero .ipad .margin{font-size:10.5px;line-height:1.3;padding-top:2px;margin-top:3px}
+#hero .ipad .rails{margin-top:6px}
+#sdControls{gap:4px;margin-top:8px}
+#sdControls .bar{gap:6px}
+#sdControls .actions{padding:0}
+#noRows{padding:8px 12px;margin-top:6px}
+#noRows p{margin:3px 0}
+#starterToggle{padding:3px 10px}
+#rr-sec{margin:6px 0 0}
+#rr-sec .cut{font-size:10.5px;line-height:1.25}
+#rr-sec .rr-count{font-size:12px}
+#rr-sec .rr-more{font-size:11px;padding:3px 10px}
+.card.ask{padding:9px 14px;margin:5px 0}
+#khint{margin:2px 0 0}
+.credit{font-size:11px;line-height:1.25;margin-bottom:6px}
+#views{margin:8px 0 0}
+/* ---- phone: the strip is desk furniture; the count sits in the search bar -- */
+@media(max-width:760px){
+#vstrip.vgroups,#sd-second{display:none}
+#count.sdcount{font:500 12px/1.3 'IBM Plex Mono',ui-monospace,monospace;margin:0;max-width:none;color:var(--ink);font-size:12px;line-height:1.3}
+#count.sdcount .fig{font-size:12px;font-weight:500;font-family:'IBM Plex Mono',ui-monospace,monospace}
+#count.sdcount .aside{font-size:10px}
+}`;document.head.appendChild(s);})();

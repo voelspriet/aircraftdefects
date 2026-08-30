@@ -1,0 +1,58 @@
+[  39s] stap 1: dacht 890, schreef 0, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[  51s] stap 2: dacht 49, schreef 0, 2 tool-calls
+   measure  {"value": {"vstripH": 219.8125, "vtab": 16, "vglab": 3, "roleTab": 16, "bodyH": 2434}}
+   measure  {"value": {"railCount": 4, "openW": 1140, "openH": 614.859375, "kidNames": ["DIV.gut", "DIV.track", "P.reading", "P."], "openRail": "where"}}
+[  91s] stap 3: dacht 1789, schreef 0, 2 tool-calls
+   measure  {"value": {"g": [{"dir": "column", "h": 82.40625}, {"dir": "column", "h": 70}, {"dir": "column", "h": 50.40625}], "lab": [{"fs": "auto", "h": 16.59375}, {"fs": 
+   measure  {"value": {"extra": ["<p></p>"], "trackClass": "track two", "ipadKids": null, "count": 1, "countEl": "sdcount"}}
+[ 135s] stap 4: dacht 2055, schreef 0, 2 tool-calls
+   measure  {"value": {"heroClass": "", "ipadClass": null, "ipadParent": null, "railsParent": "DIV.", "countParent": "DIV. id:sdControls", "countPrev": "DIV.chips", "countN
+   measure  {"value": {"error": "Page.evaluate: TypeError: (c.className || \"\").split is not a function\n    at eval (eval at evaluate (:291:30), <anonymous>:1:374)\n    a
+[ 163s] stap 5: dacht 524, schreef 0, 2 tool-calls
+   measure  {"value": "{\"t\":\"DIV\",\"c\":\"\",\"i\":\"hero\",\"cols\":[{\"t\":\"DIV\",\"c\":\"ihead\",\"i\":\"\",\"cols\":[{\"t\":\"DIV\",\"c\":\"stamp\",\"i\":\"\",\"co
+   measure  {"value": {"scKids": ["DIV#iAim.aim", "DIV#.bar", "DETAILS#moreFilters.", "DIV#starters.", "BUTTON#starterToggle.ghostbtn", "DIV#unresolved.unresolved", "DIV#ch
+[ 343s] stap 6: dacht 17365, schreef 245, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[ 354s] stap 7: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"vstripH": 79, "vtab": 16, "vglab": 3, "roleTab": 16, "openW": 1000, "openKids": ["DIV.gut", "DIV.track", "P.reading"], "ipadFound": true, "countPare
+[ 371s] stap 8: dacht 0, schreef 0, 2 tool-calls
+   measure  {"value": {"land": 0, "sdControls": 44, "starters": 18, "rails": 4, "panels": 16, "noRows": true, "noRowsTxt": "No rows yet, on purpose. Listing everything answ
+   measure  {"value": {"scrollW": 1183, "innerW": 390, "railVisible": false, "phone": true}, "pageErrors": ["Failed to execute 'insertBefore' on 'Node': The node before whi
+[ 416s] stap 9: dacht 2264, schreef 0, 2 tool-calls
+   measure  {"value": {"hero": 1128, "ipad": 1007, "rails": 582, "sdControls": 470, "starters": 30, "moreFilters": 17, "results": null, "tabs": null, "noRows": 171, "vstrip
+   measure  {"value": {"counts": {"input[text]": 4, "select[select-one]": 12, "input[date]": 2, "button[button]": 24, "details": 1, "input[hidden]": 1}, "total": 44, "input
+[ 436s] stap 10: dacht 0, schreef 0, 2 tool-calls
+   measure  {"value": {"gutH": 46, "trackH": 337, "trackW": 802, "svgH": 101, "legendH": 337, "railH": 485, "railCols": "186px 802px"}}
+   measure  {"value": {"total": 1007, "parts": {"P.stand": 37, "DIV.rv-aim": 36, "DIV.aim": 20, "DIV.hand": 18, "DIV.sdcount": 0, "DIV.rails": 582, "DIV.specimen": 82, "DIV
+[ 500s] stap 11: dacht 5456, schreef 0, 2 tool-calls
+   parent   {"value": {"error": "Page.evaluate: TypeError: Cannot read properties of null (reading 'querySelectorAll')\n    at eval (eval at evaluate (:291:30), <anonymous>
+   parent   {"value": {"error": "Page.evaluate: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')\n    at eval (eval at evaluate (:291:30), <anony
+[ 523s] stap 12: dacht 0, schreef 0, 1 tool-calls
+   parent   {"value": {"hero": true, "vstrip": false, "sdControls": false, "starters": true, "count": true, "results": true, "tabs": true, "sectionPanel": false, "panelTag"
+[ 538s] stap 13: dacht 0, schreef 0, 1 tool-calls
+   parent   {"value": {"ipadH": 933, "heroH": 979, "parts": {"DIV.ihead": 42, "DIV.sentence": 37, "DIV.aim": 20, "DIV.aimat": 32, "DIV.hand": 18, "DIV.rails": 596, "DIV.spe
+[ 570s] stap 14: dacht 1671, schreef 0, 2 tool-calls
+   measure  {"value": {"bodyH": 2270, "parts": {"hero": 1128, "credit": 38, "p-search": 660, "ps:DIV.#sdControls": 470, "ps:SECTION.#rr-sec": 110}}}
+   parent   {"value": {"bodyH": 1687, "parts": {"hero": 979, "tabs": 104, "freshness": 19, "credit": 19, "p-search": 423, "ps:DIV.scope#": 0, "ps:DIV.hint#": 0, "ps:DIV.sta
+[ 671s] stap 15: dacht 11446, schreef 0, 2 tool-calls
+   measure  {"value": [{"t": "P", "c": "stand rv-sentence", "top": 131, "h": 37, "mt": "7px", "mb": "0px", "disp": "block"}, {"t": "DIV", "c": "rv-aim", "top": 185, "h": 36
+   measure  {"value": {"kids": [{"t": "DIV", "id": "iAim", "c": "aim", "h": 20}, {"t": "DIV", "id": "", "c": "bar", "h": 94}, {"t": "DETAILS", "id": "moreFilters", "c": "",
+[ 706s] stap 16: dacht 1570, schreef 0, 1 tool-calls
+   measure  {"value": {"fns": ["WebGLRenderingContext", "WebGLRenderbuffer", "WebGL2RenderingContext", "OffscreenCanvasRenderingContext2D", "ImageBitmapRenderingContext", "
+[ 720s] stap 17: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"err": "TypeError: window.renderOnPurpose is not a function", "ok": true}}
+[ 734s] stap 18: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"type": "function", "src": "function render(d){\n  const k=LASTQ.kind,out=$(\"out\");\n  if(!d.total){out.innerHTML=emptyHTML(d,k);return}\n  const b
+[ 749s] stap 19: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"writesCount": false, "countMentions": 0, "ctx": ""}}
+[ 760s] stap 20: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"found": [], "n": 0}}
+[ 774s] stap 21: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"found": ["scopeHTML", "tallyBlock", "whenBody", "whoBody", "forcedBody", "loadSummary", "__rrLoad"], "n": 7}}
+[ 785s] stap 22: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"src": "function tallyBlock(h4,t,opt){\n  opt=opt||{};\n  const rows=(t&&t.rows)||[];\n  if(!rows.length)return '<h4 class=\"sub4\">'+h4+'</h4><p cla
+[ 795s] stap 23: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"src": "async function loadSummary(btn){\n  const box=$(\"sumout\");\n  if(!box||!LASTQ||LASTQ.kind!==\"tail\")return;\n  const t=tailParam();\n  btn
+[ 808s] stap 24: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"src": "function rrLoad(offset,popping){\n  if(rrGateClosed()){\n    RR_LASTQS=selQS();\n    rrScroll.innerHTML='';\n    rrCount.innerHTML='<strong>'

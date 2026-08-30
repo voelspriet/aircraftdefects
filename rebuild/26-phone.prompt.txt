@@ -1,0 +1,273 @@
+You have four tools and you are finishing a rebuild you can look at.
+
+  measure(js, width, query)   runs a JavaScript arrow function in a real browser
+                              against your page and returns what it evaluates to
+  parent(js, width, query)    the same, against the original you are matching, so
+                              you can read its measures instead of guessing them
+  deploy(css, js)             splices your block in, publishes it, returns any
+                              error the page throws
+  done(summary)               when the checks pass, or when you are certain one
+                              cannot pass and can say why
+
+You have thirty steps and each one costs about fifteen seconds of browser time.
+Spend them deploying and measuring. Do not read function sources looking for who
+writes what: measure the effect, change it, measure again. The previous run spent
+its last eight steps reading source and shipped nothing.
+
+Your current block is on the page and is at the end of this brief. It replaces
+itself on every deploy, so send it whole each time.
+
+# Where it stands, measured
+
+At 1440px, all passing:
+
+    tab strip     79px      16 .vtab, 3 .vglab, 16 [role=tab]
+    open rail    485px      children .gut, .track.two, one p.reading
+    #count       inside .ipad, one element, no page error
+    .card.land   none visible
+    #noRows      renders
+
+# The two faults, both at width 390
+
+## 1. The page throws insertBefore, about a hundred and sixty times
+
+    Failed to execute 'insertBefore' on 'Node': The node before which the new
+    node is to be inserted is not a child of this node.
+
+That is your move of #count into .ipad. Below 760px the page draws a different
+instrument: `drawPhone` replaces the contents of #hero, so the .rails node you
+are inserting before is no longer a child of the parent you are inserting into
+by the time your observer fires. The observer then fires again on your own
+mutation, and it repeats.
+
+Two things to get right, not one. The insert has to check that the anchor is
+still a child of the node it is inserting into, at the moment it inserts. And it
+must not run on every mutation: if #count is already in the right place, do
+nothing at all, so your own writes do not wake your own observer.
+
+Decide what "the right place" is on a phone. The original at 390px keeps the
+sentence at the top of the instrument, above everything the phone draws. Measure
+the original at 390 and match where it puts it.
+
+## 2. The body is three times wider than the window
+
+    body scrollWidth 1,183 at innerWidth 390
+
+Something inside the page is holding a fixed width. The original at 390 does not
+scroll sideways at all. Find which element is over 390 wide, measure its width
+and its parent's, and fix that element rather than putting overflow:hidden on the
+body, which hides the fault instead of removing it.
+
+# The checks, all of them, before you call done
+
+  1. At 390: no page error at all, and body scrollWidth equal to innerWidth.
+  2. At 390: no .rail visible, the phone layout only.
+  3. At 1440: #vstrip at or under 130px with 16 .vtab, 3 .vglab, 16 [role=tab].
+  4. At 1440: the open rail at or under 560px.
+  5. At 1440: #count inside .ipad, exactly one element with that id, no error.
+  6. At 1440 and 390: no visible .card.land, and #noRows still renders.
+  7. At 1440: body scrollHeight at or under 1,900. It is 2,270 now. The original
+     is 1,687. Take it out of spacing, never by hiding content.
+  8. Still there at both widths: 18 controls in #sdControls, 18 buttons in
+     #starters, 4 .rail, 16 section.panel.
+
+Measure every one before you call done, and put the numbers in the summary.
+
+Names on your page: #count.sdcount is the standing sentence, #hero.instrument >
+.ipad is the instrument's inside, .rails holds the four rails, #vstrip.vgroups >
+.vg > .vglab + .vgbtns > button.vtab is the tab strip, section.panel are the
+panels, table.reps is the record table.
+
+Do not undo the phone layout, the case sheet overlay, the record stepper or the
+aria-labels. Prefix every new name.
+
+--- YOUR CURRENT BLOCK ---
+
+CSS:
+/* ---- carried, restated ---------------------------------------------------- */
+#sentence{display:none!important}
+.card.land{display:none!important}
+/* the tab strip: three groups, label beside its buttons, one line each */
+#vstrip.vgroups{display:flex;flex-direction:column;gap:2px;border-bottom:1px solid var(--line);padding:2px 0 4px;margin:10px 0 8px}
+#vstrip.vgroups .vg{display:flex;flex-direction:row;align-items:center;gap:10px;min-height:0}
+#vstrip.vgroups .vglab{flex:0 0 auto;font:600 9.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em;color:#57514a;text-transform:uppercase;white-space:nowrap}
+#vstrip.vgroups .vgbtns{display:flex!important;flex-direction:row!important;gap:2px!important;align-items:center!important;flex-wrap:nowrap!important;margin:0!important;padding:0!important;border-bottom:0!important;overflow-x:auto;min-height:0}
+button.vtab{padding:3px 8px;font-size:11.5px;line-height:1.2;border:1px solid transparent;border-radius:3px;background:none;color:#5c554c;cursor:pointer;white-space:nowrap}
+button.vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);font-weight:600}
+.axis{display:flex;gap:2px;margin-top:3px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ash)}
+.axis span{flex:1;min-width:0}
+.sd-second{font-size:12px;color:#6b6560;margin:2px 0 8px;text-align:center;letter-spacing:.02em}
+.sd-second b{font-weight:600}
+/* the instrument: the hero is the instrument; .ipad is its inside */
+#hero.instrument{position:relative;background:var(--paper);border:1px solid var(--line);border-bottom:3px solid var(--rust);border-radius:6px;margin:12px 0 0;overflow:hidden}
+#hero.instrument > .ipad{padding:12px 20px 8px}
+/* the standing count, seated above the rails */
+#count.sdcount{font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1.1;color:var(--ink);max-width:26em;margin:4px 0 2px}
+#count.sdcount:empty{margin:0;font-size:0;line-height:0}
+#count.sdcount .fig{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:.92em;font-variant-numeric:tabular-nums;color:var(--rust-text,#b8431f)}
+#count.sdcount .aside{font-size:.62em;color:var(--ash)}
+#count.sdcount .broken{display:block;font-size:.5em;color:var(--rust)}
+#count.sdcount .clause{border-bottom:1px dotted rgba(29,29,31,.28);cursor:pointer}
+/* one reading per open rail, at the original measure */
+.rail .reading{margin:6px 0 0;padding:6px 12px 6px 13px;border-left:2px solid var(--rust);background:#faf7f3;font:14px/1.45 Georgia,'Times New Roman',serif;color:var(--ink);max-width:74ch}
+.rail>.reading{grid-column:2}
+@media(max-width:700px){.rail .reading{font-size:14px;padding:7px 10px}}
+/* rail measures at desk width; the phone layout is left alone */
+@media(min-width:901px){
+.rail{align-items:start}
+.rail .track{min-width:0;position:relative}
+.rail .track.two{display:grid;grid-template-columns:1fr 330px;gap:14px}
+.rail .track.two > svg.plane{max-width:520px;height:auto;display:block}
+.rail .col .ch{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;color:var(--ash);margin-bottom:3px}
+.rail .orow{display:grid;grid-template-columns:120px 1fr 52px;gap:8px;align-items:center;font-size:11.5px;height:14px;padding:0 3px;border-radius:3px}
+.rail .orow .on{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:14px}
+.rail .orow .ob{height:6px;background:#e8e3d8;border-radius:3px;overflow:hidden}
+.rail .orow .ob i{display:block;height:100%;background:var(--rust)}
+.rail .orow.wide{grid-template-columns:190px 1fr 56px;height:17px}
+.rail .orow.wide .on{font-size:12px;line-height:17px}
+.rail .fblock{height:22px}
+.rail .frows{margin-top:4px}
+.rail .fnote{font-size:11px;margin-top:3px}
+.rail[data-rail=forced].open .fblock{margin-bottom:5px}
+/* the WHERE legend and its note, tightened to the original's measure */
+.rail .legend{font-size:11.5px;gap:0}
+.rail .lrow{padding:0 4px;line-height:1.35}
+.rail .zonenote{font-size:11px;line-height:1.4;margin-top:4px;padding-top:4px}
+}
+JS:
+(function(){
+"use strict";
+function byId(id){return document.getElementById(id)}
+
+/* ---- the instrument's inside: #hero.instrument > .ipad ---------------------
+   The page renders the hero flat. Give it the frame and an .ipad that holds
+   everything but the head, so #count can sit directly above .rails. */
+function ensureIpad(){
+  var hero=byId("hero"); if(!hero||!hero.querySelector(".rails"))return;
+  if(!/\binstrument\b/.test(hero.className||""))hero.className=("instrument "+(hero.className||"")).trim();
+  var kids=[].slice.call(hero.children), i, ipad=null, ihead=null;
+  for(i=0;i<kids.length;i++){
+    if(/\bipad\b/.test(kids[i].className||"")){ipad=kids[i];break}
+  }
+  for(i=0;i<kids.length;i++){
+    if(/\bihead\b/.test(kids[i].className||"")){ihead=kids[i];break}
+  }
+  if(!ipad){
+    ipad=document.createElement("div"); ipad.className="ipad";
+    if(ihead)ihead.after(ipad); else hero.insertBefore(ipad,hero.firstChild);
+    kids=[].slice.call(hero.children);
+    for(i=0;i<kids.length;i++){
+      if(kids[i]!==ipad&&kids[i]!==ihead)ipad.appendChild(kids[i]);
+    }
+  }
+  return ipad;
+}
+
+/* #count.sdcount: one element, inside .ipad, immediately above .rails. Moved,
+   never cloned, so the page's own writers keep finding it by id. */
+function seatCount(ipad){
+  if(!ipad)return;
+  var all=document.querySelectorAll("#count"); if(!all.length)return;
+  var rails=ipad.querySelector(".rails"); if(!rails)return;
+  var c=null,i;
+  for(i=0;i<all.length;i++){ if(all[i].parentElement===ipad){c=all[i];break} }
+  if(!c){ c=all[0]; }
+  for(i=0;i<all.length;i++){ if(all[i]!==c)all[i].remove(); }
+  if(c.parentElement!==ipad)ipad.insertBefore(c,rails);
+  if(c.nextElementSibling!==rails)ipad.insertBefore(c,rails);
+  if(!/\bsdcount\b/.test(c.className))c.className=("sdcount "+c.className).trim();
+}
+
+/* one reading per open rail: keep the fuller one as a single p.reading, put it
+   back where the original put it, and leave the rail exactly three children:
+   .gut, .track, p.reading. FORCED holds its reading inside .track. */
+function oneReading(){
+  var open=document.querySelectorAll(".rail.open"),i;
+  for(i=0;i<open.length;i++){
+    var rail=open[i];
+    var rs=[].slice.call(rail.querySelectorAll(".reading")); 
+    var keep=null;
+    if(rs.length){
+      keep=rs.slice().sort(function(a,b){
+        var d=b.textContent.trim().length-a.textContent.trim().length;
+        return d||((a.tagName==="P")?-1:1);
+      })[0];
+      if(keep.tagName!=="P"){
+        var p=document.createElement("p"); p.className="reading";
+        p.innerHTML=keep.innerHTML;
+        keep.parentNode.replaceChild(p,keep); keep=p;
+      }
+      for(var j=0;j<rs.length;j++){ if(rs[j]!==keep)rs[j].remove() }
+    }
+    var host=(rail.dataset.rail==="forced")?(rail.querySelector(".track")||rail):rail;
+    if(keep&&keep.parentNode!==host)host.appendChild(keep);
+    /* nothing but .gut, .track and the reading may remain */
+    [].slice.call(rail.children).forEach(function(n){
+      if(/\b(gut|track)\b/.test(n.className||""))return;
+      if(n===keep)return;
+      n.remove();
+    });
+  }
+}
+
+function stripInline(){
+  var bs=document.querySelectorAll("#vstrip.vgroups .vgbtns"),i;
+  for(i=0;i<bs.length;i++){
+    var b=bs[i]; if(b.dataset.sdInl)continue; b.dataset.sdInl="1";
+    b.style.margin="0"; b.style.padding="0"; b.style.borderBottom="0";
+    b.style.flexWrap="nowrap"; b.style.overflowX="auto";
+  }
+}
+
+function secondLine(){
+  var strip=byId("vstrip"); if(!strip)return;
+  var p=byId("sd-second");
+  if(!p){ p=document.createElement("p"); p.id="sd-second"; p.className="sd-second";
+          strip.parentNode.insertBefore(p,strip.nextSibling); }
+  if(p.dataset.sdDone)return; p.dataset.sdDone="1";
+  var fr=byId("freshness");
+  p.innerHTML=(fr&&fr.textContent.trim())?fr.textContent.trim()
+    :"Counts of reports filed, not of flights.";
+}
+
+/* the #sentence keeper: hidden wherever the page puts it; whatever is written to
+   #sentence or #count, both ends hold the same words */
+function ensureSentence(){
+  var s=byId("sentence");
+  if(!s){ s=document.createElement("div"); s.id="sentence"; s.hidden=true;
+          (document.querySelector("main.wrap")||document.body).appendChild(s); }
+  if(!s.hidden)s.hidden=true;
+  if(s.style.display!=="none")s.style.display="none";
+}
+var snap={s:null,c:null};
+function mirror(){
+  var s=byId("sentence"), c=byId("count");
+  if(!s||!c||s===c)return;
+  var sv=s.innerHTML, cv=c.innerHTML;
+  if(sv!==cv){
+    if(sv!==snap.s&&snap.s!==null){ c.innerHTML=sv; cv=sv; }  /* the page wrote #sentence */
+    else { s.innerHTML=cv; sv=cv; }                           /* the page wrote #count */
+  }
+  snap.s=sv; snap.c=cv;
+}
+
+function purgeLand(){
+  var ls=document.querySelectorAll(".card.land"),i;
+  for(i=0;i<ls.length;i++)ls[i].remove();
+}
+
+/* every step is a no-op once settled, so the observer loop terminates */
+var queued=false;
+function pass(){
+  queued=false;
+  purgeLand(); ensureSentence();
+  var ipad=ensureIpad();
+  seatCount(ipad); oneReading();
+  stripInline(); secondLine(); mirror();
+}
+function kick(){ if(queued)return; queued=true; requestAnimationFrame(pass); }
+new MutationObserver(kick).observe(document.documentElement,{childList:true,subtree:true});
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",pass);
+else pass();
+addEventListener("load",pass);
+})();

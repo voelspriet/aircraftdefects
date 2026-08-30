@@ -1,0 +1,76 @@
+[  13s] stap 1: dacht 893, schreef 0, 2 tool-calls
+   measure  {"value": {"innerWidth": 390, "scrollW": 1183, "wide": []}, "pageErrors": ["Failed to execute 'insertBefore' on 'Node': The node before which the new node is to
+   parent   {"value": {"innerWidth": 390, "heroHTML": "\n  <div class=\"phbar\" id=\"phBar\">\n    <div class=\"phcount\"><b>1,757,827</b> reports</div>\n    <div class=\"p
+[  56s] stap 2: dacht 3313, schreef 201, 2 tool-calls
+   parent   {"value": {"countRect": {"t": 3247, "l": 20, "w": 219, "h": 20}, "visible": true, "bodyOvX": "visible", "htmlOvX": "visible", "bodySW": 780, "htmlSW": 780, "wid
+   measure  {"value": {"error": "Page.evaluate: SyntaxError: Unexpected end of input\n    at eval (<anonymous>)\n    at UtilityScript.evaluate (<anonymous>:291:30)\n    at 
+[  79s] stap 3: dacht 0, schreef 266, 1 tool-calls
+   measure  {"value": {"error": "Page.evaluate: SyntaxError: Unexpected end of input\n    at eval (<anonymous>)\n    at UtilityScript.evaluate (<anonymous>:291:30)\n    at 
+[  92s] stap 4: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"innerWidth": 390, "bodySW": 1183, "htmlSW": 1183, "wide": [{"tag": "HTML", "id": "", "cls": "", "sw": 1183, "ow": 390, "pw": 0}, {"tag": "BODY", "id
+[ 145s] stap 5: dacht 6367, schreef 229, 2 tool-calls
+   parent   {"value": {"nCounts": 1, "heroRect": {"t": 16, "h": 2467}, "countRect": {"t": 3247, "l": 20, "h": 20}, "countInHero": false, "countParentCls": "bar", "countPrev
+   measure  {"value": {"bodySH": 2270, "out": [{"id": "znarrow", "cls": "", "t": 16, "h": 0}, {"id": "hero-root", "cls": "", "t": 28, "h": 1128}, {"id": "tip", "cls": "", "
+[ 199s] stap 6: dacht 4916, schreef 259, 2 tool-calls
+   parent   {"value": {"bodySH": 1687, "out": [{"id": "hero", "cls": "instrument", "h": 979}, {"id": "tabs", "cls": "tabs", "h": 104}, {"id": "freshness", "cls": "freshness
+   measure  {"value": {"heroH": 1128, "railsKids": ["rail:29", "rail open:485", "rail:30", "rail:30"], "ipadKids": ["stand rv-sentence:37", "rv-aim:36", "iAim:20", "iHand:1
+[ 232s] stap 7: dacht 1550, schreef 107, 2 tool-calls
+   parent   {"value": {"heroKids": ["ipad:933", "seam:34"], "searchKids": ["scope:0", "hint:0", "starters:36", "filters:80", "morefilters:40", "chips:0", "unresolved:0", "b
+   measure  {"value": {"panelsId": "panels", "panelsKids": ["p-search:660", "p-patterns:0", "p-aircraft:0", "p-found:0", "p-fleet:0", "p-leads:0", "p-emerging:0", "p-cluste
+[ 268s] stap 8: dacht 2043, schreef 0, 2 tool-calls
+   parent   {"value": {"ipadKids": ["ihead:42", "iSentence:37", "iAim:20", "aimat:32", "iHand:18", "rails:596", "specimen opens:64", "iMargin:64"], "searchKids": ["scope:0"
+   measure  {"value": {"searchKids": ["sdControls:470", "rr-sec:110"], "resultsKids": [], "filters": []}}
+[ 317s] stap 9: dacht 4097, schreef 238, 1 tool-calls
+   measure  {"value": {"sdKids": ["iAim:20", "bar:94", "moreFilters:17", "starters:30", "starterToggle:34", "unresolved:0", "chips:0", "sentence:0", "actions:34", "noRows:1
+[ 334s] stap 10: dacht 0, schreef 0, 2 tool-calls
+   parent   {"value": {"noRows": "absent", "heroPad": "0px", "ipadPad": "14px 20px 8px", "heroKids": ["ipad:933", "seam:34"], "specimenH": 64, "marginH": 64}}
+   measure  {"value": {"noRows": [171, "block"], "ipadPad": "12px 20px 8px", "ipadKids": ["stand rv-sentence:37", "rv-aim:36", "iAim:20", "iHand:18", "count:0", "rails:582"
+[ 384s] stap 11: dacht 4165, schreef 0, 1 tool-calls
+   measure  {"value": {"noRows": {"id": "noRows", "cls": "norows", "text": "No rows yet, on purpose. Listing everything answers no question and buries the one you have.Take
+[ 421s] stap 12: dacht 3528, schreef 0, 1 tool-calls
+   measure  {"value": {".rv-aim": [{"id": "", "cls": "rv-aim", "text": "AIM ATAirlineAirframeZoneTake it", "h": 36}], ".iAim": [], ".iHand": [], ".margin": [{"id": "", "cls
+[ 437s] stap 13: dacht 0, schreef 0, 2 tool-calls
+   measure  {"value": {"h": 110, "pad": "0px", "margin": "26px -18px 0px", "kids": [{"id": "", "cls": "cut", "h": 34, "text": "newest first, ties broken on the control"}, {
+   parent   {"value": {"railsKids": ["rail :27", "rail open:508", "rail:27", "rail:27"], "openTrack": ["[object SVGAnimatedString]:138", ":343"], "openRailCls": "rail open"
+[ 491s] stap 14: dacht 3806, schreef 219, 2 tool-calls
+   measure  {"value": [{"c": "stand rv-sentence", "h": 37, "mt": "7px", "mb": "0px", "pt": "0px", "pb": "0px"}, {"c": "rv-aim", "h": 36, "mt": "16px", "mb": "0px", "pt": "0
+   parent   {"value": [{"c": "ihead", "h": 42, "mt": "0px", "mb": "0px", "pt": "0px", "pb": "0px"}, {"c": "iSentence", "h": 37, "mt": "7px", "mb": "0px", "pt": "0px", "pb":
+[ 742s] stap 15: dacht 30600, schreef 407, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[ 750s] stap 16: dacht 0, schreef 128, 2 tool-calls
+   measure  {"value": {"innerWidth": 390, "bodySW": 390, "htmlSW": 390, "stripVisible": {"w": 0, "h": 0, "sw": 0, "disp": "none"}, "count": {"inSearchBar": false, "parent":
+   measure  {"value": {"bodySH": 2099, "out": [{"id": "znarrow", "cls": "", "h": 0}, {"id": "hero-root", "cls": "", "h": 1047}, {"id": "tip", "cls": "", "h": 0}, {"id": "",
+[ 815s] stap 17: dacht 4136, schreef 262, 2 tool-calls
+   measure  {"value": {"heroCls": "instrument phone", "heroKids": ["rv-desk", "rv-ph"], "railsInHero": true, "railsVis": false, "phbarVis": true, "railCount": 0, "railVisCo
+   parent   {"value": {"ask": "absent", "khint": null, "creditH": 19}}
+[ 889s] stap 18: dacht 6283, schreef 353, 2 tool-calls
+   measure  {"value": {"heroRootKids": [{"id": "hero", "cls": "instrument", "h": 1047, "vis": true}], "sdKids": [{"id": "iAim", "cls": "aim", "h": 20}, {"id": "", "cls": "b
+   parent   {"value": {"ask": "absent", "khint": "absent", "hasNoRows": false, "hasRrSec": false, "hasStarterToggle": false, "sdControls": false}}
+[ 940s] stap 19: dacht 3072, schreef 247, 2 tool-calls
+   measure  {"value": {"ask": {"h": 69, "mt": "10px", "mb": "10px", "pt": "14px", "pb": "14px"}, "khint": {"h": 17, "mt": "4px", "mb": "0px", "pt": "0px", "pb": "0px"}, "cr
+   parent   {"value": {"hero": {"h": 979, "mt": "12px", "mb": "0px", "pt": "0px", "pb": "0px"}, "ipad": {"h": 933, "mt": "0px", "mb": "0px", "pt": "14px", "pb": "8px"}, "ps
+[1042s] stap 20: dacht 4910, schreef 115, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[1053s] stap 21: dacht 0, schreef 0, 2 tool-calls
+   measure  {"value": {"innerWidth": 390, "bodySW": 390, "htmlSW": 390, "count": {"parent": "ipad", "vis": false, "inSearchBar": false, "h": 0}, "railVis": 0, "noRowsVis": 
+   measure  {"value": {"innerWidth": 1440, "bodySW": 1440, "bodySH": 1953}}
+[1091s] stap 22: dacht 1709, schreef 267, 1 tool-calls
+   measure  {"value": {"hero": 969, "ipadKids": ["stand rv-sentence:37", "rv-aim:36", "iAim:20", "iHand:18", "count:0", "rails:582", "specimen opens:77", "margin:92", "aimw
+[1177s] stap 23: dacht 5264, schreef 136, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[1186s] stap 24: dacht 0, schreef 0, 2 tool-calls
+   measure  {"value": {"innerWidth": 390, "bodySW": 390, "htmlSW": 390, "count": {"parent": "bar", "inSearchBar": true, "h": 0, "t": 2734}, "heroCls": "instrument phone", "
+   measure  {"value": {"innerWidth": 1440, "bodySW": 1440, "bodySH": 1929}}
+[1217s] stap 25: dacht 1006, schreef 150, 1 tool-calls
+   measure  {"value": {"countHTML": "", "countCls": "sdcount", "barVis": true, "barRect": {"t": 2687, "h": 198}, "psVis": true, "psDisp": "flex", "noRowsVis": true}}
+[1232s] stap 26: dacht 0, schreef 0, 1 tool-calls
+   parent   {"value": {"countHTML": "<strong>1,757,827 reports.</strong> Nothing chosen yet.", "countCls": "count", "countVis": "block", "barKids": [{"cls": "count", "h": 2
+[1246s] stap 27: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"barKids": [{"cls": "sdcount", "h": 0, "disp": "block", "fs": "0px", "lh": "0px", "pad": "0px"}, {"cls": "fld grow", "h": 47, "disp": "grid", "fs": "
+[1293s] stap 28: dacht 0, schreef 0, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[1304s] stap 29: dacht 0, schreef 0, 2 tool-calls
+   measure  {"value": {"innerWidth": 390, "bodySW": 390, "htmlSW": 390, "count": {"parent": "bar", "h": 0, "t": 2734, "disp": "block", "fs": "12px"}, "barKids": [{"cls": "s
+   measure  {"value": {"innerWidth": 1440, "bodySW": 1440, "bodySH": 1802}}
+[1336s] stap 30: dacht 1280, schreef 156, 1 tool-calls
+   measure  {"value": {"html": "", "text": "", "childCount": 0, "sib": "fld grow", "cs": {"0": "accent-color", "1": "align-content", "2": "align-items", "3": "align-self", 

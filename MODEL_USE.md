@@ -11,7 +11,7 @@ reader of the file: every teal block is the model reading FAA write-ups live,
 and every one of those calls is listed below with its prompt, its cost and its
 guard.
 
-**aircraftdefects.com/z/rebuilt** is the earlier page, written by the model from
+**The earlier page** (kept in the repository; not linked publicly) was written by the model from
 written specifications (`rebuild/specs/`), and left in place so the two can be
 compared. Its provenance is counted by `build/count_provenance.py` and recorded
 at the end of this file.
@@ -67,7 +67,7 @@ narrower slices. The server resolves each against the file and prints the real
 count; a slice with zero reports is dropped. Labelled "the model's suggestions,
 not a ranking".
 
-## The earlier page (/z/rebuilt): how it was written
+## The earlier page: how it was written
 
 ## The model
 
@@ -165,7 +165,7 @@ retracted for exactly that reason: its adjudicator turned out to be a constant
 rather than a judge, so it agreed with everything. See F1 in
 [`docs/FINDINGS.md`](docs/FINDINGS.md).
 
-## What is not written by the model, on /z/rebuilt
+## What is not written by the model, on the earlier page
 
 This section counts the earlier page only. Every figure can be counted from the
 repository with `python3 build/count_provenance.py`.

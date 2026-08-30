@@ -82,8 +82,8 @@ causes, no rates, because the file has no denominators.
 
 Two pages are served and the honest answer differs. The page at / is a
 hand-written frame (rebuild/z2.html); on it the model is the reader, and every
-live call is listed with its prompt, guard and cost in MODEL_USE.md. The page
-at /z/rebuilt is the model's own earlier build from
+live call is listed with its prompt, guard and cost in MODEL_USE.md. The model's own
+earlier page build (preserved in the repository, not linked) is from
 written specifications, with the hand-written share counted, not claimed, by
 build/count_provenance.py. The service is the model's nine research builds
 plus hand-marked blocks (45%). Every hand-written commit says so in its first

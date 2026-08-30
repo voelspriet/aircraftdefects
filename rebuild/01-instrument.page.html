@@ -7136,7 +7136,7 @@ window.addEventListener("load", function(){ sdrStripRails(); sdrFixLabels(); sdr
 
 
 
-/* ---- 38: the part number read right, and locate, written by the model ---- */
+/* ---- 39: the part number, fetched not intercepted, written by the model ---- */
 (function(){
 "use strict";
 window.__sderrs=window.__sderrs||[];
@@ -7348,77 +7348,72 @@ function sdEnsureGlobals(){
 }
 sdEnsureGlobals();
 
-/* ============ sd-recfetch: the case sheet is opened per record and the page
-   fetches that record itself; the file's part number field is PartNumber,
-   with ComponentPartNumber as the sparse fallback. The response is picked up
-   in passing: fetch and XHR are wrapped once, and only a response that looks
-   like one record (own PartNumber or ComponentPartNumber field, no records
-   array, and not one of the dossier endpoints) is kept, latest one winning,
-   because the sheet shows one record at a time. ========================== */
-var SX={last:null};
-function sdNoteRecord(obj,url){
-  try{
-    if(!obj||typeof obj!=="object"||Array.isArray(obj))return;
-    if(!Object.prototype.hasOwnProperty.call(obj,"PartNumber")&&!Object.prototype.hasOwnProperty.call(obj,"ComponentPartNumber"))return;
-    if("records" in obj)return;
-    if(url&&/api\/(airframe|repeats|summary|operator|part|export|locate)(\/|\?|$)/i.test(String(url)))return;
-    SX.last=obj;
-    kick();
-  }catch(_){}
-}
-if(!window.__sdFetchWrapped){
-  window.__sdFetchWrapped=true;
-  var sdOf=window.fetch;
-  if(typeof sdOf==="function"){
-    window.fetch=function(){
-      var args=arguments,url="";
-      try{url=(args[0]&&args[0].url)?String(args[0].url):String(args[0]||"")}catch(_){}
-      return sdOf.apply(this,arguments).then(function(res){
-        try{
-          if(res&&res.ok&&res.clone){
-            var sdCl=res.clone();
-            sdCl.json().then(function(j){sdNoteRecord(j,url)}).catch(function(){});
-          }
-        }catch(_){}
-        return res;
-      });
-    };
-  }
-  try{
-    var sdXO=(typeof XMLHttpRequest!=="undefined")&&XMLHttpRequest.prototype;
-    if(sdXO&&!sdXO.__sdRecPatched){
-      sdXO.__sdRecPatched=true;
-      var sdOOpen=sdXO.open,sdOSend=sdXO.send;
-      sdXO.open=function(m,u){try{this.__sdUrl=String(u||"")}catch(_){}return sdOOpen.apply(this,arguments)};
-      sdXO.send=function(){
-        var self=this;
-        try{
-          self.addEventListener("load",function(){
-            try{
-              if(self.responseType&&self.responseType!=="text"&&self.responseType!=="")return;
-              var ct="";
-              try{ct=self.getResponseHeader("content-type")||""}catch(_){}
-              if(ct&&!/json/i.test(ct))return;
-              sdNoteRecord(JSON.parse(self.responseText),self.__sdUrl);
-            }catch(_){}
-          });
-        }catch(_){}
-        return sdOSend.apply(this,arguments);
-      };
-    }
-  }catch(_){}
-}
-
 /* ============ sd-pnrow: the case sheet's sixteen rows carry a Part row that
    names the part, but the part number appeared nowhere on the page \u2014 and
-   worse, a row once said "not recorded" about a number the file records,
-   because the wrong field was read. The record endpoint's field is
-   PartNumber ("17039203426" on JR2R20260825350); ComponentPartNumber is the
-   fallback and is null on most records. Read PartNumber; fall back to
-   ComponentPartNumber only when PartNumber is empty; print "not recorded"
-   only when both really are, in the same words the sheet uses for its other
-   absent fields, detected from those rows themselves. The row is the way
-   into the part dossier. ================================================ */
+   worse, a row once said "not recorded" about a number the file records.
+   Nothing is intercepted any more: when a sheet is open, its control number
+   is read off the sheet itself and one request goes straight to
+   api/case/<control>, a flat object whose PartNumber is the field that
+   carries the number ("17039203426" on JR2R20260825350), with
+   ComponentPartNumber as the fallback and null on most records. "not
+   recorded" is printed only when the record is in hand and both fields
+   really are empty \u2014 never while the request is in flight and never when
+   it failed, because either of those would tell a reader the FAA recorded
+   nothing where the FAA recorded a number. The row is the way into the part
+   dossier. ================================================================ */
+var SDPNC={cache:{},busy:{}};
+function sdControlToken(text){
+  var m=String(text==null?"":text).match(/\b[A-Za-z0-9]{9,16}\b/g),i,d;
+  if(!m)return "";
+  for(i=0;i<m.length;i++){
+    d=(m[i].match(/\d/g)||[]).length;
+    if(d>=9)return m[i];
+  }
+  return "";
+}
+function sdFindControl(table){
+  if(!table)return "";
+  var rows=table.rows,i,c0,tok;
+  /* first preference: a row whose label names the control */
+  for(i=0;i<rows.length;i++){
+    if(rows[i].getAttribute&&rows[i].getAttribute("data-sd-pnrow")==="1")continue;
+    c0=rows[i].cells&&rows[i].cells[0];
+    if(!c0)continue;
+    if(/control/i.test(c0.textContent||"")){
+      tok=sdControlToken(rows[i].cells[rows[i].cells.length-1].textContent);
+      if(tok)return tok;
+    }
+  }
+  /* fallback: the sheet's own text, row by row, skipping the row this block
+     drew and the citation row, either of which could carry a number that is
+     not the control */
+  var clone=table.cloneNode(true);
+  [].slice.call(clone.querySelectorAll("tr[data-sd-pnrow]")).forEach(function(n){if(n.parentNode)n.parentNode.removeChild(n)});
+  rows=clone.rows;
+  for(i=0;i<rows.length;i++){
+    c0=rows[i].cells&&rows[i].cells[0];
+    if(c0&&/how to cite/i.test(c0.textContent||""))continue;
+    tok=sdControlToken(rows[i].textContent);
+    if(tok)return tok;
+  }
+  return "";
+}
+function sdEnsureCase(control){
+  if(Object.prototype.hasOwnProperty.call(SDPNC.cache,control))return SDPNC.cache[control];
+  if(!SDPNC.busy[control]){
+    SDPNC.busy[control]=1;
+    sdGetJSON("case/"+encodeURIComponent(control)).then(function(rec){
+      SDPNC.cache[control]=(rec&&typeof rec==="object"&&!Array.isArray(rec))?rec:null;
+      delete SDPNC.busy[control];
+      kick();
+    }).catch(function(){
+      SDPNC.cache[control]=null;
+      delete SDPNC.busy[control];
+      kick();
+    });
+  }
+  return undefined; /* in flight */
+}
 function sdIsAbsentText(s){
   if(/^(--|\u2013|\u2014|-)$/.test(s))return true;
   if(/^(none|unknown|n\/a|na|not available|not recorded|not given|not reported|not stated|not captured|no entry|missing|absent|unrecorded)\.?$/i.test(s))return true;
@@ -7438,7 +7433,7 @@ function sdAbsence(table){
   }
   return best;
 }
-function sdSheetPartRows(){
+function sdSheets(){
   var out=[],ts=document.querySelectorAll("table"),i,j,t,rows,part,cite;
   for(i=0;i<ts.length;i++){
     t=ts[i];rows=t.rows;part=null;cite=null;
@@ -7450,11 +7445,11 @@ function sdSheetPartRows(){
       if(tx==="Part")part=rows[j];
       else if(tx==="How to cite it")cite=rows[j];
     }
-    if(part&&cite)out.push(part);
+    if(part&&cite)out.push({table:t,row:part});
   }
   return out;
 }
-function sdFillPartRow(partRow){
+function sdFillPartRow(partRow,table){
   var nxt=partRow.nextElementSibling,row=null;
   if(nxt&&nxt.getAttribute&&nxt.getAttribute("data-sd-pnrow")==="1")row=nxt;
   else if(nxt&&nxt.cells&&nxt.cells[0]&&nxt.cells[0].textContent.trim()==="Part number")return; /* the page drew its own */
@@ -7472,16 +7467,17 @@ function sdFillPartRow(partRow){
   }
   var vc=row.cells&&row.cells[1];
   if(!vc)return;
-  var rec=SX.last;
-  var raw=null;
-  if(rec&&typeof rec==="object"){
-    raw=rec.PartNumber;
-    if(raw==null||String(raw).trim()==="")raw=rec.ComponentPartNumber;
-  }
-  var pn=(raw==null)?"":String(raw).trim();
-  var key,ab=null;
+  var control=sdFindControl(table||partRow.closest("table"));
+  var rec,key,pn,ab;
+  if(!control){key="noctl";vc.setAttribute("data-sd-pnval",key);vc.textContent="";return}
+  rec=sdEnsureCase(control);
+  if(rec===undefined){key="pending:"+control;vc.setAttribute("data-sd-pnval",key);vc.textContent="";return}
+  if(!rec){key="failed:"+control;vc.setAttribute("data-sd-pnval",key);vc.textContent="";return}
+  var raw=rec.PartNumber;
+  if(raw==null||String(raw).trim()==="")raw=rec.ComponentPartNumber;
+  pn=(raw==null)?"":String(raw).trim();
   if(pn)key="pn:"+pn;
-  else{ab=sdAbsence(partRow.closest("table"))||{text:"not recorded",cls:""};key="absent:"+ab.text}
+  else{ab=sdAbsence(table)||{text:"not recorded",cls:""};key="absent:"+ab.text}
   if(vc.getAttribute("data-sd-pnval")===key)return;
   vc.setAttribute("data-sd-pnval",key);
   vc.textContent="";
@@ -7501,8 +7497,8 @@ function sdFillPartRow(partRow){
   }
 }
 function sdPartRow(){
-  var rows=sdSheetPartRows(),i;
-  for(i=0;i<rows.length;i++){try{sdFillPartRow(rows[i])}catch(_){}}
+  var sheets=sdSheets(),i;
+  for(i=0;i<sheets.length;i++){try{sdFillPartRow(sheets[i].row,sheets[i].table)}catch(_){}}
 }
 
 /* ============ sd-dossier: the panel holds one subject at a time — a tail
@@ -7836,8 +7832,9 @@ document.addEventListener("keydown",function(e){
 addEventListener("popstate",function(){try{sdBootFromURL()}catch(_){}});
 /* sd-mark: the second way in from the table. Beside each operator value that
    setFilter owns, a small marker opens the operator dossier; a code.cd that
-   really carries a P/N (none are measured on this page) would open the part
-   dossier. Model cells are left to setFilter alone. */
+   really carries a P/N opens the part dossier. Model cells are left to
+   setFilter alone, and the part number row this block drew is skipped, since
+   its own code already carries data-sd-part. */
 function sdMarkCells(){
   var OPRE=/setFilter\s*\(\s*(['"])operator\1\s*,\s*(['"])([^'"]*)\2/;
   var i,sp,ns=document.querySelectorAll("span.c[onclick*='setFilter']");
@@ -8892,7 +8889,7 @@ table.reps th{ font-size:11px; background:transparent; color:var(--ash);
 .rail.open[data-rail=when] .track{ overflow-x:auto; overscroll-behavior-x:contain }
 `;document.head.appendChild(s);})();
 
-(function(){var s=document.createElement('style');s.id='sdr-css-38';s.textContent=`#sentence{display:none!important}
+(function(){var s=document.createElement('style');s.id='sdr-css-39';s.textContent=`#sentence{display:none!important}
 #sd-sink{display:none!important}
 .card.land{display:none!important}
 #vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}

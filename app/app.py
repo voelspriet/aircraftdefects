@@ -1258,3 +1258,37 @@ def ask_file():
     unmapped = list(out.get("unmapped") or []) + dropped
     return jsonify(filters=f, reading=out.get("reading"), unmapped=unmapped,
                    cannot=out.get("cannot"), model=MODEL)
+
+# ---- hand-written, 30 August 2026: the pre-read specimen -------------------
+# The front door shows the latest report where the crew had to act, already
+# read by the model, so the page opens with the reading in place. Cached by
+# record id; a new record triggers one call. The FAA feed refreshes three
+# times a day, so at most three calls a day.
+_SPEC = {"id": None, "data": None}
+
+@app.get("/z/api/specimen")
+def specimen():
+    params = {k: v for k, v in request.args.items() if v and k not in ("hero", "view", "case")}
+    params.setdefault("crew", "A")
+    params["limit"] = 1
+    d = api("/api/search", **params)
+    rows = d.get("rows") or []
+    if not rows:
+        return jsonify(none=True, total=d.get("total", 0))
+    r = rows[0]; rid = r.get("OperatorControlNumber")
+    key = rid + "|" + json.dumps(params, sort_keys=True)
+    if _SPEC["id"] == key and _SPEC["data"]:
+        return jsonify(_SPEC["data"])
+    rec = decorate(r)
+    text = rec["text"]
+    prompt = GLOSS_RULES.split("Separately:")[0] + "\n" + ABSTAIN + \
+        "\nWrite plain prose only, at most 90 words, no JSON. End with one sentence naming what the write-up does not say.\n\nThe write-up, verbatim:\n" + text
+    t0 = time.time(); plain = None; err = None
+    try:
+        plain = glm(prompt, effort="low", max_tokens=900)
+    except Exception as e:
+        err = str(e)[:120]
+    out = {"record": rec, "plain": plain, "error": err, "read_at": time.strftime("%H:%M"),
+           "seconds": round(time.time() - t0, 1), "total": d.get("total"), "model": MODEL}
+    _SPEC["id"] = key; _SPEC["data"] = out
+    return jsonify(out)

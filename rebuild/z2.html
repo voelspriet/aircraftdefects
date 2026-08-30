@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aircraft defects, read</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* ---- hand-written, 30 August 2026, counted in MODEL_USE.md. The quiet /z,
+   built from the approved mockup. One screen, one desk line, WHERE as the
+   anchor, the latest crew-action report pre-read by the model, three rails
+   onward. The deep tool the model wrote stays at /z/rebuilt and is linked
+   from Find leads. ---------------------------------------------------------- */
+:root{--paper:#f6f4ee;--ink:#1c1b17;--ash:#6f6a62;--line:#ddd8cc;--rust:#b8431f;--model:#245c5a;--model-bg:#ecf2f1;--zone:#cfc4ad;--zone-lo:#e6dfd1;
+ --serif:'Instrument Serif',Georgia,serif;--sans:Archivo,system-ui,sans-serif;--mono:'IBM Plex Mono',Menlo,monospace}
+*{box-sizing:border-box}html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 var(--sans)}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 44px 40px}
+.mast{display:flex;justify-content:space-between;gap:20px;font:500 11px/1 var(--mono);letter-spacing:.12em;color:var(--ash);text-transform:uppercase}
+h1{font:400 40px/1.15 var(--serif);margin:34px 0 6px;letter-spacing:-.01em;text-wrap:balance}
+h1 b{font:500 34px var(--mono);font-weight:500}
+h1 .here{color:var(--rust)}
+.promise{font:400 15px/1.5 var(--sans);color:var(--ash);margin:0;max-width:64ch}.promise em{font-style:normal;color:var(--model);font-weight:600}
+.desk{margin:18px 0 0}
+.ask{display:flex;gap:8px;max-width:980px;flex-wrap:wrap}
+.ask select{font:400 13px var(--sans);padding:0 8px;border:1px solid var(--line);background:transparent;color:var(--ink);max-width:170px;min-height:40px}
+.ask input{flex:1;min-width:260px;font:400 15px var(--sans);padding:10px 12px;border:1px solid var(--line);background:transparent;color:var(--ink)}
+.ask button{font:600 13px var(--sans);padding:0 16px;min-height:40px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+.ask button.ghost{background:transparent;color:var(--ink)}
+.period{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:10px 0 0;font:400 12.5px var(--sans);color:var(--ash)}
+.period .lab{font:600 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;margin-right:6px}
+.period button{font:500 12.5px var(--sans);padding:5px 11px;min-height:28px;border:1px solid var(--line);border-radius:100px;background:transparent;color:var(--ink);cursor:pointer}
+.period button.on{border-color:var(--rust);color:var(--rust)}
+.period input[type=date]{font:400 12px var(--mono);padding:4px 6px;min-height:28px;border:1px solid var(--line);background:transparent;color:var(--ink)}
+.period .free{margin-left:10px;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.draft{margin:10px 0 0;padding:10px 14px;border-left:2px solid var(--model);background:var(--model-bg);font:400 14px/1.5 var(--sans);max-width:980px}
+.draft .lab{font:600 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--model);display:block;margin-bottom:6px}
+.draft .chip{display:inline-block;margin:4px 6px 0 0;padding:3px 9px;border:1px dashed var(--model);border-radius:100px;font:500 12.5px/1.4 var(--sans);background:var(--paper)}
+.draft .chip i{font-style:normal;color:var(--ash);margin-right:4px}
+.draft .acts{margin-top:8px;display:flex;gap:8px}.draft .acts button{font:500 12.5px var(--sans);padding:7px 11px;border:1px solid var(--ink);background:var(--paper);border-radius:3px;cursor:pointer}.draft .acts .run{background:var(--ink);color:var(--paper)}
+.draft .mut{display:block;margin-top:6px;color:var(--ash)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
+.chips span{font:500 12px var(--sans);padding:4px 10px;border:1px solid var(--rust);color:var(--rust);border-radius:100px}
+.chips span button{border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:0 0 0 6px}
+.body{display:grid;grid-template-columns:1.15fr 1fr;gap:56px;margin-top:40px;align-items:start}
+.hero{min-width:0}
+.hero svg{width:100%;height:auto;display:block}
+.zone{font:400 12px var(--mono);fill:var(--ink)}.zone.dim{fill:var(--ash)}
+.zone tspan.n{font-weight:500}
+.zbtn{cursor:pointer}.zbtn:hover .zf,.zbtn:focus .zf{stroke:var(--rust);stroke-width:2}.zbtn.on .zf{stroke:var(--rust);stroke-width:2}
+.cannot{margin:14px 0 0;font:400 12.5px/1.5 var(--sans);color:var(--ash);max-width:52ch}
+.cannot b{font:400 12px var(--mono);color:var(--ink)}
+.cannot button{background:none;border:0;padding:0;font:inherit;color:var(--ink);border-bottom:1px dotted var(--ash);cursor:pointer}
+.spec{min-width:0}
+.eyebrow{font:500 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ash);margin:0 0 10px}
+.who{font:600 13px/1.45 var(--sans);margin:0 0 8px}.who span{color:var(--ash);font-weight:500}
+.raw{font:400 13.5px/1.7 var(--mono);margin:0;padding:0 0 0 14px;border-left:2px solid var(--line);word-break:break-word}
+.raw u{text-decoration:none;border-bottom:1px dotted var(--model);cursor:pointer;padding:3px 0}
+.model{margin:0;padding:14px 18px;border-left:2px solid var(--model);background:var(--model-bg)}
+.model .lab{font:500 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--model);margin:0 0 8px}
+.model p{font:400 17px/1.55 var(--serif);margin:0;white-space:pre-wrap}
+.model .prov{font:400 11.5px/1.5 var(--mono);color:var(--ash);margin:10px 0 0;white-space:normal}
+.model.wait p{color:var(--ash);font-family:var(--sans);font-size:14px}
+.mc{margin:12px 0 0}
+.mc__go{font:500 13px/1.2 var(--sans);padding:8px 12px;min-height:36px;border:1px solid var(--model);background:transparent;color:var(--model);border-radius:3px;cursor:pointer;text-align:left}
+.mc__go b{display:block;font:400 11px/1.3 var(--mono);color:var(--ash);margin-top:2px}
+.mc__meter{display:none;align-items:center;gap:12px;font:500 11px/1 var(--mono);letter-spacing:.06em;color:var(--model);margin:8px 0 0;text-transform:uppercase}
+.mc[data-state=pending] .mc__meter,.mc[data-state=streaming] .mc__meter{display:flex}
+.mc__spin{width:36px;height:2px;background:linear-gradient(90deg,var(--model) 0 40%,transparent 40% 100%);background-size:200% 100%;animation:sw 1.1s linear infinite}
+@keyframes sw{to{background-position:-200% 0}}@media(prefers-reduced-motion:reduce){.mc__spin{animation:none;background:var(--model)}}
+.mc__stop{font:500 11px/1 var(--mono);border:1px solid var(--model);background:none;color:var(--model);padding:4px 8px;min-height:24px;border-radius:3px;cursor:pointer}
+.mc__body{display:none;margin-top:8px}.mc[data-state=streaming] .mc__body,.mc[data-state=done] .mc__body,.mc[data-state=abstain] .mc__body,.mc[data-state=error] .mc__body,.mc[data-state=cancelled] .mc__body{display:block}
+.rails{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line);margin-top:44px}
+.rail{padding:16px 18px 0 0;border-right:1px solid var(--line);cursor:pointer;background:none;text-align:left;font:inherit;color:inherit}
+.rail:last-child{border-right:0}.rail+.rail{padding-left:18px}
+.rail .q{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.rail .n{font:400 22px/1.2 var(--serif);margin:6px 0 2px}.rail .n b{font:400 20px var(--mono)}
+.rail .pn{font:400 12px/1.4 var(--sans);color:var(--ash)}
+.foot{display:flex;flex-wrap:wrap;gap:10px 26px;justify-content:space-between;margin-top:22px;font:400 12px/1.5 var(--mono);color:var(--ash)}
+.foot span{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.foot a,.cannot a,.cannot button{color:var(--ash);display:inline-block;padding:4px 0;min-height:24px;line-height:16px}
+/* rails as heroes */
+.months{display:flex;align-items:flex-end;gap:1px;height:120px;border-bottom:1px solid var(--line)}
+.mo{flex:1 1 0;min-width:1px;background:var(--zone);cursor:pointer;border:0;padding:0}.mo:hover,.mo.on{background:var(--rust)}
+.axis{display:flex;justify-content:space-between;font:400 11px var(--mono);color:var(--ash);margin-top:6px}
+.ladder{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;font:400 13px/1.5 var(--sans)}
+.ladder button{display:contents;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.ladder .bar{position:relative;padding-left:8px}.ladder .bar i{position:absolute;left:0;top:4px;bottom:4px;width:var(--w);background:var(--zone-lo);z-index:-1}
+.ladder b{font:400 12px var(--mono);text-align:right}
+.ladder button:hover span{color:var(--rust)}
+.leads{margin:0 auto;max-width:1180px;padding:0 44px 60px}
+.leads h2{font:400 26px/1.2 var(--serif);margin:0 0 4px;padding-top:36px;border-top:1px solid var(--line)}
+.scope{font:500 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ash);margin:22px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 28px}
+.lead{display:grid;grid-template-columns:34px 1fr;gap:0 12px;padding:12px 0 0;border-top:1px solid var(--line);cursor:pointer;text-decoration:none;color:inherit;min-height:44px}
+.lead .ic{grid-row:1/4;width:30px;height:30px;stroke:var(--ink);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;margin-top:2px}
+.lead.model .ic{stroke:var(--model)}
+.lead .t{font:600 13px/1.3 var(--sans)}.lead .d{font:400 12px/1.45 var(--sans);color:var(--ash);margin-top:4px}
+.lead.model .t::after{content:" · model reads";font:500 10px var(--mono);color:var(--model);letter-spacing:.06em}
+.lead:hover .t{color:var(--rust)}
+.sr{position:absolute;left:-9999px}
+a.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--paper);padding:8px 12px;font:600 12px var(--sans)}a.skip:focus{left:8px;z-index:9}
+@media(max-width:900px){.wrap{padding:24px 20px}.body{grid-template-columns:1fr;gap:32px}h1{font-size:30px}.rails{grid-template-columns:1fr}.rail{border-right:0;border-bottom:1px solid var(--line);padding:14px 0}.rail+.rail{padding-left:0}.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+</style></head>
+<body>
+<a class="skip" href="#leads">Skip to Find leads</a>
+<div class="wrap">
+  <div class="mast"><span id="mast">FAA service difficulty reports</span><span>aircraftdefects.com/z</span></div>
+  <h1 id="h1"><b>…</b> reports</h1>
+  <p class="promise">Every one carries a mechanic’s write-up in trade shorthand. <em>GLM-5.3-Flash</em> reads them here, live, and says what it cannot answer.</p>
+
+  <div class="desk">
+    <div class="ask">
+      <select id="kind" aria-label="What to look for"><option value="">anything</option><option value="q">words the mechanic wrote</option><option value="operator">an airline</option><option value="tail">a tail number</option><option value="model">an aircraft type</option><option value="part">a part</option><option value="jasc">a system code</option></select>
+      <input id="qin" maxlength="300" placeholder="Ask a question, or type it: bird strike · N617FE · Southwest · Boeing 737 · CHAFED" aria-label="Ask the file or search">
+      <button id="askBtn" type="button">Ask</button><button id="srchBtn" class="ghost" type="button">Search</button>
+    </div>
+    <div class="period" id="period"><span class="lab">Period</span>
+      <button type="button" data-p="all">all, since 1995</button><button type="button" data-p="year">this year</button><button type="button" data-p="last">last year</button><button type="button" data-p="90">last 90 days</button><button type="button" data-p="month">this month</button>
+      <span class="free">or <input type="date" id="from" aria-label="from"> to <input type="date" id="to" aria-label="to"> <button type="button" id="takeP">take it</button></span>
+    </div>
+    <div id="draft"></div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div class="body">
+    <div class="hero" id="hero"></div>
+    <div class="spec" id="spec"></div>
+  </div>
+
+  <div class="rails" id="rails"></div>
+  <div class="foot"><span id="footnote">counts are of reports filed, not of flights · no rate is claimed</span><span><a id="readAll" href="#">read all</a> · <a href="#leads">find leads</a> · <a href="/z/rebuilt?view=p-codes">every code explained</a> · <a href="https://github.com/voelspriet/aircraftdefects-z#readme">method</a></span></div>
+</div>
+
+<div class="leads" id="leads">
+  <h2>Find leads</h2>
+  <p class="scope">Narrows to what you selected</p>
+  <div class="grid" id="leadsA"></div>
+  <p class="scope">Answers from the whole file</p>
+  <div class="grid" id="leadsB"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var D=document, $=function(s){return D.querySelector(s)};
+var RAIL=(new URLSearchParams(location.search).get("hero")||"where").replace("anatomy","where");
+var VIEW={hero:1,view:1,case:1};
+function q(){return new URLSearchParams(location.search)}
+function sel(){var p=q();Object.keys(VIEW).forEach(function(k){p.delete(k)});return p}
+function num(n){return (n==null?"":String(n)).replace(/\B(?=(\d{3})+(?!\d))/g,",")}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function go(p){location.href=location.pathname+(p.toString()?"?"+p.toString():"")}
+function setRail(r){var p=q();p.set("hero",r);go(p)}
+var ZLABEL={"ZONE 100":"lower fuselage","ZONE 200":"upper fuselage","ZONE 300":"stabilisers","ZONE 400":"engines","ZONE 500":"left wing","ZONE 600":"right wing","ZONE 700":"landing gear","ZONE 800":"doors","ZONE 900":"lavatories, galleys"};
+var ZPOS={"ZONE 200":[334,80,300,130],"ZONE 100":[334,252,300,176],"ZONE 300":[572,36,528,76],"ZONE 800":[4,252,60,170],"ZONE 400":[130,278,270,214],"ZONE 700":[60,278,150,214],"ZONE 500":[470,214,560,150],"ZONE 600":[470,232,560,150],"ZONE 900":[404,252,420,160]};
+var PRETTY={from:"from",to:"to",q:"words",operator:"airline",tail:"tail",model:"type",make:"make",part:"part",jasc:"system",zone:"zone",crew:"crew action",nature:"nature",stage:"stage"};
+
+/* ---- desk ---- */
+function chips(){var c=$("#chips");c.innerHTML="";sel().forEach(function(v,k){var s=D.createElement("span");s.innerHTML=esc(PRETTY[k]||k)+" "+esc(ZLABEL[v]||v)+'<button type="button" aria-label="remove">×</button>';s.querySelector("button").onclick=function(){var p=q();p.delete(k);go(p)};c.appendChild(s)})}
+$("#srchBtn").onclick=function(){var v=$("#qin").value.trim();if(!v)return;var k=$("#kind").value||"q";var p=q();if(k==="tail")v=v.toUpperCase().replace(/^N/,"");p.set(k,v);go(p)};
+$("#qin").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();$("#askBtn").click()}});
+$("#askBtn").onclick=function(){var v=$("#qin").value.trim();if(!v)return;var d=$("#draft");d.innerHTML='<div class="draft"><span class="lab">GLM-5.3-Flash is reading your question</span></div>';
+  fetch("/z/api/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({q:v})}).then(function(r){return r.json()}).then(function(a){
+    var f=a.filters||{},keys=Object.keys(f),h='<div class="draft"><span class="lab">The model read your question as</span>'+esc(a.reading||"")+'<div>';
+    keys.forEach(function(k){h+='<span class="chip"><i>'+esc(PRETTY[k]||k)+'</i>'+esc(f[k])+'</span>'});if(!keys.length)h+='<span class="chip">no filters</span>';h+='</div>';
+    if(a.unmapped&&a.unmapped.length)h+='<span class="mut">Could not map: '+esc(a.unmapped.join(", "))+'</span>';if(a.cannot)h+='<span class="mut">'+esc(a.cannot)+'</span>';
+    h+='<span class="mut">Filters proposed by GLM-5.3-Flash. Nothing has run yet.</span><div class="acts"><button type="button" class="run"'+(keys.length?"":" disabled")+'>Run this</button><button type="button" class="discard">Discard</button></div></div>';
+    d.innerHTML=h;d.querySelector(".discard").onclick=function(){d.innerHTML=""};d.querySelector(".run").onclick=function(){var p=new URLSearchParams();keys.forEach(function(k){p.set(k,f[k])});p.set("hero",RAIL);go(p)};
+  }).catch(function(){d.innerHTML='<div class="draft"><span class="lab">The model did not answer</span>Nothing has run. Try Search with plain words.</div>'})};
+function iso(d){return d.toISOString().slice(0,10)}
+$("#period").querySelectorAll("button[data-p]").forEach(function(b){b.onclick=function(){var p=q(),t=new Date(),k=b.dataset.p;p.delete("from");p.delete("to");
+  if(k==="year"){p.set("from",t.getFullYear()+"-01-01")}else if(k==="last"){p.set("from",(t.getFullYear()-1)+"-01-01");p.set("to",(t.getFullYear()-1)+"-12-31")}
+  else if(k==="90"){var d=new Date(t);d.setDate(d.getDate()-90);p.set("from",iso(d))}else if(k==="month"){p.set("from",t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-01")}go(p)}});
+$("#takeP").onclick=function(){var p=q(),f=$("#from").value,t=$("#to").value;f?p.set("from",f):p.delete("from");t?p.set("to",t):p.delete("to");go(p)};
+(function markPeriod(){var p=q(),f=p.get("from")||"",t=p.get("to")||"",y=new Date().getFullYear();$("#from").value=f;$("#to").value=t;var k="all";
+  if(f===y+"-01-01"&&!t)k="year";else if(f===(y-1)+"-01-01"&&t===(y-1)+"-12-31")k="last";else if(f&&!t&&f.endsWith("-01")&&f.startsWith(String(y)))k="month";else if(f&&!t){var d=new Date();d.setDate(d.getDate()-90);if(f===iso(d))k="90"}else if(f||t)k="free";
+  $("#period").querySelectorAll("button[data-p]").forEach(function(b){b.classList.toggle("on",b.dataset.p===k)})})();
+
+/* ---- model call block (streams) ---- */
+function mc(label,sub,url){var box=D.createElement("section");box.className="mc";box.dataset.state="idle";box.setAttribute("role","status");box.setAttribute("aria-live","polite");
+  box.innerHTML='<button type="button" class="mc__go">'+esc(label)+(sub?"<b>"+esc(sub)+"</b>":"")+'</button><div class="mc__meter"><span class="mc__spin" aria-hidden="true"></span><span class="mc__count">reading</span><span class="mc__clock">0.0 s</span><button type="button" class="mc__stop">Stop</button></div><div class="mc__body"><div class="model"><p class="lab">Read by GLM-5.3-Flash</p><p class="out"></p><p class="prov"></p></div></div>';
+  var go_=box.querySelector(".mc__go"),out=box.querySelector(".out"),prov=box.querySelector(".prov"),es=null,t0=0,tick=null,meta=null,got="";
+  function st(s){box.dataset.state=s;box.setAttribute("aria-busy",s==="pending"||s==="streaming"?"true":"false")}
+  function fin(kind,d){if(tick)clearInterval(tick);if(es)es.close();go_.disabled=false;var read=meta?num(meta.read)+" of "+num(meta.of)+" "+(meta.what||""):"";var secs=d&&d.seconds!=null?d.seconds+" s":((Date.now()-t0)/1000).toFixed(1)+" s";
+    if(kind==="done"){st("done");out.innerHTML=esc(got).replace(/\[([A-Z0-9]{8,24})\]/g,'<a href="/z/rebuilt?case=$1" style="font:500 11px var(--mono);color:var(--model);vertical-align:super">$1</a>');prov.textContent="read by GLM-5.3-Flash, "+read+", "+secs+(d&&d.tokens?", "+num(d.tokens)+" tokens":"")+". Its words, not the FAA’s."}
+    else if(kind==="abstain"){st("abstain");prov.textContent="GLM-5.3-Flash would not answer. "+read+"."}
+    else if(kind==="cancelled"){st("cancelled");prov.textContent="stopped by you at "+secs+". Partial."}
+    else{st("error");out.textContent="The call to GLM-5.3-Flash failed"+(d&&d.message?" ("+d.message+")":"")+". Nothing has changed on this page."}}
+  function start(){got="";meta=null;out.textContent="";prov.textContent="";go_.disabled=true;st("pending");t0=Date.now();tick=setInterval(function(){box.querySelector(".mc__clock").textContent=((Date.now()-t0)/1000).toFixed(1)+" s"},100);
+    es=new EventSource(url());es.addEventListener("meta",function(e){try{meta=JSON.parse(e.data)}catch(x){}if(meta)box.querySelector(".mc__count").textContent="reading "+num(meta.read)+" of "+num(meta.of)+" "+(meta.what||"")});
+    es.addEventListener("delta",function(e){var s;try{s=JSON.parse(e.data)}catch(x){s=e.data}if(box.dataset.state!=="streaming")st("streaming");got+=s;out.textContent=got});
+    es.addEventListener("abstain",function(e){var d={};try{d=JSON.parse(e.data)}catch(x){}out.textContent=d.text||"The model would not say.";fin("abstain",d)});
+    es.addEventListener("done",function(e){var d={};try{d=JSON.parse(e.data)}catch(x){}fin("done",d)});
+    es.addEventListener("error",function(e){var d={};try{d=JSON.parse(e.data)}catch(x){}if(got){fin("done",d)}else fin("error",d)})}
+  go_.onclick=function(e){e.stopPropagation();start()};box.querySelector(".mc__stop").onclick=function(e){e.stopPropagation();fin("cancelled")};return box}
+D.addEventListener("click",function(e){var u=e.target.closest&&e.target.closest(".raw u");if(!u)return;var host=u.closest(".spec");var old=host.querySelector(".mc[data-vocab]");if(old)old.remove();var w=u.textContent.replace(/[^A-Z\/\-]/g,"");if(w.length<3)return;
+  var b=mc("How the trade says it: "+w,"up to 60 write-ups carrying this word",function(){return"/z/api/stream/vocab?word="+encodeURIComponent(w)});b.dataset.vocab=w;host.appendChild(b);b.querySelector(".mc__go").click()});
+
+/* ---- data ---- */
+var H=null;
+fetch("/z/api/hero?"+sel().toString()).then(function(r){return r.json()}).then(function(h){H=h;draw()}).catch(function(){$("#hero").innerHTML='<p class="cannot">The file did not answer. Reload.</p>'});
+fetch("/z/api/specimen?"+sel().toString()).then(function(r){return r.json()}).then(spec).catch(function(){});
+
+function draw(){var h=H,tot=h.total||0,corpus=h.corpus||tot,filtered=sel().toString().length>0;
+  $("#mast").textContent="FAA service difficulty reports · "+(h.span||"1 Jan 1995 to today");
+  var railName={where:"<span class=here>where</span> on the aircraft they were found",when:"<span class=here>when</span> they were filed, month by month",who:"<span class=here>who</span> filed them, airline and tail",forced:"<span class=here>what they forced</span> the crew to do"}[RAIL];
+  $("#h1").innerHTML="<b>"+num(tot)+"</b> reports, "+railName+"."+(filtered?' <span style="font:italic 22px var(--serif);color:var(--ash)">'+num(corpus-tot)+" set aside.</span>":"");
+  $("#readAll").textContent="read "+(filtered?"these "+num(tot):"all "+num(corpus));$("#readAll").href="/z/rebuilt?"+sel().toString();
+  chips();
+  var hero=$("#hero");hero.innerHTML="";
+  if(RAIL==="where")hero.appendChild(plane(h));else if(RAIL==="when")hero.appendChild(months(h));else if(RAIL==="who")hero.appendChild(who(h));else hero.appendChild(forced(h));
+  var rails=$("#rails");rails.innerHTML="";var all={when:["When","<b>"+num((h.months||[]).length||380)+"</b> months","the same reports, month by month"],where:["Where","on the aircraft","nine zones, and what cannot be placed"],who:["Who","<b>"+num(h.aircraft)+"</b> aircraft","airline and tail"],forced:["What it forced","<b>"+num(h.crew_reports)+"</b> reports","what the crew had to do"]};
+  ["when","where","who","forced"].filter(function(r){return r!==RAIL}).forEach(function(r){var b=D.createElement("button");b.className="rail";b.innerHTML='<div class="q">'+all[r][0]+'</div><div class="n">'+all[r][1]+'</div><div class="pn">'+all[r][2]+'</div>';b.onclick=function(){setRail(r)};rails.appendChild(b)});
+  leads(h)}
+
+function plane(h){var w=D.createElement("div");var zones={};(h.zones||[]).forEach(function(z){zones[z.code]=z.n});var cur=q().get("zone");
+  var s='<svg viewBox="0 0 620 300" role="group" aria-label="Side view of an airliner with report counts on each zone">'+
+  '<g fill="none" stroke="#a39a88" stroke-width="1.2"><path d="M60 170 Q80 128 150 122 L470 118 Q520 116 560 128 L600 150 Q590 176 540 178 L120 190 Q70 190 60 170Z" fill="#e6dfd1"/><path class="zf" data-z="ZONE 200" d="M60 170 Q80 128 150 122 L470 118 Q520 116 560 128 L600 150 L60 170Z" fill="#cfc4ad"/><path class="zf" data-z="ZONE 300" d="M470 118 L520 60 L560 58 L545 118Z" fill="#e6dfd1"/><path d="M540 150 L610 140 L600 152Z" fill="#e6dfd1"/><path class="zf" data-z="ZONE 500" d="M240 178 L300 178 L360 218 L250 220Z" fill="#e6dfd1"/><ellipse class="zf" data-z="ZONE 400" cx="270" cy="212" rx="34" ry="12" fill="#e6dfd1"/><path class="zf" data-z="ZONE 700" d="M150 190 L150 226 M150 226 a7 7 0 1 0 0.1 0M300 200 L300 232 M300 232 a7 7 0 1 0 0.1 0"/></g><g fill="none" stroke="#8b857a" stroke-width=".8">';
+  Object.keys(ZPOS).forEach(function(z){var p=ZPOS[z];s+='<path d="M'+p[2]+' '+p[3]+' L'+(p[0]+(p[0]<300?40:-6))+' '+(p[1]-4)+'"/>'});s+='</g>';
+  Object.keys(ZPOS).forEach(function(z){var p=ZPOS[z],n=zones[z]||0;s+='<text class="zone zbtn'+(cur===z?" on":"")+(n?"":" dim")+'" data-z="'+z+'" x="'+p[0]+'" y="'+p[1]+'" tabindex="0" role="button">'+ZLABEL[z]+' <tspan class="n">'+num(n)+'</tspan></text>'});
+  s+='</svg>';w.innerHTML=s;
+  w.querySelectorAll("[data-z]").forEach(function(el){el.style.cursor="pointer";el.onclick=function(){var p=q();if(p.get("zone")===el.dataset.z)p.delete("zone");else p.set("zone",el.dataset.z);go(p)};el.onkeydown=function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();el.onclick()}}});
+  var placed=(h.zones||[]).reduce(function(a,z){return a+z.n},0);
+  var c=D.createElement("p");c.className="cannot";c.innerHTML="The drawing can place <b>"+num(placed)+"</b>. Another <b>"+num(h.other_location||0)+"</b> name a place in words the FAA never coded, and <b>"+num(h.no_location||0)+"</b> give none. Both sit under the aircraft: <button type=button data-f='other'>read the ones in words</button> · <button type=button data-f='none'>the ones with none</button>.";
+  c.querySelectorAll("button").forEach(function(b){b.onclick=function(){location.href="/z/rebuilt?"+sel().toString()+"&zone="+(b.dataset.f==="other"?"WORDS":"NONE")}});w.appendChild(c);return w}
+
+function months(h){var w=D.createElement("div");var ms=h.months||[];var mx=Math.max.apply(null,ms.map(function(m){return m.n||0}).concat([1]));var cur=q().get("from");
+  var strip=D.createElement("div");strip.className="months";ms.forEach(function(m){var b=D.createElement("button");b.className="mo";b.type="button";b.style.height=Math.max(1,Math.round((m.n||0)/mx*118))+"px";b.title=(m.label||m.key||"")+" · "+num(m.n)+" reports";b.setAttribute("aria-label",b.title);
+    var k=m.key||m.label;if(k&&cur&&cur.slice(0,7)===String(k).slice(0,7))b.classList.add("on");b.onclick=function(){var p=q();var y=String(k).slice(0,4),mo=String(k).slice(5,7)||"01";p.set("from",y+"-"+mo+"-01");var d=new Date(+y,+mo,0);p.set("to",y+"-"+mo+"-"+String(d.getDate()).padStart(2,"0"));go(p)};strip.appendChild(b)});
+  w.appendChild(strip);var ax=D.createElement("div");ax.className="axis";ax.innerHTML="<span>"+esc((ms[0]||{}).label||"1995")+"</span><span>"+esc((ms[ms.length-1]||{}).label||"today")+"</span>";w.appendChild(ax);
+  var c=D.createElement("p");c.className="cannot";c.textContent="Click a month to take it. "+num(ms.length)+" months; the newest are still filling up, since reports reach the FAA days to years after the defect.";w.appendChild(c);return w}
+
+function ladder(rows,key,labelOf,noteText){var w=D.createElement("div");var l=D.createElement("div");l.className="ladder";var mx=Math.max.apply(null,rows.map(function(r){return r.n||0}).concat([1]));
+  rows.slice(0,14).forEach(function(r){var b=D.createElement("button");b.type="button";b.innerHTML='<span class="bar" style="--w:'+Math.round((r.n||0)/mx*100)+'%"><i></i>'+esc(labelOf(r))+'</span><b>'+num(r.n)+'</b>';b.onclick=function(){var p=q();p.set(key,r.key||r.code);go(p)};l.appendChild(b)});
+  w.appendChild(l);var c=D.createElement("p");c.className="cannot";c.textContent=noteText;w.appendChild(c);return w}
+function who(h){var w=D.createElement("div");var ops=(h.operator_rows||h.operators||[]).map(function(o){return{key:o.key||o.code,n:o.n,label:o.label||o.name||o.key}});
+  var e=D.createElement("p");e.className="eyebrow";e.textContent="Airlines, by reports filed";w.appendChild(e);w.appendChild(ladder(ops,"operator",function(r){return r.label},"The airline list counts every report. Airline names come from the FAA’s 2006 cross-reference and can be stale."));
+  var tails=(h.swarm||[]).slice(0,14).map(function(t){return{key:t.key||t.tail,n:t.n,label:"N"+(t.key||t.tail)}});if(tails.length){var e2=D.createElement("p");e2.className="eyebrow";e2.style.marginTop="18px";e2.textContent="Most-reported airframes";w.appendChild(e2);w.appendChild(ladder(tails,"tail",function(r){return r.label},"The tail list shows the 900 most-reported aircraft out of "+num(h.aircraft)+"."))}return w}
+function forced(h){var w=D.createElement("div");var rows=(h.crew||[]).filter(function(c){return c.n>0&&["K","0","O"].indexOf(c.code)<0}).map(function(c){return{code:c.code,n:c.n,label:c.label}});
+  var e=D.createElement("p");e.className="eyebrow";e.textContent=num(h.crew_reports)+" of "+num(h.total)+" reports record something the crew had to do";w.appendChild(e);
+  w.appendChild(ladder(rows,"crew",function(r){return r.label},"A report can carry more than one action; each is counted once here. Not what broke, but what it forced."));return w}
+
+/* ---- specimen ---- */
+function spec(d){var s=$("#spec");if(!d||d.none||!d.record){s.innerHTML='<p class="eyebrow">Latest report where the crew had to act</p><p class="cannot">None in this selection.</p>';return}
+  var r=d.record,dt=r.date||"";var pretty=(function(){var m=dt.match(/(\d\d)\/(\d\d)\/(\d{4})/);if(!m)return dt;return new Date(+m[3],+m[1]-1,+m[2]).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})})();
+  var meta=[r.make&&r.model?((r.make||"")+" "+(r.model||"")).trim():"",r.tail?"N"+r.tail:"",(r.crew||[]).join(", ").toLowerCase(),(r.nature||[]).join(", ").toLowerCase(),(r.stage||"").toLowerCase()].filter(Boolean);
+  var raw=esc(r.text).replace(/\b([A-Z][A-Z\/\-]{2,})\b/g,function(m){return /^(THE|AND|WAS|FOR|WITH|FROM|THAT|THIS|WERE|WHEN|AFTER|DURING|FOUND|LEFT|RIGHT|AIRCRAFT|FLIGHT|CREW|NOTED)$/.test(m)?m:"<u>"+m+"</u>"});
+  s.innerHTML='<p class="eyebrow">Latest report where the crew had to act · filed '+esc(pretty)+'</p><p class="who">'+esc(meta[0]+(meta[1]?", "+meta[1]:""))+' <span>· '+esc(meta.slice(2).join(" · "))+'</span></p>'+
+    (d.plain?'<div class="model"><p class="lab">In plain English, read by GLM-5.3-Flash</p><p>'+esc(d.plain)+'</p><p class="prov">Read when this report arrived, '+esc(d.read_at)+' · '+esc(d.seconds)+' s · its words, not the FAA’s. Underlined words below open the trade’s own meaning.</p></div>':'<div class="model wait"><p class="lab">GLM-5.3-Flash</p><p>'+esc(d.error||"did not answer")+'</p></div>')+
+    '<p class="eyebrow" style="margin-top:16px">The mechanic’s words, as filed</p><p class="raw">'+raw+'</p><p class="cannot" style="margin-top:8px"><a href="/z/rebuilt?case='+esc(r.id)+'">Open the case sheet</a> · every code on this report, spelled out.</p>'}
+
+/* ---- leads ---- */
+function leads(h){var s=sel().toString();var A=[["Patterns","what the coded fields say about this slice","p-patterns"],["Aircraft","which airframes carry this, and how often","p-aircraft"],["How it was found","in flight, on the ground, by a warning, by a look","p-found"],["What recurs here","the model reads the write-ups and names what no code captures","recurs",1]];
+  var B=[["Fleet","one airline, one type: how many aircraft the reports touch","p-fleet"],["Story leads","angles worth checking, computed on everything published","p-leads"],["New defects","what appeared in the file for the first time this year","p-emerging"],["Same day, many aircraft","one operator, one system, several tails, one date","p-clusters"],["Same defect","the forty most written-up parts","p-defect"],["Corrosion and cracks","where the airframe is wearing out","p-corrosion"],["Old airframes","50,000 hours and more","p-old"],["Engines","shutdowns, fires, and what preceded them","p-engines"],["What the crew did","ranked by share of reports with a crew action","p-crew"],["Compare","two slices side by side","p-compare"],["Code vs words","where the box a filer ticked disagrees with the sentence beneath; two passes must agree","conflicts",1],["The paperwork gap","how long reports take to reach the FAA","p-lag"]];
+  var I={"Patterns":'<path d="M4 20V12M10 20V6M16 20v-4M22 20V9"/>',"Aircraft":'<path d="M3 13l8-1 5-8h2l-2 8 5 1v2l-5 1-1 5h-2l-1-5-8-1z"/>',"How it was found":'<circle cx="10" cy="10" r="6"/><path d="M15 15l6 6"/>',"What recurs here":'<path d="M5 12a7 7 0 0 1 12-5l2 2M19 12a7 7 0 0 1-12 5l-2-2"/><path d="M19 4v5h-5M5 20v-5h5"/>',"Fleet":'<path d="M3 8l6-1 3-4h2l-1 4 4 1v1l-4 1-1 3h-2l-1-3-6-1z"/><path d="M8 17l6-1 3-4h2l-1 4 4 1v1l-4 1-1 3h-2l-1-3-6-1z"/>',"Story leads":'<path d="M4 4h10l6 6v10H4z"/><path d="M14 4v6h6M8 13h8M8 17h8"/>',"New defects":'<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',"Same day, many aircraft":'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>',"Same defect":'<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/>',"Corrosion and cracks":'<path d="M3 20L9 8l3 5 3-8 6 15"/>',"Old airframes":'<circle cx="12" cy="12" r="6"/><path d="M12 9v3h2M12 3v3M12 18v3M3 12h3M18 12h3"/>',"Engines":'<circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/>',"What the crew did":'<circle cx="12" cy="7" r="3"/><path d="M5 21a7 7 0 0 1 14 0"/>',"Compare":'<rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="14" rx="1"/>',"Code vs words":'<path d="M4 6h9M4 12h6M4 18h8"/><path d="M15 15l2 2 4-5"/>',"The paperwork gap":'<path d="M4 18h16M6 18V9M12 18V5M18 18v-8"/>'};
+  function card(x){var a=D.createElement("a");a.className="lead"+(x[3]?" model":"");a.href=x[2]==="recurs"?"#recurs":x[2]==="conflicts"?"/z/conflicts":"/z/rebuilt?"+s+(s?"&":"")+"view="+x[2];a.innerHTML='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'+(I[x[0]]||"")+'</svg><div class="t">'+esc(x[0])+'</div><div class="d">'+esc(x[1])+'</div>';return a}
+  var A_=$("#leadsA");A_.innerHTML="";A.forEach(function(x){A_.appendChild(card(x))});var B_=$("#leadsB");B_.innerHTML="";B.forEach(function(x){B_.appendChild(card(x))});
+  var rec=D.getElementById("recurs");if(!rec){rec=D.createElement("div");rec.id="recurs";A_.insertAdjacentElement("afterend",rec)}rec.innerHTML="";
+  var tot=h.total||0,n=Math.min(300,tot);if(s){rec.appendChild(mc("What recurs here",(tot>300?num(n)+" of "+num(tot)+" write-ups, newest first, not a sample of the rest":"all "+num(n)+" write-ups in this selection"),function(){return"/z/api/stream/recurs?"+s}))}
+  else{var p=D.createElement("p");p.className="cannot";p.textContent="Take a zone, a month, an airline or a tail first; then the model can read what recurs in it.";rec.appendChild(p)}}
+})();
+</script>
+</body></html>

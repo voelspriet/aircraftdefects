@@ -19,8 +19,9 @@ JS     = [("17-merge.js",   "17: the instrument's setting"),
           ("47-hand.js",    "47: HAND-WRITTEN. one empty state, one count. see MODEL_USE.md"),
           ("48-hand.js",    "48: HAND-WRITTEN. skip link, a month or year. see MODEL_USE.md"),
           ("49-hand.js",    "49: HAND-WRITTEN. starters reach the URL; no unasked scroll. see MODEL_USE.md"),
+          ("50-hand.js",    "50: HAND-WRITTEN. AIM AT under the headline, as the parent. see MODEL_USE.md"),
           (("10-guidance.md", "js"), "10: how to read each panel")]
-CSS    = ["18-css.css", "41-css.css", "43b-css.css", "43a-css.css", "42-css.css", "49-hand.css"]
+CSS    = ["18-css.css", "41-css.css", "43b-css.css", "43a-css.css", "42-css.css", "49-hand.css", "50-hand.css"]
 
 out = BASE.read_text()
 for item, label in JS:

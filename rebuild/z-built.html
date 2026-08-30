@@ -10624,6 +10624,26 @@ addEventListener("resize",kick);
 })();
 
 
+/* ---- 50: HAND-WRITTEN. AIM AT under the headline, as the parent. see MODEL_USE.md, written by the model ---- */
+/* ---- 50, hand-written, 30 August 2026. See 50-hand.css for the why. ----
+   Put the AIM AT row where the parent puts it: after the headline, before the
+   instruction line. It is built at the foot of .ipad; this moves it. */
+(function(){
+  "use strict";
+  function place(){
+    var pad=document.querySelector('#hero .ipad')||document.querySelector('.ipad'); if(!pad)return;
+    var w=pad.querySelector('.aimwrap'), c=pad.querySelector('#count'), h=pad.querySelector('.hand'); if(!w||!c)return;
+    /* parent order inside .ipad: headline, aim row, instruction line, rails */
+    if(c.nextElementSibling!==w) c.insertAdjacentElement('afterend',w);
+    if(h&&w.nextElementSibling!==h) w.insertAdjacentElement('afterend',h);
+  }
+  var q=false; function kick(){ if(q)return; q=true; requestAnimationFrame(function(){q=false; try{place()}catch(e){}}); }
+  new MutationObserver(kick).observe(document.documentElement,{childList:true,subtree:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',kick); else kick();
+  addEventListener('load',kick);
+})();
+
+
 /* ---- 10: how to read each panel, written by the model ---- */
 
 /* ---- panel guidance for the SDR rebuild ----
@@ -11869,6 +11889,33 @@ body.rr-sheet-lock{
 /* the one element that really grows on hover: reserve its height, as the
    parent does, instead of pinning the whole page (removed from 42-dom.js) */
 #aimLine,.aim{min-height:3em}
+`;document.head.appendChild(s);})();
+
+(function(){var s=document.createElement('style');s.id='sdr-css-50';s.textContent=`/* ---- 50, hand-written, 30 August 2026. Counted in MODEL_USE.md. ----
+   Side by side with the parent at the same URL (?hero=anatomy there,
+   ?hero=where here), three things the instrument drew differently:
+   1. The parent's AIM AT row sits directly under the headline. Here the
+      instrument builds the same row (.aimwrap) and then hides it with
+      #hero .ipad .aimwrap{display:none}, leaving the reader a long scroll
+      to the desk's copy. Shown, and moved up by 50-hand.js.
+   2. The WHEN bars: parent rgb(216,210,198) at opacity 1. Here an inline
+      rule painted them var(--rust) at .557 opacity, a dark smear that the
+      headline then collided with. Parent's colour restored.
+   3. The rail tabs: parent sets the label in Archivo and the subline in the
+      system face; here both fell to monospace. Parent's faces restored. */
+#hero .ipad .aimwrap{display:flex !important;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 2px}
+.mo i{background:#d8d2c6 !important;opacity:1 !important}
+.mo:hover i,.mo:focus-visible i,.mo.lit i{background:var(--rust) !important}
+.picker .q{font:600 10.5px/1.1 Archivo,system-ui,sans-serif !important;letter-spacing:.1em}
+.picker .pn{font:400 9.5px/1.2 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important;color:#5f584f}
+/* the row's own parts, as the parent draws them: uppercase label, a plain
+   ghost "Take it" (here it was ink on ink, an unreadable black block), and
+   "OR ONE DAY" upright on the same line */
+.aimwrap .aimbox{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.aimwrap label{font:600 10.5px/1 Archivo,system-ui,sans-serif !important;letter-spacing:.1em;text-transform:uppercase;color:var(--ash);font-style:normal !important}
+.aimwrap button.aimgo{background:#fff !important;color:#1d1d1f !important;border:1px solid #1d1d1f !important;padding:6px 12px;font:500 13px/1 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;border-radius:3px;cursor:pointer}
+.aimwrap label.aimday{display:inline-flex;align-items:center;gap:8px;font-style:normal !important}
+.aimwrap input#iAimAt{min-width:30ch;padding:6px 9px;font:400 13px -apple-system,"Segoe UI",Roboto,sans-serif}
 `;document.head.appendChild(s);})();
 
 window.drawInstrument=drawInstrument;

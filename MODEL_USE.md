@@ -105,14 +105,16 @@ The line at the top of this file, "everything on the page is written by the
 model", is the intent and it was not precise enough to be checkable. This section
 is the precise version. Every figure here can be counted from the repository.
 
-    served page, raw                 616,701 characters   (recounted 30 August, after 49)
-      model-written                    592,131   96.0%
-      hand-written                      24,570   4.0%
+    served page, raw                 620,352 characters   (recounted 30 August, after 50)
+      model-written                    592,369   95.5%
+      hand-written                      27,983   4.5%
         rebuild/bridge.js.bak             13,228
         rebuild/47-hand.js                 2,618
         rebuild/48-hand.js                 5,138
         rebuild/49-hand.js                 2,756
-        rebuild/49-hand.css                  830
+        rebuild/49-hand.css                  976
+        rebuild/50-hand.js                 1,086
+        rebuild/50-hand.css                2,181
       plus one hand edit inside a model block: 1,160 characters REMOVED from
       rebuild/42-dom.js (the height-pinning; backup 42-dom.js.bak-49)
 
@@ -174,3 +176,9 @@ recorded every element's resting height and pinned anything that grew, so after
 any search the instrument was pinned to 0px with its content painting over the
 desk, and the page shortened by 860px under a scrolled reader. `#aimLine` now has
 a min-height instead. Each is dated 30 August and explained in its file header.
+
+**`rebuild/50-hand.js` and `50-hand.css`** restore the instrument to the parent's
+own drawing at the same URL: the AIM AT row shown under the headline (it was
+built, then hidden by a model rule), the WHEN bars in the parent's colour (they
+were painted rust at half opacity, a smear the headline collided with), the rail
+tabs in the parent's faces, and a "Take it" button that was ink on ink.

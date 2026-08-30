@@ -72,7 +72,7 @@ words underneath and every abbreviation explained.
 
 ## What is not the model's
 
-Five files of the served page are hand-written, 4.0% of it by character count, plus one edit inside a model block.
+Seven files of the served page are hand-written, 4.5% of it by character count, plus one edit inside a model block.
 `rebuild/bridge.js.bak` joins the two halves the model built separately.
 `rebuild/47-hand.js` fixes two faults found by looking at the screen on 30 August
 that two model rounds did not land: an empty state shown over live results, and

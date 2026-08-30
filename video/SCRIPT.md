@@ -1,4 +1,4 @@
-# Make it readable · video script (v2, 31 August 2026)
+# Make it readable · video script (v4, 31 August 2026)
 
 Length about 3:10. Voice: Henk, first person (or the OpenAI voice from v1 with the same settings). Every screen shot is a real page state at aircraftdefects.com/z; the URL is given so the captures can be scripted. No music under the voice; a low bed under the opening clip only.
 
@@ -36,6 +36,15 @@ An emergency landing? That is just an A. But the same letter elsewhere on the fo
 
 **Voice:**
 It was something public, but the government presented it as ingredients on a table rather than a meal. Over 1.7 million records were there and none of it was accessible. When z.ai came with a hackathon I thought: I want to make this completely transparent, to help families and researchers.
+
+---
+
+## 2b. WHERE THE TROUBLE SITS · footage from v1, live counts
+
+**Screen:** the page's own aircraft drawing, then five real shots (aviation/gen/k_*.mp4, 2560x1440): the cabin floor and seat track, the belly structure, a door, the tail, the wing seam. Each carries a corner card with the zone and the live count from /z/api/hero ("Upper fuselage 84,453 · ZONE 200 · reports filed, not a rate").
+
+**Voice, one sentence per shot:**
+Where does the trouble sit? The file says, when a mechanic ticked a zone. / Eighty-four thousand reports on the upper fuselage: the cabin, the floor, the seat tracks. / Sixty-one thousand below the floor, in the belly and the holds. / Twenty-three thousand on the doors. / Nine thousand on the tail. / Eleven thousand on the left wing alone.
 
 ---
 
@@ -132,7 +141,7 @@ The file has no context, so for this one page the model searches the web first a
 One point seven million reports, public since 1995, readable now.
 
 **Card:**
-aircraftdefects.com/z
+aircraftdefects.com
 Built with GLM-5.3-Flash · GLM-5.3 Flash Lightning Hackathon
 Henk van Ess, 2026
 
@@ -153,3 +162,8 @@ Henk van Ess, 2026
 | 5 | /z/#view=freefall; click `tr.rec.key`; click `#ff .mc__go` nth 0 | done |
 
 Voice files: one per numbered block, so a retake never touches the others.
+
+
+## How v4 is made (beats)
+
+Every sentence in sections 3 to 6 is one beat in `video/beats.py`: one voice file, one element framed. `capture4.py` records each shot in real time through Chrome's screencast (lossless PNG frames at 2400x1350, so the picture is crisp), scrolls the element to the centre and scales the page around it (1.2x to 1.7x), writes a mark when it is framed, and waits for the model's answer where a button was pressed. `build4.py` places each sentence at its mark, compresses only the model's waiting time to 2.5 s, and encodes at 2560x1440, CRF 16. `zones.py` renders section 2b from the v1 footage with the live counts.

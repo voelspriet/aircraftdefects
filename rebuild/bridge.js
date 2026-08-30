@@ -3398,12 +3398,15 @@ addEventListener("resize",kick);
 })();
 
 /* ---- 43: the drift, and the names it owns, written by the model ---- */
-/* block 44 script, replacing block 43 whole.
+/* block 44 script, replacing 43-dom.js whole.
    Jobs:
    1. exactly one #iAim, enforced at every write channel, emitter named in console
    2. every :hover rule in the page's own stylesheets loses layout changing
       declarations and keeps color, shadow and transform
    3. the standalone back to the instrument control gets a 24px tap target
+   4. a repeat row with no hours figure carries the file's own reason instead
+      of the bare phrase, taken from the note the repeats view now sends with
+      every blank, and the two causes keep their two different sentences
    Plus the root background is synced to the body's computed background. */
 
 (function () {
@@ -3702,6 +3705,202 @@ addEventListener("resize",kick);
     }
   }
 
+  /* ---------- 4. a reason on every repeat row that has no hours figure ---------- */
+
+  /* The repeats view now sends a note with every group whose hours_between is
+     null, and the two causes carry two different notes. The rows themselves
+     are drawn elsewhere in the page, so this block meets them twice: it reads
+     the notes as they come back over the network, and when a rendered row
+     shows the bare phrase with no number in front of it, it swaps the phrase
+     for the short reason that matches the note. Both reasons are the file's
+     own limitation, never the tool's, and a figure that is present stands
+     untouched, zero included. */
+
+  var REPEATS_PATH = '/z/api/repeats/';
+  var PHRASE = 'hours between first and last';
+  var FLAG = 'data-hrs44';
+  var REASON_DISAGREE = "the file's own hour readings do not agree";
+  var REASON_NO_HOURS = 'the file records no airframe hours on one or more of these reports';
+  var REASON_FALLBACK = 'the file does not provide the hours between these reports';
+
+  var repeatGroups = [];
+
+  function normTxt(s) {
+    try { return String(s || '').replace(/\s+/g, ' ').toLowerCase(); }
+    catch (e) { return ''; }
+  }
+
+  /* the short line tracks the note the view sent, one cause per note */
+  function shortReason(note) {
+    var n = normTxt(note);
+    if (n.indexOf('do not agree') !== -1) return REASON_DISAGREE;
+    if (n.indexOf('does not record') !== -1) return REASON_NO_HOURS;
+    return null;
+  }
+
+  /* match a rendered row to its group by what the row itself shows */
+  function findGroup(rowText) {
+    var t = normTxt(rowText);
+    for (var pass = 0; pass < 2; pass++) {
+      for (var i = 0; i < repeatGroups.length; i++) {
+        var g = repeatGroups[i];
+        if (!g || g.hours_between != null || !g.note) continue;
+        var sys = normTxt(g.system);
+        if (sys && t.indexOf(sys) === -1) continue;
+        if (g.times == null || t.indexOf(g.times + ' write-ups') === -1) continue;
+        if (pass === 0) {
+          var part = normTxt(g.part);
+          if (part && t.indexOf(part) === -1) continue;
+        }
+        return g;
+      }
+    }
+    return null;
+  }
+
+  function restoreFallback(row) {
+    try {
+      var w = document.createTreeWalker(row, NodeFilter.SHOW_TEXT, null, false);
+      while (w.nextNode()) {
+        var n = w.currentNode;
+        if (n.nodeValue && n.nodeValue.indexOf(REASON_FALLBACK) !== -1) {
+          n.nodeValue = n.nodeValue.split(REASON_FALLBACK).join(PHRASE);
+        }
+      }
+    } catch (e) {}
+  }
+
+  function takeGroups(data) {
+    try {
+      if (!data || !data.groups || !data.groups.length) return;
+      var added = false;
+      for (var i = 0; i < data.groups.length; i++) {
+        var g = data.groups[i];
+        if (g && g.hours_between == null && g.note) {
+          repeatGroups.push(g);
+          added = true;
+        }
+      }
+      if (!added) return;
+      /* rows patched with the fallback reason can now be done properly */
+      var stale = document.querySelectorAll('[' + FLAG + '="fallback"]');
+      for (var j = 0; j < stale.length; j++) {
+        restoreFallback(stale[j]);
+        try { stale[j].removeAttribute(FLAG); } catch (e) {}
+      }
+      backstop();
+    } catch (e) {}
+  }
+
+  /* read the notes however the page asks for them */
+  try {
+    if (typeof window.fetch === 'function' && !window.__zRepeatHook) {
+      var ofetch = window.fetch;
+      window.fetch = function () {
+        var url = '';
+        try {
+          var a0 = arguments[0];
+          url = String(a0 && a0.url ? a0.url : a0);
+        } catch (e) {}
+        var p = ofetch.apply(this, arguments);
+        try {
+          if (url.indexOf(REPEATS_PATH) !== -1 && p && typeof p.then === 'function') {
+            p.then(function (res) {
+              try {
+                if (res && typeof res.clone === 'function') {
+                  res.clone().json().then(takeGroups).catch(function () {});
+                }
+              } catch (e) {}
+            }).catch(function () {});
+          }
+        } catch (e) {}
+        return p;
+      };
+      window.__zRepeatHook = true;
+    }
+  } catch (e) {}
+
+  try {
+    if (!XMLHttpRequest.prototype.__zRepeatHook) {
+      var xOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function (method, url) {
+        var xhr = this;
+        try {
+          if (String(url || '').indexOf(REPEATS_PATH) !== -1) {
+            xhr.addEventListener('load', function () {
+              try { takeGroups(JSON.parse(xhr.responseText)); } catch (e) {}
+            });
+          }
+        } catch (e) {}
+        return xOpen.apply(this, arguments);
+      };
+      XMLHttpRequest.prototype.__zRepeatHook = true;
+    }
+  } catch (e) {}
+
+  function patchRows(scope) {
+    var root = scope || document;
+    var host = root;
+    try { if (root.nodeType === 9) host = root.body || root.documentElement; } catch (e) {}
+    if (!host) return;
+    var hay = '';
+    try { hay = host.textContent || ''; } catch (e) { return; }
+    if (hay.indexOf(PHRASE) === -1) return;
+    var walker;
+    try {
+      walker = document.createTreeWalker(host, NodeFilter.SHOW_TEXT, null, false);
+    } catch (e) { return; }
+    var hits = [];
+    try {
+      while (walker.nextNode()) {
+        var n = walker.currentNode;
+        if (n.nodeValue && n.nodeValue.indexOf(PHRASE) !== -1) hits.push(n);
+      }
+    } catch (e) { return; }
+    for (var i = 0; i < hits.length; i++) fixHoursNode(hits[i]);
+  }
+
+  function fixHoursNode(node) {
+    try {
+      /* if the view's own full note is already on the page, leave it alone */
+      if (node.nodeValue.indexOf('cannot be shown') !== -1) return;
+    } catch (e) { return; }
+    var el = node.parentElement;
+    if (!el) return;
+    /* climb to the row, the smallest ancestor that talks about write-ups */
+    var row = el, up = 0;
+    while (row && up < 8) {
+      var txt = '';
+      try { txt = row.textContent || ''; } catch (e) { txt = ''; }
+      if (txt.indexOf('write-ups') !== -1) break;
+      row = row.parentElement;
+      up++;
+    }
+    if (!row) row = el;
+    var flag = null;
+    try { flag = row.getAttribute(FLAG); } catch (e) {}
+    if (flag === 'note' || flag === 'num') return;
+    var rowText = '';
+    try { rowText = row.textContent || ''; } catch (e) { return; }
+    var idx = rowText.indexOf(PHRASE);
+    if (idx === -1) return;
+    /* a bare number right in front of the phrase means the figure stands,
+       and 0 is a figure: both write-ups at the same airframe hours */
+    var before = rowText.slice(0, idx).replace(/[\s\u00b7]+$/, '');
+    var lastTok = before ? before.split(/\s+/).pop() : '';
+    if (/^[\d][\d,]*$/.test(lastTok)) {
+      try { row.setAttribute(FLAG, 'num'); } catch (e) {}
+      return;
+    }
+    var g = repeatGroups.length ? findGroup(rowText) : null;
+    var reason = (g && g.note) ? shortReason(g.note) : null;
+    if (!reason) reason = REASON_FALLBACK;
+    try {
+      node.nodeValue = node.nodeValue.split(PHRASE).join(reason);
+      row.setAttribute(FLAG, g ? 'note' : 'fallback');
+    } catch (e) {}
+  }
+
   /* ---------- background and scheduling ---------- */
 
   function syncBg() {
@@ -3728,6 +3927,7 @@ addEventListener("resize",kick);
       try { enforceAimOnce(); } catch (e) {}
       try { sweep(); } catch (e) {}
       try { tapFix(document); } catch (e) {}
+      try { patchRows(document); } catch (e) {}
       try { syncBg(); } catch (e) {}
     }, 80);
   }
@@ -3741,6 +3941,7 @@ addEventListener("resize",kick);
     try { enforceAimOnce(); } catch (e) {}
     try { sweep(); } catch (e) {}
     try { tapFix(document); } catch (e) {}
+    try { patchRows(document); } catch (e) {}
     try { syncBg(); } catch (e) {}
     if (mo) {
       try {

@@ -343,10 +343,36 @@ def run(url, is_parent=False):
               "; ".join(wrong[:2]) if wrong
               else (f"{checked} airframes checked" if checked else "EXAMINED NOTHING"))
 
-        neg = pg.evaluate("""()=>{const m=(document.body.innerText||'')
-            .match(/-\\d[\\d,]*\\s*hours between first and last/g); return m||[];}""")
-        c.add("no duration is negative", not neg,
-              f"{len(neg)} negative durations, e.g. " + "; ".join(neg[:2]) if neg else "")
+        # Negative AND blank. The 44-dates fix turned 16 negative durations into
+        # 11 correct ones and 5 that print no number at all: "· hours between
+        # first and last" with nothing in front of it. A check that only hunts
+        # the minus sign passes that, and a missing number is still broken output.
+        # Repeat rows only exist on an airframe page. Run against the landing
+        # page this examined nothing and passed - the third vacuous pass in this
+        # file today, after the date checks and the tap targets. Any check that
+        # inspected zero things must fail, not pass.
+        durneg, durblank, durtotal = [], [], 0
+        for _tail in ("617FE", "373UP", "947FD"):
+            try:
+                pg.goto(f"{base}/z/?tail={_tail}", wait_until="networkidle", timeout=60000)
+                pg.wait_for_timeout(3000)
+            except Exception:
+                continue
+            d = pg.evaluate("""()=>{const t=document.body.innerText||'';
+                const neg=(t.match(/-\\d[\\d,]*\\s*hours between first and last/g)||[]);
+                const all=[...t.matchAll(/·\\s*([^·\\n]*?)hours between first and last/g)];
+                // Dangling, not merely numberless: "· an unknown number of hours"
+                // reads fine and has no digit; "· hours between first and last"
+                // with nothing before it reads as a bug whatever the intent.
+                const blank=all.filter(m=>!/\\S/.test(m[1])).map(m=>m[0].trim().slice(0,60));
+                return {neg, blank, total:all.length};}""")
+            durneg += d["neg"]; durblank += d["blank"]; durtotal += d["total"]
+        c.add("no duration is negative or left dangling",
+              durtotal > 0 and not durneg and not durblank,
+              "EXAMINED NOTHING" if durtotal == 0
+              else (f"{len(durneg)} negative, {len(durblank)} dangling of {durtotal} rows"
+                    + ("; e.g. " + durblank[0] if durblank else "")
+                    if (durneg or durblank) else f"{durtotal} rows over 3 airframes"))
 
         c.add("no runtime errors", not errs, "; ".join(errs[:2]))
         br.close()

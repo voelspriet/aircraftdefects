@@ -10837,7 +10837,9 @@ body.rr-sheet-lock{
    whatever sat above it in flow, including an open rail of the instrument. And
    #rr-sec was overflow:hidden, which is what let the bar clip. Both restored
    to what the parent does: the bar scrolls with its section. */
-.cut{position:static !important;top:auto !important;z-index:auto !important}
+/* correction, same day: the parent's bar IS sticky (its own inline style
+   block). What differed was #rr-sec{overflow:hidden}, which turns a sticky
+   child into one that clips and hangs. Only the overflow is changed. */
 #rr-sec{overflow:visible !important}
 /* the one element that really grows on hover: reserve its height, as the
    parent does, instead of pinning the whole page (removed from 42-dom.js) */

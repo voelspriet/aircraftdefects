@@ -1,0 +1,56 @@
+[  63s] stap 1: dacht 124, schreef 0, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[  81s] stap 2: dacht 274, schreef 151, 2 tool-calls
+   measure  {"value": {"afKeys": ["aircraft", "cannot_show", "capped", "citation", "first", "found", "framing", "last", "operators", "records", "systems", "tail"], "aircraf
+   measure  {"value": {"aircraftExists": true, "aircraftHTML": "<section id=\"p-aircraft\" class=\"panel\" hidden=\"\" role=\"tabpanel\" aria-labelledby=\"tab-p-aircraft\">
+[ 118s] stap 3: dacht 523, schreef 111, 2 tool-calls
+   measure  {"value": {"tail": "N373UP", "note": "Written up more than once on this airframe. The file does not say whether a later report is the same finding returning or 
+   measure  {"value": {"scopes": ["p-patterns", "p-aircraft", "p-found", "p-fleet", "p-leads", "p-emerging", "p-clusters", "p-defect", "p-structure", "p-age", "p-engines", 
+[ 145s] stap 4: dacht 450, schreef 160, 2 tool-calls
+   measure  {"value": {"tailParam": null, "rrTail": null, "panelHTML": "<div class=\"scope\" data-scope=\"p-aircraft\"></div><h2>Aircraft</h2><p class=\"sdrs-guidance\" dat
+   measure  {"value": []}
+[ 173s] stap 5: dacht 721, schreef 0, 2 tool-calls
+   measure  {"value": {"afterClickVisible": ["p-aircraft"], "tabOn": "vtab on", "url": "https://aircraftdefects.com/z/"}}
+   measure  {"value": {"noRows": true, "revealBtn": true, "bodyHTML": "<div id=\"noRows\" class=\"norows\"><p><strong>No rows yet, on purpose.</strong> Listing everything a
+[ 198s] stap 6: dacht 0, schreef 109, 1 tool-calls
+   measure  {"value": "clicked"}
+[ 213s] stap 7: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"rowCount": 0, "firstRowHTML": null, "tailCellHTML": null}}
+[ 226s] stap 8: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"tables": []}}
+[ 244s] stap 9: dacht 231, schreef 0, 1 tool-calls
+   measure  {"value": {"wu": 0, "wrote": 0, "mainLen": 430911, "mainSample": "<div id=\"znarrow\"></div>\n<div id=\"hero-root\"><div id=\"hero\" class=\"instrument\"><div c
+[ 258s] stap 10: dacht 455, schreef 0, 1 tool-calls
+   measure  {"value": {"wu": 0, "rows": 0, "firstRow": null}}
+[ 277s] stap 11: dacht 612, schreef 0, 1 tool-calls
+   measure  {"value": {"rows": 0, "first": "olor:#7a5b00;margin:6px 0 0}\n#sd-dossier .sd-d-lim{margin:0;padding-left:18px}\n#sd-dossier .sd-d-lim li{margin:4px 0;font-size
+[ 296s] stap 12: dacht 430, schreef 0, 1 tool-calls
+   measure  {"value": {"rows": 0, "dataKeys": ["oncontentvisibilityautostatechange", "oncontextrestored", "onformdata", "onloadeddata", "onloadedmetadata", "onpopstate", "c
+[ 314s] stap 13: dacht 82, schreef 0, 1 tool-calls
+   measure  {"value": {"error": "Page.evaluate: TypeError: Cannot read properties of undefined (reading 'length')\n    at eval (eval at evaluate (:291:30), <anonymous>:5:72
+[ 327s] stap 14: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"error": "Page.evaluate: TypeError: Cannot read properties of undefined (reading 'length')\n    at eval (eval at evaluate (:291:30), <anonymous>:5:82
+[ 343s] stap 15: dacht 212, schreef 0, 1 tool-calls
+   measure  {"value": {"error": "Page.evaluate: TypeError: Cannot read properties of undefined (reading 'length')\n    at eval (eval at evaluate (:291:30), <anonymous>:7:33
+[ 359s] stap 16: dacht 163, schreef 0, 1 tool-calls
+   measure  {"value": {"info": "function=function recordsBody(d,k){\n  const rs=d.records||[];\n  const scope='<div class=\"scope sample\">Read a", "booted": true}}
+[ 373s] stap 17: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "function recordsBody(d,k){\n  const rs=d.records||[];\n  const scope='<div class=\"scope sample\">Read and decoded: the newest '+num(d.analysed)+\" o
+[ 383s] stap 18: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "function recHTML(r,i){\n  const miss='<span class=\"absent\">not recorded</span>';\n  const head=[];\n  head.push('<span class=\"rc mono\">'+(r.date?
+[ 416s] stap 19: dacht 2368, schreef 194, 1 tool-calls
+   measure  {"value": {"totalLen": 456538, "tailParamDef": "tailParam();\n    bits.push('<div class=\"bar\">'\n      +'<button class=\"ghost\" id=\"sumBtn\" onclick=\"loadS
+[ 429s] stap 20: dacht 334, schreef 0, 1 tool-calls
+   measure  {"value": {"pAircraftBody": null, "tailParamFn": "function tailParam(){\n  const v=LASTQ&&LASTQ.kind===\"tail\"?LASTQ.v:\"\";\n  return String(v).toUpperCase().
+[ 451s] stap 21: dacht 725, schreef 0, 1 tool-calls
+   measure  {"value": {"urlSearch": 22458, "locationSearch": 23232, "showFn": "function show(id){\n  if(!VIEW_READY){ CURVIEW=id||'p-search'; return; }   // called during a
+[ 480s] stap 22: dacht 2190, schreef 0, 1 tool-calls
+   measure  {"value": {"ask": "async function ask(k,v,md,push){\n  if(!v)return;\n  $(\"out\").innerHTML='<div class=\"card\"><p class=\"muted\">Reading the file\\u2026</p>
+[ 578s] stap 23: dacht 12707, schreef 185, 1 tool-calls
+   measure  {"value": {"shortTail": {"found": 26, "tail": "N373UP", "records": 26}, "bogus": {"status": 200, "body": {"found": 0, "note": "No reports in this file name that
+[ 867s] stap 24: dacht 30465, schreef 389, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[ 876s] stap 25: dacht 0, schreef 87, 1 tool-calls
+   measure  {"value": {"exists": true, "html": "<div class=\"sd-d-head\"><span class=\"sd-d-tail\">N373UP</span><span class=\"sd-d-make\">BOEING 76734AF</span><span class=\
+[ 896s] stap 26: dacht 212, schreef 0, 1 tool-calls
+   measure  {"value": {"frameMatch": true, "frameText": "19 of these 26 write-ups were made with the aircraft on the ", "missingCannotShow": [], "hoursShown": ["0 hours bet

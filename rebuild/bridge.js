@@ -1756,7 +1756,7 @@ window.addEventListener("load", function(){ sdrStripRails(); sdrFixLabels(); sdr
 
 
 
-/* ---- 31: written with its own eyes, written by the model ---- */
+/* ---- 32: written with its own eyes, written by the model ---- */
 (function(){
 "use strict";
 window.__sderrs=window.__sderrs||[];
@@ -1914,6 +1914,160 @@ function purgeLand(){
   var ls=document.querySelectorAll(".card.land"),i;
   for(i=0;i<ls.length;i++)ls[i].remove();
 }
+
+/* ================= sd-dossier: one airframe, read from the four endpoints ============ */
+var SD={tail:null,inflight:null,cache:{}};
+function sdEsc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function sdDossierNode(){
+  var panel=byId("p-aircraft");if(!panel)return null;
+  var node=byId("sd-dossier");
+  if(!node){
+    node=document.createElement("div");node.id="sd-dossier";
+    node.setAttribute("role","region");node.setAttribute("aria-label","Dossier for one aircraft");
+    var pb=byId("p-aircraft-body");
+    if(pb&&pb.parentNode===panel)pb.insertAdjacentElement("afterend",node);
+    else panel.appendChild(node);
+  }
+  return node;
+}
+function sdSetVerbatim(node,sel,txt){
+  var el=node.querySelector(sel);
+  if(el)el.textContent=(txt==null)?"":String(txt);
+}
+function sdRender(node,t,raf,rpf,rsm){
+  var ok=function(r){return r&&r.status==="fulfilled"?r.value:null};
+  var af=ok(raf),rp=ok(rpf),sm=ok(rsm);
+  var parts=[];
+  var found=af?(af.found||0):0;
+  if(!af||found===0){
+    parts.push('<div class="sd-d-head"><span class="sd-d-tail">'+sdEsc(t)+'</span></div>');
+    parts.push('<section class="sd-d-sec"><p class="sd-d-none">No reports in this file name that tail number.</p>'
+      +(af&&af.note?'<p class="sd-d-note">'+sdEsc(af.note)+'</p>':'')
+      +'<p class="sd-d-note">Nothing is shown rather than something wrong.</p></section>');
+    node.innerHTML=parts.join("");
+    return;
+  }
+  var ac=af.aircraft||{};
+  var mm=[ac.make,ac.model].filter(Boolean).join(" ");
+  var rec0=(af.records&&af.records[0])||{};
+  if(!mm&&rec0.make)mm=[rec0.make,rec0.model].filter(Boolean).join(" ");
+  var ops=(af.operators||[]).map(function(o){return (o&&o.name?o.name:"unnamed")+(o&&o.reports?" ("+o.reports+")":"")}).join(", ");
+  parts.push('<div class="sd-d-head">'
+    +'<span class="sd-d-tail">'+sdEsc(af.tail||t)+'</span>'
+    +(mm?'<span class="sd-d-make">'+sdEsc(mm)+'</span>':'')
+    +'<span class="sd-d-count">'+found+' report'+(found===1?"":"s")+'</span>'
+    +(af.first||af.last?'<span class="sd-d-make">first filed '+sdEsc(af.first||"\u2014")+' \u00b7 last filed '+sdEsc(af.last||"\u2014")+'</span>':'')
+    +'</div>');
+  var fr=af.framing||{};
+  parts.push('<section class="sd-d-sec"><h3>Where the write-ups were made</h3>'
+    +'<p class="sd-d-frame" data-sd-frame="1"></p>'
+    +'<ul class="sd-d-split">'
+    +'<li>on the ground <b>'+sdEsc(fr.on_ground)+'</b> ('+sdEsc(fr.on_ground_pct)+'%)</li>'
+    +'<li>in flight <b>'+sdEsc(fr.in_flight)+'</b> ('+sdEsc(fr.in_flight_pct)+'%)</li>'
+    +'<li>of <b>'+sdEsc(fr.total)+'</b> write-ups</li>'
+    +'</ul></section>');
+  if(rp&&rp.groups&&rp.groups.length){
+    var gs=rp.groups.map(function(g){
+      var sys=g.system?" \u2014 "+sdEsc(g.system):"";
+      var rec=(g.records&&g.records[0]&&g.records[0].text)
+        ?'<blockquote class="sd-d-quote">'+sdEsc(String(g.records[0].text).slice(0,220))+'</blockquote>':"";
+      return '<div class="sd-d-rpt"><b>'+sdEsc(g.part||"unnamed part")+'</b>'+sys
+        +' \u00b7 '+sdEsc(g.times)+' write-up'+(g.times===1?"":"s")
+        +' \u00b7 first '+sdEsc(g.first)+' \u00b7 last '+sdEsc(g.last)
+        +' \u00b7 <span class="sd-d-hrs">'+sdEsc(g.hours_between)+' hours between first and last</span>'+rec+'</div>';
+    }).join("");
+    parts.push('<section class="sd-d-sec"><h3>What recurred</h3>'
+      +(rp.note?'<p class="sd-d-note">'+sdEsc(rp.note)+'</p>':"")+gs+'</section>');
+  }else{
+    parts.push('<section class="sd-d-sec"><h3>What recurred</h3><p class="sd-d-none">Nothing on this airframe was written up more than once.</p></section>');
+  }
+  var gen=!!(sm&&sm.generated===true);
+  var hasSum=sm&&sm.summary&&String(sm.summary).trim();
+  var lab=hasSum?(gen?"Written by a model":"Assembled from recounted numbers \u2014 not written by a model"):"Summary not written";
+  var sumBody=hasSum?'<p class="sd-d-sum" data-sd-sum="1"></p>'
+    :'<p class="sd-d-none">No summary was written for this tail. That is the check working: nothing is shown rather than something wrong.</p>';
+  var sumNote=(sm&&sm.note)?'<p class="sd-d-note">'+sdEsc(sm.note)+'</p>':"";
+  var sumLim=(sm&&sm.cannot_show&&sm.cannot_show.length)
+    ?'<ul class="sd-d-lim">'+sm.cannot_show.map(function(x){return "<li>"+sdEsc(x)+"</li>"}).join("")+'</ul>':"";
+  parts.push('<section class="sd-d-sec"><h3 class="sd-mine">'+sdEsc(lab)+'</h3>'+sumBody+sumNote+sumLim+'</section>');
+  var cs=af.cannot_show||[];
+  parts.push('<section class="sd-d-sec"><h3>What this file cannot show</h3>'
+    +(cs.length?'<ul class="sd-d-lim">'+cs.map(function(x){return "<li>"+sdEsc(x)+"</li>"}).join("")+'</ul>':"")
+    +'</section>');
+  var cit=af.citation||{};
+  var csvTail=af.tail||t;
+  parts.push('<section class="sd-d-sec"><h3>Citation</h3><p class="sd-d-cite">'
+    +sdEsc(cit.source||"FAA Service Difficulty Reports")
+    +(cit.retrieved?" \u00b7 retrieved "+sdEsc(cit.retrieved):"")
+    +(cit.url?' \u00b7 <a href="'+sdEsc(cit.url)+'" rel="noopener">'+sdEsc(cit.url)+'</a>':"")
+    +(cit.record_ids&&cit.record_ids.length?" \u00b7 "+cit.record_ids.length+" record ids":"")
+    +'</p><div class="sd-d-btns"><a class="sdbtn" id="sd-d-csv" download="'+sdEsc(csvTail)+'-sdr.csv" href="/z/api/export/'+encodeURIComponent(csvTail)+'.csv">Download the CSV for this airframe</a>'
+    +'<span class="sd-d-make">The CSV carries its own citation header lines.</span></div></section>');
+  node.innerHTML=parts.join("");
+  sdSetVerbatim(node,"[data-sd-frame]",fr.sentence);
+  if(hasSum)sdSetVerbatim(node,"[data-sd-sum]",sm.summary);
+}
+function sdOpenTail(t){
+  t=String(t||"").trim();if(!t)return;
+  SD.tail=t;
+  var tab=document.querySelector('#vstrip .vtab[data-view="p-aircraft"]');
+  if(tab)try{tab.click()}catch(_){}
+  var node=sdDossierNode();if(!node)return;
+  if(SD.cache[t]){
+    node.dataset.sdTail=t;node.dataset.sdDone="1";
+    var c=SD.cache[t];sdRender(node,t,c[0],c[1],c[2]);return;
+  }
+  if(SD.inflight===t)return;
+  SD.inflight=t;
+  node.dataset.sdTail=t;node.dataset.sdDone="";
+  node.innerHTML='<p class="sd-d-none">Reading the file\u2026</p>';
+  var g=function(u){return fetch("/z/api/"+u).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})};
+  Promise.allSettled([
+    g("airframe/"+encodeURIComponent(t)),
+    g("repeats/"+encodeURIComponent(t)),
+    g("summary/"+encodeURIComponent(t))
+  ]).then(function(rs){
+    if(SD.tail!==t)return;
+    SD.inflight=null;SD.cache[t]=rs;
+    node.dataset.sdTail=t;node.dataset.sdDone="1";
+    sdRender(node,t,rs[0],rs[1],rs[2]);
+  }).catch(function(){
+    if(SD.tail!==t)return;
+    SD.inflight=null;
+    node.dataset.sdDone="1";
+    node.innerHTML='<section class="sd-d-sec"><p class="sd-d-none">The dossier did not answer. Nothing is shown rather than something wrong.</p></section>';
+  });
+}
+function sdBootFromURL(){
+  var q=new URLSearchParams(location.search);
+  var t=q.get("tail");
+  if(!t&&q.get("kind")==="tail")t=q.get("v");
+  if(t)sdOpenTail(t);
+}
+/* sd-dossier wiring: same mechanism the table uses, [data-ask="tail|..."] */
+document.addEventListener("click",function(e){
+  var el=e.target&&e.target.closest?e.target.closest('[data-ask^="tail|"]'):null;
+  if(!el)return;
+  var v=(el.getAttribute("data-ask")||"").slice(5);
+  if(v)sdOpenTail(v);
+},true);
+document.addEventListener("keydown",function(e){
+  if(e.key!=="Enter"&&e.key!==" ")return;
+  var t=e.target;
+  if(!t||!t.getAttribute)return;
+  var a=t.getAttribute("data-ask")||"";
+  if(a.indexOf("tail|")===0){var v=a.slice(5);if(v)sdOpenTail(v)}
+},true);
+addEventListener("popstate",function(){try{sdBootFromURL()}catch(_){}});
+function sdDossierKick(){
+  if(!SD.tail)return;
+  var node=sdDossierNode();if(!node)return;
+  if(node.isConnected&&node.dataset.sdTail===SD.tail&&node.dataset.sdDone==="1")return;
+  var c=SD.cache[SD.tail];
+  if(c){node.dataset.sdTail=SD.tail;node.dataset.sdDone="1";sdRender(node,SD.tail,c[0],c[1],c[2])}
+  else sdOpenTail(SD.tail);
+}
+
 var queued=false;
 function pass(){
   queued=false;
@@ -1928,11 +2082,12 @@ function pass(){
   try{secondLine()}catch(e){}
   try{tagTable()}catch(e){}
   try{sdMirror()}catch(e){}
+  try{sdDossierKick()}catch(e){}
 }
 function kick(){if(queued)return;queued=true;requestAnimationFrame(pass)}
 new MutationObserver(kick).observe(document.documentElement,{childList:true,subtree:true});
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",pass);
-else pass();
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){pass();sdBootFromURL()});
+else{pass();sdBootFromURL()}
 addEventListener("load",pass);
 addEventListener("resize",kick);
 })();
@@ -2705,7 +2860,7 @@ table.reps th{ font-size:11px; background:transparent; color:var(--ash);
 .rail.open[data-rail=when] .track{ overflow-x:auto; overscroll-behavior-x:contain }
 `;document.head.appendChild(s);})();
 
-(function(){var s=document.createElement('style');s.id='sdr-css-31';s.textContent=`#sentence{display:none!important}
+(function(){var s=document.createElement('style');s.id='sdr-css-32';s.textContent=`#sentence{display:none!important}
 #sd-sink{display:none!important}
 .card.land{display:none!important}
 #vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}
@@ -2776,4 +2931,30 @@ tr.wrote td{padding:0 0 14px}
 .wu:not(.clip){padding-bottom:34px}
 .wu:not(.clip)::after{content:"none"}
 .wu.clip{overflow:hidden;max-height:112px}
-.wu.clip::after{content:"";position:absolute;left:0;right:0;bottom:0;height:16px;background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,.92) 70%,#fff)}`;document.head.appendChild(s);})();
+.wu.clip::after{content:"";position:absolute;left:0;right:0;bottom:0;height:16px;background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,.92) 70%,#fff)}
+/* sd-dossier: the aircraft dossier, in #p-aircraft */
+#sd-dossier{max-width:1140px;margin:14px auto 0;padding:0 2px;font-size:14px;line-height:1.5}
+#sd-dossier .sd-d-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:2px 0 6px}
+#sd-dossier .sd-d-tail{font-family:'Instrument Serif',Georgia,serif;font-size:30px;color:var(--ink)}
+#sd-dossier .sd-d-make{font-size:12.5px;color:#6b6560}
+#sd-dossier .sd-d-count{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;color:var(--rust-text,#b8431f)}
+#sd-dossier .sd-d-sec{margin:12px 0 0;padding:10px 14px;border:1px solid var(--line);border-left:3px solid var(--rust);background:var(--card);border-radius:4px}
+#sd-dossier .sd-d-sec h3{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ash);margin:0 0 7px}
+#sd-dossier .sd-d-sec h3.sd-mine{color:#7a5b00}
+#sd-dossier .sd-d-frame{font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}
+#sd-dossier .sd-d-split{display:flex;gap:8px 18px;flex-wrap:wrap;margin:8px 0 0;padding:0;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:#5c554c;list-style:none}
+#sd-dossier .sd-d-split b{color:var(--ink);font-variant-numeric:tabular-nums}
+#sd-dossier .sd-d-ops{font-size:12px;color:#6b6560;margin:7px 0 0}
+#sd-dossier .sd-d-rpt{margin:7px 0 0;padding-left:10px;border-left:2px solid #e8e3d8;font-size:12.5px;color:#5c554c}
+#sd-dossier .sd-d-rpt b{color:var(--ink)}
+#sd-dossier .sd-d-hrs{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--rust-text,#b8431f)}
+#sd-dossier .sd-d-quote{margin:5px 0 0;padding:0 0 0 8px;border-left:2px solid var(--line);font:11px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:#7a746c}
+#sd-dossier .sd-d-sum{font:15px/1.55 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}
+#sd-dossier .sd-d-note{font-size:11.5px;color:#7a5b00;margin:7px 0 0}
+#sd-dossier .sd-d-lim{margin:0;padding-left:18px}
+#sd-dossier .sd-d-lim li{margin:4px 0;font-size:13px;color:var(--ink)}
+#sd-dossier .sd-d-cite{font-size:12px;color:#6b6560;margin:0;word-break:break-word}
+#sd-dossier .sd-d-cite a{color:var(--rust-text,#b8431f)}
+#sd-dossier .sd-d-btns{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+#sd-dossier .sd-d-none{font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}
+@media(max-width:700px){#sd-dossier .sd-d-tail{font-size:24px}#sd-dossier .sd-d-sec{padding:9px 10px}}`;document.head.appendChild(s);})();

@@ -7,3 +7,6 @@
    to what the parent does: the bar scrolls with its section. */
 .cut{position:static !important;top:auto !important;z-index:auto !important}
 #rr-sec{overflow:visible !important}
+/* the one element that really grows on hover: reserve its height, as the
+   parent does, instead of pinning the whole page (removed from 42-dom.js) */
+#aimLine,.aim{min-height:3em}

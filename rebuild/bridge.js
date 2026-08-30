@@ -3185,71 +3185,17 @@ addEventListener("resize",kick);
      height, with overflow visible, so the revealed content overlays instead
      of pushing the page. Rest heights are recorded at boot, after load and
      after each open, and refreshed on unhover. */
-  var restH = new WeakMap();
-  var pinned = [];
-  var scanTimer = null;
-  var outTimer = null;
-
-  function recordOne(el){
-    if (el && el !== D.documentElement && el !== bodyEl) { restH.set(el, el.offsetHeight); }
-  }
-
-  function recordRestAll(){
-    var all = D.querySelectorAll('*');
-    for (var i = 0; i < all.length; i++) { recordOne(all[i]); }
-  }
-
-  function unpin(list){
-    for (var i = 0; i < list.length; i++) {
-      list[i].style.height = '';
-      list[i].style.overflow = '';
-    }
-  }
-
-  function scanHover(){
-    scanTimer = null;
-    var old = pinned;
-    pinned = [];
-    unpin(old); /* measure natural state, synchronously, before repaint */
-    var all = D.querySelectorAll('*');
-    for (var i = 0; i < all.length; i++) {
-      var el = all[i];
-      if (el === D.documentElement || el === bodyEl) { continue; }
-      var rest = restH.get(el);
-      if (rest === undefined) { recordOne(el); continue; }
-      if (el.offsetHeight > rest + 1) {
-        el.style.height = rest + 'px';
-        el.style.overflow = 'visible';
-        pinned.push(el);
-      }
-    }
-  }
-
-  D.addEventListener('mouseover', function(){
-    lastOver = Date.now();
-    if (scanTimer) { return; }
-    scanTimer = setTimeout(scanHover, 20);
-  }, true);
-
-  D.addEventListener('mouseout', function(){
-    if (!pinned.length || outTimer) { return; }
-    outTimer = setTimeout(function(){
-      outTimer = null;
-      if (Date.now() - lastOver < 220) { return; }
-      var old = pinned;
-      pinned = [];
-      unpin(old);
-      setTimeout(function(){
-        for (var i = 0; i < old.length; i++) {
-          var el = old[i];
-          try {
-            if (el.isConnected && !el.matches(':hover')) { recordOne(el); }
-          } catch (e) {}
-        }
-      }, 40);
-    }, 120);
-  }, true);
-
+  /* ---- hand edit, 30 August 2026, counted in MODEL_USE.md ----------------
+     Removed here: a WeakMap of every element's resting height, a mouseover
+     scan that pinned any element that had grown back to that height, and the
+     recordRestAll() sweeps that fed it. It was the model's answer to "hovering
+     must not shift the layout", and it treated every legitimate growth as a
+     hover artefact: #hero-root was recorded at 0px mid-render, so after any
+     search the instrument was pinned to 0px with its content still painting
+     over the desk (the reading paragraph across the starter buttons), and the
+     page shortened by 860px under a scrolled reader. The one element that
+     really grows on hover, #aimLine, is held by a min-height in 49-hand.css.
+     Everything below is the case-sheet repair and is unchanged. ------------ */
   /* Tab stays inside the sheet while it is open. Escape is the page's own
      document level capture listener and is left exactly as it is. */
   D.addEventListener('keydown', function(e){
@@ -3317,7 +3263,7 @@ addEventListener("resize",kick);
     sweep();
     lockScroll(true);
     focusIn(s);
-    setTimeout(function(){ dedupeIds(); recordRestAll(); }, 80);
+    setTimeout(dedupeIds, 80);
   }
 
   function onClosed(){
@@ -3329,7 +3275,6 @@ addEventListener("resize",kick);
       try { op.focus({ preventScroll: true }); }
       catch (e) { try { op.focus(); } catch (e2) {} }
     }
-    setTimeout(recordRestAll, 80);
   }
 
   function pollState(){
@@ -3379,18 +3324,14 @@ addEventListener("resize",kick);
     var already = false;
     try { already = isOpen(s); } catch (e) {}
     if (already) { sheetState = true; sweep(); lockScroll(true); }
-    recordRestAll();
     window.addEventListener('load', function(){
-      setTimeout(function(){ dedupeIds(); recordRestAll(); }, 150);
+      setTimeout(dedupeIds, 150);
     });
     /* Guard interval: re-runs the sweep while open, in case the page marks
        again through any path, and catches opens and closes that bypass
        both the wrapper and the observer. */
     setInterval(function(){
       try { pollState(); } catch (e) {}
-      if (!sheetState && !pinned.length && Date.now() - lastOver > 1200) {
-        recordRestAll();
-      }
     }, 500);
   }
 
@@ -5518,4 +5459,7 @@ body.rr-sheet-lock{
    to what the parent does: the bar scrolls with its section. */
 .cut{position:static !important;top:auto !important;z-index:auto !important}
 #rr-sec{overflow:visible !important}
+/* the one element that really grows on hover: reserve its height, as the
+   parent does, instead of pinning the whole page (removed from 42-dom.js) */
+#aimLine,.aim{min-height:3em}
 `;document.head.appendChild(s);})();

@@ -105,11 +105,16 @@ The line at the top of this file, "everything on the page is written by the
 model", is the intent and it was not precise enough to be checkable. This section
 is the precise version. Every figure here can be counted from the repository.
 
-    served page, raw                 608,795 characters   (recounted 30 August, after 47)
-      model-written                    592,949   97.4%
-      hand-written                      15,846   2.6%
-        rebuild/bridge.js.bak            13,228   the seam between the two halves
-        rebuild/47-hand.js                2,618   two faults, see below
+    served page, raw                 616,701 characters   (recounted 30 August, after 49)
+      model-written                    592,131   96.0%
+      hand-written                      24,570   4.0%
+        rebuild/bridge.js.bak             13,228
+        rebuild/47-hand.js                 2,618
+        rebuild/48-hand.js                 5,138
+        rebuild/49-hand.js                 2,756
+        rebuild/49-hand.css                  830
+      plus one hand edit inside a model block: 1,160 characters REMOVED from
+      rebuild/42-dom.js (the height-pinning; backup 42-dom.js.bak-49)
 
 **`rebuild/bridge.js.bak`, 13,226 characters, is hand-written.** It joins the two
 halves the model built separately. The controls were briefed to call `search(off)`
@@ -158,3 +163,14 @@ screen, and keeps the airframe dossier off the page when the instrument's
 selection is empty, so a page never shows two different counts. It is 0.43%
 of the served page. Every other block on the page is the model's. The gate that
 checks both behaviours is `build/verify_presentation.py`, also hand-written.
+
+**`rebuild/48-hand.js`** adds the parent's "Skip to the results" link and the AIM AT
+"a month or year" target that /z lacked. **`rebuild/49-hand.js` and `49-hand.css`**
+make the starter questions reach the URL (they filled the form, and this page's
+search gate reads the URL, so all six were dead), stop `showChange()` scrolling a
+reader upward on every re-render, and un-stick the results bar, which the parent
+never made sticky. **The edit inside `42-dom.js`** removes the model's hover fix: it
+recorded every element's resting height and pinned anything that grew, so after
+any search the instrument was pinned to 0px with its content painting over the
+desk, and the page shortened by 860px under a scrolled reader. `#aimLine` now has
+a min-height instead. Each is dated 30 August and explained in its file header.

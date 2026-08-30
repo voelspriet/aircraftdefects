@@ -1195,7 +1195,7 @@ NEXT_ASK = ("\n\nFinally, on a last line of its own, write NEXT: followed by a J
             "appears in the write-ups' record numbers), model, tail, q (a single word from the write-ups), "
             "from, to. Nothing after the JSON.")
 
-def _stream_response(meta, prompt, effort, max_tokens, recs=None, meta_of=None, base=None):
+def _stream_response(meta, prompt, effort, max_tokens, recs=None, meta_of=None, base=None, fallback_checks=None):
     t0 = time.time()
     def gen():
         yield _sse("meta", meta)
@@ -1212,12 +1212,19 @@ def _stream_response(meta, prompt, effort, max_tokens, recs=None, meta_of=None, 
                         text = text[:m.start()].rstrip()
                         yield _sse("next", _next_three(m.group(1), base or {}))
                     m = re.search(r"\n?\s*CHECKS:\s*(\[[\s\S]*\])\s*$", text)
-                    if m:
-                        text = text[:m.start()].rstrip()
-                        try:
-                            yield _sse("checks", json.loads(m.group(1)))
-                        except Exception:
-                            yield _sse("checks", [])
+                    if m or fallback_checks:
+                        chk = []
+                        if m:
+                            text = text[:m.start()].rstrip()
+                            try:
+                                chk = [c for c in json.loads(m.group(1)) if isinstance(c, dict) and c.get("filters")]
+                            except Exception:
+                                chk = []
+                        have = {json.dumps(c.get("filters"), sort_keys=True) for c in chk}
+                        for c in (fallback_checks or []):
+                            if json.dumps(c["filters"], sort_keys=True) not in have:
+                                chk.append(c)
+                        yield _sse("checks", chk[:5])
                     if recs:
                         sents, stats = verify_text(text, recs)
                         yield _sse("verify", {"sentences": sents, "stats": stats, "records": meta_of or {}})
@@ -1531,6 +1538,28 @@ def stream_airframe():
     return _stream_response({"read": n, "of": d.get("count", n), "what": "reports on N" + tail + ", oldest first"},
                             prompt, "low", 8000, recs=recs, meta_of=meta_of)
 
+
+# ---- hand-written, 31 August 2026: airline names for the page --------------
+# The FAA's December 2006 cross-reference, so names can be stale; the page
+# keeps the designator in the tooltip.
+_OPS = None
+@app.get("/z/api/operators")
+def operators_map():
+    global _OPS
+    if _OPS is None:
+        out = {}
+        try:
+            facets = api("/api/facets")
+            for o in (facets.get("operators") or []):
+                if isinstance(o, str):
+                    n = dec("operator", o)
+                    if n and n.upper() != o.upper():
+                        out[o] = n
+        except Exception:
+            pass
+        _OPS = out
+    return jsonify(_OPS)
+
 @app.get("/z/api/stream/vocab")
 def stream_vocab():
     word = (request.args.get("word") or "").strip().upper()
@@ -1744,4 +1773,15 @@ def stream_case():
               "\nPlain prose, no JSON, at most 140 words.\n\nEvery coded field on this report, decoded:\n"
               + json.dumps(facts, ensure_ascii=False) + "\n\nThe write-up, verbatim:\n" + text)
     rid = (raw.get("OperatorControlNumber") if isinstance(raw, dict) else None) or "THIS"
-    return _stream_response({"read": 1, "of": 1, "what": "this report, all fields"}, prompt, "low", 1500, recs={rid: text}, meta_of={})
+    fb = []
+    if which == "checks" and isinstance(raw, dict):
+        tail = (raw.get("RegistryNNumber") or "").strip(); op = (raw.get("OperatorDesignator") or "").strip()
+        part = (raw.get("PartName") or "").strip(); day = _date_words(raw.get("DifficultyDate"))
+        mm = re.match(r"(\d\d)/(\d\d)/(\d{4})", raw.get("DifficultyDate") or "")
+        iso = "%s-%s-%s" % (mm.group(3), mm.group(1), mm.group(2)) if mm else None
+        if tail and part: fb.append({"label": "same aircraft, same part", "filters": {"tail": tail, "part": part}})
+        if tail: fb.append({"label": "everything on this aircraft", "filters": {"tail": tail}})
+        if op and part: fb.append({"label": "same airline, same part", "filters": {"operator": op, "part": part}})
+        if op and iso: fb.append({"label": "same airline, same day", "filters": {"operator": op, "from": iso, "to": iso}})
+        if part and part.upper() != "UNKNOWN": fb.append({"label": "this part, every airline", "filters": {"part": part}})
+    return _stream_response({"read": 1, "of": 1, "what": "this report, all fields"}, prompt, "low", 1500, recs={rid: text}, meta_of={}, fallback_checks=fb)

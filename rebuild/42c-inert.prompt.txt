@@ -1,0 +1,109 @@
+Your last block is on the page and did not reach the sheet. Here is why, measured,
+and what to write instead. Return two fenced blocks, js then css, replacing your
+previous 42 block whole.
+
+# What it did fix, measured by the gate
+
+    hovering shifts no layout    46 of 115 controls before, 1 after
+    duplicate id #tip            gone
+
+# What it did not, and why
+
+    FAIL  the sheet itself is not inert       inert ancestor: DIV#case-wrap
+    FAIL  Close is topmost at its own centre  elementFromPoint returns BODY
+    FAIL  opening moves focus into the sheet
+    FAIL  the wheel scrolls the sheet         case-wrap.scrollTop 0, window.scrollY 0->500
+
+You wrote a whole replacement dialog, correctly, with the containment guard the
+fault needs. Nothing calls it. Measured on the live page:
+
+    String(window.openCase)  ->  function(id){ if(currentCase&&String(currentCase
+                                 .OperatorControlNumber)===String(id)&&caseBox
+                                 .classList.contains('open'))return; lastFoc...
+
+That is the page's own function. You exported yours as `window.caseSheet`, and
+every row's button is markup reading `onclick="openCase('...')"`, which resolves
+against the global scope at click time. The page's version runs, yours never does.
+
+This is worth naming, because it is the same fault you were asked to repair: two
+implementations that never meet, the wrong one winning by name resolution, in
+total silence. Correct code, correct diagnosis, no effect.
+
+# Do not write a third dialog
+
+Your block is appended to the page. You can add, you cannot delete. Another
+replacement would be a third implementation that also never runs.
+
+Repair the page's dialog in place instead. This is the whole job:
+
+    function setSiblings(on){
+      Array.prototype.forEach.call(document.body.children,function(el){
+        if(el===caseBox||el===tipEl)return;
+        if(on){el.setAttribute('data-rr-inert','1');
+               el.setAttribute('aria-hidden','true');
+               try{el.inert=true;}catch(e){}}
+        else if(el.getAttribute('data-rr-inert')){...}});}
+
+`caseBox` was captured while `#case-box` was still a child of `<body>`. A later
+block re-parented it into `#case-wrap`. The identity test no longer matches, so
+the sheet's own container is treated as page furniture and marked.
+
+Escape still closes the sheet, and that asymmetry is the diagnosis: a keydown
+listener on `document` with capture is not routed by hit-testing, so it is the one
+route in that `inert` does not cut. Every pointer route is gone.
+
+# Three properties the repair must have
+
+**It clears two attributes, not one.** The line above sets `inert` AND
+`aria-hidden="true"`. Clearing only `inert` gives a sheet that is fully operable
+by mouse and invisible to every screen reader, and `#case-box` inside it is
+`role="dialog" aria-modal="true"`, so an assistive-technology user would be told
+both that the page is hidden and that the dialog is hidden. That is a worse bug
+than the one you are fixing, and it would pass every visual check.
+
+**It runs on every open, and is idempotent.** `setSiblings(true)` fires each time
+a sheet is opened. A clear that runs once at boot fixes the first sheet and
+nothing after it. Watch for the attribute, or run after each open; either way it
+must be safe to run any number of times.
+
+**Its containment test is exact in both directions.** Clear the flags from any
+element that contains the sheet or its overlay. Leave `MAIN.wrap` inert and
+aria-hidden: the page behind the sheet must stay hidden from both the pointer and
+the screen reader, and that already works today.
+
+Then add what the page never had: move focus into the sheet on open, return it to
+whatever opened it on close, and keep Tab inside while it is open.
+
+# Also
+
+    document.querySelectorAll('#iAim').length  ->  2
+
+You cleared `#tip`. Do the same for `#iAim`.
+
+    hovering shifts no layout   1 of 115 controls still shifts, worst 485.1px
+
+The parent shifts nothing at all. One is not zero. Find the last one and hold its
+height at rest the way you held the others.
+
+# What the gate will check
+
+    with a sheet open, document.querySelectorAll('[inert]')
+        contains MAIN.wrap
+        does NOT contain #case-wrap, #case-box, or anything containing them
+    with a sheet open, neither #case-wrap nor #case-box carries aria-hidden
+    MAIN.wrap still carries both inert and aria-hidden while the sheet is open
+    document.elementFromPoint(centre of Close) returns that BUTTON, not BODY
+    a real mouse click on Close closes the sheet
+    Escape still closes it
+    the wheel over the sheet scrolls the sheet, not the page behind it
+    opening moves focus into the sheet, closing returns it to the opener
+    after closing, document.querySelectorAll('[inert]') is empty and no
+        aria-hidden is left behind
+    every id appears exactly once, #iAim included
+    zero controls shift the layout on hover
+
+These already pass and must not break: the page behind is inert, Escape closes,
+closing clears every inert flag, the focus ring survives, no sideways scroll at
+1440, 1024 or 768, and no runtime errors.
+
+Write no em dash and no en dash in anything that reaches the page.

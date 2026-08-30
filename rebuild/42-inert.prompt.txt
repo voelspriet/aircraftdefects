@@ -1,0 +1,155 @@
+The case sheet you built cannot be closed. It cannot be scrolled either. Nothing
+throws, nothing is logged, and every check that asks the server whether the
+feature works says it works.
+
+This brief asks you to make one modal, not two, and to make it operable.
+
+Return two things, each in its own fenced block, in this order:
+
+  1. js    your page block, whole
+  2. css   your appearance block, whole
+
+# What you built, and what it does in a browser
+
+Two implementations of the same dialog are live at once, and neither knows about
+the other.
+
+The first captures the sheet at boot, when it is a direct child of the body:
+
+    line 4732
+    var rrSec=document.getElementById('rr-sec'), rrScroll=document.getElementById('rr-scroll'),
+        rrCount=document.getElementById('rr-count'), caseBox=document.getElementById('case-box'),
+        tipEl=document.getElementById('tip');
+
+The second re-parents it into an overlay it creates:
+
+    line 7001
+    function sdrEnsureWrap(){
+      sdrWrap = document.getElementById("case-wrap");
+      if (!sdrWrap){ sdrWrap = document.createElement("div"); sdrWrap.id = "case-wrap"; document.body.appendChild(sdrWrap); }
+      sdrBox = document.getElementById("case-box");
+      ...
+      else if (sdrBox.parentElement !== sdrWrap) sdrWrap.appendChild(sdrBox);
+
+After that line runs, `#case-box` is no longer a child of the body. `#case-wrap`
+is. And the code that makes the rest of the page inert while the sheet is open
+still exempts the sheet by identity on the old element:
+
+    line 5167
+    function setSiblings(on){
+      Array.prototype.forEach.call(document.body.children,function(el){
+        if(el===caseBox||el===tipEl)return;
+        if(on){el.setAttribute('data-rr-inert','1');el.setAttribute('aria-hidden','true');try{el.inert=true;}catch(e){}}
+
+`el===caseBox` never matches any body child any more. So the sheet's own
+container is marked inert along with everything it was supposed to protect.
+
+Measured in Chromium 139 on the live page, with a sheet open:
+
+    document.querySelectorAll('[inert]')
+      MAIN.wrap, DIV#tip, SCRIPT, STYLE, SCRIPT, STYLE, SCRIPT,
+      BUTTON.rv-seam, DIV#case-wrap          <- the sheet itself
+
+    document.elementFromPoint(778, 65)       BODY      (centre of the Close button)
+    real mouse click on Close                nothing
+    button.click() from the console          closes instantly
+    Escape                                   closes it   <- this one works
+    wheel over the sheet                     window.scrollY 0 -> 500
+                                             case-wrap.scrollTop stays 0
+    case-wrap.scrollHeight 1746, clientHeight 900   so it can scroll, and never does
+
+`inert` removes a subtree from hit-testing and from focus. That is the whole
+explanation. `closeCase()` was never broken; the button never receives the event,
+the wheel goes to the page behind, and focus never enters. Setting
+`case-wrap.inert=false` by hand immediately makes `elementFromPoint` return the
+button and the wheel scroll the sheet to 400.
+
+Two more measurements from the same session:
+
+    after opening, document.activeElement    BODY        (focus never moves in)
+    three Tab presses                        focus leaves the dialog entirely
+    #case-box aria-modal                     "true"
+
+So a screen-reader user is told the rest of the page is hidden, and is then placed
+nowhere.
+
+Escape working is the clue to the shape of the bug. Its listener is registered on
+`document` with capture, so it is never inside the inert subtree and keeps firing.
+Everything that has to be aimed at the sheet - a click, a wheel, a focus - is
+routed by hit-testing, and hit-testing is what `inert` switches off. The keyboard
+route out survives; every pointer route in is gone.
+
+There is a second cause of the same symptom. `id="tip"` is declared twice on the
+page. `tipEl` resolves to one of the two, so the other is a body child that this
+same loop inerts, which is why `DIV#tip` appears in that list despite being named
+in the guard.
+
+    /z      #tip x 2, #iAim x 2
+    parent  elements with id: 98, unique: 98   (no duplicates)
+
+# What to build instead
+
+One dialog. Decide which of the two implementations owns the sheet and delete the
+other; do not leave both running and reconcile them.
+
+The overlay owns the scroll. The card sits inside it. That is already written
+down in your own comment at line 6997, and it is the right decision - keep it.
+
+The guard on the inert loop must be about containment, not identity. Anything
+that contains the sheet is part of the sheet. An element captured at boot is a
+stale handle the moment another block re-parents it, and identity comparisons
+against stale handles fail silently, which is exactly what happened here.
+
+Give the tooltip a name of its own so that `getElementById` returns the element
+the code means. Two elements with one id is not a style question; it made a live
+control unreachable.
+
+The dialog must be operable by someone who never touches a mouse:
+  - opening moves focus into the sheet
+  - Escape closes it
+  - Tab cycles inside it and does not escape
+  - closing returns focus to whatever opened it
+
+Do not solve this by removing `inert` and leaving the page behind clickable. The
+inerting is correct; only its guard is wrong. A dialog that claims `aria-modal`
+and leaves the page behind live is a worse answer than the bug.
+
+While you are in the sheet: the action bar is narrower than the panel it sits in.
+It renders x 298 to 831 inside a panel spanning x 280 to 1160, leaving a visible
+step at its right edge. Its rule assumes a panel padding that the other overlay
+stylesheet no longer supplies:
+
+    line 6973
+    "#case-wrap #case-box .bar.case-actions{position:sticky;top:0;z-index:3;...
+     margin:-24px -28px 14px;padding:10px 28px;border-bottom:1px solid #e2ded5}"
+
+`#case-wrap` is styled in three places, with two different open mechanisms
+(`[data-sdr-open='1']` at line 6970 and `.open` at line 9097). One of those is
+also surplus. Return one.
+
+# What must still be true afterwards
+
+    with a sheet open, document.querySelectorAll('[inert]')
+        contains MAIN.wrap
+        does NOT contain the overlay, the sheet, or anything containing them
+
+    document.elementFromPoint(<centre of the Close button>)
+        returns that BUTTON, not BODY
+
+    the Close button closes the sheet with a real mouse click
+    Escape still closes it (it already does; it must not regress)
+    the wheel over the sheet scrolls the sheet, not the page behind it
+    opening moves focus into the sheet; closing returns it to the opener
+    Tab does not leave the sheet while it is open
+
+    after closing, document.querySelectorAll('[inert]') is empty
+        (this already works and must not regress: verified 30 August)
+
+    the action bar spans the full width of the panel it sits in
+
+    one overlay implementation, one open mechanism, one inert function.
+    every id on the page appears exactly once: `document.querySelectorAll('[id]')`
+    has no repeated id, `#tip` and `#iAim` included.
+
+Nothing else on the page may change. The nine builds C made reachable are all
+driven through this sheet, so a regression here is a regression in all of them.

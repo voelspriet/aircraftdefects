@@ -1,0 +1,175 @@
+Your appearance blocks disagree with each other. Two of them use the same class
+names for different components, so the page renders in combinations neither block
+asked for, and it no longer looks like the tool it was cloned from.
+
+This brief asks you to return one appearance block that owns its own names, and
+to fix three faults a reader can see.
+
+Return two things, each in its own fenced block, in this order:
+
+  1. css   your appearance block, whole
+  2. js    your page block, whole - only if a fix below needs it
+
+# What you built, and what it renders as
+
+The page carries four style blocks. The parent carries one. Sixteen selectors are
+declared in two different blocks, and twelve of those set the same property to a
+different value. `rebuild/splice_css.py` prints them; this is its output on the
+live page, 30 August 2026:
+
+    '.mo'             flex: 0 0 4px            vs   1
+    '.mo i'           background: var(--rest)  vs   var(--rust)
+    '.mo:focus-visible'  outline: 2px solid var(--rust)  vs  none
+    '.stamp'          font: 500 10.5px/1.5 "IBM Plex Mono"  vs  600 10.5px Archivo
+    '.picker button'  font: 600 11px Archivo   vs   inherit
+    '.mono'           font-family: ui-monospace,SFMono-Regular  vs  var(--mono)
+    'body'            background: #f2eee6      vs   var(--paper)
+    '.muted'          color: #8b857a           vs   var(--ash)
+    '.absent'         color: #a09a8e           vs   var(--ash)
+    '.wu'             background: #faf8f4      vs   #fbf7ee
+    '#tip'            background: #26231e      vs   var(--ink)   (and six more)
+
+The later block wins every one of them, by position rather than by intent. The
+month strip shows what that produces: `.mo i` takes its colour from one block and
+its opacity from the other, so the bars render a mixture neither block declared.
+
+    /z      rgba(117, 111, 105, 0.557) at opacity 0.85
+    parent  rgb(216, 210, 198)         at opacity 1
+
+`.mo:focus-visible` shows how thin the margin is. It is declared six times across
+the blocks, in this order:
+
+    outline: 2px solid var(--rust)      (shared with buttons, links, summary)
+    outline: none
+    outline: 1.5px solid var(--ink)
+    outline: 2px solid var(--ink)
+
+The ring survives only because the last declaration happens to restore it. One of
+those six says `outline: none` on the control the WHEN rail is operated with, and
+nothing but source order is keeping it from winning.
+
+The result across the whole page, measured against the parent at 1440px. Of the
+71 strings that appear exactly once on both pages, only nine render identically:
+
+    44 differ in font size        legend values 12 -> 11px, tabs 12.5 -> 11.5px
+    31 differ in colour           "AIM AT" rgb(117,111,105) -> rgb(184,67,31)
+    27 differ in font family      "Landing gear" -apple-system -> Archivo
+     6 differ in weight           "Export CSV" 400 -> 600
+
+The zone legend is the clearest case, and it is visible in any screenshot. In the
+parent a label and its count are both 12px. Here the label went up and the count
+went down:
+
+              label                 value
+    parent    12px -apple-system    12px
+    /z        15px Archivo          11px
+
+So "place named in words, not as a zone" wraps to two lines here and one line in
+the parent, and a row's number no longer sits on the same baseline as its label.
+
+## Three faults a reader can see
+
+**Hovering anything shoves the page down.** Hover a zone row, the drawing, or a
+month bar and everything below the pointer jumps. The parent does not do this at
+all.
+
+    parent   112 controls hovered   0 layout shifts
+    /z       115 controls hovered   46 shift the layout, worst single move 485px
+
+`build/verify_presentation.py` reports that figure and is the gate for this brief.
+
+One element causes all of it. `<div class="aim" id="aimLine" aria-live="polite">`
+is empty at rest and has no height. On hover it fills with the aim text and grows,
+and every element after it in flow moves:
+
+    hovering "Landing gear"
+      div.aim      y  96.4 -> 102.4     it grows, and everything below follows
+      div.hand     y 121.9 -> 128.4     "Click a zone on the aircraft..."
+      span.c       y 123.9 -> 130.4     "Or use the filters below."
+      div.sdcount  y 144.1 -> 150.6     the headline
+      div.rails    y 183.1 -> 189.6
+      page height  2129.8 -> 2136.3
+
+**Two figures are cut off mid-number.** The gutter values are ellipsised because
+their boxes are narrower than their text:
+
+    span.gv   72px box / 95px  text    "54,634 aircraft"       -> 54,634 air...
+    span.gv   50px box / 126px text    "151,543 of 1,757,827"  -> 151,54...
+    parent, same width: 0 ellipsised elements, both printed in full
+
+A count truncated mid-digit is the one failure this page cannot afford. It is the
+page's own argument that the FAA's numbers should be readable.
+
+**Label text is printed underneath a button.** In the group strip, the figure in
+"These ignore your selection. Each answers from all 1,757,827 reports..." overlaps
+the Fleet tab:
+
+    text  "1,757,827"   left 481  top 1305  right 530  bottom 1315
+    btn   "Fleet"       left 520  top 1290  right 563  bottom 1312
+    overlap             10px wide by 7px tall, at a 1440px viewport
+
+"What the crew did" is orphaned onto a line of its own in the same strip. And at
+390px the same strips run off the screen: twenty elements outside the viewport,
+the document scrolling sideways to 698px. At 768px and above there is no overflow
+at all, so this is the narrow case only.
+
+# What to build instead
+
+Own your names. A block that introduces a class must not reuse a name another
+block already means something else by. Where a name is genuinely shared, it must
+be shared deliberately, from the tokens in `:root`, and mean the same thing in
+both places. `rebuild/splice_css.py` will now fail the build on any selector where
+two blocks set one property to two values, so this cannot come back silently.
+
+Take the type scale from the tokens rather than restating it. A label and the
+number beside it are one row and read as one row; they take one size. Where the
+parent sets 12px for both, the clone has no reason to set 15 and 11.
+
+A live region that appears on hover must not be able to move the page. Reserve its
+height. A reader aiming at a zone is pointing at a target that moves out from
+under the pointer, and no amount of correct content in that region is worth that.
+
+A number is never truncated. If the gutter cannot hold "151,543 of 1,757,827",
+the gutter is the wrong width, or the value wraps, or it is written shorter on
+purpose - but the digits that are printed are all the digits there are.
+
+A label and the buttons beside it are two columns, not two things drawn in the
+same place. At narrow widths the buttons wrap or their strip scrolls on its own;
+the page body never scrolls sideways.
+
+Declare a focus ring once. `outline: none` on a focusable control is not a style
+choice available here, and the month bars are how the WHEN rail is operated. Six
+declarations of one selector, where the ring survives on source order alone, is
+the same fault as the rest of this brief and it is one edit away from a page you
+cannot operate by keyboard.
+
+# What must still be true afterwards
+
+    python3 rebuild/splice_css.py z-built.html     exits 0
+
+    hovering any zone row, the drawing, or any month bar moves nothing.
+      the headline's y position is identical before and after the hover.
+      measured target: 0 of the page's controls shift the layout, as the parent does.
+
+    no element on the page is ellipsised at 1440px.
+      "151,543 of 1,757,827" and "54,634 aircraft" print in full.
+
+    no text overlaps a button at 1440px.
+
+    at 390px, document.scrollWidth === document.clientWidth.
+      at 768, 1024 and 1440 it already does, and must stay that way.
+
+    .mo:focus-visible draws a visible ring, and is declared once.
+
+    the month bars are one colour at one opacity, from the tokens.
+
+    a zone label and its count are the same size, and
+    "place named in words, not as a zone" sits on one line at 1440px.
+
+    html and body have the same background.
+
+These must not regress. They are measured and they are better than the parent:
+
+    horizontal overflow 0px at 768, 1024 and 1440
+    380 month bars at 2.56px, against the parent's 0.38px
+    zero console errors and zero page errors

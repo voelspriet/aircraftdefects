@@ -1,0 +1,78 @@
+Your block is on the page and did not take effect for the sheet. Here is why,
+measured, and what to change. Return two fenced blocks, js then css, replacing
+your previous 42 block whole.
+
+# What your block did fix, measured by the gate
+
+    hovering shifts no layout    46 of 115 controls before, 1 after
+    no duplicate ids             tip x2 is gone; iAim x2 remains
+
+# What it did not, and the reason
+
+    FAIL  the sheet itself is not inert       inert ancestor: DIV#case-wrap
+    FAIL  Close is topmost at its own centre  elementFromPoint returns BODY
+    FAIL  opening moves focus into the sheet
+    FAIL  the wheel scrolls the sheet         case-wrap.scrollTop 0, window.scrollY 0->500
+
+You wrote a whole replacement dialog, correctly, with the containment guard the
+fault needs. Nothing calls it. Measured on the live page:
+
+    String(window.openCase)   -> function(id){ if(currentCase&&String(currentCase
+                                 .OperatorControlNumber)===String(id)&&caseBox
+                                 .classList.contains('open'))return; lastFoc...
+
+That is the page's own function, not yours. You exported yours as
+`window.caseSheet`. Every row's button is markup that reads
+`onclick="openCase('...')"`, which resolves against the global scope at click
+time, so the page's version runs and yours never does.
+
+Two ways to make it run, and you should take the second.
+
+  1. Assign your functions to `window.openCase` and `window.closeCase`. That
+     works, but the page's own code calls its internal ones directly in places
+     you cannot see from here, so the two would drift apart in state.
+
+  2. Leave the page's dialog alone and repair only what is wrong with it. The
+     page's inert pass captures a reference to `#case-box` while it is still a
+     child of `<body>`, then a later block re-parents it into `#case-wrap`, and
+     the identity check that was meant to exempt the sheet stops matching. So
+     the sheet's own container gets inerted, which switches off hit-testing for
+     everything inside it: the Close button, the scroll, the focus. Escape keeps
+     working, and that is the clue: a keydown listener on `document` with
+     capture is not routed by hit-testing, so it is the one route that inert does
+     not cut.
+
+     What to do: whenever an element is marked inert, if it contains the sheet
+     or the sheet's overlay, clear that flag immediately. A MutationObserver on
+     the `inert` attribute, or a check right after the sheet opens, both work.
+     Then add what the page never had: move focus into the sheet on open, return
+     it to the opener on close, and keep Tab inside while it is open.
+
+     Do not remove the inert flag from `MAIN.wrap`. The page behind the sheet
+     must stay inert; the gate checks that and it passes today.
+
+# The other duplicate id
+
+    document.querySelectorAll('#iAim').length  ->  2
+
+You cleared `#tip`. Do the same for `#iAim`: keep the one the instrument writes
+into and rename or remove the other, whichever leaves the aim line working.
+
+# What the gate will check
+
+    with a sheet open, document.querySelectorAll('[inert]')
+        contains MAIN.wrap
+        does NOT contain #case-wrap, #case-box, or anything containing them
+    document.elementFromPoint(centre of Close) returns that BUTTON, not BODY
+    a real mouse click on Close closes the sheet
+    Escape still closes it, and must not regress
+    the wheel over the sheet scrolls the sheet, not the page behind it
+    opening moves focus into the sheet, closing returns it to the opener
+    after closing, document.querySelectorAll('[inert]') is empty
+    every id on the page appears exactly once, #iAim included
+
+These eight already pass and must not break: the page behind is inert, Escape
+closes, closing clears every inert flag, the focus ring survives, no sideways
+scroll at 1440, 1024 or 768, and no runtime errors.
+
+Write no em dash and no en dash in anything that reaches the page.

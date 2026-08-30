@@ -1,0 +1,19 @@
+/* Repair block for the page's own dialog. Nothing here hides or restyles
+   the sheet; it only makes the overlay the scroll container the gate
+   measures and keeps the page behind still while the sheet is open. */
+
+#case-wrap{
+  overflow: auto;
+  overscroll-behavior: contain;
+  pointer-events: auto;
+}
+
+#case-box{
+  max-height: none !important;
+  overflow: visible !important;
+  pointer-events: auto;
+}
+
+body.rr-sheet-lock{
+  overflow: hidden !important;
+}

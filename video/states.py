@@ -76,7 +76,7 @@ with sync_playwright() as p:
         pg.locator('#mc .mc__go').nth(0).click(); wait_done(pg, '#mc', 1); pg.wait_for_timeout(500)
         c = shot(pg, '#mc .mc', 'case_answer', nth=0, pad=12); c['out'] = rel(pg, '#mc .mc .out', c, 0); c['text'] = pg.locator('#mc .mc .out').nth(0).inner_text(); S['case_answer'] = c
         pg.locator('#mc .mc__go').nth(4).click(); wait_done(pg, '#mc', 2); pg.wait_for_timeout(500)
-        c = shot(pg, '#mc .mc', 'case_checks', nth=4, pad=12); c['out'] = rel(pg, '#mc .mc .out', c, 4); c['text'] = pg.locator('#mc .mc .out').nth(4).inner_text(); c['picks'] = rel(pg, '#mc .mc .out .pick', c, 4) if pg.locator('#mc .mc .out .pick').count() else None; S['case_checks'] = c
+        c = shot(pg, '#mc .mc', 'case_checks', nth=4, pad=12); c['out'] = rel(pg, '#mc .mc .out', c, 4); c['text'] = pg.locator('#mc .mc .out').nth(4).inner_text(); c['picks'] = rel(pg, '#mc .pick', c, 0) if pg.locator('#mc .pick').count() else None; S['case_checks'] = c
         pg.close()
     block('case', _case)
     def _question():
@@ -94,7 +94,7 @@ with sync_playwright() as p:
         pg = page(br, 1280, 860); goto(pg, '/?tail=583UP', '#sumMc .mc__go')
         S['airframe_head'] = shot(pg, '#sum', 'airframe_head', pad=16); S['airframe_head']['big'] = rel(pg, '#sum .bigsel', S['airframe_head'])
         pg.locator('#sumMc .mc__go').first.click(); wait_done(pg, '#sumMc'); pg.wait_for_timeout(600)
-        c = shot(pg, '#sumMc .mc', 'airframe', pad=12); c['out'] = rel(pg, '#sumMc .out', c); c['text'] = pg.locator('#sumMc .out').inner_text(); c['prov_text'] = pg.locator('#sumMc .prov').inner_text()
+        c = shot(pg, '#sumMc .mc', 'airframe', pad=12); c['out'] = rel(pg, '#sumMc .out', c); c['text'] = pg.locator('#sumMc .out').first.inner_text(); c['prov_text'] = pg.locator('#sumMc .prov').first.inner_text()
         gap = pg.evaluate("(function(){var sp=[...document.querySelectorAll('#sumMc .out .s')].find(x=>/Nothing was filed/i.test(x.textContent));if(!sp)return null;var r=sp.getBoundingClientRect();return [r.left,r.top,r.width,r.height]})()")
         c['gap'] = {'x': gap[0] - c['x0'], 'y': gap[1] - c['y0'], 'w': gap[2], 'h': gap[3]} if gap else None; S['airframe'] = c
         pg.close()
@@ -114,7 +114,7 @@ with sync_playwright() as p:
         pg = page(br, 1280, 860); goto(pg, '/#view=freefall', '#ff tr.rec.key')
         S['freefall_rows'] = shot(pg, '#ff .tblwrap', 'freefall_rows', pad=12, nth=0); S['freefall_rows']['key'] = rel(pg, '#ff tr.rec.key', S['freefall_rows'])
         pg.locator('#ff .mc__go').first.click(); wait_done(pg, '#ff'); pg.wait_for_timeout(600)
-        c = shot(pg, '#ff .mc', 'web', nth=0, pad=12); c['out'] = rel(pg, '#ff .out', c); c['srcs'] = rel(pg, '#ff .srcs', c) if pg.locator('#ff .srcs').count() else None; c['text'] = pg.locator('#ff .out').inner_text(); S['web'] = c
+        c = shot(pg, '#ff .mc', 'web', nth=0, pad=12); c['out'] = rel(pg, '#ff .out', c); c['srcs'] = rel(pg, '#ff .srcs', c) if pg.locator('#ff .srcs').count() else None; c['text'] = pg.locator('#ff .out').first.inner_text(); S['web'] = c
         pg.close()
     block('web', _web)
     br.close()

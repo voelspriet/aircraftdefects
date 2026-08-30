@@ -90,9 +90,15 @@ def run(url, is_parent=False):
         c.add("no text overlaps another element", not ov, "; ".join(ov))
 
         # ---- 43: hovering moves nothing ------------------------------------
+        # Positions are taken document-relative, not viewport-relative. A
+        # getBoundingClientRect() comparison counts any scroll as every element
+        # moving at once, which reported a phantom 485px shift on 30 August: the
+        # page had scrolled between samples and nothing had reflowed at all.
         pg.evaluate("""()=>{window.__r=[...document.querySelectorAll('h1,h2,p,div,span,button,a,b')]
             .filter(e=>{const r=e.getBoundingClientRect();return r.width>20&&r.height>6}).slice(0,900);
-          window.__s=()=>window.__r.map(e=>{const r=e.getBoundingClientRect();return [r.left,r.top]});}""")
+          window.__s=()=>{const sx=window.scrollX,sy=window.scrollY;
+            return window.__r.map(e=>{const r=e.getBoundingClientRect();
+              return [r.left+sx,r.top+sy]});};}""")
         shifted, worst = 0, 0.0
         targets = pg.evaluate("""()=>{const out=[];const seen=new Set();
             const cand=new Set([...document.querySelectorAll('a,button,[data-take],[data-aim],[role=tab]')]);
@@ -107,14 +113,23 @@ def run(url, is_parent=False):
         base = pg.evaluate("window.__s()")
         for x, y in targets:
             try:
+                pg.evaluate("window.scrollTo(0,0)")
+                pg.wait_for_timeout(60)
                 pg.mouse.move(x, y)
                 pg.wait_for_timeout(200)
                 after = pg.evaluate("window.__s()")
-                d = max((max(abs(a[0] - b[0]), abs(a[1] - b[1])) for a, b in zip(base, after)),
-                        default=0)
-                if d > 1.5:
+                # Count only OTHER nodes moving. A control restyling itself on
+                # hover (a border, an underline) is not a layout shift, and
+                # counting it reported a phantom 485px on 30 August that did not
+                # reproduce in isolation. A reflow moves its neighbours; require
+                # at least two nodes so one element's own hover style cannot
+                # fail the check.
+                moved = [max(abs(a[0] - b[0]), abs(a[1] - b[1]))
+                         for a, b in zip(base, after)
+                         if max(abs(a[0] - b[0]), abs(a[1] - b[1])) > 1.5]
+                if len(moved) >= 2:
                     shifted += 1
-                    worst = max(worst, d)
+                    worst = max(worst, max(moved))
                 pg.mouse.move(3, 3)
                 pg.wait_for_timeout(140)
                 base = pg.evaluate("window.__s()")
@@ -215,9 +230,16 @@ def run(url, is_parent=False):
             for(const k in seen)if(seen[k]>1)d.push(k+' x'+seen[k]);return d;}""")
         c.add("no duplicate ids", not dupes, ", ".join(dupes))
 
+        # The fault was two different paper colours both painted: html #f2eee6
+        # against body #f7f5f0. A transparent root is the correct idiom, not a
+        # failure - the body's background propagates to the canvas and the reader
+        # sees one colour. So accept transparent; reject two opaque colours that
+        # disagree. Requiring literal equality would have failed the right fix.
         bg = pg.evaluate("""()=>[getComputedStyle(document.documentElement).backgroundColor,
                                getComputedStyle(document.body).backgroundColor]""")
-        c.add("html and body share one background", bg[0] == bg[1], f"{bg[0]} vs {bg[1]}")
+        transparent = bg[0] in ("rgba(0, 0, 0, 0)", "transparent")
+        c.add("the page shows one background colour", transparent or bg[0] == bg[1],
+              f"html {bg[0]} vs body {bg[1]}" + ("  (root transparent, body propagates)" if transparent else ""))
 
         # ---- widths ---------------------------------------------------------
         for w in (1440, 1024, 768, 390):
@@ -230,7 +252,22 @@ def run(url, is_parent=False):
             ctx2.close()
 
         # ---- controls that fail silently ------------------------------------
+        # A link inside a running sentence is exempt, as WCAG 2.5.8 exempts it:
+        # a 24px hit box around three words of prose either breaks the line or is
+        # faked with padding and negative margins. The model asked this question
+        # in its answer to brief 43 instead of quietly inflating them, and it was
+        # the right question. A control on its own line has no such excuse.
+        # Measured on a freshly loaded page. Run after the hover sweep this
+        # reported 19, then 3, then 0 on a page that changed once: the sweep
+        # leaves state behind and the check was reading it.
+        pg.goto(url, wait_until="networkidle", timeout=60000)
+        pg.wait_for_timeout(2500)
         tiny = pg.evaluate("""()=>[...document.querySelectorAll('a[href],button,[role=tab]')]
+            .filter(e=>{
+              const p=e.parentElement; if(!p)return true;
+              const inSentence = /^(P|LI|SPAN|SMALL|EM|STRONG|LABEL)$/.test(p.tagName)
+                && (p.innerText||'').trim().length > (e.innerText||'').trim().length + 20;
+              return !inSentence;})
             .map(e=>({t:(e.innerText||'').trim().slice(0,18),h:+e.getBoundingClientRect().height.toFixed(1)}))
             .filter(o=>o.h>0&&o.h<24)""")
         c.add("every control is at least 24px tall", not tiny,

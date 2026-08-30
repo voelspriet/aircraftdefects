@@ -1,0 +1,139 @@
+Four faults left. Your last block fixed four and missed these, and the reason it
+missed them is worth reading before you write.
+
+Return two fenced blocks, css then js, replacing your previous 43 block whole.
+Keep everything in it that works: the truncation fix on `.gv`, the hover
+reservation on `.aim`, the tap targets on `.vtab`, and the html/body background.
+
+# Why the misses happened
+
+Sixteen of the thirty-eight selectors in your last block match nothing on this
+page. Checked against the live DOM:
+
+    .gutter  .zrow  .zl  .zv          the zone legend, none of these exist
+    .strip .tabs   .strip .note       the group strip, neither exists
+    .drawing  .wu  .absent  .mono  .aim > *
+    .prose a  .note a  textarea
+    .mo:hover i   .mo:focus-visible i
+
+The four that matched are exactly the four faults that got fixed: `.gv`, `.aim`,
+`.vtab`, and `html, body`. The rules for the others were correct CSS aimed at
+names this page does not use, and they deployed without a warning.
+
+That is the third time in three rounds. First `window.caseSheet` where the page
+calls `openCase`. Then a comment saying two blocks "are deleted" when an appended
+block has no channel to delete anything. Now sixteen selectors. Every one of them
+correct in itself, every one aimed at something that is not there.
+
+So this brief gives you the markup, measured off the live page a moment ago.
+Do not write a selector that is not in it.
+
+# The shapes, verbatim
+
+  The tab strip, three groups:
+
+      <div class="vgroups" id="vstrip">
+        <div class="vg">
+          <div class="vglab">These ignore your selection. Each answers from all
+                             <b>1,757,827</b> reports, or from a slice you set
+                             inside the panel</div>
+          <div class="vgbtns"><button class="vtab">Fleet</button> ...</div>
+        </div>
+        ... two more .vg
+      </div>
+
+      computed now:  .vg     display:flex; flex-direction:row; gap:10px;
+                             flex-wrap:nowrap
+                     .vglab  flex:0 0 auto; white-space:nowrap; width 194px
+
+  The zone legend row:
+
+      <div class="lrow zone" data-take="zone|ZONE 200" tabindex="0" role="button">
+        <i style="background:..."></i>
+        <span class="lb">Upper fuselage</span>
+        <span class="bar"><i></i></span>
+        <b>84,453</b>
+      </div>
+
+      the label is `.lrow .lb`, the count is `.lrow b`.
+
+  The phone month strip, below 760px:
+
+      <div class="phstrip"><button class="phmo"><i></i><span>...</span></button> ...</div>
+
+  The aim line exists twice:
+
+      div.aim#iAim  inside .ipad        empty, 18px
+      div.aim#iAim  inside #sdControls  empty, 18px
+
+# 1. A label runs under the buttons beside it
+
+    <b>1,757,827</b> inside .vglab   at (481, 1255), 50 x 10
+    <button class="vtab">Fleet</button> in .vgbtns  at (520, 1238), 45 x 24
+    they overlap by 10 x 7
+
+`.vglab` is `white-space:nowrap` at a fixed 194px, so its text runs past its own
+box and under the buttons in the same row. The label is a sentence, not a word.
+Either let it wrap inside its width, or give the row a width that fits it. The
+strip must stay at or under 130px in total, which the gate also checks, and the
+three group labels and sixteen buttons all stay.
+
+# 2. The phone strip runs off the screen
+
+    at 390px:  document.scrollWidth 698, clientWidth 390
+
+    every .phmo button in .phstrip, 44px wide, laid in a row that neither wraps
+    nor scrolls. The eighth one already ends at 543px, the last far beyond it.
+
+At 768, 1024 and 1440 there is no horizontal overflow at all, and that is better
+than the parent, which breaks at 768 and doubles at 390. Do not lose it. The
+strip itself must keep all its months: scroll it inside its own box, or wrap it,
+but do not drop bars and do not let the body scroll sideways.
+
+# 3. One hover still moves the page
+
+    1 of 114 controls shifts the layout, worst single move 485.1px
+
+You reserved height on `.aim`, which took it from 46 to 1. One is left, and the
+parent moves nothing at all. A synthetic mouseover on every control finds no
+shift, so the one that remains is driven by a CSS `:hover` rule that changes a
+box, not by a script. Look for a `:hover` that changes height, padding, border,
+font-size or display on something in the page flow, and make the change one that
+does not affect layout.
+
+# 4. The aim line is emitted twice
+
+Both are `div.aim#iAim`, both empty, one inside `.ipad` and one inside
+`#sdControls`. Your last block stripped the attribute at runtime and it is still
+two, so whatever emits the second one runs after your pass.
+
+You said yourself the real fix is at the emit site rather than a runtime strip,
+and you were right. Only one of them is ever written into. Find which, and stop
+the other from being emitted with that id at all. If you cannot reach the emit
+site from a block appended to the page, say so plainly in your answer and name
+which block emits it, rather than deduping again.
+
+# On the three controls under 24px
+
+    'SDR Desk lookup'          15px    a link inside a sentence
+    'Freefall: A Reckoning'    15px    a link inside a sentence
+    'back to the instrument'   13.1px  a standalone control
+
+You asked whether the two in running text should be inflated. They should not,
+and I have taken them out of the check: a link inside a sentence is exempt, and
+your padding-with-negative-margin answer was the right instinct but the honest
+answer was the one you gave in words. The third is not in a sentence. It is a
+control on its own line and it should be 24px.
+
+# What must still be true
+
+    no text is cut off at 1440
+    html and body share one background
+    the tab strip at or under 130px with 16 .vtab and 3 .vglab
+    no horizontal overflow at 768, 1024 or 1440
+    the case sheet still opens, closes, scrolls and takes focus: do not touch
+      #case-wrap, #case-box or .rr-sheet-lock, and set no overflow on body
+    380 month bars on the desktop strip
+    no runtime errors
+
+Write no em dash and no en dash in anything that reaches the page.

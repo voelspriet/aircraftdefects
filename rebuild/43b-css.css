@@ -1,0 +1,53 @@
+/* block 44, replacing block 43 whole.
+   Every selector below appears in the markup measured for this brief. */
+
+/* keeps */
+
+html { background: transparent; }
+/* the canvas falls back to the body's background, and the script below
+   copies the body's computed background onto the root so that html and
+   body share one background with no color guessed here */
+
+.gv {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  min-width: 0;
+}
+
+.aim { min-height: 18px; }
+
+.vtab {
+  box-sizing: border-box;
+  min-height: 24px;
+  min-width: 24px;
+}
+
+/* 1. the group label wraps inside its own row instead of running
+      under the buttons beside it */
+
+#vstrip .vg { min-width: 0; }
+
+#vstrip .vglab {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  max-width: 360px;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+/* 2. the phone month strip scrolls inside its own box */
+
+.phstrip {
+  display: flex;
+  flex-wrap: nowrap;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.phmo { flex: 0 0 auto; }

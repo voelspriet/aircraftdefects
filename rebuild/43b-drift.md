@@ -1,3 +1,74 @@
+Four fixes, one admission, no invented selectors: every selector in the CSS block appears verbatim in the markup you measured, and the JS block only touches things it can prove exist at runtime.
+
+**1. Label under the buttons.** `.vglab` stops being a 194px nowrap box. It now takes the rest of its own row (capped at 360px, so wrapping can never need more than two to three lines and the strip stays under the 130px ceiling) and wraps there. Flex siblings cannot overlap, so the 10x7 collision is gone by construction, and the row can only need less width than before, never more, at 768 and up.
+
+**2. Phone strip.** `.phstrip` becomes its own horizontal scroll box (`overflow-x: auto`, `max-width: 100%`) and `.phmo` becomes `flex: 0 0 auto`, so every month keeps its 44px and the strip scrolls inside itself instead of spilling. Nothing is dropped, the body never scrolls sideways, and at 768 and up the phone strip is out of the layout while the desktop strip with its 380 bars is untouched.
+
+**3. The last moving hover.** I cannot see the offending rule's selector from here, and inventing one is exactly how sixteen phantom selectors got deployed last round. So the block does not guess. It walks the page's own stylesheets, including media and supports blocks, and rewrites every rule that fires on `:hover`: all layout-changing declarations (size, margins, padding, border widths, font-size, line-height, display, position, offsets, flex and grid sizing) are removed, leaving the hover free to change color, shadow, transform and opacity only. Border shorthands that carried a color keep the color as `border-color`, so the intent survives without the box moving. Focus rules are left alone, and nothing whose selector mentions `case-wrap`, `case-box` or `rr-sheet-lock` is touched. The sweep runs again whenever nodes are added, so late-injected styles are covered. If the culprit was a hover that revealed something with `display`, the reveal is gone: that is what "does not affect layout" costs, and I am saying so.
+
+**4. The second aim line, plainly.** The emit site is inside the page's own script, and a block appended to the page cannot reach into that function or name it from where I sit. What I can do is stand on the doorway every emitter must pass through. Writes to the aim line resolve through `document.getElementById`, which returns the first `#iAim` in document order, so the first copy is the one written into, and the guard pins the id to that copy. The `id` property, `setAttribute`, `innerHTML`, `insertAdjacentHTML`, `appendChild`, `insertBefore`, `replaceChild`, `append` and `prepend` all now refuse a second `iAim` id wherever it is aimed, and print the emitter's stack to the console the moment it fires, which is the emitting block's name. A backstop pass keeps the invariant if the emitter used a channel I did not list, and if it ever has to choose, it keeps the copy that has content.
+
+**5. Tap target.** The standalone "back to the instrument" control is found by its text, not by a guessed selector, and raised to a 24px inline-block. The two links inside running text are not matched and not inflated, per your ruling.
+
+**6. Keeps.** `.gv` still cannot clip: it wraps, overflow stays visible. `.aim` keeps its 18px reservation. `.vtab` keeps its 24px tap floor with border-box so the floor cannot grow the button. The root's background is transparent in CSS, which lets the canvas fall through to the body's own background, and the script then copies the body's computed background onto the root, so html and body share one background whatever the theme sets, with no color guessed. Nothing touches `#case-wrap`, `#case-box`, `.rr-sheet-lock`, or body overflow.
+
+```css
+/* block 44, replacing block 43 whole.
+   Every selector below appears in the markup measured for this brief. */
+
+/* keeps */
+
+html { background: transparent; }
+/* the canvas falls back to the body's background, and the script below
+   copies the body's computed background onto the root so that html and
+   body share one background with no color guessed here */
+
+.gv {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  min-width: 0;
+}
+
+.aim { min-height: 18px; }
+
+.vtab {
+  box-sizing: border-box;
+  min-height: 24px;
+  min-width: 24px;
+}
+
+/* 1. the group label wraps inside its own row instead of running
+      under the buttons beside it */
+
+#vstrip .vg { min-width: 0; }
+
+#vstrip .vglab {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  max-width: 360px;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+/* 2. the phone month strip scrolls inside its own box */
+
+.phstrip {
+  display: flex;
+  flex-wrap: nowrap;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.phmo { flex: 0 0 auto; }
+```
+
+```js
 /* block 44 script, replacing block 43 whole.
    Jobs:
    1. exactly one #iAim, enforced at every write channel, emitter named in console
@@ -357,3 +428,4 @@
   window.addEventListener('load', backstop);
   setTimeout(backstop, 400);
 })();
+```

@@ -1,0 +1,9 @@
+/* ---- 49, hand-written, 30 August 2026. Counted in MODEL_USE.md. ----
+   The parent's results bar is not sticky; only its table header is. Block 18
+   made .cut position:sticky at top:0 with z-index 6, so on any scroll where the
+   records section is in view the bar pinned to the viewport and painted across
+   whatever sat above it in flow, including an open rail of the instrument. And
+   #rr-sec was overflow:hidden, which is what let the bar clip. Both restored
+   to what the parent does: the bar scrolls with its section. */
+.cut{position:static !important;top:auto !important;z-index:auto !important}
+#rr-sec{overflow:visible !important}

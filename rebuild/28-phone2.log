@@ -1,0 +1,78 @@
+[  12s] stap 1: dacht 327, schreef 124, 2 tool-calls
+   parent   {"value": {"count": true, "cls": "count", "text": "1,757,827 reports. Nothing chosen yet.", "rect": {"top": 3246.78125, "h": 20.140625, "w": 218.796875}, "inPhb
+   measure  {"value": {"count": false, "rect": null, "errs": "", "noRows": false, "scrollW": 390, "innerW": 390, "railVisible": 0}, "pageErrors": ["Cannot read properties o
+[  44s] stap 2: dacht 1469, schreef 178, 1 tool-calls
+   parent   {"value": {"phbar": {"pos": "sticky", "rect": {"top": 17, "h": 104.8125}, "vis": true}, "phcount": {"top": 25, "h": 22, "text": "1,757,827 reports"}, "count": {
+[ 232s] stap 3: dacht 27683, schreef 77, 2 tool-calls
+   parent   {"value": {"countChain": ["#count.count", ".bar", "#p-search.panel.on", "#main.wrap", ".", "."], "cntVisible": true, "phbarChain": ["#phBar.phbar", "#hero.instr
+   measure  {"value": {"phbarChain": [".phbar", ".rv-ph", "#hero.instrument.phone", "#hero-root.", ".wrap", ".", "."], "phbarInHero": true, "heroKids": ["rv-desk", "rv-ph"]
+[ 260s] stap 4: dacht 0, schreef 534, 2 tool-calls
+   parent   {"value": {"noRowsHTML": null, "pSearchTop": 2835.9375, "countText": "1,757,827 reports. Nothing chosen yet."}}
+   parent   {"value": {"ipadQuery": false, "heroClass": "instrument phone", "phExtraTop": 2230.375, "firstPanelTop": null, "noRows": false, "noRowsText": null}}
+[ 302s] stap 5: dacht 3143, schreef 194, 2 tool-calls
+   measure  {"value": {"phbar": true, "phbarHTML": "<div class=\"phcount\"><b>1,757,827</b> reports</div><div class=\"phchips\"><span class=\"rv-none\">nothing filtered yet
+   parent   {"value": {"phbarHTML": "\n    <div class=\"phcount\"><b>1,757,827</b> reports</div>\n    <div class=\"phchips\"><span class=\"ash\">nothing filtered yet</span>
+[ 327s] stap 6: dacht 0, schreef 289, 2 tool-calls
+   parent   {"value": {"sdCountClass": "count", "countInPhbar": false}}
+   measure  {"value": "no new error", "pageErrors": ["Cannot read properties of null (reading 'addEventListener')"]}
+[ 453s] stap 7: dacht 17389, schreef 103, 2 tool-calls
+   measure  {"value": {"errs": [], "countExists": false, "countText": null, "heroKids": ["rv-desk", "rv-ph"], "noRows": false}, "pageErrors": ["Cannot read properties of nu
+   measure  {"value": {"countInIpad": true, "countParent": "ipad", "countText": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "countW": 1096, "h
+[ 617s] stap 8: dacht 24301, schreef 139, 2 tool-calls
+   measure  {"value": {"exists": true, "txt": "", "chain": ["#noRows.norows:dnone:vvisible", "#sdControls.:dblock:vvisible", "#p-search.panel:dflex:vvisible", "#panels.:dbl
+   measure  {"value": {"roleTabStrip": 16, "roleTabAll": 20, "sdBtns": 24, "sdSel": 12, "sdInp": 7, "sdBarBtns": 2, "ipadStands": 0, "ipadCounts": 1, "countText": "1,757,82
+[ 660s] stap 9: dacht 3005, schreef 146, 2 tool-calls
+   parent   {"value": {"noRowsOuter": "MISSING", "reps": "none", "norowsCSS": null}}
+   measure  {"value": {"noRowsOuter": "<div id=\"noRows\" class=\"norows\"><p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and buries th
+[ 792s] stap 10: dacht 17151, schreef 172, 1 tool-calls
+   measure  {"value": "<div id=\"noRows\" class=\"norows\"><p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and buries the one you have.<
+[ 894s] stap 11: dacht 13603, schreef 120, 1 tool-calls
+   measure  {"value": {"directKids": ["#iAim.aim[DIV]", ".bar[DIV]", "#moreFilters.[DETAILS]", "#starters.[DIV]", "#starterToggle.ghostbtn[BUTTON]", "#unresolved.unresolved
+[ 947s] stap 12: dacht 0, schreef 72, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[ 960s] stap 13: dacht 0, schreef 41, 2 tool-calls
+   measure  {"value": {"countExists": false, "countText": null, "countTop": null, "inPhbar": false, "noRowsTxt": "No rows yet, on purpose. Listing everything answers no que
+   measure  {"value": {"countInIpad": true, "ipadCounts": 1, "countText": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "railW": 1096, "railRead
+[1033s] stap 14: dacht 7942, schreef 261, 2 tool-calls
+   measure  {"value": {"chain": ["#noRows.norows:dnone", "#sdControls.:dblock", "#p-search.panel:dflex", "#panels.:dblock", "#views.:dblock", ".wrap:dblock", ".:dblock", ".
+   measure  {"value": {"rs": "complete", "hasCount": false, "scripts": [{"src": "inline", "defer": false, "async": false, "atEnd": false}, {"src": "inline", "defer": false,
+[1066s] stap 15: dacht 0, schreef 283, 1 tool-calls
+   parent   {"value": {"error": "Page.evaluate: TypeError: Cannot read properties of null (reading 'offsetHeight')\n    at eval (eval at evaluate (:291:30), <anonymous>:1:2
+[1097s] stap 16: dacht 2602, schreef 163, 1 tool-calls
+   measure  {"value": {"disp": "none", "vis": "visible", "hiddenAttr": true, "inlineStyle": null, "rules": ["#noRows { padding: 8px 12px; margin-top: 6px; }", "#noRows p { 
+[1152s] stap 17: dacht 0, schreef 238, 1 tool-calls
+   deploy   {"ok": false, "where": "syntax", "error": "/Users/henkvaness/vibecoding/aircraftdefects-z/rebuild/bridge.js:1774\n  if(!/\\binstrument\\b/.test(hero.className||
+[1194s] stap 18: dacht 95, schreef 51, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[1208s] stap 19: dacht 0, schreef 24, 2 tool-calls
+   measure  {"value": {"countExists": true, "inPhbar": true, "countText": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "countTop": 33, "countH"
+   measure  {"value": {"countInIpad": true, "ipadCounts": 1, "countText": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "railW": 1096, "railRead
+[1234s] stap 20: dacht 0, schreef 230, 1 tool-calls
+   measure  {"value": {"railKids": [".gut rest[DIV]", ".track[DIV]"], "railHTMLLen": 68054, "railTextLen": 14, "readings": 2, "readingInfo": [{"cls": "reading", "tag": "P",
+[1283s] stap 21: dacht 5432, schreef 181, 1 tool-calls
+   measure  {"value": [{"cls": "rail", "attr": "when", "w": 1096, "gutW": 110, "trackW": 974, "readings": []}, {"cls": "rail open", "attr": "where", "w": 1096, "gutW": 110,
+[1319s] stap 22: dacht 3043, schreef 176, 2 tool-calls
+   parent   {"value": [{"attr": "when", "cls": "rail ", "w": 1098, "h": 27, "gutW": 186, "trackW": 900, "trackH": 14, "readings": []}, {"attr": "where", "cls": "rail open",
+   measure  {"value": {"railH": 518, "kids": ["gut:h46:w110", "track two:h337:w974", "reading:h16:w974", "reading:h106:w974"], "gutTextLen": 29}}
+[1390s] stap 23: dacht 1253, schreef 131, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[1404s] stap 24: dacht 380, schreef 70, 2 tool-calls
+   measure  {"value": {"railH": 481, "railReadingH": 106, "railReadings": 1, "countInIpad": true, "countText": "1,757,827 reports, everything the FAA has published to 26 Au
+   measure  {"value": {"countExists": true, "countText": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "countInIpad": true, "scrollH": 21648, "e
+[1433s] stap 25: dacht 534, schreef 78, 2 tool-calls
+   measure  {"value": {"noError": true, "countExists": true, "countText": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "countTop": 33, "noRowsH
+   measure  {"value": {"countExists": true, "countTop": 112, "noRowsH": 199, "scrollW": 390, "panels": 16, "land": 0, "starters": 18, "errs": []}}
+[1489s] stap 26: dacht 4284, schreef 146, 2 tool-calls
+   measure  {"value": {"railH": 481, "readOK": true, "svg": "626x138", "vstripH": 100, "vtab": 16, "vglab": 3, "roleTab": 16, "carriersInIpad": 1, "isCount": true, "scrollH
+   measure  {"value": {"noErrors": true, "countExists": true, "countText": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "aboveFold": true, "scr
+[1524s] stap 27: dacht 22, schreef 30, 1 tool-calls
+KLAAR: Fixed the phone fault and preserved all desktop measures.
+
+**The fault and the fix.** At 390 the page redraws #hero as a phone instrument (`.phbar` inside `.rv-ph`); the desktop #count was never created there, and the page's own script throws on a null element before my block runs (my error listener never even fires — the throw is not catchable from my scope). Fixes, all prefixed `sd-`/`#sd-`:
+1. `seatCount()` now *creates* #count if the page never did, and seats it inside `#hero .phbar` (first child) when phone — matching the original, which puts its sentence in the sticky `.phbar` at the top (original `.phcount` top = 25px; my `#count` top = 33px). It re-seats on every pass (rAF-debounced MutationObserver + resize), so it survives redraws on resize across 760px and on filter changes without doubling (dedupe loop keeps exactly one #count).
+2. `#noRows` at 390 is emptied and `hidden` by the page's script; I now seed it with its desktop content and strip the `hidden` attribute on phone (CSS `#noRows[hidden]{display:block!important}` backs it). It renders at 199px tall.
+3. Every function in my block already guards null elements (`if(!c)return`); #count is now always created before anything reaches for it, so no listener throws.
+
+**390 checks:** no page error (0 in `__sderrs`); #count present, text "1,757,827 reports, everything the FAA has published to 26 August 2026.", top 33px (above the fold); body scrollWidth 390 = innerWidth 390; 0 visible .rail; #noRows renders (199px). Filtered (?zone=ZONE+500&operator=CALA): same, count top 112px, no errors.
+
+**1440 checks:** open rail (where) 481px — within 10% of 508 — with its 462-char reading paragraph; svg.plane 626×138 (within 5% of 628×138); exactly one sentence carrier in .ipad and it is #count, holding text both unfiltered and filtered; #vstrip 100px (≤130) with 16 .vtab, 3 .vglab, 16 [role=tab]; body scrollHeight 1945 (≤1990). Both widths: 0 .card.land, 18 buttons in #starters, 16 section.panel. Resize 1440→390→1440 re-verified: nothing doubles, disappears or throws.

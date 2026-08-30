@@ -728,7 +728,7 @@ def case_page(rid):
 @app.get("/z/img/<name>")
 def z_img(name):
     """Hand-written, 31 August 2026: the few images the page carries."""
-    if not re.fullmatch(r"[a-z0-9\-]+\.(webp|png|jpg|svg)", name):
+    if not re.fullmatch(r"[a-z0-9\-]+\.(webp|png|jpg|svg|mp4)", name):
         return jsonify(error="no such image"), 404
     return send_from_directory(app.static_folder, name, max_age=86400)
 

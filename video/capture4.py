@@ -76,7 +76,7 @@ class Shot:
         self.mark('click ' + (what or sel)); self.hold(0.3)
     def wait_done(self, scope, count=1, timeout=300000):
         self.mark('wait ' + scope)
-        self.pg.wait_for_function("(a)=>document.querySelectorAll(a[0]+' .mc[data-state=\"done\"], '+a[0]+' .mc[data-state=\"abstain\"]').length>=a[1]", arg=[scope, count], timeout=timeout)
+        self.pg.wait_for_function("(a)=>document.querySelectorAll(a[0]+' .mc[data-state=\"done\"], '+a[0]+' .mc[data-state=\"abstain\"], '+a[0]+' .mc[data-state=\"error\"]').length>=a[1]", arg=[scope, count], timeout=timeout)
         self.mark('done ' + scope)
     def beat(self, key):
         """The element is framed: the voice starts here and the frame holds for it."""
@@ -138,7 +138,7 @@ def s4e(pw):
     s.click('#qin', what='focus');
     for ch in 'what plane is the most dangerous': s.pg.keyboard.type(ch); s.hold(0.05)
     s.zoom('#qin', 1.6); s.beat('b4e_1')
-    s.unzoom(0.5); s.click('#askBtn', what='Ask'); s.mark('wait #draft'); s.pg.wait_for_selector('#draft .mc', state='attached', timeout=60000); s.pg.wait_for_function("document.querySelectorAll('#draft .mc[data-state=\"done\"], #draft .mc[data-state=\"abstain\"]').length>=1", timeout=300000); s.mark('done #draft')
+    s.unzoom(0.5); s.click('#askBtn', what='Ask'); s.mark('wait #draft'); s.pg.wait_for_selector('#draft .mc', state='attached', timeout=60000); s.pg.wait_for_function("document.querySelectorAll('#draft .mc[data-state=\"done\"], #draft .mc[data-state=\"abstain\"], #draft .mc[data-state=\"error\"]').length>=1", timeout=300000); s.mark('done #draft')
     s.zoom('#draft .out', 1.25); s.beat('b4e_2')
     s.zoom('#draft .next', 1.4); s.beat('b4e_3'); s.close()
 

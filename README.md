@@ -53,6 +53,47 @@ Each brief carries the specification, the measured evidence for what is wrong,
 and the checks the result has to pass. Every one is committed:
 [`rebuild/*.prompt.txt`](rebuild/).
 
+## What GLM-5.3-Flash does here that the FAA's own site cannot
+
+The FAA publishes these 1,757,827 reports through a search form that returns
+rows. Ten coded boxes, one free-text write-up per row, in capitals and trade
+shorthand. It reads every box as a code and the write-up as an opaque string.
+`ZONE 700` means the landing gear; `A` means the crew landed somewhere they had
+not planned to; `R & R NLG UPLOCK BOX IAW AMM 32-33-07` means a part was
+removed and replaced according to a manual. The site tells you none of that.
+It cannot search inside the write-up for meaning, only for characters. It
+cannot tell you that two filings on one day are the same event. It cannot say
+whether the code a mechanic ticked matches the sentence they wrote underneath.
+
+Everything on /z that the FAA site cannot do is the model reading words. Each
+is a live button; each streams the model's answer as it is produced; each
+states what it read (n of m), how long it took and what it cost; each abstains
+in plain words when the write-ups do not support an answer, and that
+abstention is shown as a result. Nothing the model writes is coloured or set
+like a count. It is teal, labelled, and it says "Its words, not the FAA's."
+
+| The reader presses | The FAA site | GLM-5.3-Flash on /z |
+|---|---|---|
+| **Say it in plain English** on any write-up | shows `OVRHD SUPRNMRY AREA EMERGENCY LIGHT INOP` | rewrites it, keeps every step and every manual reference, expands the shorthand, and lists every abbreviation marked "from the record" or "outside knowledge". Refuses when the text is too clipped to be sure. 2.2 s, live. |
+| **How the trade says it** on any word (`CHAFED`, `INOP`, `CAS`) | nothing; a word is a string | reads 60 write-ups carrying the word and explains what mechanics mean by it and what else they call the same thing, each with a record. Under ten uses, it says so and stops. |
+| **What recurs here** over any selection | a count | reads up to 300 write-ups (the button says which 300, and that it is not a sample of the rest) and names what recurs that no coded box captures, with verbatim quotes and record numbers. Told to say "several" rather than a number it has not verified. When asked for exact counts it declined, which is the behaviour that makes it usable. |
+| **Is this the right slice?** before export | exports whatever the codes matched | reads the filters and 25 of the rows and says which do not belong to what was meant, and what the codes will miss because mechanics wrote it in words. If all 25 match: "That says nothing about the other 4,124." |
+| **Ask the file** | a form with nineteen boxes | a question in plain words becomes draft filter chips, checked against the FAA's own code tables and the operator list, shown before anything runs. The reporter presses Run or discards. It never answers the question itself, and it lists the words it could not map. On first test it invented `WN` for Southwest; the designator is `SWAA`; it is now held to the list. |
+| **Does the code match the words?** | never asked | two independent passes over a record, and only where both agree is a disagreement between a ticked box and the sentence beneath it written down. 44 records read so far; the page says a record with no entry has not been checked, not cleared. |
+| **Where was this?** | 1,454,504 reports name a place in words and the site cannot place them | reads the write-ups on screen and says where, keeping an answer only when it can quote the words verbatim, and counting what it dropped. |
+
+What this cost, measured: 865 tokens and 1.42 seconds per report at six
+concurrent. A pass over the whole file would be 1.52 billion tokens and 2.9
+days at sixty concurrent. It has not been run, and MODEL_USE.md says why.
+
+What the page does not do with the model, and why: it does not let the model
+decide whether two filings on one day were one event (two passes agreeing is
+not verification); it does not narrate the 124 reports filed before the defect
+they describe (they are counted, and almost certainly transcription artefacts);
+it does not summarise an airframe's life unpinned (one click, one bill). The
+red team on the design panel (docs/DESIGN-Z2.md) cut those, and the reasons
+are recorded there.
+
 ## What it builds
 
 An instrument at the top of the page and a desk beneath it.

@@ -1,6 +1,6 @@
 # Make it readable
 
-**Live: [aircraftdefects.com/z](https://aircraftdefects.com/z/) — MIT — built with GLM-5.3-Flash**
+**Live: [aircraftdefects.com/z](https://aircraftdefects.com/z/) · MIT · GLM-5.3-Flash reads the file live**
 
 A government can publish everything it holds and still answer none of your
 questions. The FAA publishes 1,757,827 aircraft defect reports going back to
@@ -8,7 +8,7 @@ questions. The FAA publishes 1,757,827 aircraft defect reports going back to
 `ZONE 700` where it means the landing gear, and `A` where it means the crew
 landed somewhere they had not planned to.
 
-This is an instrument for reading it, written by GLM-5.3-Flash.
+This is an instrument for reading it. GLM-5.3-Flash reads the file live: every teal block on the page is the model reading write-ups on the spot, every quote it makes is checked against the record before you see it, and the frame it arrives in is hand-written (see MODEL_USE.md for who wrote what).
 
 ## What it does
 

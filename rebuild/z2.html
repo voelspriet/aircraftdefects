@@ -191,8 +191,9 @@ var ROOT=location.pathname.indexOf("/z")===0?"/z/":"/";
 /* hand-written, 31 August 2026: every record link opens the sheet in this page; the old page is never the target */
 document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest('a[href*="/z/rebuilt?case="]');if(!a)return;var m=a.getAttribute("href").match(/case=([A-Za-z0-9]+)/);if(!m)return;e.preventDefault();e.stopPropagation();
   location.href=casePage(m[1])},true);document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll('a[href="/z/"]').forEach(function(a){a.setAttribute("href",ROOT)})});
-function go(p){var skip={hero:1,v:1,from:1,to:1};var before=Array.from(q().keys()).filter(function(k){return !skip[k]}).length,after=Array.from(p.keys()).filter(function(k){return !skip[k]}).length;
-  try{if(after>before)sessionStorage.setItem("z-scroll","sum");else sessionStorage.removeItem("z-scroll")}catch(x){}
+function go(p){var skip={hero:1,v:1,from:1,to:1};function sig(sp){var out=[];sp.forEach(function(v,k){if(!skip[k])out.push(k+"="+v)});return out.sort().join("&")}
+  var b=sig(q()),a=sig(p);var nb=b?b.split("&").length:0,na=a?a.split("&").length:0;
+  try{if(a!==b&&na>=nb&&na>0)sessionStorage.setItem("z-scroll","sum");else sessionStorage.removeItem("z-scroll")}catch(x){}
   location.href=location.pathname+(p.toString()?"?"+p.toString():"")+location.hash}
 function setRail(r){var p=q();p.set("hero",r);go(p)}
 var ZLABEL={"7379":"Boeing 737-9 (MAX 9)","7878":"Boeing 787-8","7879":"Boeing 787-9","ZONE 100":"lower fuselage","ZONE 200":"upper fuselage","ZONE 300":"stabilisers","ZONE 400":"engines","ZONE 500":"left wing","ZONE 600":"right wing","ZONE 700":"landing gear","ZONE 800":"doors","ZONE 900":"lavatories, galleys"};

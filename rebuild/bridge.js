@@ -5512,4 +5512,10 @@ body.rr-sheet-lock{
 .aimwrap label.aimday{display:inline-flex;align-items:center;gap:8px;font-style:normal !important}
 .aimwrap input#iAimAt{min-width:30ch;padding:6px 9px;font:400 13px -apple-system,"Segoe UI",Roboto,sans-serif}
 .aimwrap,.aimwrap .aimbox{width:100%;max-width:none}
+/* zone legend, as the parent sets it: label 12px system face, value 12px mono,
+   one baseline. Here the label had gone to 13px Archivo and the value to 11px,
+   and the longest label wrapped. */
+.lrow>span,.lrow>i{font:400 12px/1.4 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif !important}
+.lrow>b{font:400 12px/1.4 "IBM Plex Mono",ui-monospace,Menlo,monospace !important}
+.aimwrap label.aimday{text-transform:uppercase}
 `;document.head.appendChild(s);})();

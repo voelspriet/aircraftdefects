@@ -716,13 +716,13 @@ def rebuilt():
 @app.get("/z/conflicts")
 @app.get("/z/conflicts/")
 def conflicts_page():
-    return send_from_directory(app.static_folder, "conflicts.html")
+    return send_from_directory(app.static_folder, "conflicts.html", max_age=0)
 
 
 @app.get("/z/case/<rid>")
 def case_page(rid):
     """Hand-written, 31 August 2026: one report on its own page."""
-    return send_from_directory(app.static_folder, "case.html")
+    return send_from_directory(app.static_folder, "case.html", max_age=0)
 
 
 @app.get("/z/img/<name>")
@@ -736,7 +736,7 @@ def z_img(name):
 @app.get("/z/")
 @app.get("/z")
 def index():
-    return send_from_directory(app.static_folder, "index.html")
+    return send_from_directory(app.static_folder, "index.html", max_age=0)
 
 
 if __name__ == "__main__":

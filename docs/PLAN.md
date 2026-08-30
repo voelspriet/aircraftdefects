@@ -37,7 +37,7 @@ Verified: gloss returns in 6.2s at `low`, five jargon terms, no gateway errors.
 
 ---
 
-## B. Parity with the parent tool — **re-opened**, 29 August
+## B. Parity with the parent tool — **done**, 30 August
 
 The inventory was not made by me reading two pages. Three screenshots of the
 parent and one of /z went to GLM-5.3-Flash with one question: what does the first
@@ -127,6 +127,53 @@ third of B.
 - [ ] one URL dialect: ?hero=anatomy and ?hero=where must both open the aircraft
 
 A phase can no longer pass by being described. It has to survive the count.
+
+### Closed, 30 August, on the count
+
+Eleven rounds after it was re-opened, six of them driven by the model itself
+through `rebuild/agent.py`, which gives it four tools: `measure(js)` against its
+own page in a real browser, `parent(js)` against the original, `deploy(css, js)`,
+and `done()`. It writes, ships, measures, reads the number back and fixes itself.
+
+Measured live, /z against aircraftdefects.com, at 1440px:
+
+                          original   rebuild
+  standing sentence           34px      34px   Instrument Serif, at the top of
+                                               the instrument, with the clauses
+  tab strip                    104       100
+  open rail                    508       481   .gut, .track.two, the reading
+  aircraft drawing        628 x 138  626 x 138
+  page, rails shut           1,687     1,945
+  page, table loaded        16,655    18,248   9.6% over
+  write-up cell                112       112
+  page errors                 none      none
+
+At 390px: no page error, no desktop rail, body scrollWidth equal to innerWidth,
+the sentence above the fold. Resizing 1440 to 390 and back leaves one of it.
+
+True in every state, which is what took the last three rounds:
+
+  /z/?zone=ZONE+500&operator=CALA   219 reports, left wing, Continental
+                                    Airlines Inc. 1,757,608 set aside.
+  /z/                               1,757,827 reports, everything the FAA has
+                                    published to 26 August 2026.
+
+Two things the harnesses still print, both checked and neither a fault. The
+claims harness flags a dozen figures per state that it cannot find in the data:
+they are the counts inside the filter dropdowns, which count the whole corpus and
+not the selection, and the original carries them identically. And two endpoints
+the original has are absent, `/api/crew-definition` and `/api/freshness`, because
+the rebuild takes both from `/api/facets` instead.
+
+What is still not equal, and is recorded rather than hidden: the record rows are
+84px against 72, which is 1,200px of the remaining gap, and the write-up rows
+carry a gloss button the original does not have at all.
+
+The harness was corrected too. It counted `#starters button` and `#more`, both of
+which the rebuild names differently, and so reported a missing control where
+there is one. A harness that is wrong about the thing it measures is worse than
+no harness, because its green is believed.
+
 
 ---
 

@@ -1,0 +1,555 @@
+[
+ {
+  "role": "user",
+  "content": "Two faults. Both are height, and the first one is a hundred copies of a single\nelement.\n\nRULE FOR THIS RUN: your first tool call must be deploy. Ship a fix, then measure\nit, then fix again. Twenty steps.\n\n  deploy(css, js)             splices your block in, publishes it, returns errors\n  measure(js, width, query)   runs a JavaScript arrow function against your page\n  parent(js, width, query)    the same, against the original\n  done(summary)               when the checks pass\n\nYour block is at the end of this brief and is on the page now.\n\n# 1. The write-up cell is 32px taller than the original's, a hundred times over\n\nAt /z/?hero=where&zone=ZONE+200, 1440px, with the record table loaded:\n\n                       original   rebuild\n    .wu (the write-up)     112       144\n    tr.wrote row           126       159\n    tr.rep row              72        73\n    table                14,914    17,977\n    page                 16,655    20,002\n\nSame 13px type. The original's line-height is 20.15px, yours is 19.5px, so it is\nnot leading: your block simply shows more of the mechanic's text before it clips.\nThe original clips the write-up to a fixed height and fades the last line, with\nthe full text still reachable by opening the case sheet.\n\nMeasure the original's .wu: its height, its max-height, its overflow, whether it\nuses a line clamp and at how many lines, and what its fade is. Then match it.\n\nDo not delete the write-up or its gloss button. The mechanic's own words are the\nreason this table exists. Clip them the way the original clips them.\n\n    td padding is also 5px 10px here against the original's 4px 10px.\n\n# 2. Three blocks the original does not have, above the tabs\n\n    rebuild top-level children of <main>:\n      znarrow 30, hero-root 784, tip 0, card.ask 59, khint 17, out 0,\n      credit 28, views 18803\n\n    original:\n      hero 837, tabs 104, freshness 19, credit 19, then the panels\n\n`.card.ask` (59px) and `.khint` (17px) sit between the instrument and the tabs\nand have no counterpart in the original, whose \"aim at\" line lives inside the\ninstrument. `znarrow` is 30px above everything. Read what each of the three says\nbefore you remove anything: if it carries text the original carries elsewhere,\nmove it there rather than deleting it. If it carries nothing the original has,\nsay so in your summary and take it out.\n\n    credit is 28 here against 19 there, which is spacing.\n\n# The checks, before you call done\n\n  1. At ?hero=where&zone=ZONE+200, 1440: tr.wrote within 10% of 126, the table\n     within 10% of 14,914, and documentElement.scrollHeight within 10% of 16,655.\n  2. The write-up still shows the mechanic's words, clipped and faded like the\n     original's, and the gloss button under it still works.\n  3. Still true, all of them, and measure each: /z/?zone=ZONE+500&operator=CALA\n     reads \"219 reports, left wing, Continental Airlines Inc. 1,757,608 set\n     aside.\" at 1440 and 390; unfiltered reads the 1,757,827 sentence with the\n     published-to date at both widths; 390 has no page error, #count above the\n     fold, body scrollWidth 390, no .rail visible; 1440 has the open rail within\n     10% of 508 with its reading paragraph, svg within 5% of 628 x 138, one\n     sentence carrier in .ipad and it is #count, #vstrip at or under 130px with\n     16 .vtab and 16 [role=tab], no page error, 18 controls, 18 starter\n     questions, 4 .rail, 16 section.panel.\n\nPut the measured numbers in the summary.\n\nDo not undo the phone layout, the case sheet overlay, the record stepper or the\naria-labels. Prefix every new name.\n\n--- YOUR CURRENT BLOCK ---\n\nCSS:\n#sentence{display:none!important}\n#sd-sink{display:none!important}\n.card.land{display:none!important}\n#vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}\n#vstrip.vgroups .vg{display:flex;flex-direction:row;align-items:center;gap:10px;min-width:0}\n#vstrip.vgroups .vglab{flex:0 0 auto;font:600 9.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em;color:#57514a;text-transform:uppercase;white-space:nowrap}\n#vstrip.vgroups .vgbtns{display:flex!important;flex-direction:row!important;gap:2px!important;align-items:center!important;flex-wrap:wrap!important;margin:0!important;padding:0!important;border-bottom:0!important;min-width:0;flex:1 1 auto}\nbutton.vtab{padding:3px 8px;font-size:11.5px;line-height:1.2;border:1px solid transparent;border-radius:3px;background:none;color:#5c554c;cursor:pointer;white-space:nowrap}\nbutton.vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);font-weight:600}\n.axis{display:flex;gap:2px;margin-top:3px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ash)}\n.axis span{flex:1;min-width:0}\n.sd-second{font-size:11.5px;color:#6b6560;margin:0 0 3px;text-align:center;letter-spacing:.02em}\n.sd-second b{font-weight:600}\n#hero.instrument{position:relative;background:var(--paper);border:1px solid var(--line);border-bottom:3px solid var(--rust);border-radius:6px;margin:12px 0 0;overflow:hidden;padding:0}\n#hero.instrument > .ipad{padding:10px 20px 6px}\n#count.sdcount{font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1.1;color:var(--ink);max-width:none;margin:4px 0 2px;white-space:normal}\n#count.sdcount .fig{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:.92em;font-variant-numeric:tabular-nums;color:var(--rust-text,#b8431f)}\n#count.sdcount .aside{font-size:.62em;color:var(--ash)}\n#count.sdcount .broken{display:block;font-size:.5em;color:var(--rust)}\n#count.sdcount .clause{border-bottom:1px dotted rgba(29,29,31,.28);cursor:pointer}\n.rail .reading{margin:9px 0 0;padding:8px 12px 8px 13px;border-left:2px solid var(--rust);background:#faf7f3;font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);max-width:none}\n.rail>.reading{grid-column:2}\n@media(max-width:700px){.rail .reading{font-size:14px;padding:7px 10px}}\n@media(min-width:901px){\n#hero.instrument{max-width:1140px!important}\n.rail{align-items:start;grid-template-columns:110px minmax(0,1fr)!important}\n.rail .track{min-width:0;position:relative}\n.rail .track.two{display:grid;grid-template-columns:minmax(0,628px) minmax(0,330px);gap:18px}\n.rail .track.two > svg.plane{width:100%;max-width:640px;height:auto;display:block}\n.rail .col .ch{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;color:var(--ash);margin-bottom:3px}\n.rail .orow{display:grid;grid-template-columns:120px 1fr 52px;gap:8px;align-items:center;font-size:11.5px;height:14px;padding:0 3px;border-radius:3px}\n.rail .orow .on{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:14px}\n.rail .orow .ob{height:6px;background:#e8e3d8;border-radius:3px;overflow:hidden}\n.rail .orow .ob i{display:block;height:100%;background:var(--rust)}\n.rail .orow.wide{grid-template-columns:190px 1fr 56px;height:17px}\n.rail .orow.wide .on{font-size:12px;line-height:17px}\n.rail .fblock{height:22px}\n.rail .frows{margin-top:4px}\n.rail .fnote{font-size:11px;margin-top:3px}\n.rail[data-rail=forced].open .fblock{margin-bottom:5px}\n.rail .legend{font-size:11.5px;gap:0}\n.rail .lrow{padding:0 4px;line-height:1.35}\n.rail .zonenote{font-size:11px;line-height:1.4;margin-top:4px;padding-top:4px}\n}\n#hero .ipad .aimwrap{display:none}\n#hero .ipad .rv-aim{margin-top:6px}\n#hero .ipad .specimen{font-size:11px;line-height:1.35;padding-top:2px;padding-bottom:2px}\n#hero .ipad .margin{font-size:10.5px;line-height:1.3;padding-top:2px;margin-top:3px}\n#hero .ipad .rails{margin-top:6px}\n#sdControls{gap:4px;margin-top:8px}\n#sdControls .bar{gap:6px}\n#sdControls .actions{padding:0}\n#noRows{padding:8px 12px;margin-top:6px}\n#noRows p{margin:3px 0}\n#starterToggle{padding:3px 10px}\n#rr-sec{margin:6px 0 0}\n#rr-sec .cut{font-size:10.5px;line-height:1.25}\n#rr-sec .rr-count{font-size:12px}\n#rr-sec .rr-more{font-size:11px;padding:3px 10px}\n.card.ask{padding:9px 14px;margin:5px 0}\n#khint{margin:2px 0 0}\n.credit{font-size:11px;line-height:1.25;margin-bottom:6px}\n#views{margin:8px 0 0}\n@media(max-width:760px){\n#vstrip.vgroups,#sd-second{display:none}\n.phbar>#count.sdcount{flex:0 0 100%;font:500 12.5px/1.35 'IBM Plex Mono',ui-monospace,monospace;margin:0 0 6px;max-width:none;color:var(--ink);white-space:normal}\n.phbar>#count.sdcount .fig{font-size:12.5px;font-weight:600;font-family:'IBM Plex Mono',ui-monospace,monospace}\n.phbar>#count.sdcount .aside,.phbar>#count.sdcount .broken{font-size:10px}\n#noRows{display:block!important;visibility:visible!important}\n#noRows[hidden]{display:block!important}\n#noRows p{font-size:12px;line-height:1.4}\n}\nJS:\n(function(){\n\"use strict\";\nwindow.__sderrs=window.__sderrs||[];\naddEventListener(\"error\",function(e){try{window.__sderrs.push(String((e&&e.message)||e))}catch(_){}});\nfunction byId(id){return document.getElementById(id)}\nfunction visible(n){if(!n||n.nodeType!==1)return false;if(!n.offsetParent&&getComputedStyle(n).position!==\"fixed\")return false;var cs=getComputedStyle(n);return cs.display!==\"none\"&&cs.visibility!==\"hidden\"}\nfunction phone(){return matchMedia(\"(max-width:760px)\").matches}\nvar READING_TEXT=\"Upper fuselage accounts for 84,453 of the 212,940 reports written in the FAA\\u2019s numbered zones, or 39.7%. Those numbers are what this diagram can place, and they are 12.1% of the selection. Another 1,454,504 do say where, in words such as FUSELAGE or CABIN rather than a zone number, so the drawing cannot show them. Only 90,383, 5.1%, give no location at all. It is a sample rather than the whole file, but it does give you a good idea of where the trouble sits.\";\nvar SEED_HTML='<span class=\"fig\">1,757,827</span> reports, everything the FAA has published to 26 August 2026.';\nvar SHORT_TOTAL=/^1,757,827\\s+reports\\.?(\\s*Nothing chosen yet\\.?)?\\s*$/;\nvar NOROWS_HTML='<p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and buries the one you have.</p><p class=\"muted\">Take a month, a zone, an airline or a tail from the instrument above, pick one of the starter questions, or set a filter. To read the file straight through anyway, use the button at the foot of the instrument.</p><p><button type=\"button\" class=\"sdbtn\" id=\"revealBtn\">Read all 1,757,827 anyway</button> <button type=\"button\" class=\"ghostbtn\" id=\"gotoStarters\">Show me the starter questions</button></p>';\nfunction sdFiltered(){\n  var i,x;\n  var sels=document.querySelectorAll(\"#sdControls select\");\n  for(i=0;i<sels.length;i++){if((sels[i].value||\"\").trim()!==\"\")return true}\n  var ins=document.querySelectorAll(\"#sdControls input\");\n  for(i=0;i<ins.length;i++){\n    x=ins[i];\n    if(x.type===\"checkbox\"||x.type===\"radio\"){if(x.checked)return true}\n    else if((x.value||\"\").trim()!==\"\")return true;\n  }\n  var tabs=document.querySelectorAll(\"#vstrip .vtab.on\");\n  for(i=0;i<tabs.length;i++){if((tabs[i].getAttribute(\"data-view\")||\"p-search\")!==\"p-search\")return true}\n  return false;\n}\nfunction ensureIpad(){\n  var hero=byId(\"hero\");if(!hero)return null;\n  var rails=hero.querySelector(\".rails\");\n  if(!rails||!visible(rails)||hero.querySelector(\".phbar\"))return hero.querySelector(\":scope > .ipad\")||null;\n  if(!/\\binstrument\\b/.test(hero.className||\"\"))hero.className=(\"instrument \"+(hero.className||\"\")).trim();\n  var kids=[].slice.call(hero.children),i,ipad=null,ihead=null;\n  for(i=0;i<kids.length;i++){if(/\\bipad\\b/.test(kids[i].className||\"\")){ipad=kids[i];break}}\n  for(i=0;i<kids.length;i++){if(/\\bihead\\b/.test(kids[i].className||\"\")){ihead=kids[i];break}}\n  if(!ipad){\n    ipad=document.createElement(\"div\");ipad.className=\"ipad\";\n    if(ihead)ihead.after(ipad);else hero.insertBefore(ipad,hero.firstChild);\n    kids=[].slice.call(hero.children);\n    for(i=0;i<kids.length;i++){if(kids[i]!==ipad&&kids[i]!==ihead)ipad.appendChild(kids[i])}\n  }\n  return ipad;\n}\nfunction sdSink(){\n  var s=byId(\"sd-sink\");\n  if(!s){s=document.createElement(\"div\");s.id=\"sd-sink\";(document.querySelector(\"main.wrap\")||document.body).appendChild(s)}\n  return s;\n}\nfunction sdEmpty(c){return !c.textContent.trim()&&!c.children.length}\nfunction seatCount(){\n  var all=document.querySelectorAll(\"#count\");\n  var c=all[0];\n  if(!c){\n    c=document.createElement(\"div\");c.id=\"count\";\n    (document.querySelector(\"main.wrap\")||document.body).appendChild(c);\n  }\n  var i;\n  for(i=0;i<all.length;i++){if(all[i]!==c&&all[i].parentNode)all[i].parentNode.removeChild(all[i])}\n  function detach(){if(c.parentNode&&c.parentNode.nodeType===1&&c.parentNode.contains(c))c.parentNode.removeChild(c)}\n  var hero=byId(\"hero\");\n  var railsEl=hero?hero.querySelector(\".rails\"):null;\n  var rails=(railsEl&&visible(railsEl))?railsEl:null;\n  var ph=hero?hero.querySelector(\".phbar\"):null;\n  if(ph&&(phone()||!rails)){\n    if(c.parentNode!==ph){detach();ph.insertBefore(c,ph.firstChild)}\n  }else if(rails){\n    var host=rails.parentNode;\n    if(c.parentNode!==host||c.nextElementSibling!==rails){\n      detach();\n      if(rails.parentNode===host)host.insertBefore(c,rails);\n    }\n  }\n  if(!/\\bsdcount\\b/.test(c.className))c.className=(\"sdcount \"+c.className).trim();\n  if(!sdFiltered()){\n    if(sdEmpty(c)||SHORT_TOTAL.test(c.textContent.trim())){c.dataset.sdSeeded=\"1\";c.innerHTML=SEED_HTML}\n  }\n}\nfunction retireStand(){\n  var s=document.querySelector(\".ipad .stand\");\n  if(s&&s.parentNode)sdSink().appendChild(s);\n}\nfunction ensureReading(){\n  var rail=document.querySelector(\".rail[data-rail=where]\");\n  if(!rail||!rail.parentNode)return;\n  var rs=[].slice.call(rail.querySelectorAll(\".reading\")),i,keep=null;\n  for(i=0;i<rs.length;i++){\n    if(!keep||rs[i].textContent.trim().length>keep.textContent.trim().length)keep=rs[i];\n  }\n  if(keep&&keep.tagName!==\"P\"){\n    var p=document.createElement(\"p\");p.className=\"reading\";\n    p.innerHTML=keep.innerHTML;\n    keep.parentNode.replaceChild(p,keep);keep=p;\n  }\n  if(!keep){\n    keep=document.createElement(\"p\");keep.className=\"reading\";\n    keep.textContent=READING_TEXT;\n  }\n  if(keep.parentNode!==rail)rail.appendChild(keep);\n  [].slice.call(rail.children).forEach(function(n){\n    if(n===keep)return;\n    var cn=n.className||\"\";\n    if(/\\b(gut|track)\\b/.test(cn))return;\n    if(/\\breading\\b/.test(cn)){\n      if(!n.textContent.trim())n.remove();\n      return;\n    }\n    n.remove();\n  });\n}\nfunction stripInline(){\n  var bs=document.querySelectorAll(\"#vstrip.vgroups .vgbtns\"),i;\n  for(i=0;i<bs.length;i++){\n    var b=bs[i];if(b.dataset.sdInl)continue;b.dataset.sdInl=\"1\";\n    b.style.margin=\"0\";b.style.padding=\"0\";b.style.borderBottom=\"0\";\n  }\n}\nfunction secondLine(){\n  var strip=byId(\"vstrip\");if(!strip)return;\n  var p=byId(\"sd-second\");\n  if(!p){p=document.createElement(\"p\");p.id=\"sd-second\";p.className=\"sd-second\";strip.parentNode.insertBefore(p,strip.nextSibling)}\n  if(p.dataset.sdDone)return;p.dataset.sdDone=\"1\";\n  var fr=byId(\"freshness\");\n  p.innerHTML=(fr&&fr.textContent.trim())?fr.textContent.trim():\"Counts of reports filed, not of flights.\";\n}\nfunction ensureSentence(){\n  var s=byId(\"sentence\");\n  if(!s){s=document.createElement(\"div\");s.id=\"sentence\";s.hidden=true;(document.querySelector(\"main.wrap\")||document.body).appendChild(s)}\n  if(!s.hidden)s.hidden=true;\n  if(s.style.display!==\"none\")s.style.display=\"none\";\n}\nfunction ensureNoRows(){\n  var n=byId(\"noRows\");if(!n)return;\n  if(!n.textContent.trim()&&!n.children.length)n.innerHTML=NOROWS_HTML;\n  if(phone()){\n    if(n.hasAttribute(\"hidden\"))n.removeAttribute(\"hidden\");\n    if(n.style.display===\"none\")n.style.display=\"\";\n  }\n}\nvar snap={c:null};\nfunction sdMirror(){\n  var s=byId(\"sentence\"),c=byId(\"count\");\n  if(!s||!c||s===c)return;\n  var cv=c.innerHTML;\n  if(s.innerHTML!==cv&&snap.c!==null&&snap.c!==cv){\n    s.innerHTML=cv;\n  }\n  snap.c=cv;\n}\nfunction purgeLand(){\n  var ls=document.querySelectorAll(\".card.land\"),i;\n  for(i=0;i<ls.length;i++)ls[i].remove();\n}\nvar queued=false;\nfunction pass(){\n  queued=false;\n  try{purgeLand()}catch(e){}\n  try{ensureSentence()}catch(e){}\n  try{ensureIpad()}catch(e){}\n  try{seatCount()}catch(e){}\n  try{retireStand()}catch(e){}\n  try{ensureReading()}catch(e){}\n  try{ensureNoRows()}catch(e){}\n  try{stripInline()}catch(e){}\n  try{secondLine()}catch(e){}\n  try{sdMirror()}catch(e){}\n}\nfunction kick(){if(queued)return;queued=true;requestAnimationFrame(pass)}\nnew MutationObserver(kick).observe(document.documentElement,{childList:true,subtree:true});\nif(document.readyState===\"loading\")document.addEventListener(\"DOMContentLoaded\",pass);\nelse pass();\naddEventListener(\"load\",pass);\naddEventListener(\"resize\",kick);\n})();"
+ },
+ {
+  "role": "assistant",
+  "content": "I'll ship a first fix (provisional write-up clip + td padding via a tagged table), then measure both sides to match the original exactly.",
+  "tool_calls": [
+   {
+    "id": "call_51bce7f656af43bbaa9c6e82",
+    "type": "function",
+    "function": {
+     "name": "deploy",
+     "arguments": "{\"css\":\"#sentence{display:none!important}\\n#sd-sink{display:none!important}\\n.card.land{display:none!important}\\n#vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}\\n#vstrip.vgroups .vg{display:flex;flex-direction:row;align-items:center;gap:10px;min-width:0}\\n#vstrip.vgroups .vglab{flex:0 0 auto;font:600 9.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em;color:#57514a;text-transform:uppercase;white-space:nowrap}\\n#vstrip.vgroups .vgbtns{display:flex!important;flex-direction:row!important;gap:2px!important;align-items:center!important;flex-wrap:wrap!important;margin:0!important;padding:0!important;border-bottom:0!important;min-width:0;flex:1 1 auto}\\nbutton.vtab{padding:3px 8px;font-size:11.5px;line-height:1.2;border:1px solid transparent;border-radius:3px;background:none;color:#5c554c;cursor:pointer;white-space:nowrap}\\nbutton.vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);font-weight:600}\\n.axis{display:flex;gap:2px;margin-top:3px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ash)}\\n.axis span{flex:1;min-width:0}\\n.sd-second{font-size:11.5px;color:#6b6560;margin:0 0 3px;text-align:center;letter-spacing:.02em}\\n.sd-second b{font-weight:600}\\n#hero.instrument{position:relative;background:var(--paper);border:1px solid var(--line);border-bottom:3px solid var(--rust);border-radius:6px;margin:12px 0 0;overflow:hidden;padding:0}\\n#hero.instrument > .ipad{padding:10px 20px 6px}\\n#count.sdcount{font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1.1;color:var(--ink);max-width:none;margin:4px 0 2px;white-space:normal}\\n#count.sdcount .fig{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:.92em;font-variant-numeric:tabular-nums;color:var(--rust-text,#b8431f)}\\n#count.sdcount .aside{font-size:.62em;color:var(--ash)}\\n#count.sdcount .broken{display:block;font-size:.5em;color:var(--rust)}\\n#count.sdcount .clause{border-bottom:1px dotted rgba(29,29,31,.28);cursor:pointer}\\n.rail .reading{margin:9px 0 0;padding:8px 12px 8px 13px;border-left:2px solid var(--rust);background:#faf7f3;font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);max-width:none}\\n.rail>.reading{grid-column:2}\\n@media(max-width:700px){.rail .reading{font-size:14px;padding:7px 10px}}\\n@media(min-width:901px){\\n#hero.instrument{max-width:1140px!important}\\n.rail{align-items:start;grid-template-columns:110px minmax(0,1fr)!important}\\n.rail .track{min-width:0;position:relative}\\n.rail .track.two{display:grid;grid-template-columns:minmax(0,628px) minmax(0,330px);gap:18px}\\n.rail .track.two > svg.plane{width:100%;max-width:640px;height:auto;display:block}\\n.rail .col .ch{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;color:var(--ash);margin-bottom:3px}\\n.rail .orow{display:grid;grid-template-columns:120px 1fr 52px;gap:8px;align-items:center;font-size:11.5px;height:14px;padding:0 3px;border-radius:3px}\\n.rail .orow .on{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:14px}\\n.rail .orow .ob{height:6px;background:#e8e3d8;border-radius:3px;overflow:hidden}\\n.rail .orow .ob i{display:block;height:100%;background:var(--rust)}\\n.rail .orow.wide{grid-template-columns:190px 1fr 56px;height:17px}\\n.rail .orow.wide .on{font-size:12px;line-height:17px}\\n.rail .fblock{height:22px}\\n.rail .frows{margin-top:4px}\\n.rail .fnote{font-size:11px;margin-top:3px}\\n.rail[data-rail=forced].open .fblock{margin-bottom:5px}\\n.rail .legend{font-size:11.5px;gap:0}\\n.rail .lrow{padding:0 4px;line-height:1.35}\\n.rail .zonenote{font-size:11px;line-height:1.4;margin-top:4px;padding-top:4px}\\n}\\n#hero .ipad .aimwrap{display:none}\\n#hero .ipad .rv-aim{margin-top:6px}\\n#hero .ipad .specimen{font-size:11px;line-height:1.35;padding-top:2px;padding-bottom:2px}\\n#hero .ipad .margin{font-size:10.5px;line-height:1.3;padding-top:2px;margin-top:3px}\\n#hero .ipad .rails{margin-top:6px}\\n#sdControls{gap:4px;margin-top:8px}\\n#sdControls .bar{gap:6px}\\n#sdControls .actions{padding:0}\\n#noRows{padding:8px 12px;margin-top:6px}\\n#noRows p{margin:3px 0}\\n#starterToggle{padding:3px 10px}\\n#rr-sec{margin:6px 0 0}\\n#rr-sec .cut{font-size:10.5px;line-height:1.25}\\n#rr-sec .rr-count{font-size:12px}\\n#rr-sec .rr-more{font-size:11px;padding:3px 10px}\\n.card.ask{padding:9px 14px;margin:5px 0}\\n#khint{margin:2px 0 0}\\n.credit{font-size:11px;line-height:1.25;margin-bottom:6px}\\n#views{margin:8px 0 0}\\n@media(max-width:760px){\\n#vstrip.vgroups,#sd-second{display:none}\\n.phbar>#count.sdcount{flex:0 0 100%;font:500 12.5px/1.35 'IBM Plex Mono',ui-monospace,monospace;margin:0 0 6px;max-width:none;color:var(--ink);white-space:normal}\\n.phbar>#count.sdcount .fig{font-size:12.5px;font-weight:600;font-family:'IBM Plex Mono',ui-monospace,monospace}\\n.phbar>#count.sdcount .aside,.phbar>#count.sdcount .broken{font-size:10px}\\n#noRows{display:block!important;visibility:visible!important}\\n#noRows[hidden]{display:block!important}\\n#noRows p{font-size:12px;line-height:1.4}\\n}\\n/* sd-wu: clip the write-up like the original, fixed height + fade */\\ntable.sdtable td{padding:4px 10px}\\n.wu{max-height:112px;overflow:hidden;position:relative}\\n.wu::after{content:\\\"\\\";position:absolute;left:0;right:0;bottom:0;height:16px;background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,.92) 70%,#fff)}\",\"js\":\"(function(){\\n\\\"use strict\\\";\\nwindow.__sderrs=window.__sderrs||[];\\naddEventListener(\\\"error\\\",function(e){try{window.__sderrs.push(String((e&&e.message)||e))}catch(_){}});\\nfunction byId(id){return document.getElementById(id)}\\nfunction visible(n){if(!n||n.nodeType!==1)return false;if(!n.offsetParent&&getComputedStyle(n).position!==\\\"fixed\\\")return false;var cs=getComputedStyle(n);return cs.display!==\\\"none\\\"&&cs.visibility!==\\\"hidden\\\"}\\nfunction phone(){return matchMedia(\\\"(max-width:760px)\\\").matches}\\nvar READING_TEXT=\\\"Upper fuselage accounts for 84,453 of the 212,940 reports written in the FAA\\\\u2019s numbered zones, or 39.7%. Those numbers are what this diagram can place, and they are 12.1% of the selection. Another 1,454,504 do say where, in words such as FUSELAGE or CABIN rather than a zone number, so the drawing cannot show them. Only 90,383, 5.1%, give no location at all. It is a sample rather than the whole file, but it does give you a good idea of where the trouble sits.\\\";\\nvar SEED_HTML='<span class=\\\"fig\\\">1,757,827</span> reports, everything the FAA has published to 26 August 2026.';\\nvar SHORT_TOTAL=/^1,757,827\\\\s+reports\\\\.?(\\\\s*Nothing chosen yet\\\\.?)?\\\\s*$/;\\nvar NOROWS_HTML='<p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and buries the one you have.</p><p class=\\\"muted\\\">Take a month, a zone, an airline or a tail from the instrument above, pick one of the starter questions, or set a filter. To read the file straight through anyway, use the button at the foot of the instrument.</p><p><button type=\\\"button\\\" class=\\\"sdbtn\\\" id=\\\"revealBtn\\\">Read all 1,757,827 anyway</button> <button type=\\\"button\\\" class=\\\"ghostbtn\\\" id=\\\"gotoStarters\\\">Show me the starter questions</button></p>';\\nfunction sdFiltered(){\\n  var i,x;\\n  var sels=document.querySelectorAll(\\\"#sdControls select\\\");\\n  for(i=0;i<sels.length;i++){if((sels[i].value||\\\"\\\").trim()!==\\\"\\\")return true}\\n  var ins=document.querySelectorAll(\\\"#sdControls input\\\");\\n  for(i=0;i<ins.length;i++){\\n    x=ins[i];\\n    if(x.type===\\\"checkbox\\\"||x.type===\\\"radio\\\"){if(x.checked)return true}\\n    else if((x.value||\\\"\\\").trim()!==\\\"\\\")return true;\\n  }\\n  var tabs=document.querySelectorAll(\\\"#vstrip .vtab.on\\\");\\n  for(i=0;i<tabs.length;i++){if((tabs[i].getAttribute(\\\"data-view\\\")||\\\"p-search\\\")!==\\\"p-search\\\")return true}\\n  return false;\\n}\\nfunction ensureIpad(){\\n  var hero=byId(\\\"hero\\\");if(!hero)return null;\\n  var rails=hero.querySelector(\\\".rails\\\");\\n  if(!rails||!visible(rails)||hero.querySelector(\\\".phbar\\\"))return hero.querySelector(\\\":scope > .ipad\\\")||null;\\n  if(!/\\\\binstrument\\\\b/.test(hero.className||\\\"\\\"))hero.className=(\\\"instrument \\\"+(hero.className||\\\"\\\")).trim();\\n  var kids=[].slice.call(hero.children),i,ipad=null,ihead=null;\\n  for(i=0;i<kids.length;i++){if(/\\\\bipad\\\\b/.test(kids[i].className||\\\"\\\")){ipad=kids[i];break}}\\n  for(i=0;i<kids.length;i++){if(/\\\\bihead\\\\b/.test(kids[i].className||\\\"\\\")){ihead=kids[i];break}}\\n  if(!ipad){\\n    ipad=document.createElement(\\\"div\\\");ipad.className=\\\"ipad\\\";\\n    if(ihead)ihead.after(ipad);else hero.insertBefore(ipad,hero.firstChild);\\n    kids=[].slice.call(hero.children);\\n    for(i=0;i<kids.length;i++){if(kids[i]!==ipad&&kids[i]!==ihead)ipad.appendChild(kids[i])}\\n  }\\n  return ipad;\\n}\\nfunction sdSink(){\\n  var s=byId(\\\"sd-sink\\\");\\n  if(!s){s=document.createElement(\\\"div\\\");s.id=\\\"sd-sink\\\";(document.querySelector(\\\"main.wrap\\\")||document.body).appendChild(s)}\\n  return s;\\n}\\nfunction sdEmpty(c){return !c.textContent.trim()&&!c.children.length}\\nfunction seatCount(){\\n  var all=document.querySelectorAll(\\\"#count\\\");\\n  var c=all[0];\\n  if(!c){\\n    c=document.createElement(\\\"div\\\");c.id=\\\"count\\\";\\n    (document.querySelector(\\\"main.wrap\\\")||document.body).appendChild(c);\\n  }\\n  var i;\\n  for(i=0;i<all.length;i++){if(all[i]!==c&&all[i].parentNode)all[i].parentNode.removeChild(all[i])}\\n  function detach(){if(c.parentNode&&c.parentNode.nodeType===1&&c.parentNode.contains(c))c.parentNode.removeChild(c)}\\n  var hero=byId(\\\"hero\\\");\\n  var railsEl=hero?hero.querySelector(\\\".rails\\\"):null;\\n  var rails=(railsEl&&visible(railsEl))?railsEl:null;\\n  var ph=hero?hero.querySelector(\\\".phbar\\\"):null;\\n  if(ph&&(phone()||!rails)){\\n    if(c.parentNode!==ph){detach();ph.insertBefore(c,ph.firstChild)}\\n  }else if(rails){\\n    var host=rails.parentNode;\\n    if(c.parentNode!==host||c.nextElementSibling!==rails){\\n      detach();\\n      if(rails.parentNode===host)host.insertBefore(c,rails);\\n    }\\n  }\\n  if(!/\\\\bsdcount\\\\b/.test(c.className))c.className=(\\\"sdcount \\\"+c.className).trim();\\n  if(!sdFiltered()){\\n    if(sdEmpty(c)||SHORT_TOTAL.test(c.textContent.trim())){c.dataset.sdSeeded=\\\"1\\\";c.innerHTML=SEED_HTML}\\n  }\\n}\\nfunction retireStand(){\\n  var s=document.querySelector(\\\".ipad .stand\\\");\\n  if(s&&s.parentNode)sdSink().appendChild(s);\\n}\\nfunction ensureReading(){\\n  var rail=document.querySelector(\\\".rail[data-rail=where]\\\");\\n  if(!rail||!rail.parentNode)return;\\n  var rs=[].slice.call(rail.querySelectorAll(\\\".reading\\\")),i,keep=null;\\n  for(i=0;i<rs.length;i++){\\n    if(!keep||rs[i].textContent.trim().length>keep.textContent.trim().length)keep=rs[i];\\n  }\\n  if(keep&&keep.tagName!==\\\"P\\\"){\\n    var p=document.createElement(\\\"p\\\");p.className=\\\"reading\\\";\\n    p.innerHTML=keep.innerHTML;\\n    keep.parentNode.replaceChild(p,keep);keep=p;\\n  }\\n  if(!keep){\\n    keep=document.createElement(\\\"p\\\");keep.className=\\\"reading\\\";\\n    keep.textContent=READING_TEXT;\\n  }\\n  if(keep.parentNode!==rail)rail.appendChild(keep);\\n  [].slice.call(rail.children).forEach(function(n){\\n    if(n===keep)return;\\n    var cn=n.className||\\\"\\\";\\n    if(/\\\\b(gut|track)\\\\b/.test(cn))return;\\n    if(/\\\\breading\\\\b/.test(cn)){\\n      if(!n.textContent.trim())n.remove();\\n      return;\\n    }\\n    n.remove();\\n  });\\n}\\nfunction stripInline(){\\n  var bs=document.querySelectorAll(\\\"#vstrip.vgroups .vgbtns\\\"),i;\\n  for(i=0;i<bs.length;i++){\\n    var b=bs[i];if(b.dataset.sdInl)continue;b.dataset.sdInl=\\\"1\\\";\\n    b.style.margin=\\\"0\\\";b.style.padding=\\\"0\\\";b.style.borderBottom=\\\"0\\\";\\n  }\\n}\\nfunction secondLine(){\\n  var strip=byId(\\\"vstrip\\\");if(!strip)return;\\n  var p=byId(\\\"sd-second\\\");\\n  if(!p){p=document.createElement(\\\"p\\\");p.id=\\\"sd-second\\\";p.className=\\\"sd-second\\\";strip.parentNode.insertBefore(p,strip.nextSibling)}\\n  if(p.dataset.sdDone)return;p.dataset.sdDone=\\\"1\\\";\\n  var fr=byId(\\\"freshness\\\");\\n  p.innerHTML=(fr&&fr.textContent.trim())?fr.textContent.trim():\\\"Counts of reports filed, not of flights.\\\";\\n}\\nfunction ensureSentence(){\\n  var s=byId(\\\"sentence\\\");\\n  if(!s){s=document.createElement(\\\"div\\\");s.id=\\\"sentence\\\";s.hidden=true;(document.querySelector(\\\"main.wrap\\\")||document.body).appendChild(s)}\\n  if(!s.hidden)s.hidden=true;\\n  if(s.style.display!==\\\"none\\\")s.style.display=\\\"none\\\";\\n}\\nfunction ensureNoRows(){\\n  var n=byId(\\\"noRows\\\");if(!n)return;\\n  if(!n.textContent.trim()&&!n.children.length)n.innerHTML=NOROWS_HTML;\\n  if(phone()){\\n    if(n.hasAttribute(\\\"hidden\\\"))n.removeAttribute(\\\"hidden\\\");\\n    if(n.style.display===\\\"none\\\")n.style.display=\\\"\\\";\\n  }\\n}\\n/* sd-tag: mark the record table so its td padding can be tightened */\\nfunction tagTable(){\\n  var w=document.querySelector(\\\".wu\\\");\\n  if(!w)return;\\n  var t=w.closest(\\\"table\\\");\\n  if(t&&!t.classList.contains(\\\"sdtable\\\"))t.classList.add(\\\"sdtable\\\");\\n}\\nvar snap={c:null};\\nfunction sdMirror(){\\n  var s=byId(\\\"sentence\\\"),c=byId(\\\"count\\\");\\n  if(!s||!c||s===c)return;\\n  var cv=c.innerHTML;\\n  if(s.innerHTML!==cv&&snap.c!==null&&snap.c!==cv){\\n    s.innerHTML=cv;\\n  }\\n  snap.c=cv;\\n}\\nfunction purgeLand(){\\n  var ls=document.querySelectorAll(\\\".card.land\\\"),i;\\n  for(i=0;i<ls.length;i++)ls[i].remove();\\n}\\nvar queued=false;\\nfunction pass(){\\n  queued=false;\\n  try{purgeLand()}catch(e){}\\n  try{ensureSentence()}catch(e){}\\n  try{ensureIpad()}catch(e){}\\n  try{seatCount()}catch(e){}\\n  try{retireStand()}catch(e){}\\n  try{ensureReading()}catch(e){}\\n  try{ensureNoRows()}catch(e){}\\n  try{stripInline()}catch(e){}\\n  try{secondLine()}catch(e){}\\n  try{tagTable()}catch(e){}\\n  try{sdMirror()}catch(e){}\\n}\\nfunction kick(){if(queued)return;queued=true;requestAnimationFrame(pass)}\\nnew MutationObserver(kick).observe(document.documentElement,{childList:true,subtree:true});\\nif(document.readyState===\\\"loading\\\")document.addEventListener(\\\"DOMContentLoaded\\\",pass);\\nelse pass();\\naddEventListener(\\\"load\\\",pass);\\naddEventListener(\\\"resize\\\",kick);\\n})();\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_51bce7f656af43bbaa9c6e82",
+  "content": "{\"ok\": true, \"note\": \"published to https://aircraftdefects.com/z/\"}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_8cb8020b05994e0090fdd97f",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var w=document.querySelector(\\\".wu\\\");var r=w?w.getBoundingClientRect():null;var trs=document.querySelectorAll(\\\"tr.wrote,tr.rep\\\");var t=document.querySelector(\\\".wu\\\")?document.querySelector(\\\".wu\\\").closest(\\\"table\\\"):null;return {wu:r?r.height:null,rows:[].map.call(trs,x=>[x.className,x.getBoundingClientRect().height]),table:t?t.getBoundingClientRect().height:null,page:document.documentElement.scrollHeight,children:[].map.call(document.querySelector(\\\"main\\\").children,x=>[x.className||x.tagName,Math.round(x.getBoundingClientRect().height)])}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   },
+   {
+    "id": "call_ec9d9eaba6cf44b7b71a43cc",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var w=document.querySelector(\\\".wu\\\");var cs=w?getComputedStyle(w):null;var r=w?w.getBoundingClientRect():null;return {wuHeight:r?r.height:null,maxHeight:cs?cs.maxHeight:null,overflow:cs?cs.overflow:null,webkitLineClamp:cs?cs.webkitLineClamp:null,lineClamp:cs?cs.webkitLineClamp:null,display:cs?cs.display:null,fontSize:cs?cs.fontSize:null,lineHeight:cs?cs.lineHeight:null,children:children(),tr:tr(),table:tbl(),page:document.documentElement.scrollHeight};function children(){return [].map.call(document.querySelector(\\\"main\\\").children,x=>[x.className||x.tagName,Math.round(x.getBoundingClientRect().height)])}function tr(){var o={};[\\\"wrote\\\",\\\"rep\\\"].forEach(function(c){var e=document.querySelector(\\\"tr.\\\"+c);if(e)o[c]=e.getBoundingClientRect().height});return o}function tbl(){var t=document.querySelector(\\\"table\\\");return t?t.getBoundingClientRect().height:null}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_8cb8020b05994e0090fdd97f",
+  "content": "{\"value\": {\"wu\": 112, \"rows\": [[\"rep\", 73.046875], [\"wrote\", 127], [\"rep\", 85.21875], [\"wrote\", 127], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 73.046875], [\"wrote\", 122.25], [\"rep\", 85.21875], [\"wrote\", 127], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 73.046875], [\"wrote\", 127], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 122.25], [\"rep\", 85.21875], [\"wrote\", 127], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 122.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 122.25], [\"rep\", 73.046875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 122.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 127], [\"rep\", 73.046875], [\"wrote\", 127], [\"rep\", 73.046875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 122.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 122.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 122.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 73.046875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 122.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 127], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 127], [\"rep\", 85.21875], [\"wrote\", 127], [\"rep\", 85.21875], [\"wrote\", 122.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 102.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 82.25], [\"rep\", 85.21875], [\"wrote\", 102.25]], \"table\": 18794.0625, \"page\": 20819, \"children\": [[\"DIV\", 30], [\"DIV\", 784], [\"DIV\", 0], [\"card ask\", 59], [\"hint\", 17], [\"DIV\", 0], [\"credit\", 28], [\"DIV\", 19620], [\"rv-sentence\", 0], [\"rv-aim\", 36]]}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_ec9d9eaba6cf44b7b71a43cc",
+  "content": "{\"value\": {\"wuHeight\": 111.8125, \"maxHeight\": \"none\", \"overflow\": \"visible\", \"webkitLineClamp\": \"none\", \"lineClamp\": \"none\", \"display\": \"block\", \"fontSize\": \"13px\", \"lineHeight\": \"20.15px\", \"children\": [[\"instrument\", 837], [\"tabs\", 104], [\"freshness\", 19], [\"credit\", 19], [\"panel on\", 15533], [\"panel\", 0], [\"panel\", 0], [\"panel\", 0], [\"panel\", 0], [\"panel\", 0], [\"panel\", 0], [\"panel\", 0], [\"panel\", 0], [\"panel\", 0], [\"panel\", 0], [\"panel\", 0], [\"panel\", 0], [\"DIV\", 0], [\"panel\", 0], [\"panel\", 0], [\"panel\", 0]], \"tr\": {\"wrote\": 126.3125, \"rep\": 72.375}, \"table\": 14913.78125, \"page\": 16655}}"
+ },
+ {
+  "role": "assistant",
+  "content": "The clip works (`.wu` 112, first `tr.wrote` 127 vs 126.3), but later `tr.rep` rows run 85.2 vs the original's 72.4 and the table is still 26% too tall. Let me dig into what makes the rep rows tall on each side.",
+  "tool_calls": [
+   {
+    "id": "call_21705eb3f4394f57bff41463",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var t=document.querySelector(\\\"table\\\");var rows=[].slice.call(t.querySelectorAll(\\\"tr\\\"));var counts={};rows.forEach(function(r){counts[r.className]=(counts[r.className]||0)+1});var rep=rows.filter(r=>r.className===\\\"rep\\\")[1]||rows.filter(r=>r.className===\\\"rep\\\")[0];var td=rep.querySelector(\\\"td\\\");var cs=getComputedStyle(td);var wu=rep.querySelector(\\\".wu\\\");var wuParent=wu?wu.parentElement:null;var wuPCs=wuParent?getComputedStyle(wuParent):null;var fade=getComputedStyle(wu,\\\"::after\\\");var out={rowCount:rows.length,counts:counts,repH:rep.getBoundingClientRect().height,tdPad:cs.padding,wuH:wu?wu.getBoundingClientRect().height:null,wuLH:wu?getComputedStyle(wu).lineHeight:null,wuTag:wu?wu.tagName:null,parentTag:wuParent?wuParent.tagName+\\\".\\\"+wuParent.className:null,parentMaxH:wuPCs?wuPCs.maxHeight:null,parentOverflow:wuPCs?wuPCs.overflow:null,afterContent:fade.content,afterBg:fade.backgroundImage.slice(0,120),afterH:fade.height,tds:[].map.call(rep.querySelectorAll(\\\"td\\\"),td=>[td.className,td.textContent.trim().slice(0,40),Math.round(td.getBoundingClientRect().height)])};var wr=rows.filter(r=>r.className===\\\"wrote\\\")[1];if(wr){out.wroteH=wr.getBoundingClientRect().height;out.wroteTds=[].map.call(wr.querySelectorAll(\\\"td\\\"),td=>[td.className,td.textContent.trim().slice(0,40),Math.round(td.getBoundingClientRect().height)])}return out}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   },
+   {
+    "id": "call_fcac7e1baf5b444d80b90674",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var t=document.querySelector(\\\"table\\\");var rows=[].slice.call(t.querySelectorAll(\\\"tr\\\"));var counts={};rows.forEach(function(r){counts[r.className]=(counts[r.className]||0)+1});var rep=rows.filter(r=>r.className===\\\"rep\\\")[1]||rows.filter(r=>r.className===\\\"rep\\\")[0];var td=rep.querySelector(\\\"td\\\");var cs=getComputedStyle(td);var wu=rep.querySelector(\\\".wu\\\");var out={rowCount:rows.length,counts:counts,repH:rep.getBoundingClientRect().height,tdPad:cs.padding,wuH:wu?wu.getBoundingClientRect().height:null,wuLH:wu?getComputedStyle(wu).lineHeight:null,tds:[].map.call(rep.querySelectorAll(\\\"td\\\"),td=>[td.className,td.textContent.trim().slice(0,40),Math.round(td.getBoundingClientRect().height)])};var wr=rows.filter(r=>r.className===\\\"wrote\\\")[1];if(wr){out.wroteH=wr.getBoundingClientRect().height;out.wroteTds=[].map.call(wr.querySelectorAll(\\\"td\\\"),td=>[td.className,td.textContent.trim().slice(0,40),Math.round(td.getBoundingClientRect().height)])}return out}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_21705eb3f4394f57bff41463",
+  "content": "{\"value\": {\"error\": \"Page.evaluate: TypeError: Failed to execute 'getComputedStyle' on 'Window': parameter 1 is not of type 'Element'.\\n    at eval (eval at evaluate (:291:30), <anonymous>:1:457)\\n    at UtilityScript.evaluate (<anonymous>:298:18)\\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\"}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_fcac7e1baf5b444d80b90674",
+  "content": "{\"value\": {\"rowCount\": 202, \"counts\": {\"hdr\": 1, \"spine\": 1, \"rep\": 100, \"wrote\": 100}, \"repH\": 85.21875, \"tdPad\": \"5px 10px\", \"wuH\": null, \"wuLH\": null, \"tds\": [[\"\", \"26 August 2026N617FE\", 85], [\"\", \"Federal Express Corp\", 85], [\"\", \"DOUG MD11F\", 85], [\"\", \"N617FE\", 85], [\"\", \"Fuselage, Seat/Cargo Attach Fittings\", 85], [\"\", \"SEAT TRACKNO DISCREPANCY\", 85], [\"\", \"Other\", 85], [\"\", \"None\", 85], [\"\", \"Someone looked at it\", 85], [\"muted\", \"On the ground, in inspection or maintena\", 85], [\"\", \"Case sheet\", 85]], \"wroteH\": 127, \"wroteTds\": [[\"\", \"MAIN DECK CARGO COMPARTMENT - EXISTING S\", 127]]}}"
+ },
+ {
+  "role": "assistant",
+  "content": "The `rep` selector exists on both \u2014 the error was `querySelector` picking a header row whose `td` differs. Let me probe the original's `rep` cell and write-up anatomy more carefully.",
+  "tool_calls": [
+   {
+    "id": "call_6f5262325a524f438460e575",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var t=document.querySelector(\\\"table\\\");var rows=[].slice.call(t.querySelectorAll(\\\"tr\\\"));var rep=rows.filter(r=>r.className===\\\"rep\\\")[1];var td=rep.querySelector(\\\"td\\\");var cs=getComputedStyle(td);var wu=rep.querySelector(\\\".wu\\\");var pcs=wu?getComputedStyle(wu.parentElement):null;var fade=wu?getComputedStyle(wu,\\\"::after\\\"):null;var out={repH:rep.getBoundingClientRect().height,tdPad:cs.padding,tds:[].map.call(rep.querySelectorAll(\\\"td\\\"),td=>[td.textContent.trim().slice(0,40),Math.round(td.getBoundingClientRect().height)])};if(wu){var wcs=getComputedStyle(wu);out.wu={tag:wu.tagName,cls:wu.className,h:wu.getBoundingClientRect().height,maxH:wcs.maxHeight,overflow:wcs.overflow,webkitLineClamp:wcs.webkitLineClamp,webkitBoxOrient:wcs.webkitBoxOrient,display:wcs.display,fontSize:wcs.fontSize,lineHeight:wcs.lineHeight,mask:wcs.maskImage||wcs.webkitMaskImage,maskSize:wcs.maskSize,parentTag:wu.parentElement.tagName+\\\".\\\"+wu.parentElement.className,parentMaxH:pcs?pcs.maxHeight:null,parentOverflow:pcs?pcs.overflow:null,afterContent:fade.content,afterH:fade.height,afterBg:fade.backgroundImage.slice(0,100),afterMask:fade.maskImage||fade.webkitMaskImage}};var wr=rows.filter(r=>r.className===\\\"wrote\\\")[1];out.wroteH=wr.getBoundingClientRect().height;out.wroteTds=[].map.call(wr.querySelectorAll(\\\"td\\\"),td=>[td.textContent.trim().slice(0,40),Math.round(td.getBoundingClientRect().height)])}return out}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_6f5262325a524f438460e575",
+  "content": "{\"value\": {\"error\": \"Page.evaluate: SyntaxError: Unexpected token 'return'\\n    at eval (<anonymous>)\\n    at UtilityScript.evaluate (<anonymous>:291:30)\\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_9544d4a84ef04650b6ce00a3",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var t=document.querySelector(\\\"table\\\");var rows=[].slice.call(t.querySelectorAll(\\\"tr\\\"));var rep=rows.filter(r=>r.className===\\\"rep\\\")[1];var td=rep.querySelector(\\\"td\\\");var cs=getComputedStyle(td);var wu=rep.querySelector(\\\".wu\\\");var out={repH:rep.getBoundingClientRect().height,tdPad:cs.padding,tds:[].map.call(rep.querySelectorAll(\\\"td\\\"),td=>[td.textContent.trim().slice(0,40),Math.round(td.getBoundingClientRect().height)])};if(wu){var wcs=getComputedStyle(wu);var pcs=getComputedStyle(wu.parentElement);var fade=getComputedStyle(wu,\\\"::after\\\");out.wu={tag:wu.tagName,cls:wu.className,h:wu.getBoundingClientRect().height,maxH:wcs.maxHeight,overflow:wcs.overflow,webkitLineClamp:wcs.webkitLineClamp,webkitBoxOrient:wcs.webkitBoxOrient,display:wcs.display,fontSize:wcs.fontSize,lineHeight:wcs.lineHeight,maskImage:wcs.maskImage||wcs.webkitMaskImage,parentTag:wu.parentElement.tagName+\\\".\\\"+wu.parentElement.className,parentMaxH:pcs.maxHeight,parentOverflow:pcs.overflow,afterContent:fade.content,afterH:fade.height,afterBg:fade.backgroundImage.slice(0,100),afterMask:fade.maskImage||fade.webkitMaskImage};var wr=rows.filter(r=>r.className===\\\"wrote\\\")[1];out.wroteH=wr.getBoundingClientRect().height;out.wroteTds=[].map.call(wr.querySelectorAll(\\\"td\\\"),td2=>[td2.textContent.trim().slice(0,40),Math.round(td2.getBoundingClientRect().height)])}return out}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_9544d4a84ef04650b6ce00a3",
+  "content": "{\"value\": {\"repH\": 72.375, \"tdPad\": \"8px 9px 4px\", \"tds\": [[\"26 Aug 2026N617FE\", 72], [\"Federal Express Corp\", 72], [\"DOUG MD11F\", 72], [\"N617FE\", 72], [\"Fuselage, Seat/Cargo Attach Fittings\\n   \", 72], [\"SEAT TRACK\\n        NO DISCREPANCY\", 72], [\"Other\", 72], [\"None\", 72], [\"By eye\", 72], [\"In maintenance\", 72], [\"Case sheet\\n        FDEA202608261231\", 72]]}}"
+ },
+ {
+  "role": "assistant",
+  "content": "Original `rep` tds pad `8px 9px 4px`, and the write-up lives in the `wrote` rows. Now I need the per-row height distributions on both sides to see where my extra ~3,900px comes from.",
+  "tool_calls": [
+   {
+    "id": "call_3ab66e824d9b438a80758435",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var rows=[].slice.call(document.querySelectorAll(\\\"table tr\\\"));function hist(cls){var h={};rows.filter(r=>r.className===cls).forEach(function(r){var v=Math.round(r.getBoundingClientRect().height);h[v]=(h[v]||0)+1});return h}var wr=rows.filter(r=>r.className===\\\"wrote\\\")[0];var wu=wr.querySelector(\\\".wu\\\");var wtd=wr.querySelector(\\\"td\\\");var out={wroteHist:hist(\\\"wrote\\\"),repHist:hist(\\\"rep\\\")};if(wu){var p=wu.parentElement,pcs=getComputedStyle(p);var f=getComputedStyle(wu,\\\"::after\\\");out.wu={h:wu.getBoundingClientRect().height,maxH:pcs.maxHeight,overflow:pcs.overflow,lineClamp:pcs.webkitLineClamp,boxOrient:pcs.webkitBoxOrient,parentTag:p.tagName+\\\".\\\"+p.className,parentMaxH:pcs.maxHeight,parentPadding:pcs.padding,afterContent:f.content,afterH:f.height,afterMask:(f.maskImage||f.webkitMaskImage||\\\"\\\").slice(0,80),mask:(getComputedStyle(wu).maskImage||\\\"\\\").slice(0,80)}}out.wtdPad=getComputedStyle(wtd).padding;out.wtdLine=getComputedStyle(wtd).lineHeight;out.wtdFont=getComputedStyle(wtd).fontSize;var rep=rows.filter(r=>r.className===\\\"rep\\\")[0];var rtd=rep.querySelector(\\\"td\\\");out.rtdPad=getComputedStyle(rtd).padding;out.rtdLine=getComputedStyle(rtd).lineHeight;}return out}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   },
+   {
+    "id": "call_accde61707544015812f63b3",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var rows=[].slice.call(document.querySelectorAll(\\\"table tr\\\"));function hist(cls){var h={};rows.filter(r=>r.className===cls).forEach(function(r){var v=Math.round(r.getBoundingClientRect().height);h[v]=(h[v]||0)+1});return h}var wr=rows.filter(r=>r.className===\\\"wrote\\\")[0];var wtd=wr.querySelector(\\\"td\\\");var rep=rows.filter(r=>r.className===\\\"rep\\\")[0];var rtd=rep.querySelector(\\\"td\\\");return {wroteHist:hist(\\\"wrote\\\"),repHist:hist(\\\"rep\\\"),wtdPad:getComputedStyle(wtd).padding,wtdLine:getComputedStyle(wtd).lineHeight,rtdPad:getComputedStyle(rtd).padding,rtdLine:getComputedStyle(rtd).lineHeight,tableH:document.querySelector(\\\"table\\\").getBoundingClientRect().height,page:document.documentElement.scrollHeight}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_3ab66e824d9b438a80758435",
+  "content": "{\"value\": {\"error\": \"Page.evaluate: SyntaxError: Unexpected token 'return'\\n    at eval (<anonymous>)\\n    at UtilityScript.evaluate (<anonymous>:291:30)\\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\"}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_accde61707544015812f63b3",
+  "content": "{\"value\": {\"wroteHist\": {\"82\": 18, \"102\": 62, \"122\": 10, \"127\": 10}, \"repHist\": {\"73\": 7, \"85\": 93}, \"wtdPad\": \"5px 10px\", \"wtdLine\": \"14.85px\", \"rtdPad\": \"5px 10px\", \"rtdLine\": \"14.85px\", \"tableH\": 18794.0625, \"page\": 20819}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_f57addd732e843cebc85de38",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var rows=[].slice.call(document.querySelectorAll(\\\"table tr\\\"));function hist(cls){var h={};rows.filter(function(r){return r.className===cls}).forEach(function(r){var v=Math.round(r.getBoundingClientRect().height);h[v]=(h[v]||0)+1});return h}var wr=rows.filter(function(r){return r.className===\\\"wrote\\\"})[0];var wu=wr.querySelector(\\\".wu\\\");var wtd=wr.querySelector(\\\"td\\\");var out={wroteHist:hist(\\\"wrote\\\"),repHist:hist(\\\"rep\\\")};if(wu){var p=wu.parentElement;var pcs=getComputedStyle(p);var f=getComputedStyle(wu,\\\"::after\\\");var wcs=getComputedStyle(wu);out.wu={h:wu.getBoundingClientRect().height,maxH:pcs.maxHeight,overflow:pcs.overflow,lineClamp:wcs.webkitLineClamp,boxOrient:wcs.webkitBoxOrient,parentTag:p.tagName+\\\".\\\"+p.className,parentMaxH:pcs.maxHeight,parentOverflow:pcs.overflow,parentPadding:pcs.padding,afterContent:f.content,afterH:f.height,afterMask:(f.maskImage||f.webkitMaskImage||\\\"\\\").slice(0,80),mask:(wcs.maskImage||\\\"\\\").slice(0,80)}}out.wtdPad=getComputedStyle(wtd).padding;out.wtdLine=getComputedStyle(wtd).lineHeight;var rep=rows.filter(function(r){return r.className===\\\"rep\\\"})[0];var rtd=rep.querySelector(\\\"td\\\");out.rtdPad=getComputedStyle(rtd).padding;out.rtdLine=getComputedStyle(rtd).lineHeight;return out}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_f57addd732e843cebc85de38",
+  "content": "{\"value\": {\"wroteHist\": {\"51\": 18, \"71\": 61, \"91\": 10, \"126\": 11}, \"repHist\": {\"71\": 72, \"72\": 23, \"73\": 1, \"93\": 4}, \"wu\": {\"h\": 111.8125, \"maxH\": \"none\", \"overflow\": \"visible\", \"lineClamp\": \"none\", \"boxOrient\": \"horizontal\", \"parentTag\": \"TD.\", \"parentMaxH\": \"none\", \"parentOverflow\": \"visible\", \"parentPadding\": \"0px 0px 14px\", \"afterContent\": \"\\\"\\\"\", \"afterH\": \"22px\", \"afterMask\": \"none\", \"mask\": \"none\"}, \"wtdPad\": \"0px 0px 14px\", \"wtdLine\": \"20.15px\", \"rtdPad\": \"8px 9px 4px\", \"rtdLine\": \"20.15px\"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "My earlier probe mislabeled fields (read the parent's max-height instead of `.wu`'s). Let me get the real `.wu` clip mechanism and per-cell anatomy on both sides.",
+  "tool_calls": [
+   {
+    "id": "call_89b33281e5c446c5ac287c68",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var rows=[].slice.call(document.querySelectorAll(\\\"table tr\\\"));var wr=rows.filter(function(r){return r.className===\\\"wrote\\\"})[1];var wu=wr.querySelector(\\\".wu\\\");var wcs=getComputedStyle(wu);var wtd=wr.querySelector(\\\"td\\\");var rep=rows.filter(function(r){return r.className===\\\"rep\\\"})[1];var repInfo=[].map.call(rep.querySelectorAll(\\\"td\\\"),function(td){var kid=td.firstElementChild;return {tdH:Math.round(td.getBoundingClientRect().height),tdScroll:td.scrollHeight,kid:kid?(kid.tagName+\\\".\\\"+(kid.className||\\\"\\\")):null,kidH:kid?Math.round(kid.getBoundingClientRect().height):null,lines:Math.round(td.getBoundingClientRect().height/20.15)}});return {wu:{h:wu.getBoundingClientRect().height,scrollH:wu.scrollHeight,clientH:wu.clientHeight,height:wcs.height,maxH:wcs.maxHeight,overflow:wcs.overflow,padding:wcs.padding,position:wcs.position,display:wcs.display,mask:wcs.webkitMaskImage,lineClamp:wcs.webkitLineClamp,text:slice(wu.textContent)},wtdH:Math.round(wtd.getBoundingClientRect().height),wtdPad:getComputedStyle(wtd).padding,rep:repInfo};function slice(s){s=s.trim();return s.length>90?s.slice(0,90)+\\\"\u2026\\\":s}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   },
+   {
+    "id": "call_9b8aff14fe3e471796989b7e",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var rows=[].slice.call(document.querySelectorAll(\\\"table tr\\\"));var wr=rows.filter(function(r){return r.className===\\\"wrote\\\"})[1];var wu=wr.querySelector(\\\".wu\\\");var wcs=getComputedStyle(wu);var wtd=wr.querySelector(\\\"td\\\");var rep=rows.filter(function(r){return r.className===\\\"rep\\\"})[1];var repInfo=[].map.call(rep.querySelectorAll(\\\"td\\\"),function(td){var kid=td.firstElementChild;return {tdH:Math.round(td.getBoundingClientRect().height),tdScroll:td.scrollHeight,kid:kid?(kid.tagName+\\\".\\\"+(kid.className||\\\"\\\")):null,kidH:kid?Math.round(kid.getBoundingClientRect().height):null}});return {wu:{h:wu.getBoundingClientRect().height,scrollH:wu.scrollHeight,clientH:wu.clientHeight,height:wcs.height,maxH:wcs.maxHeight,overflow:wcs.overflow,padding:wcs.padding,position:wcs.position,lineClamp:wcs.webkitLineClamp},wtdH:Math.round(wtd.getBoundingClientRect().height),wtdPad:getComputedStyle(wtd).padding,rep:repInfo,hasSd:wtd.closest(\\\"table\\\").className}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_89b33281e5c446c5ac287c68",
+  "content": "{\"value\": {\"wu\": {\"h\": 111.8125, \"scrollH\": 112, \"clientH\": 112, \"height\": \"111.812px\", \"maxH\": \"none\", \"overflow\": \"visible\", \"padding\": \"8px 12px\", \"position\": \"relative\", \"display\": \"block\", \"mask\": \"none\", \"lineClamp\": \"none\", \"text\": \"MAIN DECK CARGO COMPARTMENT - EXISTING SEAT TRACK REPAIR BETWEEN STATION 1651 - 1691, X= 8\\u2026\"}, \"wtdH\": 126, \"wtdPad\": \"0px 0px 14px\", \"rep\": [{\"tdH\": 72, \"tdScroll\": 72, \"kid\": \"DIV.muted\", \"kidH\": 19, \"lines\": 4}, {\"tdH\": 72, \"tdScroll\": 72, \"kid\": \"SPAN.c\", \"kidH\": 36, \"lines\": 4}, {\"tdH\": 72, \"tdScroll\": 72, \"kid\": \"SPAN.c\", \"kidH\": 16, \"lines\": 4}, {\"tdH\": 72, \"tdScroll\": 72, \"kid\": \"SPAN.c\", \"kidH\": 16, \"lines\": 4}, {\"tdH\": 72, \"tdScroll\": 72, \"kid\": \"SPAN.c\", \"kidH\": 36, \"lines\": 4}, {\"tdH\": 72, \"tdScroll\": 72, \"kid\": \"SPAN.c\", \"kidH\": 16, \"lines\": 4}, {\"tdH\": 72, \"tdScroll\": 72, \"kid\": \"SPAN.c dull\", \"kidH\": 16, \"lines\": 4}, {\"tdH\": 72, \"tdScroll\": 72, \"kid\": \"SPAN.term c\", \"kidH\": 16, \"lines\": 4}, {\"tdH\": 72, \"tdScroll\": 72, \"kid\": \"SPAN.term c\", \"kidH\": 16, \"lines\": 4}, {\"tdH\": 72, \"tdScroll\": 72, \"kid\": \"SPAN.term c\", \"kidH\": 34, \"lines\": 4}, {\"tdH\": 72, \"tdScroll\": 72, \"kid\": \"BUTTON.ghost\", \"kidH\": 36, \"lines\": 4}]}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_9b8aff14fe3e471796989b7e",
+  "content": "{\"value\": {\"wu\": {\"h\": 112, \"scrollH\": 144, \"clientH\": 112, \"height\": \"112px\", \"maxH\": \"112px\", \"overflow\": \"hidden\", \"padding\": \"8px 12px\", \"position\": \"relative\", \"lineClamp\": \"none\"}, \"wtdH\": 127, \"wtdPad\": \"5px 10px\", \"rep\": [{\"tdH\": 85, \"tdScroll\": 84, \"kid\": \"SPAN.sub\", \"kidH\": 16}, {\"tdH\": 85, \"tdScroll\": 84, \"kid\": \"SPAN.c\", \"kidH\": 30}, {\"tdH\": 85, \"tdScroll\": 84, \"kid\": \"SPAN.c\", \"kidH\": 15}, {\"tdH\": 85, \"tdScroll\": 84, \"kid\": \"SPAN.c\", \"kidH\": 15}, {\"tdH\": 85, \"tdScroll\": 84, \"kid\": \"SPAN.jasc c\", \"kidH\": 30}, {\"tdH\": 85, \"tdScroll\": 84, \"kid\": \"SPAN.c\", \"kidH\": 15}, {\"tdH\": 85, \"tdScroll\": 84, \"kid\": \"SPAN.c dull\", \"kidH\": 15}, {\"tdH\": 85, \"tdScroll\": 84, \"kid\": \"SPAN.term c\", \"kidH\": 15}, {\"tdH\": 85, \"tdScroll\": 84, \"kid\": \"SPAN.term c\", \"kidH\": 45}, {\"tdH\": 85, \"tdScroll\": 84, \"kid\": \"SPAN.term c\", \"kidH\": 74}, {\"tdH\": 85, \"tdScroll\": 84, \"kid\": \"BUTTON.ghost\", \"kidH\": 40}], \"hasSd\": \"reps sdtable\"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "The constant +31px on `wrote` rows and narrower wrapping on `rep` cells need explanation. Let me compare `.wu` internals (children, computed height on short rows) and rep cell metrics on both sides.",
+  "tool_calls": [
+   {
+    "id": "call_574c2679f0c64d59954c02f5",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var rows=[].slice.call(document.querySelectorAll(\\\"table tr\\\"));var byH={};rows.filter(function(r){return r.className===\\\"wrote\\\"}).forEach(function(r){var h=Math.round(r.getBoundingClientRect().height);if(!byH[h]){var wu=r.querySelector(\\\".wu\\\");var wcs=getComputedStyle(wu);byH[h]={wuH:wu.getBoundingClientRect().height,wuScroll:wu.scrollHeight,wuHeightProp:wcs.height,wuMaxH:wcs.maxHeight,wuKids:[].map.call(wu.children,function(k){return k.tagName+\\\".\\\"+(k.className||\\\"\\\")}),wuLines:Math.round(wu.scrollHeight/wcs.lineHeight.slice(0,-2)),tdPad:getComputedStyle(r.querySelector(\\\"td\\\")).padding,len:wu.textContent.trim().length}}});var t=document.querySelector(\\\"table\\\");return {cols:t.querySelector(\\\"tr\\\").children.length,tW:Math.round(t.getBoundingClientRect().width),byH:byH}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   },
+   {
+    "id": "call_8cf87eb27a4e4d8d9eb1f453",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var rows=[].slice.call(document.querySelectorAll(\\\"table tr\\\"));var byH={};rows.filter(function(r){return r.className===\\\"wrote\\\"}).forEach(function(r){var h=Math.round(r.getBoundingClientRect().height);if(!byH[h]){var wu=r.querySelector(\\\".wu\\\");var wcs=getComputedStyle(wu);byH[h]={wuH:wu.getBoundingClientRect().height,wuScroll:wu.scrollHeight,wuHeightProp:wcs.height,wuMaxH:wcs.maxHeight,wuKids:[].map.call(wu.children,function(k){return k.tagName+\\\".\\\"+(k.className||\\\"\\\")}),wuLines:Math.round(wu.scrollHeight/19.5),tdPad:getComputedStyle(r.querySelector(\\\"td\\\")).padding,len:wu.textContent.trim().length}}});var t=document.querySelector(\\\"table\\\");return {cols:t.querySelector(\\\"tr\\\").children.length,tW:Math.round(t.getBoundingClientRect().width),byH:byH}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_574c2679f0c64d59954c02f5",
+  "content": "{\"value\": {\"cols\": 11, \"tW\": 1140, \"byH\": {\"51\": {\"wuH\": 36, \"wuScroll\": 36, \"wuHeightProp\": \"36px\", \"wuMaxH\": \"none\", \"wuKids\": [\"DIV.txt\"], \"wuLines\": 2, \"tdPad\": \"0px 0px 14px\", \"len\": 69}, \"71\": {\"wuH\": 56, \"wuScroll\": 56, \"wuHeightProp\": \"56px\", \"wuMaxH\": \"none\", \"wuKids\": [\"DIV.txt\"], \"wuLines\": 3, \"tdPad\": \"0px 0px 14px\", \"len\": 129}, \"91\": {\"wuH\": 76, \"wuScroll\": 76, \"wuHeightProp\": \"76px\", \"wuMaxH\": \"none\", \"wuKids\": [\"DIV.txt\"], \"wuLines\": 4, \"tdPad\": \"0px 0px 14px\", \"len\": 231}, \"126\": {\"wuH\": 111.8125, \"wuScroll\": 112, \"wuHeightProp\": \"111.812px\", \"wuMaxH\": \"none\", \"wuKids\": [\"DIV.txt\", \"BUTTON.ghost wu-toggle\"], \"wuLines\": 6, \"tdPad\": \"0px 0px 14px\", \"len\": 416}}}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_8cf87eb27a4e4d8d9eb1f453",
+  "content": "{\"value\": {\"cols\": 11, \"tW\": 1100, \"byH\": {\"82\": {\"wuH\": 67.25, \"wuScroll\": 67, \"wuHeightProp\": \"67.25px\", \"wuMaxH\": \"112px\", \"wuKids\": [\"DIV.txt\", \"DIV.wu-gloss\"], \"wuLines\": 3, \"tdPad\": \"5px 10px\", \"len\": 92}, \"102\": {\"wuH\": 87.25, \"wuScroll\": 87, \"wuHeightProp\": \"87.25px\", \"wuMaxH\": \"112px\", \"wuKids\": [\"DIV.txt\", \"DIV.wu-gloss\"], \"wuLines\": 4, \"tdPad\": \"5px 10px\", \"len\": 152}, \"122\": {\"wuH\": 107.25, \"wuScroll\": 107, \"wuHeightProp\": \"107.25px\", \"wuMaxH\": \"112px\", \"wuKids\": [\"DIV.txt\", \"DIV.wu-gloss\"], \"wuLines\": 5, \"tdPad\": \"5px 10px\", \"len\": 254}, \"127\": {\"wuH\": 112, \"wuScroll\": 144, \"wuHeightProp\": \"112px\", \"wuMaxH\": \"112px\", \"wuKids\": [\"DIV.txt\", \"BUTTON.ghost wu-toggle\", \"DIV.wu-gloss\"], \"wuLines\": 7, \"tdPad\": \"5px 10px\", \"len\": 439}}}}"
+ },
+ {
+  "role": "assistant",
+  "content": "Key structural difference found: the rebuild's `.wu` always carries a `.wu-gloss` div (the original only has `DIV.txt` plus, on long ones, a `wu-toggle` button). Let me look inside `.wu` on both sides.",
+  "tool_calls": [
+   {
+    "id": "call_021efc5a3ea141cbac4ba096",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var rows=[].slice.call(document.querySelectorAll(\\\"table tr\\\"));var wr=rows.filter(function(r){return r.className===\\\"wrote\\\"})[1];var wu=wr.querySelector(\\\".wu\\\");var txt=wu.querySelector(\\\".txt\\\");var td=wr.querySelector(\\\"td\\\");var out={tdW:Math.round(td.getBoundingClientRect().width),wuPad:getComputedStyle(wu).padding,txt:{h:Math.round(txt.getBoundingClientRect().height),w:Math.round(txt.getBoundingClientRect().width),lh:getComputedStyle(txt).lineHeight,fs:getComputedStyle(txt).fontSize},toggle:(wu.querySelector(\\\".wu-toggle\\\")||null)?Math.round(wu.querySelector(\\\".wu-toggle\\\").getBoundingClientRect().height):null};var wtdcs=getComputedStyle(td);out.tdPad=wtdcs.padding;out.tdColspan=td.colSpan;var t2=rows.filter(function(r){return r.className===\\\"wrote\\\"})[3];var td2=t2.querySelector(\\\"td\\\");out.td2W=Math.round(td2.getBoundingClientRect().width);return out}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   },
+   {
+    "id": "call_c4cdb5703ee7411298db62d2",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var rows=[].slice.call(document.querySelectorAll(\\\"table tr\\\"));var wr=rows.filter(function(r){return r.className===\\\"wrote\\\"})[1];var wu=wr.querySelector(\\\".wu\\\");var txt=wu.querySelector(\\\".txt\\\");var g=wu.querySelector(\\\".wu-gloss\\\");var td=wr.querySelector(\\\"td\\\");var tcs=getComputedStyle(td);var gcs=g?getComputedStyle(g):null;return {tdW:Math.round(td.getBoundingClientRect().width),tdPad:tcs.padding,wuPad:getComputedStyle(wu).padding,txt:{h:Math.round(txt.getBoundingClientRect().height),w:Math.round(txt.getBoundingClientRect().width),lh:getComputedStyle(txt).lineHeight,fs:getComputedStyle(txt).fontSize},gloss:g?{h:Math.round(g.getBoundingClientRect().height),pos:gcs.position,mt:gcs.marginTop,mb:gcs.marginBottom,text:g.textContent.trim().slice(0,60)}:null,toggle:(wu.querySelector(\\\".wu-toggle\\\")||null)?Math.round(wu.querySelector(\\\".wu-toggle\\\").getBoundingClientRect().height):null,btn:wu.querySelector(\\\"button\\\")?wu.querySelector(\\\"button\\\").textContent.trim():null}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_021efc5a3ea141cbac4ba096",
+  "content": "{\"value\": {\"tdW\": 1139, \"wuPad\": \"8px 12px\", \"txt\": {\"h\": 64, \"w\": 783, \"lh\": \"20px\", \"fs\": \"12.5px\"}, \"toggle\": 26, \"tdPad\": \"0px 0px 14px\", \"tdColspan\": 11, \"td2W\": 1139}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_c4cdb5703ee7411298db62d2",
+  "content": "{\"value\": {\"tdW\": 1099, \"tdPad\": \"5px 10px\", \"wuPad\": \"8px 12px\", \"txt\": {\"h\": 64, \"w\": 780, \"lh\": \"20px\", \"fs\": \"12.5px\"}, \"gloss\": {\"h\": 25, \"pos\": \"relative\", \"mt\": \"2px\", \"mb\": \"2px\", \"text\": \"Say it in plain English\"}, \"toggle\": 25, \"btn\": \"Read the whole write-up\"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "The mystery is solved: my `.wu` carries a `.wu-gloss` block (~29px) inside the clip on every row; the original only has it on expanded rows. Let me verify how the original treats the gloss on expand.",
+  "tool_calls": [
+   {
+    "id": "call_da9d4d92dd764c5ab56619bd",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var gl=[].slice.call(document.querySelectorAll(\\\".wu-gloss\\\"));var vis=gl.filter(function(g){return g.getBoundingClientRect().height>0});var rows=[].slice.call(document.querySelectorAll(\\\"tr.wrote\\\"));var long=rows.filter(function(r){return r.querySelector(\\\".wu-toggle\\\")})[0];var btn=long.querySelector(\\\".wu-toggle\\\");btn.click();var wu=long.querySelector(\\\".wu\\\");var after={wuH:wu.getBoundingClientRect().height,glIn:!!wu.querySelector(\\\".wu-gloss\\\"),glH:wu.querySelector(\\\".wu-gloss\\\")?Math.round(wu.querySelector(\\\".wu-gloss\\\").getBoundingClientRect().height):null,rowH:Math.round(long.getBoundingClientRect().height),btnText:btn.textContent.trim()};btn.click();after.rowH2=Math.round(long.getBoundingClientRect().height);return {total:gl.length,visible:vis.length,firstText:gl[0]?gl[0].textContent.trim().slice(0,40):null,after:after}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   },
+   {
+    "id": "call_c1a9d7971c914740a0e7fdab",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var rows=[].slice.call(document.querySelectorAll(\\\"tr.wrote\\\"));var long=rows.filter(function(r){return r.querySelector(\\\".wu-toggle\\\")})[0];var btn=long.querySelector(\\\".wu-toggle\\\");var wu=long.querySelector(\\\".wu\\\");var before={wuH:wu.getBoundingClientRect().height,rowH:Math.round(long.getBoundingClientRect().height),glVis:!!wu.querySelector(\\\".wu-gloss\\\")&&wu.querySelector(\\\".wu-gloss\\\").getBoundingClientRect().height>0};btn.click();var after={wuH:wu.getBoundingClientRect().height,rowH:Math.round(long.getBoundingClientRect().height),glVis:wu.querySelector(\\\".wu-gloss\\\")?wu.querySelector(\\\".wu-gloss\\\").getBoundingClientRect().height>0:null,glText:wu.querySelector(\\\".wu-gloss\\\")?wu.querySelector(\\\".wu-gloss\\\").textContent.trim().slice(0,40):null};btn.click();after.rowH2=Math.round(long.getBoundingClientRect().height);return {before:before,after:after}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_da9d4d92dd764c5ab56619bd",
+  "content": "{\"value\": {\"total\": 0, \"visible\": 0, \"firstText\": null, \"after\": {\"wuH\": 129.8125, \"glIn\": false, \"glH\": null, \"rowH\": 144, \"btnText\": \"Show less\", \"rowH2\": 126}}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_c1a9d7971c914740a0e7fdab",
+  "content": "{\"value\": {\"before\": {\"wuH\": 112, \"rowH\": 127, \"glVis\": true}, \"after\": {\"wuH\": 112, \"rowH\": 127, \"glVis\": true, \"glText\": \"Say it in plain English\", \"rowH2\": 127}}}"
+ },
+ {
+  "role": "assistant",
+  "content": "The `.wu-gloss` doesn't exist in the original at all (rebuild addition I must keep but take out of flow), and the original's `.wu-toggle` overlays the faded line. Let me get the inline heights, the fade gradient, and what sets the table width on each side.",
+  "tool_calls": [
+   {
+    "id": "call_fabc5a6160a349cf8d1d8813",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var rows=[].slice.call(document.querySelectorAll(\\\"tr.wrote\\\"));var short1=rows.filter(function(r){return Math.round(r.getBoundingClientRect().height)===71})[0];var wu=short1.querySelector(\\\".wu\\\");var f=getComputedStyle(wu,\\\"::after\\\");var t=document.querySelector(\\\"table\\\");var wrap=t.parentElement;var chain=[];var n=t;for(var i=0;i<4&&n;i++){chain.push([n.tagName+\\\".\\\"+(n.className||\\\"\\\"),Math.round(n.getBoundingClientRect().width),getComputedStyle(n).maxWidth]);n=n.parentElement}return {shortStyle:wu.getAttribute(\\\"style\\\"),shortCls:wu.className,shortKids:[].map.call(wu.children,function(k){return k.tagName+\\\".\\\"+(k.className||\\\"\\\")}),afterBg:f.backgroundImage.slice(0,160),afterH:f.height,afterBottom:f.bottom,afterPos:f.position,chain:chain}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   },
+   {
+    "id": "call_0e52537f1f9c42e2bc7c4fd5",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var rows=[].slice.call(document.querySelectorAll(\\\"tr.wrote\\\"));var short1=rows.filter(function(r){return Math.round(r.getBoundingClientRect().height)===82})[0];var wu=short1.querySelector(\\\".wu\\\");var g=wu.querySelector(\\\".wu-gloss\\\");var gc=g?getComputedStyle(g):null;var f=getComputedStyle(wu,\\\"::after\\\");var t=document.querySelector(\\\"table\\\");var chain=[];var n=t;for(var i=0;i<4&&n;i++){chain.push([n.tagName+\\\".\\\"+(n.className||\\\"\\\"),Math.round(n.getBoundingClientRect().width),getComputedStyle(n).maxWidth]);n=n.parentElement}return {shortStyle:wu.getAttribute(\\\"style\\\"),shortCls:wu.className,glossStyle:g?g.getAttribute(\\\"style\\\"):null,glossPos:gc?gc.position:null,glossFont:gc?gc.fontSize:null,glossBtn:g?g.querySelector(\\\"button\\\")?g.querySelector(\\\"button\\\").textContent.trim():null:null,afterBg:f.backgroundImage.slice(0,160),afterH:f.height,chain:chain}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_fabc5a6160a349cf8d1d8813",
+  "content": "{\"value\": {\"shortStyle\": null, \"shortCls\": \"wu clip\", \"shortKids\": [\"DIV.txt\"], \"afterBg\": \"none\", \"afterH\": \"auto\", \"afterBottom\": \"auto\", \"afterPos\": \"static\", \"chain\": [[\"TABLE.reports\", 1140, \"none\"], [\"DIV.tscroll\", 1140, \"none\"], [\"DIV.\", 1154, \"none\"], [\"DIV.panel on\", 1140, \"none\"]]}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_0e52537f1f9c42e2bc7c4fd5",
+  "content": "{\"value\": {\"shortStyle\": null, \"shortCls\": \"wu clip\", \"glossStyle\": null, \"glossPos\": \"relative\", \"glossFont\": \"13px\", \"glossBtn\": \"Say it in plain English\", \"afterBg\": \"linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.92) 70%, rgb(255, 255, 255))\", \"afterH\": \"16px\", \"chain\": [[\"TABLE.reps sdtable\", 1100, \"none\"], [\"DIV.rr-scroll\", 1102, \"100%\"], [\"SECTION.\", 1102, \"100%\"], [\"SECTION.panel\", 1140, \"none\"]]}}"
+ },
+ {
+  "role": "assistant",
+  "content": "Now let me read the texts of the extra blocks and the original's in-instrument aim line.",
+  "tool_calls": [
+   {
+    "id": "call_5312560ac0454449ac8df835",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var ins=document.querySelector(\\\".instrument,#hero\\\");var aims=[].slice.call(ins.querySelectorAll(\\\"*\\\")).filter(function(n){return /aim/i.test(n.textContent.trim().slice(0,80))&&n.children.length<3&&n.getBoundingClientRect().height<60}).slice(0,5).map(function(n){return [n.tagName+\\\".\\\"+(n.className||\\\"\\\"),Math.round(n.getBoundingClientRect().height),n.textContent.trim().slice(0,90)]});var kids=[].map.call(ins.children,function(n){return [n.tagName+\\\".\\\"+(n.className||\\\"\\\"),Math.round(n.getBoundingClientRect().height),n.textContent.trim().slice(0,60)]});return {kids:kids,aims:aims}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   },
+   {
+    "id": "call_e517f7f22a764e959ec57c0a",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var main=document.querySelector(\\\"main\\\");var extra=[\\\"znarrow\\\",\\\"card ask\\\",\\\"khint\\\",\\\"rv-aim\\\",\\\"rv-sentence\\\"].map(function(cls){var n=main.querySelector(\\\":scope > .\\\"+cls.split(\\\" \\\").join(\\\".\\\"));if(!n)return [cls,null];return [cls,Math.round(n.getBoundingClientRect().height),n.textContent.trim().slice(0,120)]});var zn=document.querySelector(\\\".znarrow\\\");return {extra:extra,znHTML:zn?zn.outerHTML.slice(0,300):null}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_5312560ac0454449ac8df835",
+  "content": "{\"value\": {\"kids\": [[\"DIV.ipad\", 791, \"FAA SERVICE DIFFICULTY REPORTS \\u00b7 1 JAN 1995 TO 26 AUG 2026\\n \"], [\"BUTTON.seam\", 34, \"Read the 84,453 \\u2192\"]], \"aims\": [[\"LABEL.\", 11, \"Aim at\"]]}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_e517f7f22a764e959ec57c0a",
+  "content": "{\"value\": {\"extra\": [[\"znarrow\", null], [\"card ask\", 59, \"TAIL\\n      AIRLINE\\n      AIRCRAFT TYPE\\n    \\n    \\n    \\n    Ask\"], [\"khint\", null], [\"rv-aim\", 36, \"AIM ATAirlineAirframeZoneTake it\"], [\"rv-sentence\", 0, \"84,453 reports, upper fuselage. 1,673,374 set aside.\"]], \"znHTML\": null}}"
+ },
+ {
+  "role": "assistant",
+  "content": "The aim line lives inside the original's instrument. Now let me read the three extra blocks' actual classes and text.",
+  "tool_calls": [
+   {
+    "id": "call_98debb2b69a5475dac4c4450",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var main=document.querySelector(\\\"main\\\");var kids=[].map.call(main.children,function(n){return {cls:n.className,tag:n.tagName,h:Math.round(n.getBoundingClientRect().height),text:n.textContent.trim().slice(0,140)}});return kids.slice(0,8)}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   },
+   {
+    "id": "call_37eca1038454489a9c142b89",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var ip=document.querySelector(\\\"#hero .ipad\\\");var kids=[].map.call(ip?ip.children:[],function(n){return [n.tagName+\\\".\\\"+(n.className||\\\"\\\"),Math.round(n.getBoundingClientRect().height),n.textContent.trim().slice(0,50)]});var aim=document.querySelector(\\\".rv-aim\\\");return {ipadKids:kids,rvAimParent:aim?aim.parentElement.className:null,aimHTML:aim?aim.outerHTML.slice(0,400):null}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_98debb2b69a5475dac4c4450",
+  "content": "{\"value\": [{\"cls\": \"\", \"tag\": \"DIV\", \"h\": 30, \"text\": \"NARROWED TOzone: ZONE 200 \\u00d7clear all\"}, {\"cls\": \"\", \"tag\": \"DIV\", \"h\": 784, \"text\": \"FAA Service Difficulty Reports \\u00b7 1 JAN 1995 TO 26 AUG 2026WHENmonth by monthWHEREon the aircraftWHOairline and tailWHAT IT FORCEDwhat the cr\"}, {\"cls\": \"\", \"tag\": \"DIV\", \"h\": 0, \"text\": \"\"}, {\"cls\": \"card ask\", \"tag\": \"DIV\", \"h\": 59, \"text\": \"TAIL\\n      AIRLINE\\n      AIRCRAFT TYPE\\n    \\n    \\n    \\n    Ask\"}, {\"cls\": \"hint\", \"tag\": \"P\", \"h\": 17, \"text\": \"The registration, with or without the leading N \\u2014 e.g. N583UP or 583UP. One airframe, its whole write-up history in this file.\"}, {\"cls\": \"\", \"tag\": \"DIV\", \"h\": 0, \"text\": \"\"}, {\"cls\": \"credit\", \"tag\": \"P\", \"h\": 28, \"text\": \"The same public corpus as the SDR Desk lookup, read through a\\n  different lens. Codes are decoded from the FAA's own lookup tables; airline \"}, {\"cls\": \"\", \"tag\": \"DIV\", \"h\": 19620, \"text\": \"Narrows to what you selectedSearchPatternsAircraftHow it was foundThese ignore your selection. Each answers from all 84,453 reports, or from\"}]}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_37eca1038454489a9c142b89",
+  "content": "{\"value\": {\"ipadKids\": [[\"DIV.aim\", 20, \"\"], [\"DIV.hand\", 18, \"Click a zone on the aircraft to keep only what was\"], [\"DIV.sdcount\", 33, \"84,453 reports, upper fuselage. 1,673,374 set asid\"], [\"DIV.rails\", 449, \"WHEN380 monthsWHEREon the aircraftUpper fuselageUp\"], [\"DIV.specimen opens\", 77, \"One report from this selection. First the FAA\\u2019s ow\"], [\"DIV.margin\", 89, \"August 2026 covers 1 to 26 August, so its bar coun\"], [\"DIV.aimwrap\", 0, \"Aim ata month or yearan airlinea tail numbera zone\"]], \"rvAimParent\": \"wrap\", \"aimHTML\": \"<div class=\\\"rv-aim\\\" data-rv=\\\"1\\\"><span class=\\\"rv-aim-label\\\">AIM AT</span><select aria-label=\\\"Airline\\\"><option value=\\\"airline\\\">Airline</option><option value=\\\"airframe\\\">Airframe</option><option value=\\\"zone\\\">Zone</option></select><input type=\\\"text\\\" placeholder=\\\"e.g. Southwest Airlines Co \\u00b7 SWAA\\\"><button class=\\\"rv-take\\\" type=\\\"button\\\">Take it</button><input type=\\\"date\\\" title=\\\"One day\\\" aria-label=\\\"One da\"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "Now let me check whether the original carries the \"NARROWED TO\" chips or the \"Ask\" card anywhere else (so I move rather than delete).",
+  "tool_calls": [
+   {
+    "id": "call_9deec55b7577433fa750dcf4",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{function find(txt){var hits=[];var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);var n;while(n=w.nextNode()){if(n.textContent.indexOf(txt)>-1){var e=n.parentElement;hits.push([e.tagName+\\\".\\\"+(e.className||\\\"\\\"),Math.round(e.getBoundingClientRect().height)])}}return hits.slice(0,6)}return {narrowed:find(\\\"NARROWED\\\"),clearAll:find(\\\"clear all\\\"),ask:find(\\\"Ask\\\"),plainEnglish:find(\\\"plain English\\\"),regHint:find(\\\"One airframe, its whole write-up history\\\")}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_9deec55b7577433fa750dcf4",
+  "content": "{\"value\": {\"narrowed\": [[\"SCRIPT.\", 0]], \"clearAll\": [], \"ask\": [], \"plainEnglish\": [[\"DD.\", 0], [\"SCRIPT.\", 0]], \"regHint\": []}}"
+ },
+ {
+  "role": "assistant",
+  "content": "All three extra blocks have no counterpart in the original (no \"NARROWED TO\", no \"Ask\", no tail hint anywhere). Now let me get their exact selectors and the credit spacing on both sides before my second deploy.",
+  "tool_calls": [
+   {
+    "id": "call_54994fc501f344949fc74b15",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var main=document.querySelector(\\\"main\\\");var c1=main.children[0],c4=main.children[3],c5=main.children[4];var cr=document.querySelector(\\\"main > .credit\\\")||document.querySelector(\\\".credit\\\");var crc=cr?getComputedStyle(cr):null;return {c1:{tag:c1.tagName,id:c1.id,cls:c1.className,html:c1.outerHTML.slice(0,200)},c4:{tag:c4.tagName,id:c4.id,cls:c4.className,html:c4.outerHTML.slice(0,150)},c5:{tag:c5.tagName,id:c5.id,cls:c5.className,html:c5.outerHTML.slice(0,150)},credit:crc?{mt:crc.marginTop,mb:crc.marginBottom,fs:crc.fontSize,lh:crc.lineHeight,pad:crc.padding,h:Math.round(cr.getBoundingClientRect().height),text:cr.textContent.trim().slice(0,80)}:null}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   },
+   {
+    "id": "call_10700544e0384743ad4a4d0c",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var cr=document.querySelector(\\\".credit\\\");var crc=cr?getComputedStyle(cr):null;var fresh=document.querySelector(\\\".freshness\\\");return {credit:crc?{mt:crc.marginTop,mb:crc.marginBottom,fs:crc.fontSize,lh:crc.lineHeight,pad:crc.padding,h:Math.round(cr.getBoundingClientRect().height),text:cr.textContent.trim().slice(0,80)}:null,fresh:fresh?{h:Math.round(fresh.getBoundingClientRect().height),mt:getComputedStyle(fresh).marginTop,mb:getComputedStyle(fresh).marginBottom,fs:getComputedStyle(fresh).fontSize}:null,mainKids:[].map.call(document.querySelector(\\\"main\\\").children,function(n){return [n.tagName+\\\".\\\"+(n.className||\\\"\\\"),Math.round(n.getBoundingClientRect().height)]}).slice(0,6)}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_54994fc501f344949fc74b15",
+  "content": "{\"value\": {\"c1\": {\"tag\": \"DIV\", \"id\": \"znarrow\", \"cls\": \"\", \"html\": \"<div id=\\\"znarrow\\\"><span class=\\\"zn-lab\\\">NARROWED TO</span><button class=\\\"zn-chip\\\" data-drop=\\\"zone\\\">zone: ZONE 200 <span>\\u00d7</span></button><button class=\\\"zn-chip zn-all\\\" data-drop=\\\"*\\\">clear all</button><\"}, \"c4\": {\"tag\": \"DIV\", \"id\": \"\", \"cls\": \"card ask\", \"html\": \"<div class=\\\"card ask\\\">\\n    <div class=\\\"picker\\\" role=\\\"group\\\" aria-label=\\\"What kind of thing to ask about\\\">\\n      <button type=\\\"button\\\" class=\\\"on\\\" data-\"}, \"c5\": {\"tag\": \"P\", \"id\": \"khint\", \"cls\": \"hint\", \"html\": \"<p class=\\\"hint\\\" id=\\\"khint\\\">The registration, with or without the leading N \\u2014 e.g. N583UP or 583UP. One airframe, its whole write-up history in this fi\"}, \"credit\": {\"mt\": \"2px\", \"mb\": \"6px\", \"fs\": \"11px\", \"lh\": \"13.75px\", \"pad\": \"0px\", \"h\": 28, \"text\": \"The same public corpus as the SDR Desk lookup, read through a\\n  different lens. \"}}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_10700544e0384743ad4a4d0c",
+  "content": "{\"value\": {\"credit\": {\"mt\": \"2px\", \"mb\": \"10px\", \"fs\": \"12px\", \"lh\": \"18.6px\", \"pad\": \"0px\", \"h\": 19, \"text\": \"Inspired by Rory Kennedy's\\n  Freefall: A Reckoning for Boeing.\\n  Built by Henk v\"}, \"fresh\": {\"h\": 19, \"mt\": \"10px\", \"mb\": \"2px\", \"fs\": \"12px\"}, \"mainKids\": [[\"DIV.instrument\", 837], [\"DIV.tabs\", 104], [\"P.freshness\", 19], [\"P.credit\", 19], [\"DIV.panel on\", 15533], [\"DIV.panel\", 0]]}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_981b46189fdf4115afa5cef8",
+    "type": "function",
+    "function": {
+     "name": "deploy",
+     "arguments": "{\"css\":\"#sentence{display:none!important}\\n#sd-sink{display:none!important}\\n.card.land{display:none!important}\\n#vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}\\n#vstrip.vgroups .vg{display:flex;flex-direction:row;align-items:center;gap:10px;min-width:0}\\n#vstrip.vgroups .vglab{flex:0 0 auto;font:600 9.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em;color:#57514a;text-transform:uppercase;white-space:nowrap}\\n#vstrip.vgroups .vgbtns{display:flex!important;flex-direction:row!important;gap:2px!important;align-items:center!important;flex-wrap:wrap!important;margin:0!important;padding:0!important;border-bottom:0!important;min-width:0;flex:1 1 auto}\\nbutton.vtab{padding:3px 8px;font-size:11.5px;line-height:1.2;border:1px solid transparent;border-radius:3px;background:none;color:#5c554c;cursor:pointer;white-space:nowrap}\\nbutton.vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);font-weight:600}\\n.axis{display:flex;gap:2px;margin-top:3px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ash)}\\n.axis span{flex:1;min-width:0}\\n.sd-second{font-size:11.5px;color:#6b6560;margin:0 0 3px;text-align:center;letter-spacing:.02em}\\n.sd-second b{font-weight:600}\\n#hero.instrument{position:relative;background:var(--paper);border:1px solid var(--line);border-bottom:3px solid var(--rust);border-radius:6px;margin:12px 0 0;overflow:hidden;padding:0}\\n#hero.instrument > .ipad{padding:10px 20px 6px}\\n#count.sdcount{font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1.1;color:var(--ink);max-width:none;margin:4px 0 2px;white-space:normal}\\n#count.sdcount .fig{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:.92em;font-variant-numeric:tabular-nums;color:var(--rust-text,#b8431f)}\\n#count.sdcount .aside{font-size:.62em;color:var(--ash)}\\n#count.sdcount .broken{display:block;font-size:.5em;color:var(--rust)}\\n#count.sdcount .clause{border-bottom:1px dotted rgba(29,29,31,.28);cursor:pointer}\\n.rail .reading{margin:9px 0 0;padding:8px 12px 8px 13px;border-left:2px solid var(--rust);background:#faf7f3;font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);max-width:none}\\n.rail>.reading{grid-column:2}\\n@media(max-width:700px){.rail .reading{font-size:14px;padding:7px 10px}}\\n@media(min-width:901px){\\n#hero.instrument{max-width:1140px!important}\\n.rail{align-items:start;grid-template-columns:110px minmax(0,1fr)!important}\\n.rail .track{min-width:0;position:relative}\\n.rail .track.two{display:grid;grid-template-columns:minmax(0,628px) minmax(0,330px);gap:18px}\\n.rail .track.two > svg.plane{width:100%;max-width:640px;height:auto;display:block}\\n.rail .col .ch{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;color:var(--ash);margin-bottom:3px}\\n.rail .orow{display:grid;grid-template-columns:120px 1fr 52px;gap:8px;align-items:center;font-size:11.5px;height:14px;padding:0 3px;border-radius:3px}\\n.rail .orow .on{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:14px}\\n.rail .orow .ob{height:6px;background:#e8e3d8;border-radius:3px;overflow:hidden}\\n.rail .orow .ob i{display:block;height:100%;background:var(--rust)}\\n.rail .orow.wide{grid-template-columns:190px 1fr 56px;height:17px}\\n.rail .orow.wide .on{font-size:12px;line-height:17px}\\n.rail .fblock{height:22px}\\n.rail .frows{margin-top:4px}\\n.rail .fnote{font-size:11px;margin-top:3px}\\n.rail[data-rail=forced].open .fblock{margin-bottom:5px}\\n.rail .legend{font-size:11.5px;gap:0}\\n.rail .lrow{padding:0 4px;line-height:1.35}\\n.rail .zonenote{font-size:11px;line-height:1.4;margin-top:4px;padding-top:4px}\\n}\\n#hero .ipad .aimwrap{display:none}\\n#hero .ipad .rv-aim{margin-top:6px}\\n#hero .ipad .specimen{font-size:11px;line-height:1.35;padding-top:2px;padding-bottom:2px}\\n#hero .ipad .margin{font-size:10.5px;line-height:1.3;padding-top:2px;margin-top:3px}\\n#hero .ipad .rails{margin-top:6px}\\n#sdControls{gap:4px;margin-top:8px}\\n#sdControls .bar{gap:6px}\\n#sdControls .actions{padding:0}\\n#noRows{padding:8px 12px;margin-top:6px}\\n#noRows p{margin:3px 0}\\n#starterToggle{padding:3px 10px}\\n#rr-sec{margin:6px 0 0}\\n#rr-sec .cut{font-size:10.5px;line-height:1.25}\\n#rr-sec .rr-count{font-size:12px}\\n#rr-sec .rr-more{font-size:11px;padding:3px 10px}\\n/* sd-extras: blocks the original has no counterpart for, above the tabs */\\n#znarrow,.card.ask,#khint{display:none!important}\\n/* sd-credit: match the original's spacing and type */\\n.credit{font-size:12px;line-height:18.6px;margin:2px 0 10px;padding:0}\\n/* sd-wu: keep the gloss out of the clip; clip/fade like the original */\\ntable.sdtable td{padding:5px 10px}\\ntr.wrote td{padding:0 0 14px}\\n.wu{position:relative}\\n.wu .wu-gloss{position:absolute;left:12px;bottom:0;height:auto;margin:0}\\n.wu:not(.clip){padding-bottom:34px}\\n.wu:not(.clip)::after{content:\\\"none\\\"}\\n.wu.clip{overflow:hidden;max-height:112px}\\n.wu.clip::after{content:\\\"\\\";position:absolute;left:0;right:0;bottom:0;height:16px;background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,.92) 70%,#fff)}\",\"js\":\"(function(){\\n\\\"use strict\\\";\\nwindow.__sderrs=window.__sderrs||[];\\naddEventListener(\\\"error\\\",function(e){try{window.__sderrs.push(String((e&&e.message)||e))}catch(_){}});\\nfunction byId(id){return document.getElementById(id)}\\nfunction visible(n){if(!n||n.nodeType!==1)return false;if(!n.offsetParent&&getComputedStyle(n).position!==\\\"fixed\\\")return false;var cs=getComputedStyle(n);return cs.display!==\\\"none\\\"&&cs.visibility!==\\\"hidden\\\"}\\nfunction phone(){return matchMedia(\\\"(max-width:760px)\\\").matches}\\nvar READING_TEXT=\\\"Upper fuselage accounts for 84,453 of the 212,940 reports written in the FAA\\\\u2019s numbered zones, or 39.7%. Those numbers are what this diagram can place, and they are 12.1% of the selection. Another 1,454,504 do say where, in words such as FUSELAGE or CABIN rather than a zone number, so the drawing cannot show them. Only 90,383, 5.1%, give no location at all. It is a sample rather than the whole file, but it does give you a good idea of where the trouble sits.\\\";\\nvar SEED_HTML='<span class=\\\"fig\\\">1,757,827</span> reports, everything the FAA has published to 26 August 2026.';\\nvar SHORT_TOTAL=/^1,757,827\\\\s+reports\\\\.?(\\\\s*Nothing chosen yet\\\\.?)?\\\\s*$/;\\nvar NOROWS_HTML='<p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and buries the one you have.</p><p class=\\\"muted\\\">Take a month, a zone, an airline or a tail from the instrument above, pick one of the starter questions, or set a filter. To read the file straight through anyway, use the button at the foot of the instrument.</p><p><button type=\\\"button\\\" class=\\\"sdbtn\\\" id=\\\"revealBtn\\\">Read all 1,757,827 anyway</button> <button type=\\\"button\\\" class=\\\"ghostbtn\\\" id=\\\"gotoStarters\\\">Show me the starter questions</button></p>';\\nfunction sdFiltered(){\\n  var i,x;\\n  var sels=document.querySelectorAll(\\\"#sdControls select\\\");\\n  for(i=0;i<sels.length;i++){if((sels[i].value||\\\"\\\").trim()!==\\\"\\\")return true}\\n  var ins=document.querySelectorAll(\\\"#sdControls input\\\");\\n  for(i=0;i<ins.length;i++){\\n    x=ins[i];\\n    if(x.type===\\\"checkbox\\\"||x.type===\\\"radio\\\"){if(x.checked)return true}\\n    else if((x.value||\\\"\\\").trim()!==\\\"\\\")return true;\\n  }\\n  var tabs=document.querySelectorAll(\\\"#vstrip .vtab.on\\\");\\n  for(i=0;i<tabs.length;i++){if((tabs[i].getAttribute(\\\"data-view\\\")||\\\"p-search\\\")!==\\\"p-search\\\")return true}\\n  return false;\\n}\\nfunction ensureIpad(){\\n  var hero=byId(\\\"hero\\\");if(!hero)return null;\\n  var rails=hero.querySelector(\\\".rails\\\");\\n  if(!rails||!visible(rails)||hero.querySelector(\\\".phbar\\\"))return hero.querySelector(\\\":scope > .ipad\\\")||null;\\n  if(!/\\\\binstrument\\\\b/.test(hero.className||\\\"\\\"))hero.className=(\\\"instrument \\\"+(hero.className||\\\"\\\")).trim();\\n  var kids=[].slice.call(hero.children),i,ipad=null,ihead=null;\\n  for(i=0;i<kids.length;i++){if(/\\\\bipad\\\\b/.test(kids[i].className||\\\"\\\")){ipad=kids[i];break}}\\n  for(i=0;i<kids.length;i++){if(/\\\\bihead\\\\b/.test(kids[i].className||\\\"\\\")){ihead=kids[i];break}}\\n  if(!ipad){\\n    ipad=document.createElement(\\\"div\\\");ipad.className=\\\"ipad\\\";\\n    if(ihead)ihead.after(ipad);else hero.insertBefore(ipad,hero.firstChild);\\n    kids=[].slice.call(hero.children);\\n    for(i=0;i<kids.length;i++){if(kids[i]!==ipad&&kids[i]!==ihead)ipad.appendChild(kids[i])}\\n  }\\n  return ipad;\\n}\\nfunction sdSink(){\\n  var s=byId(\\\"sd-sink\\\");\\n  if(!s){s=document.createElement(\\\"div\\\");s.id=\\\"sd-sink\\\";(document.querySelector(\\\"main.wrap\\\")||document.body).appendChild(s)}\\n  return s;\\n}\\nfunction sdEmpty(c){return !c.textContent.trim()&&!c.children.length}\\nfunction seatCount(){\\n  var all=document.querySelectorAll(\\\"#count\\\");\\n  var c=all[0];\\n  if(!c){\\n    c=document.createElement(\\\"div\\\");c.id=\\\"count\\\";\\n    (document.querySelector(\\\"main.wrap\\\")||document.body).appendChild(c);\\n  }\\n  var i;\\n  for(i=0;i<all.length;i++){if(all[i]!==c&&all[i].parentNode)all[i].parentNode.removeChild(all[i])}\\n  function detach(){if(c.parentNode&&c.parentNode.nodeType===1&&c.parentNode.contains(c))c.parentNode.removeChild(c)}\\n  var hero=byId(\\\"hero\\\");\\n  var railsEl=hero?hero.querySelector(\\\".rails\\\"):null;\\n  var rails=(railsEl&&visible(railsEl))?railsEl:null;\\n  var ph=hero?hero.querySelector(\\\".phbar\\\"):null;\\n  if(ph&&(phone()||!rails)){\\n    if(c.parentNode!==ph){detach();ph.insertBefore(c,ph.firstChild)}\\n  }else if(rails){\\n    var host=rails.parentNode;\\n    if(c.parentNode!==host||c.nextElementSibling!==rails){\\n      detach();\\n      if(rails.parentNode===host)host.insertBefore(c,rails);\\n    }\\n  }\\n  if(!/\\\\bsdcount\\\\b/.test(c.className))c.className=(\\\"sdcount \\\"+c.className).trim();\\n  if(!sdFiltered()){\\n    if(sdEmpty(c)||SHORT_TOTAL.test(c.textContent.trim())){c.dataset.sdSeeded=\\\"1\\\";c.innerHTML=SEED_HTML}\\n  }\\n}\\nfunction retireStand(){\\n  var s=document.querySelector(\\\".ipad .stand\\\");\\n  if(s&&s.parentNode)sdSink().appendChild(s);\\n}\\nfunction ensureReading(){\\n  var rail=document.querySelector(\\\".rail[data-rail=where]\\\");\\n  if(!rail||!rail.parentNode)return;\\n  var rs=[].slice.call(rail.querySelectorAll(\\\".reading\\\")),i,keep=null;\\n  for(i=0;i<rs.length;i++){\\n    if(!keep||rs[i].textContent.trim().length>keep.textContent.trim().length)keep=rs[i];\\n  }\\n  if(keep&&keep.tagName!==\\\"P\\\"){\\n    var p=document.createElement(\\\"p\\\");p.className=\\\"reading\\\";\\n    p.innerHTML=keep.innerHTML;\\n    keep.parentNode.replaceChild(p,keep);keep=p;\\n  }\\n  if(!keep){\\n    keep=document.createElement(\\\"p\\\");keep.className=\\\"reading\\\";\\n    keep.textContent=READING_TEXT;\\n  }\\n  if(keep.parentNode!==rail)rail.appendChild(keep);\\n  [].slice.call(rail.children).forEach(function(n){\\n    if(n===keep)return;\\n    var cn=n.className||\\\"\\\";\\n    if(/\\\\b(gut|track)\\\\b/.test(cn))return;\\n    if(/\\\\breading\\\\b/.test(cn)){\\n      if(!n.textContent.trim())n.remove();\\n      return;\\n    }\\n    n.remove();\\n  });\\n}\\nfunction stripInline(){\\n  var bs=document.querySelectorAll(\\\"#vstrip.vgroups .vgbtns\\\"),i;\\n  for(i=0;i<bs.length;i++){\\n    var b=bs[i];if(b.dataset.sdInl)continue;b.dataset.sdInl=\\\"1\\\";\\n    b.style.margin=\\\"0\\\";b.style.padding=\\\"0\\\";b.style.borderBottom=\\\"0\\\";\\n  }\\n}\\nfunction secondLine(){\\n  var strip=byId(\\\"vstrip\\\");if(!strip)return;\\n  var p=byId(\\\"sd-second\\\");\\n  if(!p){p=document.createElement(\\\"p\\\");p.id=\\\"sd-second\\\";p.className=\\\"sd-second\\\";strip.parentNode.insertBefore(p,strip.nextSibling)}\\n  if(p.dataset.sdDone)return;p.dataset.sdDone=\\\"1\\\";\\n  var fr=byId(\\\"freshness\\\");\\n  p.innerHTML=(fr&&fr.textContent.trim())?fr.textContent.trim():\\\"Counts of reports filed, not of flights.\\\";\\n}\\nfunction ensureSentence(){\\n  var s=byId(\\\"sentence\\\");\\n  if(!s){s=document.createElement(\\\"div\\\");s.id=\\\"sentence\\\";s.hidden=true;(document.querySelector(\\\"main.wrap\\\")||document.body).appendChild(s)}\\n  if(!s.hidden)s.hidden=true;\\n  if(s.style.display!==\\\"none\\\")s.style.display=\\\"none\\\";\\n}\\nfunction ensureNoRows(){\\n  var n=byId(\\\"noRows\\\");if(!n)return;\\n  if(!n.textContent.trim()&&!n.children.length)n.innerHTML=NOROWS_HTML;\\n  if(phone()){\\n    if(n.hasAttribute(\\\"hidden\\\"))n.removeAttribute(\\\"hidden\\\");\\n    if(n.style.display===\\\"none\\\")n.style.display=\\\"\\\";\\n  }\\n}\\n/* sd-tag: mark the record table so its td padding can be tuned */\\nfunction tagTable(){\\n  var w=document.querySelector(\\\".wu\\\");\\n  if(!w)return;\\n  var t=w.closest(\\\"table\\\");\\n  if(t&&!t.classList.contains(\\\"sdtable\\\"))t.classList.add(\\\"sdtable\\\");\\n}\\nvar snap={c:null};\\nfunction sdMirror(){\\n  var s=byId(\\\"sentence\\\"),c=byId(\\\"count\\\");\\n  if(!s||!c||s===c)return;\\n  var cv=c.innerHTML;\\n  if(s.innerHTML!==cv&&snap.c!==null&&snap.c!==cv){\\n    s.innerHTML=cv;\\n  }\\n  snap.c=cv;\\n}\\nfunction purgeLand(){\\n  var ls=document.querySelectorAll(\\\".card.land\\\"),i;\\n  for(i=0;i<ls.length;i++)ls[i].remove();\\n}\\nvar queued=false;\\nfunction pass(){\\n  queued=false;\\n  try{purgeLand()}catch(e){}\\n  try{ensureSentence()}catch(e){}\\n  try{ensureIpad()}catch(e){}\\n  try{seatCount()}catch(e){}\\n  try{retireStand()}catch(e){}\\n  try{ensureReading()}catch(e){}\\n  try{ensureNoRows()}catch(e){}\\n  try{stripInline()}catch(e){}\\n  try{secondLine()}catch(e){}\\n  try{tagTable()}catch(e){}\\n  try{sdMirror()}catch(e){}\\n}\\nfunction kick(){if(queued)return;queued=true;requestAnimationFrame(pass)}\\nnew MutationObserver(kick).observe(document.documentElement,{childList:true,subtree:true});\\nif(document.readyState===\\\"loading\\\")document.addEventListener(\\\"DOMContentLoaded\\\",pass);\\nelse pass();\\naddEventListener(\\\"load\\\",pass);\\naddEventListener(\\\"resize\\\",kick);\\n})();\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_981b46189fdf4115afa5cef8",
+  "content": "{\"ok\": true, \"note\": \"published to https://aircraftdefects.com/z/\"}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_d6d3d8abd2de45258b9036ef",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var rows=[].slice.call(document.querySelectorAll(\\\"table tr\\\"));function hist(cls){var h={};rows.filter(function(r){return r.className===cls}).forEach(function(r){var v=Math.round(r.getBoundingClientRect().height);h[v]=(h[v]||0)+1});return h}var t=document.querySelector(\\\"table\\\");return {wrote:hist(\\\"wrote\\\"),rep:hist(\\\"rep\\\"),tableH:Math.round(t.getBoundingClientRect().height),page:document.documentElement.scrollHeight,top:[].map.call(document.querySelector(\\\"main\\\").children,function(n){return [n.tagName+\\\".\\\"+(n.className||\\\"\\\"),Math.round(n.getBoundingClientRect().height)]}).slice(0,6)}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_d6d3d8abd2de45258b9036ef",
+  "content": "{\"value\": {\"wrote\": {\"55\": 18, \"75\": 62, \"95\": 10, \"127\": 10}, \"rep\": {\"73\": 7, \"85\": 93}, \"tableH\": 16342, \"page\": 18248, \"top\": [[\"DIV.\", 0], [\"DIV.\", 784], [\"DIV.\", 0], [\"DIV.card ask\", 0], [\"P.hint\", 0], [\"DIV.\", 0]]}}"
+ },
+ {
+  "role": "assistant",
+  "content": "The extras are gone but `tr.rep` still reads 85 vs the original's 72. Let me inspect a rep cell's internals on both sides.",
+  "tool_calls": [
+   {
+    "id": "call_cc95100d92814e36a6c81245",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var rep=document.querySelectorAll(\\\"tr.rep\\\")[1];var tds=[].map.call(rep.querySelectorAll(\\\"td\\\"),function(td){var kid=td.firstElementChild;return {kid:kid?kid.tagName+\\\".\\\"+(kid.className||\\\"\\\"):null,kidH:kid?Math.round(kid.getBoundingClientRect().height):null,kidMt:kid?getComputedStyle(kid).marginTop:null,kidMb:kid?getComputedStyle(kid).marginBottom:null}});var td=rep.querySelector(\\\"td\\\");var c=getComputedStyle(td);return {rowH:rep.getBoundingClientRect().height,tdPad:c.padding,tdLH:c.lineHeight,tds:tds}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   },
+   {
+    "id": "call_eae461055e384fc7bc60c016",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var rep=document.querySelectorAll(\\\"tr.rep\\\")[1];var tds=[].map.call(rep.querySelectorAll(\\\"td\\\"),function(td){var kid=td.firstElementChild;return {kid:kid?kid.tagName+\\\".\\\"+(kid.className||\\\"\\\"):null,kidH:kid?Math.round(kid.getBoundingClientRect().height):null,kidMt:kid?getComputedStyle(kid).marginTop:null,kidMb:kid?getComputedStyle(kid).marginBottom:null}});var td=rep.querySelector(\\\"td\\\");var c=getComputedStyle(td);return {rowH:rep.getBoundingClientRect().height,tdPad:c.padding,tdLH:c.lineHeight,tds:tds}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_cc95100d92814e36a6c81245",
+  "content": "{\"value\": {\"rowH\": 72.375, \"tdPad\": \"8px 9px 4px\", \"tdLH\": \"20.15px\", \"tds\": [{\"kid\": \"DIV.muted\", \"kidH\": 19, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.c\", \"kidH\": 36, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.c\", \"kidH\": 16, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.c\", \"kidH\": 16, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.c\", \"kidH\": 36, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.c\", \"kidH\": 16, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.c dull\", \"kidH\": 16, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.term c\", \"kidH\": 16, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.term c\", \"kidH\": 16, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.term c\", \"kidH\": 34, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"BUTTON.ghost\", \"kidH\": 36, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}]}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_eae461055e384fc7bc60c016",
+  "content": "{\"value\": {\"rowH\": 85.21875, \"tdPad\": \"5px 10px\", \"tdLH\": \"14.85px\", \"tds\": [{\"kid\": \"SPAN.sub\", \"kidH\": 16, \"kidMt\": \"2px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.c\", \"kidH\": 30, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.c\", \"kidH\": 15, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.c\", \"kidH\": 15, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.jasc c\", \"kidH\": 30, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.c\", \"kidH\": 15, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.c dull\", \"kidH\": 15, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.term c\", \"kidH\": 15, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.term c\", \"kidH\": 45, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"SPAN.term c\", \"kidH\": 74, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}, {\"kid\": \"BUTTON.ghost\", \"kidH\": 40, \"kidMt\": \"0px\", \"kidMb\": \"0px\"}]}}"
+ },
+ {
+  "role": "assistant",
+  "content": "Progress. Now the rep-row gap: my table is 1100 wide vs 1140, td line-height 14.85 vs 20.15, and padding differs. Let me confirm the wrapper section and span line-heights.",
+  "tool_calls": [
+   {
+    "id": "call_441a1d85b7784b758b009b8e",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var t=document.querySelector(\\\"table\\\");var n=t.parentElement;var chain=[];for(var i=0;i<4&&n;i++){var c=getComputedStyle(n);chain.push({tag:n.tagName,cls:n.className,pad:c.padding,w:Math.round(n.getBoundingClientRect().width),maxW:c.maxWidth});n=n.parentElement}var rep=document.querySelectorAll(\\\"tr.rep\\\")[1];var sp=rep.querySelector(\\\"span\\\");return {chain:chain,spanLH:getComputedStyle(sp).lineHeight,spanFS:getComputedStyle(sp).fontSize,tdLH:getComputedStyle(rep.querySelector(\\\"td\\\")).lineHeight}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   },
+   {
+    "id": "call_a397ee9025ba40b1904562a0",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var rep=document.querySelectorAll(\\\"tr.rep\\\")[1];var sp=rep.querySelector(\\\"span\\\");var td=rep.querySelector(\\\"td\\\");return {spanLH:getComputedStyle(sp).lineHeight,spanFS:getComputedStyle(sp).fontSize,spanDisp:getComputedStyle(sp).display,tdLH:getComputedStyle(td).lineHeight,btnH:Math.round(rep.querySelector(\\\"button\\\").getBoundingClientRect().height),btnPad:getComputedStyle(rep.querySelector(\\\"button\\\")).padding}}\",\"query\":\"?hero=where&zone=ZONE+200\",\"width\":1440}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_441a1d85b7784b758b009b8e",
+  "content": "{\"value\": {\"chain\": [{\"tag\": \"DIV\", \"cls\": \"rr-scroll\", \"pad\": \"0px\", \"w\": 1102, \"maxW\": \"100%\"}, {\"tag\": \"SECTION\", \"cls\": \"\", \"pad\": \"0px\", \"w\": 1102, \"maxW\": \"100%\"}, {\"tag\": \"SECTION\", \"cls\": \"panel\", \"pad\": \"14px 18px 24px\", \"w\": 1140, \"maxW\": \"none\"}, {\"tag\": \"DIV\", \"cls\": \"\", \"pad\": \"0px\", \"w\": 1140, \"maxW\": \"none\"}], \"spanLH\": \"15.525px\", \"spanFS\": \"11.5px\", \"tdLH\": \"14.85px\"}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_a397ee9025ba40b1904562a0",
+  "content": "{\"value\": {\"spanLH\": \"20.15px\", \"spanFS\": \"13px\", \"spanDisp\": \"inline\", \"tdLH\": \"20.15px\", \"btnH\": 36, \"btnPad\": \"7px 9px\"}}"
+ }
+]

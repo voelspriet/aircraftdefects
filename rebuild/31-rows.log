@@ -1,0 +1,53 @@
+[  81s] stap 1: dacht 6370, schreef 137, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[  94s] stap 2: dacht 0, schreef 0, 2 tool-calls
+   measure  {"value": {"wu": 112, "rows": [["rep", 73.046875], ["wrote", 127], ["rep", 85.21875], ["wrote", 127], ["rep", 85.21875], ["wrote", 102.25], ["rep", 85.21875], [
+   parent   {"value": {"wuHeight": 111.8125, "maxHeight": "none", "overflow": "visible", "webkitLineClamp": "none", "lineClamp": "none", "display": "block", "fontSize": "13
+[ 149s] stap 3: dacht 3582, schreef 210, 2 tool-calls
+   parent   {"value": {"error": "Page.evaluate: TypeError: Failed to execute 'getComputedStyle' on 'Window': parameter 1 is not of type 'Element'.\n    at eval (eval at eva
+   measure  {"value": {"rowCount": 202, "counts": {"hdr": 1, "spine": 1, "rep": 100, "wrote": 100}, "repH": 85.21875, "tdPad": "5px 10px", "wuH": null, "wuLH": null, "tds":
+[ 175s] stap 4: dacht 0, schreef 182, 1 tool-calls
+   parent   {"value": {"error": "Page.evaluate: SyntaxError: Unexpected token 'return'\n    at eval (<anonymous>)\n    at UtilityScript.evaluate (<anonymous>:291:30)\n    a
+[ 192s] stap 5: dacht 0, schreef 0, 1 tool-calls
+   parent   {"value": {"repH": 72.375, "tdPad": "8px 9px 4px", "tds": [["26 Aug 2026N617FE", 72], ["Federal Express Corp", 72], ["DOUG MD11F", 72], ["N617FE", 72], ["Fusela
+[ 233s] stap 6: dacht 2906, schreef 182, 2 tool-calls
+   parent   {"value": {"error": "Page.evaluate: SyntaxError: Unexpected token 'return'\n    at eval (<anonymous>)\n    at UtilityScript.evaluate (<anonymous>:291:30)\n    a
+   measure  {"value": {"wroteHist": {"82": 18, "102": 62, "122": 10, "127": 10}, "repHist": {"73": 7, "85": 93}, "wtdPad": "5px 10px", "wtdLine": "14.85px", "rtdPad": "5px 
+[ 257s] stap 7: dacht 0, schreef 0, 1 tool-calls
+   parent   {"value": {"wroteHist": {"51": 18, "71": 61, "91": 10, "126": 11}, "repHist": {"71": 72, "72": 23, "73": 1, "93": 4}, "wu": {"h": 111.8125, "maxH": "none", "ove
+[ 306s] stap 8: dacht 3971, schreef 162, 2 tool-calls
+   parent   {"value": {"wu": {"h": 111.8125, "scrollH": 112, "clientH": 112, "height": "111.812px", "maxH": "none", "overflow": "visible", "padding": "8px 12px", "position"
+   measure  {"value": {"wu": {"h": 112, "scrollH": 144, "clientH": 112, "height": "112px", "maxH": "112px", "overflow": "hidden", "padding": "8px 12px", "position": "relati
+[ 416s] stap 9: dacht 10815, schreef 198, 2 tool-calls
+   parent   {"value": {"cols": 11, "tW": 1140, "byH": {"51": {"wuH": 36, "wuScroll": 36, "wuHeightProp": "36px", "wuMaxH": "none", "wuKids": ["DIV.txt"], "wuLines": 2, "tdP
+   measure  {"value": {"cols": 11, "tW": 1100, "byH": {"82": {"wuH": 67.25, "wuScroll": 67, "wuHeightProp": "67.25px", "wuMaxH": "112px", "wuKids": ["DIV.txt", "DIV.wu-glos
+[ 479s] stap 10: dacht 4576, schreef 201, 2 tool-calls
+   parent   {"value": {"tdW": 1139, "wuPad": "8px 12px", "txt": {"h": 64, "w": 783, "lh": "20px", "fs": "12.5px"}, "toggle": 26, "tdPad": "0px 0px 14px", "tdColspan": 11, "
+   measure  {"value": {"tdW": 1099, "tdPad": "5px 10px", "wuPad": "8px 12px", "txt": {"h": 64, "w": 780, "lh": "20px", "fs": "12.5px"}, "gloss": {"h": 25, "pos": "relative"
+[ 520s] stap 11: dacht 2163, schreef 199, 2 tool-calls
+   parent   {"value": {"total": 0, "visible": 0, "firstText": null, "after": {"wuH": 129.8125, "glIn": false, "glH": null, "rowH": 144, "btnText": "Show less", "rowH2": 126
+   measure  {"value": {"before": {"wuH": 112, "rowH": 127, "glVis": true}, "after": {"wuH": 112, "rowH": 127, "glVis": true, "glText": "Say it in plain English", "rowH2": 1
+[ 608s] stap 12: dacht 8401, schreef 256, 2 tool-calls
+   parent   {"value": {"shortStyle": null, "shortCls": "wu clip", "shortKids": ["DIV.txt"], "afterBg": "none", "afterH": "auto", "afterBottom": "auto", "afterPos": "static"
+   measure  {"value": {"shortStyle": null, "shortCls": "wu clip", "glossStyle": null, "glossPos": "relative", "glossFont": "13px", "glossBtn": "Say it in plain English", "a
+[ 725s] stap 13: dacht 13352, schreef 88, 2 tool-calls
+   parent   {"value": {"kids": [["DIV.ipad", 791, "FAA SERVICE DIFFICULTY REPORTS \u00b7 1 JAN 1995 TO 26 AUG 2026\n "], ["BUTTON.seam", 34, "Read the 84,453 \u2192"]], "ai
+   measure  {"value": {"extra": [["znarrow", null], ["card ask", 59, "TAIL\n      AIRLINE\n      AIRCRAFT TYPE\n    \n    \n    \n    Ask"], ["khint", null], ["rv-aim", 36,
+[ 776s] stap 14: dacht 4456, schreef 117, 2 tool-calls
+   measure  {"value": [{"cls": "", "tag": "DIV", "h": 30, "text": "NARROWED TOzone: ZONE 200 \u00d7clear all"}, {"cls": "", "tag": "DIV", "h": 784, "text": "FAA Service Dif
+   measure  {"value": {"ipadKids": [["DIV.aim", 20, ""], ["DIV.hand", 18, "Click a zone on the aircraft to keep only what was"], ["DIV.sdcount", 33, "84,453 reports, upper 
+[ 813s] stap 15: dacht 2251, schreef 133, 1 tool-calls
+   parent   {"value": {"narrowed": [["SCRIPT.", 0]], "clearAll": [], "ask": [], "plainEnglish": [["DD.", 0], ["SCRIPT.", 0]], "regHint": []}}
+[ 929s] stap 16: dacht 12863, schreef 210, 2 tool-calls
+   measure  {"value": {"c1": {"tag": "DIV", "id": "znarrow", "cls": "", "html": "<div id=\"znarrow\"><span class=\"zn-lab\">NARROWED TO</span><button class=\"zn-chip\" data
+   parent   {"value": {"credit": {"mt": "2px", "mb": "10px", "fs": "12px", "lh": "18.6px", "pad": "0px", "h": 19, "text": "Inspired by Rory Kennedy's\n  Freefall: A Reckoni
+[ 993s] stap 17: dacht 0, schreef 0, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[1002s] stap 18: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"wrote": {"55": 18, "75": 62, "95": 10, "127": 10}, "rep": {"73": 7, "85": 93}, "tableH": 16342, "page": 18248, "top": [["DIV.", 0], ["DIV.", 784], [
+[1019s] stap 19: dacht 0, schreef 122, 2 tool-calls
+   parent   {"value": {"rowH": 72.375, "tdPad": "8px 9px 4px", "tdLH": "20.15px", "tds": [{"kid": "DIV.muted", "kidH": 19, "kidMt": "0px", "kidMb": "0px"}, {"kid": "SPAN.c"
+   measure  {"value": {"rowH": 85.21875, "tdPad": "5px 10px", "tdLH": "14.85px", "tds": [{"kid": "SPAN.sub", "kidH": 16, "kidMt": "2px", "kidMb": "0px"}, {"kid": "SPAN.c", 
+[1108s] stap 20: dacht 9118, schreef 171, 2 tool-calls
+   measure  {"value": {"chain": [{"tag": "DIV", "cls": "rr-scroll", "pad": "0px", "w": 1102, "maxW": "100%"}, {"tag": "SECTION", "cls": "", "pad": "0px", "w": 1102, "maxW":
+   parent   {"value": {"spanLH": "20.15px", "spanFS": "13px", "spanDisp": "inline", "tdLH": "20.15px", "btnH": 36, "btnPad": "7px 9px"}}

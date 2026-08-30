@@ -210,7 +210,7 @@
     "from",
     "to"
    ],
-   "starters": 18,
+   "starters": 19,
    "chips": 0,
    "reportRows": 0,
    "writeUps": 0,
@@ -218,13 +218,12 @@
    "spineRows": 0,
    "exportBtn": true,
    "copyBtn": true,
-   "moreBtn": false,
+   "moreBtn": true,
    "seamBtn": true,
    "aimAt": true,
    "aimKindOpts": 6,
    "specimen": "One report from this selection. First the FAA\u2019s own filing of it, then the mechanic\u2019s words as written. Click to open the full report \u2192 Boeing 777FHT \u00b7 Emergency Lighting \u00b7 Lamp \u00b7 Functional check \u00b7 On the ground, in inspection or maintenance \u00b7 26 August 2026 POST-FLT INSP, (1EA) OVRHD SUPRNMRY AREA EMERGENCY LIGHT INOP. RE-LAMPED, IAW AMM: 33-51-04-2. LIGHT TESTS SATIS, OK FOR SVC.",
    "reading": [
-    "",
     "Upper fuselage accounts for 84,453 of the 212,940 reports written in the FAA\u2019s numbered zones, or 39.7%. Those numbers are what this diagram can place"
    ],
    "gutters": [
@@ -233,9 +232,9 @@
     "WHO 54,634 aircraft",
     "FORCED 151,543 of 1,757,827"
    ],
-   "sentence": "",
+   "sentence": "1,757,827 reports, everything the FAA has published to 26 August 2026.",
    "margin": "August 2026 covers 1 to 26 August, so its bar counts 26 days against 31 in a whole one the tail list shows the 900 most-reported aircraft out of 54,634; the airline list counts every report counts are of reports filed, not of flights",
-   "count": "1,757,827 reports. Nothing chosen yet.",
+   "count": "1,757,827 reports, everything the FAA has published to 26 August 2026.",
    "glossaryTerms": 2
   }
  },
@@ -451,7 +450,7 @@
     "from",
     "to"
    ],
-   "starters": 18,
+   "starters": 19,
    "chips": 1,
    "reportRows": 0,
    "writeUps": 100,
@@ -459,13 +458,12 @@
    "spineRows": 1,
    "exportBtn": true,
    "copyBtn": true,
-   "moreBtn": false,
+   "moreBtn": true,
    "seamBtn": true,
    "aimAt": true,
    "aimKindOpts": 6,
    "specimen": "One report from this selection. First the FAA\u2019s own filing of it, then the mechanic\u2019s words as written. Click to open the full report \u2192 Boeing 777FHT \u00b7 Emergency Lighting \u00b7 Lamp \u00b7 Functional check \u00b7 On the ground, in inspection or maintenance \u00b7 26 August 2026 POST-FLT INSP, (1EA) OVRHD SUPRNMRY AREA EMERGENCY LIGHT INOP. RE-LAMPED, IAW AMM: 33-51-04-2. LIGHT TESTS SATIS, OK FOR SVC.",
    "reading": [
-    "",
     "Upper fuselage accounts for 84,453 of the 84,453 reports written in the FAA\u2019s numbered zones, or 100.0%. Those numbers are what this diagram can place"
    ],
    "gutters": [
@@ -474,7 +472,7 @@
     "WHO 9,644 aircraft",
     "FORCED 1,675 of 84,453"
    ],
-   "sentence": "",
+   "sentence": "84,453 reports, upper fuselage. 1,673,374 set aside.",
    "margin": "August 2026 covers 1 to 26 August, so its bar counts 26 days against 31 in a whole one the tail list shows the 900 most-reported aircraft out of 9,644; the airline list counts every report counts are of reports filed, not of flights",
    "count": "84,453 reports, upper fuselage. 1,673,374 set aside.",
    "glossaryTerms": 392
@@ -697,7 +695,7 @@
     "from",
     "to"
    ],
-   "starters": 18,
+   "starters": 19,
    "chips": 0,
    "reportRows": 0,
    "writeUps": 0,
@@ -705,12 +703,13 @@
    "spineRows": 0,
    "exportBtn": true,
    "copyBtn": true,
-   "moreBtn": false,
+   "moreBtn": true,
    "seamBtn": true,
    "aimAt": true,
    "aimKindOpts": 6,
    "specimen": "One report from this selection. First the FAA\u2019s own filing of it, then the mechanic\u2019s words as written. Click to open the full report \u2192 Boeing 777FHT \u00b7 Emergency Lighting \u00b7 Lamp \u00b7 Functional check \u00b7 On the ground, in inspection or maintenance \u00b7 26 August 2026 POST-FLT INSP, (1EA) OVRHD SUPRNMRY AREA EMERGENCY LIGHT INOP. RE-LAMPED, IAW AMM: 33-51-04-2. LIGHT TESTS SATIS, OK FOR SVC.",
    "reading": [
+    "Upper fuselage accounts for 84,453 of the 212,940 reports written in the FAA\u2019s numbered zones, or 39.7%. Those numbers are what this diagram can place",
     "Eight operators file 51.6% of what is here; the other 3,938 share the rest. 54,634 aircraft appear in all. One of them, N855FT, is written up 1,068 ti"
    ],
    "gutters": [
@@ -719,9 +718,9 @@
     "WHO airline and tail 54,634 aircraft",
     "FORCED 151,543 of 1,757,827"
    ],
-   "sentence": "",
+   "sentence": "1,757,827 reports, everything the FAA has published to 26 August 2026.",
    "margin": "August 2026 covers 1 to 26 August, so its bar counts 26 days against 31 in a whole one the tail list shows the 900 most-reported aircraft out of 54,634; the airline list counts every report counts are of reports filed, not of flights",
-   "count": "1,757,827 reports. Nothing chosen yet.",
+   "count": "1,757,827 reports, everything the FAA has published to 26 August 2026.",
    "glossaryTerms": 2
   }
  },
@@ -936,7 +935,7 @@
     "from",
     "to"
    ],
-   "starters": 18,
+   "starters": 19,
    "chips": 0,
    "reportRows": 0,
    "writeUps": 0,
@@ -944,13 +943,14 @@
    "spineRows": 0,
    "exportBtn": true,
    "copyBtn": true,
-   "moreBtn": false,
+   "moreBtn": true,
    "seamBtn": true,
    "aimAt": true,
    "aimKindOpts": 6,
    "specimen": "One report from this selection. First the FAA\u2019s own filing of it, then the mechanic\u2019s words as written. Click to open the full report \u2192 Boeing 777FHT \u00b7 Emergency Lighting \u00b7 Lamp \u00b7 Functional check \u00b7 On the ground, in inspection or maintenance \u00b7 26 August 2026 POST-FLT INSP, (1EA) OVRHD SUPRNMRY AREA EMERGENCY LIGHT INOP. RE-LAMPED, IAW AMM: 33-51-04-2. LIGHT TESTS SATIS, OK FOR SVC.",
    "reading": [
-    "151,543 reports, 8.6% of this selection, record something the crew had to do rather than something found on the ground. The commonest is unscheduled l"
+    "Upper fuselage accounts for 84,453 of the 212,940 reports written in the FAA\u2019s numbered zones, or 39.7%. Those numbers are what this diagram can place",
+    "151,543 reports."
    ],
    "gutters": [
     "WHEN 380 months",
@@ -958,9 +958,9 @@
     "WHO 54,634 aircraft",
     "FORCED what the crew did 151,543 of 1,757,827"
    ],
-   "sentence": "",
+   "sentence": "1,757,827 reports, everything the FAA has published to 26 August 2026.",
    "margin": "August 2026 covers 1 to 26 August, so its bar counts 26 days against 31 in a whole one the tail list shows the 900 most-reported aircraft out of 54,634; the airline list counts every report counts are of reports filed, not of flights",
-   "count": "1,757,827 reports. Nothing chosen yet.",
+   "count": "1,757,827 reports, everything the FAA has published to 26 August 2026.",
    "glossaryTerms": 2
   }
  },
@@ -1167,7 +1167,7 @@
     "from",
     "to"
    ],
-   "starters": 18,
+   "starters": 19,
    "chips": 0,
    "reportRows": 0,
    "writeUps": 0,
@@ -1175,13 +1175,14 @@
    "spineRows": 0,
    "exportBtn": true,
    "copyBtn": true,
-   "moreBtn": false,
+   "moreBtn": true,
    "seamBtn": true,
    "aimAt": true,
    "aimKindOpts": 6,
    "specimen": "One report from this selection. First the FAA\u2019s own filing of it, then the mechanic\u2019s words as written. Click to open the full report \u2192 Boeing 777FHT \u00b7 Emergency Lighting \u00b7 Lamp \u00b7 Functional check \u00b7 On the ground, in inspection or maintenance \u00b7 26 August 2026 POST-FLT INSP, (1EA) OVRHD SUPRNMRY AREA EMERGENCY LIGHT INOP. RE-LAMPED, IAW AMM: 33-51-04-2. LIGHT TESTS SATIS, OK FOR SVC.",
    "reading": [
-    "Between 2,619 and 7,147 reports in a settled month, busiest in May 2013, quietest in January 1995. The last twelve settled months average 5,081 a mont"
+    "Between 2,619 and 7,147 reports in a settled month, busiest in May 2013, quietest in January 1995. The last twelve settled months average 5,081 a mont",
+    "Upper fuselage accounts for 84,453 of the 212,940 reports written in the FAA\u2019s numbered zones, or 39.7%. Those numbers are what this diagram can place"
    ],
    "gutters": [
     "WHEN 380 months",
@@ -1189,9 +1190,9 @@
     "WHO 54,634 aircraft",
     "FORCED 151,543 of 1,757,827"
    ],
-   "sentence": "",
+   "sentence": "1,757,827 reports, everything the FAA has published to 26 August 2026.",
    "margin": "August 2026 covers 1 to 26 August, so its bar counts 26 days against 31 in a whole one the tail list shows the 900 most-reported aircraft out of 54,634; the airline list counts every report counts are of reports filed, not of flights",
-   "count": "1,757,827 reports. Nothing chosen yet.",
+   "count": "1,757,827 reports, everything the FAA has published to 26 August 2026.",
    "glossaryTerms": 2
   }
  }

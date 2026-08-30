@@ -21,7 +21,10 @@ PROBE = """() => {
     filterFields: ["q","operator","make","model","part","ata","jasc","nature","crew","condition",
                    "stage","zone","tail","discovered","corrosion","cracked","minhours","from","to"]
                   .filter(k=>document.getElementById(k)),
-    starters:     q("#starters button").length,
+    /* the rebuild puts its expander beside the strip, not inside it, and calls
+       its pager rr-morebtn. Counting only the reference's own ids reported a
+       missing control where there is one, which is a false fault. */
+    starters:     q("#starters button, #starterToggle").length,
     chips:        q(".chip").length,
     reportRows:   q("table.reports tr.rep").length,
     writeUps:     q(".wu").length,
@@ -29,7 +32,7 @@ PROBE = """() => {
     spineRows:    q("tr.spine").length,
     exportBtn:    !!document.querySelector("[onclick*=exportCsv], #exportBtn"),
     copyBtn:      !!document.querySelector("[onclick*=copyLink], #copyBtn"),
-    moreBtn:      !!document.getElementById("more"),
+    moreBtn:      !!(document.getElementById("more") || document.getElementById("rr-morebtn")),
     seamBtn:      !!q("button").find(b=>/Read the |Read all /.test(b.innerText)),
     aimAt:        !!document.getElementById("iAimAt")||!!document.getElementById("aimAt"),
     aimKindOpts:  (document.getElementById("aimKind")||{}).length||0,

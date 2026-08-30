@@ -261,6 +261,7 @@ function draw(){var h=H;(h.crew||[]).forEach(function(c){if(c.code&&c.label)ZLAB
   var sp=h.span;sp=(typeof sp==="string")?sp:(sp&&sp.from&&sp.to?sp.from+" to "+sp.to:"1 Jan 1995 to today");$("#mast").textContent="FAA service difficulty reports · "+sp;
   var railName={where:"<span class=here>where</span> on the aircraft they were found",when:"<span class=here>when</span> they were filed, month by month",who:"<span class=here>who</span> filed them, airline and tail",forced:"<span class=here>what they forced</span> the crew to do"}[RAIL];
   $("#h1").innerHTML="<b>"+num(tot)+"</b> reports, "+railName+"."+(filtered?' <span style="font:italic 22px var(--serif);color:var(--ash)">'+num(corpus-tot)+" set aside.</span>":"");
+  if(view()==="freefall"){$("#h1").innerHTML='<span style="color:var(--rust);font-weight:700">Why this site exists</span>';$(".promise").style.display="none"}else{$(".promise").style.display=""}
   $("#readAll").textContent="read "+(filtered?"these "+num(tot):"all "+num(corpus));$("#readAll").href="/z/rebuilt?"+sel().toString();
   chips();
   (function(){var p=q(),f=p.get("from"),t=p.get("to");function pd(x){var m=x&&x.match(/(\d{4})-(\d\d)-(\d\d)/);return m?new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}):x}

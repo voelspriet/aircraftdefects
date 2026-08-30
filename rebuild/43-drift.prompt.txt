@@ -173,3 +173,34 @@ These must not regress. They are measured and they are better than the parent:
     horizontal overflow 0px at 768, 1024 and 1440
     380 month bars at 2.56px, against the parent's 0.38px
     zero console errors and zero page errors
+
+# Two more the gate fails, added after brief 42 landed
+
+**A duplicate id.** `document.querySelectorAll('#iAim').length` returns 2. You
+cleared `#tip` in the last round; do the same here. Keep the one the instrument
+writes its aim text into, and rename or drop the other, whichever leaves the aim
+line working. Renaming it at runtime after the fact is a workaround: anything
+that resolved the second one by id then gets null instead. Prefer not to emit two.
+
+**Nineteen controls under 24px tall.** Measured, with the smallest first:
+
+    'SDR Desk lookup'      14px
+    'Freefall: A Reckon'   14px
+    'Search'               21.8px   and the other fifteen .vtab buttons
+
+24px is the smallest a pointer target should be. The tab strip is the bulk of
+this: sixteen `.vtab` buttons at 21.8px. It sits at 100px total against the
+parent's 104px, so there is room to give each button its height back without the
+strip growing past 130px, which the gate also checks.
+
+The two 14px items are links in running text, not buttons. If a link inside a
+sentence cannot be 24px without breaking the sentence, say so in your answer
+rather than inflating the line height around it, and I will take it out of the
+check.
+
+# One thing to leave alone
+
+`rebuild/42-css.css` is the block that repairs the case sheet: `#case-wrap`
+scrolls, `#case-box` does not clip, and `body.rr-sheet-lock` holds the page
+still. It ships after yours. Do not restyle `#case-wrap`, `#case-box` or
+`.rr-sheet-lock`, and do not set `overflow` on `body`.

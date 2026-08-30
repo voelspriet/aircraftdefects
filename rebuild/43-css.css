@@ -1,0 +1,180 @@
+/* ==========================================================================
+   z-built — the appearance block. Every selector below is declared here
+   and nowhere else; shared values come from the tokens in :root.
+   rebuild/splice_css.py fails the build if a second block sets one of
+   these properties to a different value.
+   ========================================================================== */
+
+:root {
+  /* surfaces and ink */
+  --paper:  #f2eee6;
+  --card:   #faf8f4;          /* .wu and resting tab fills */
+  --ink:    #26231e;
+  --ash:    #8b857a;          /* .muted, .absent, secondary text */
+  --rust:   #b8431f;          /* the only accent: hover and focus */
+
+  /* month bars: one colour, one opacity, both declared here and used once */
+  --rest:   #d8d2c6;
+  --bar-op: 1;
+
+  /* type: the scale lives here and is restated nowhere */
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo,
+          Consolas, monospace;
+  --fs-10: 10.5px;
+  --fs-11: 11px;
+  --fs-12: 12px;
+  --fs-13: 13px;
+}
+
+/* ---- base ----------------------------------------------------------------- */
+
+html, body { background: var(--paper); }        /* same background, by token */
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font: 400 var(--fs-13)/1.5 var(--sans);
+  /* overflow on body belongs to rebuild/42-css.css — never set here */
+}
+
+/* ---- focus ring: declared exactly once ------------------------------------
+   The WHEN rail (.mo) is a focusable control and gets the same ring as
+   everything else. There is no `outline: none` anywhere in this block. */
+
+:where(a, button, summary, input, select, textarea, .mo):focus-visible {
+  outline: 2px solid var(--rust);
+  outline-offset: 1px;
+}
+
+/* ---- shared small pieces --------------------------------------------------- */
+
+.stamp  { font: 500 var(--fs-10)/1.5 var(--mono); letter-spacing: .02em;
+          color: var(--ash); }
+.mono   { font-family: var(--mono); }
+.muted  { color: var(--ash); }
+.absent { color: var(--ash); }
+.wu     { background: var(--card); }
+
+.picker button {
+  box-sizing: border-box;
+  min-height: 24px;
+  font: 600 var(--fs-11)/1.2 var(--sans);
+}
+
+#tip {
+  position: absolute;
+  z-index: 10;
+  max-width: 280px;
+  padding: 4px 8px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 500 var(--fs-11)/1.4 var(--mono);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+/* ---- fault 1: the aim line moved the page ----------------------------------
+   #aimLine is empty at rest, filled on hover, and used to grow, dragging
+   .hand, .sdcount and everything below it down with it. Its height is now
+   reserved whether or not it holds text: filling it changes words, never
+   layout. Hovering a zone row, the drawing or a month bar moves nothing. */
+
+.aim {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  color: var(--ash);
+  font: 400 var(--fs-12)/1.4 var(--sans);
+}
+.aim > * { margin: 0; }
+
+.hand    { color: var(--ash); font: 400 var(--fs-12)/1.4 var(--sans); }
+.sdcount { font: 600 var(--fs-13)/1.3 var(--sans); }
+
+/* ---- fault 2: gutter numbers were ellipsised --------------------------------
+   A count is never truncated: "54,634 aircraft" and "151,543 of
+   1,757,827" print in full. The gutter yields width instead; the value
+   may not be clipped. */
+
+.gutter { flex: 0 0 auto; min-width: 136px; }   /* 136px > the 126px widest value */
+.gv {
+  min-width: max-content;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  color: var(--ink);
+  font: 400 var(--fs-12)/1.5 var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+
+/* zone rows: a label and the number beside it are one row and one size.
+   12px for both, from the token — not 15 and 11 — so "place named in
+   words, not as a zone" sits on one line at 1440px. */
+.zrow { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.zl, .zv { font: 500 var(--fs-12)/1.4 var(--sans); }
+.zv { color: var(--ash); font-variant-numeric: tabular-nums; }
+
+/* ---- fault 3: strip text was painted under the Fleet tab --------------------
+   The label and the buttons are two columns that wrap; nothing here is
+   positioned over anything else. At narrow widths the columns stack and
+   the tabs wrap inside their own row — the page body never scrolls. */
+
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+  min-width: 0;
+  max-width: 100%;
+}
+.strip .note { flex: 1 1 26em; min-width: 0; }
+.strip .tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+
+/* pointer targets: 24px is the floor. Sixteen .vtab buttons go from
+   21.8px to 24px; the strip stays well under 130px. */
+.vtab {
+  box-sizing: border-box;
+  min-height: 24px;
+  padding: 3px 10px;
+  font: 500 var(--fs-11)/1.2 var(--sans);
+}
+
+/* links in running text ('SDR Desk lookup', 'Freefall: A Reckon…'):
+   padding lifts the hit area to 24px and the negative margins hand it
+   straight back, so the sentence's line box does not change. */
+.prose a, .note a {
+  display: inline-block;
+  line-height: 1;
+  padding: 5px 2px;
+  margin: -5px -2px;
+}
+
+/* ---- WHEN rail ---------------------------------------------------------------
+   The month strip scrolls inside the rail at narrow widths; it never
+   widens the document. Each bar is one colour at one opacity, both from
+   the tokens — not a colour from one block and an opacity from another. */
+
+.rails { max-width: 100%; overflow-x: auto; }
+
+.mo { flex: 0 0 3px; min-width: 0; }
+.mo i {
+  display: block;
+  width: 2.56px;
+  background: var(--rest);
+  opacity: var(--bar-op);
+}
+.mo:hover i,
+.mo:focus-visible i { background: var(--rust); }
+
+/* ---- drawing ----------------------------------------------------------------- */
+
+.drawing { max-width: 100%; }

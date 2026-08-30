@@ -105,16 +105,22 @@ The line at the top of this file, "everything on the page is written by the
 model", is the intent and it was not precise enough to be checkable. This section
 is the precise version. Every figure here can be counted from the repository.
 
-    served page, raw                620,359 characters
-      model-written                 591,890   95.4%
-      hand-written                   28,469   4.6%
-        rebuild/bridge.js.bak               13,226
-        rebuild/47-hand.js                   2,618
-        rebuild/48-hand.js                   5,137
-        rebuild/49-hand.css                    976
-        rebuild/49-hand.js                   2,756
-        rebuild/50-hand.css                  2,670
-        rebuild/50-hand.js                   1,086
+    served page, raw                 646,781 characters   (recounted 30 August, after 51)
+      model-written                    592,629   91.6%
+      hand-written                      54,152   8.4%
+        rebuild/bridge.js.bak             13,228
+        rebuild/47-hand.js                 2,618
+        rebuild/48-hand.js                 5,138
+        rebuild/49-hand.js                 2,756
+        rebuild/49-hand.css                  976
+        rebuild/50-hand.js                 1,086
+        rebuild/50-hand.css                2,670
+        rebuild/51-z2.js                  18,096
+        rebuild/51-z2.css                  7,584
+      plus one hand edit inside a model block: 1,160 characters REMOVED from
+      rebuild/42-dom.js (the height-pinning; backup 42-dom.js.bak-49)
+      The service, app/app.py, is hand-written throughout and always was; the
+      five streaming endpoints and /z/api/ask added on 30 August are marked.
 
 **`rebuild/bridge.js.bak`, 13,226 characters, is hand-written.** It joins the two
 halves the model built separately. The controls were briefed to call `search(off)`
@@ -180,3 +186,10 @@ own drawing at the same URL: the AIM AT row shown under the headline (it was
 built, then hidden by a model rule), the WHEN bars in the parent's colour (they
 were painted rust at half opacity, a smear the headline collided with), the rail
 tabs in the parent's faces, and a "Take it" button that was ink on ink.
+
+**`rebuild/51-z2.js` and `51-z2.css`** are the redesign layer from the panel of
+twenty (docs/DESIGN-Z2.md): one streaming model-call block used by every button,
+"Say it in plain English" on the specimen and every write-up, "How the trade says
+it" on any word, "What recurs here" over a selection, "Is this the right slice?"
+before export, "Ask the file" as draft filters, the shutter, and records as one
+line each. The model's words are the model's; this is the frame they arrive in.

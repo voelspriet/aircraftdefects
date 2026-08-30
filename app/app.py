@@ -1044,3 +1044,217 @@ def judge(cid):
     row = c.execute("SELECT confirmed, disputed FROM conflicts WHERE id=?", (cid,)).fetchone()
     c.close()
     return jsonify(id=cid, confirmed=row[0] if row else 0, disputed=row[1] if row else 0)
+
+# ============================================================================
+# hand-written, 30 August 2026, counted in MODEL_USE.md. The panel of twenty
+# (docs/DESIGN-Z2.md) asked for live, streamed model calls. Nothing on the page
+# streamed before this: every model call was fetch().then(json). These five
+# endpoints stream token by token as Server-Sent Events, so the reader sees the
+# model working on real evidence rather than a dead button.
+#
+# Every one states what it read (n of m) in its first event, streams the
+# model's words as they arrive, and ends with a "done" event carrying the
+# count, wall time and tokens. Abstention is a result, not an error.
+# ============================================================================
+from flask import stream_with_context
+
+def glm_stream(prompt, effort="low", max_tokens=1500):
+    """Yield content deltas as they arrive. Same call shape as glm()."""
+    body = {"model": MODEL, "temperature": 1, "top_p": 0.95,
+            "thinking": {"type": "enabled", "clear_thinking": False},
+            "reasoning_effort": effort, "max_tokens": max_tokens, "stream": True,
+            "messages": [{"role": "user", "content": prompt}]}
+    r = requests.post(ZAI, json=body, timeout=1800, stream=True, headers={
+        "Authorization": "Bearer " + key(), "Content-Type": "application/json"})
+    if r.status_code != 200:
+        raise RuntimeError("z.ai %s %s" % (r.status_code, r.text[:200]))
+    usage = {}
+    for line in r.iter_lines(decode_unicode=True):
+        if not line or not line.startswith("data:"):
+            continue
+        chunk = line[5:].strip()
+        if chunk == "[DONE]":
+            break
+        try:
+            d = json.loads(chunk)
+        except ValueError:
+            continue
+        if d.get("usage"):
+            usage = d["usage"]
+        for ch in d.get("choices", []):
+            piece = (ch.get("delta") or {}).get("content")
+            if piece:
+                yield ("delta", piece)
+    yield ("usage", usage)
+
+
+def _sse(event, data):
+    return "event: %s\ndata: %s\n\n" % (event, json.dumps(data, ensure_ascii=False))
+
+
+def _stream_response(meta, prompt, effort, max_tokens):
+    t0 = time.time()
+    def gen():
+        yield _sse("meta", meta)
+        try:
+            for kind, x in glm_stream(prompt, effort=effort, max_tokens=max_tokens):
+                if kind == "delta":
+                    yield _sse("delta", x)
+                else:
+                    yield _sse("done", {"seconds": round(time.time() - t0, 1),
+                                        "tokens": (x or {}).get("total_tokens"),
+                                        "model": MODEL, "effort": effort})
+        except Exception as e:
+            yield _sse("error", {"message": str(e)[:200],
+                                 "seconds": round(time.time() - t0, 1)})
+    return Response(stream_with_context(gen()), mimetype="text/event-stream",
+                    headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+def _selection_rows(limit):
+    """The rows the instrument is showing, from the same query string."""
+    params = {k: v for k, v in request.args.items() if v}
+    params["limit"] = limit
+    d = api("/api/search", **params)
+    rows = d.get("rows") or []
+    return rows, d.get("total", len(rows))
+
+
+ABSTAIN = ("If the write-ups do not support an answer, say exactly that in one "
+           "sentence and stop. Never invent. Never soften. British English, no em dashes.")
+
+
+@app.get("/z/api/stream/gloss")
+def stream_gloss():
+    text = (request.args.get("text") or "").strip()
+    if not text:
+        return jsonify(error="no text"), 400
+    prompt = GLOSS_RULES.split("Separately:")[0] + "\n" + ABSTAIN + \
+        "\nWrite plain prose only, no JSON.\n\nThe write-up, verbatim:\n" + text
+    long_ = len(text) > 400
+    return _stream_response({"read": 1, "of": 1, "what": "this write-up"},
+                            prompt, "high" if long_ else "low", 1200)
+
+
+@app.get("/z/api/stream/recurs")
+def stream_recurs():
+    rows, total = _selection_rows(300)
+    texts = [(r.get("OperatorControlNumber"), (r.get("Discrepancy") or "").strip())
+             for r in rows if (r.get("Discrepancy") or "").strip()]
+    n = len(texts)
+    if n < 12:
+        def gen():
+            yield _sse("meta", {"read": n, "of": total, "what": "write-ups"})
+            yield _sse("abstain", {"text": "Too few write-ups to find a pattern. %d read." % n})
+        return Response(stream_with_context(gen()), mimetype="text/event-stream")
+    listing = "\n".join("[%s] %s" % (i, t[:600]) for i, t in texts)
+    scope = ("all %d write-ups in this selection" % n if n >= total
+             else "the newest %d of %d write-ups in this selection, not a sample of the rest" % (n, total))
+    prompt = ("You are reading %s, verbatim, from FAA service difficulty reports. Name what "
+              "recurs across them that no coded field captures: three to six things. For each, "
+              "one plain sentence, then two or three verbatim quotes in their original capitals, "
+              "each ending with its record number in square brackets exactly as given. You are "
+              "describing these %d write-ups only; do not claim a count you have not pointed to, "
+              "and say 'several' or 'a few' rather than a number you did not verify. Say nothing "
+              "about cause, safety or rates. %s\n\n%s" % (scope, n, ABSTAIN, listing))
+    # first live run: 57 s, 40,026 tokens, zero words. max_tokens is a budget
+    # shared with the thinking, and at high effort the reasoning ate all of it
+    # (MODEL_USE.md records the same trap). Low effort, larger budget.
+    return _stream_response({"read": n, "of": total, "what": "write-ups", "scope": scope},
+                            prompt, "low", 8000)
+
+
+@app.get("/z/api/stream/vocab")
+def stream_vocab():
+    word = (request.args.get("word") or "").strip().upper()
+    if not word or len(word) < 3:
+        return jsonify(error="no word"), 400
+    d = api("/api/search", q=word.lower(), limit=60)
+    rows = d.get("rows") or []
+    total = d.get("total", len(rows))
+    texts = [(r.get("OperatorControlNumber"), (r.get("Discrepancy") or "").strip())
+             for r in rows if word in (r.get("Discrepancy") or "").upper()]
+    n = len(texts)
+    if n < 10:
+        def gen():
+            yield _sse("meta", {"read": n, "of": total, "what": "uses of " + word})
+            yield _sse("abstain", {"text": "This word appears %d times. Not enough to tell you how it is used." % total})
+        return Response(stream_with_context(gen()), mimetype="text/event-stream")
+    listing = "\n".join("[%s] %s" % (i, t[:400]) for i, t in texts)
+    prompt = ("Below are %d verbatim aircraft maintenance write-ups that contain the word %s. "
+              "Explain how mechanics use this word in these write-ups: what it means here, and "
+              "which other words or shorthand they use for the same thing, each with one quote "
+              "and its record number in square brackets exactly as given. Mark each meaning "
+              "'from the record' if the write-ups show it, or 'outside knowledge' if you are "
+              "supplying it. %s\n\n%s" % (n, word, ABSTAIN, listing))
+    return _stream_response({"read": n, "of": total, "what": "uses of " + word},
+                            prompt, "low", 1500)
+
+
+@app.get("/z/api/stream/slice")
+def stream_slice():
+    rows, total = _selection_rows(25)
+    filters = {k: v for k, v in request.args.items() if v and k not in ("hero", "view", "case")}
+    texts = [(r.get("OperatorControlNumber"), (r.get("Discrepancy") or "").strip())
+             for r in rows if (r.get("Discrepancy") or "").strip()]
+    n = len(texts)
+    listing = "\n".join("[%s] %s" % (i, t[:400]) for i, t in texts)
+    prompt = ("A reporter is about to export %d FAA service difficulty reports selected by these "
+              "filters: %s. Below are %d of them, verbatim. Say, in at most three short "
+              "paragraphs: which of these %d do not belong to what the filters seem to intend, "
+              "quoting the words and record number; and what the filters will miss because "
+              "mechanics wrote it in words rather than codes, with one example word. If all %d "
+              "match and nothing is obviously missed, say: 'These %d all match what you asked "
+              "for. That says nothing about the other %s.' %s\n\n%s"
+              % (total, json.dumps(filters), n, n, n, n, "{:,}".format(max(total - n, 0)),
+                 ABSTAIN, listing))
+    return _stream_response({"read": n, "of": total, "what": "write-ups", "filters": filters},
+                            prompt, "high", 1200)
+
+
+ASK_FIELDS = {"q": "words in the write-up", "operator": "airline designator", "tail": "N-number",
+              "make": "aircraft make", "model": "aircraft model", "jasc": "JASC system code",
+              "zone": "zone code, e.g. ZONE 700", "nature": "nature of condition code",
+              "crew": "precautionary procedure code", "stage": "stage of operation code",
+              "discovered": "how discovered code", "from": "date YYYY-MM-DD", "to": "date YYYY-MM-DD",
+              "corrosion": "corrosion level 1-3", "minhours": "minimum airframe hours"}
+
+
+@app.post("/z/api/ask")
+def ask_file():
+    d = request.get_json(force=True, silent=True) or {}
+    q = (d.get("q") or "").strip()[:300]
+    if not q:
+        return jsonify(error="no question"), 400
+    tables = {t: code_list(t) for t in ("nature", "precaution", "stage", "discovered", "part_location")}
+    # the model invented operator "WN" for Southwest on first test; the FAA
+    # designator is SWAA. Hand it the real list and accept nothing outside it.
+    try:
+        facets = api("/api/facets")
+        ops = [o for o in (facets.get("operators") or []) if isinstance(o, str)][:400]
+    except Exception:
+        ops = []
+    tables["operator (designator: name)"] = {o: dec("operator", o) or o for o in ops}
+    prompt = ("A reporter asked this of a file of FAA service difficulty reports: \"%s\"\n\n"
+              "Turn it into filters. Fields available: %s. Code tables (use only these codes): %s\n\n"
+              "Return JSON only: {\"filters\": {field: value}, \"reading\": \"one sentence saying how "
+              "you read the question\", \"unmapped\": [\"words you could not map\"], "
+              "\"cannot\": \"one sentence if the file has no field for what was asked, else null\"}. "
+              "Never invent a code. Never answer the question yourself."
+              % (q, json.dumps(ASK_FIELDS), json.dumps(tables)[:12000]))
+    try:
+        out = glm(prompt, schema=True, effort="low", max_tokens=600)
+    except Exception as e:
+        return jsonify(error=str(e)[:200]), 502
+    if not out:
+        return jsonify(cannot="The model returned nothing usable.", filters={}), 200
+    f = {k: str(v) for k, v in (out.get("filters") or {}).items() if k in ASK_FIELDS and v}
+    dropped = []
+    if "operator" in f and ops and f["operator"].upper() not in ops:
+        dropped.append("operator " + f.pop("operator"))
+    for tbl, fld in (("nature", "nature"), ("precaution", "crew"), ("stage", "stage"), ("discovered", "discovered")):
+        if fld in f and f[fld].upper() not in tables[tbl]:
+            dropped.append(fld + " " + f.pop(fld))
+    unmapped = list(out.get("unmapped") or []) + dropped
+    return jsonify(filters=f, reading=out.get("reading"), unmapped=unmapped,
+                   cannot=out.get("cannot"), model=MODEL)

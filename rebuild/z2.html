@@ -40,6 +40,7 @@ h1 .here{color:var(--rust)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
 .chips span{font:500 12px var(--sans);padding:4px 10px;border:1px solid var(--rust);color:var(--rust);border-radius:100px}
 .chips span button{border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:0 0 0 6px}.chips span.clear{border-color:var(--ink);color:var(--ink);background:var(--ink);color:var(--paper)}
+.when-big{font:400 30px/1.15 var(--serif);color:var(--rust);margin:26px 0 0;letter-spacing:-.01em}
 .body{display:grid;grid-template-columns:1.15fr 1fr;gap:56px;margin-top:40px;align-items:start}
 .hero{min-width:0}
 .hero svg{width:100%;height:auto;display:block}
@@ -142,6 +143,7 @@ a.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--
     <div class="chips" id="chips"></div>
   </div>
 
+  <div class="when-big" id="whenBig"></div>
   <div class="body">
     <div class="hero" id="hero"></div>
     <div class="spec" id="spec"></div>
@@ -231,6 +233,8 @@ function draw(){var h=H,tot=h.total||0,corpus=h.corpus||tot,filtered=sel().toStr
   $("#h1").innerHTML="<b>"+num(tot)+"</b> reports, "+railName+"."+(filtered?' <span style="font:italic 22px var(--serif);color:var(--ash)">'+num(corpus-tot)+" set aside.</span>":"");
   $("#readAll").textContent="read "+(filtered?"these "+num(tot):"all "+num(corpus));$("#readAll").href="/z/rebuilt?"+sel().toString();
   chips();
+  (function(){var p=q(),f=p.get("from"),t=p.get("to");function pd(x){var m=x&&x.match(/(\d{4})-(\d\d)-(\d\d)/);return m?new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}):x}
+    var span=(h.span&&typeof h.span==="object")?h.span:null;var txt=f&&t?pd(f)+" to "+pd(t):f?"From "+pd(f)+" to today":t?"Up to "+pd(t):"1 January 1995 to "+(span&&span.to?pd(span.to):"today");$("#whenBig").textContent=txt})();
   var v=view();var hero=$("#hero");hero.innerHTML="";
   if(v){renderView(v)}else if(RAIL==="where")hero.appendChild(plane(h));else if(RAIL==="when")hero.appendChild(months(h));else if(RAIL==="who")hero.appendChild(who(h));else hero.appendChild(forced(h));
   var rails=$("#rails");rails.innerHTML="";rails.style.gridTemplateColumns="repeat(4,1fr)";var all={where:["Where","on the aircraft","nine zones, and what cannot be placed"],when:["When","<b>"+num((h.months||[]).length||380)+"</b> months","the same reports, month by month"],who:["Who","<b>"+num(h.aircraft)+"</b> aircraft","airline and tail"],forced:["What it forced","<b>"+num(h.crew_reports)+"</b> reports","what the crew had to do"]};

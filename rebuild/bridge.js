@@ -1756,7 +1756,7 @@ window.addEventListener("load", function(){ sdrStripRails(); sdrFixLabels(); sdr
 
 
 
-/* ---- 39: the part number, fetched not intercepted, written by the model ---- */
+/* ---- 40: the ninth build, made honest, written by the model ---- */
 (function(){
 "use strict";
 window.__sderrs=window.__sderrs||[];
@@ -1923,7 +1923,7 @@ function purgeLand(){
    setFilter narrows the selection the honest way: every filter on this page
    is a query parameter, the instrument reads them on load and composes the
    standing sentence from them, so the parameter is set and the page applies
-   it \u2014 the URL, the sentence and the rows then all agree.
+   it : the URL, the sentence and the rows then all agree.
    setHero takes a rail name and opens that rail. ========================== */
 function sdSetFilter(field,value){
   try{
@@ -1969,7 +1969,7 @@ function sdEnsureGlobals(){
 sdEnsureGlobals();
 
 /* ============ sd-pnrow: the case sheet's sixteen rows carry a Part row that
-   names the part, but the part number appeared nowhere on the page \u2014 and
+   names the part, but the part number appeared nowhere on the page : and
    worse, a row once said "not recorded" about a number the file records.
    Nothing is intercepted any more: when a sheet is open, its control number
    is read off the sheet itself and one request goes straight to
@@ -1977,10 +1977,14 @@ sdEnsureGlobals();
    carries the number ("17039203426" on JR2R20260825350), with
    ComponentPartNumber as the fallback and null on most records. "not
    recorded" is printed only when the record is in hand and both fields
-   really are empty \u2014 never while the request is in flight and never when
+   really are empty : never while the request is in flight and never when
    it failed, because either of those would tell a reader the FAA recorded
-   nothing where the FAA recorded a number. The row is the way into the part
-   dossier. ================================================================ */
+   nothing where the FAA recorded a number. The same case record carries
+   PartName and PartCondition, and both travel with the number as
+   data-sd-partname and data-sd-partcond, because the file cannot be
+   searched by part number: the dossier the row opens is searched by the
+   part's NAME, so the name has to come from the record the reader clicked.
+   The row is the way into the part dossier. ================================ */
 var SDPNC={cache:{},busy:{}};
 function sdControlToken(text){
   var m=String(text==null?"":text).match(/\b[A-Za-z0-9]{9,16}\b/g),i,d;
@@ -2035,7 +2039,7 @@ function sdEnsureCase(control){
   return undefined; /* in flight */
 }
 function sdIsAbsentText(s){
-  if(/^(--|\u2013|\u2014|-)$/.test(s))return true;
+  if(/^(--|\u2013|:|-)$/.test(s))return true;
   if(/^(none|unknown|n\/a|na|not available|not recorded|not given|not reported|not stated|not captured|no entry|missing|absent|unrecorded)\.?$/i.test(s))return true;
   return /^not\s+[a-z][a-z ]{1,24}\.?$/i.test(s);
 }
@@ -2096,6 +2100,8 @@ function sdFillPartRow(partRow,table){
   var raw=rec.PartNumber;
   if(raw==null||String(raw).trim()==="")raw=rec.ComponentPartNumber;
   pn=(raw==null)?"":String(raw).trim();
+  var pnm=(rec.PartName==null)?"":String(rec.PartName).trim();
+  var pcd=(rec.PartCondition==null)?"":String(rec.PartCondition).trim();
   if(pn)key="pn:"+pn;
   else{ab=sdAbsence(table)||{text:"not recorded",cls:""};key="absent:"+ab.text}
   if(vc.getAttribute("data-sd-pnval")===key)return;
@@ -2106,9 +2112,13 @@ function sdFillPartRow(partRow,table){
     code.className="cd sd-pnlink";
     code.textContent=pn;
     code.setAttribute("data-sd-part",pn);
+    if(pnm)code.setAttribute("data-sd-partname",pnm);
+    if(pcd)code.setAttribute("data-sd-partcond",pcd);
     code.setAttribute("role","button");
     code.setAttribute("tabindex","0");
-    code.setAttribute("aria-label","Open the dossier for part number "+pn);
+    code.setAttribute("aria-label",pnm
+      ?("Open the dossier for the part "+pnm+", part number "+pn)
+      :("Open the dossier for part number "+pn));
     try{code.dataset.sdPnDone="1"}catch(_){}
     vc.appendChild(code);
   }else{
@@ -2122,14 +2132,24 @@ function sdPartRow(){
 }
 
 /* ============ sd-dossier: the panel holds one subject at a time — a tail
-   number, an operator code, or a part number — read from the endpoints ====== */
-var SD={kind:null,value:null,inflight:null,cache:{}};
-var SD_KIND={tail:"tail number",operator:"operator",part:"part number"};
+   number, an operator code, or a part. A part dossier is addressed by the
+   part number the reader clicked but is SEARCHED by the part's name, taken
+   from the case record they clicked it in, because the file behind this
+   page cannot be searched by part number at all. When no name travels with
+   the number, the dossier says so and shows nothing the file cannot
+   support. ================================================================ */
+var SD={kind:null,value:null,pname:"",pcond:"",inflight:null,cache:{}};
+var SD_KIND={tail:"tail number",operator:"operator",part:"part"};
 function sdEsc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function sdNum(v){var n=Number(v);if(isFinite(n))return n;n=Number(String(v==null?"":v).replace(/,/g,""));return isFinite(n)?n:0}
 function sdFmt(n){return sdNum(n).toLocaleString("en-US")}
 function sdKey(kind,val){return kind+":"+val}
-function sdKickText(kind){return 'Aircraft panel \u2014 holding <b>one '+SD_KIND[kind]+'</b>'}
+function sdCurKey(){
+  var k=sdKey(SD.kind,SD.value);
+  if(SD.kind==="part"&&SD.pname)k+="|"+SD.pname;
+  return k;
+}
+function sdKickText(kind){return 'Aircraft panel, holding <b>one '+SD_KIND[kind]+'</b>'}
 function sdDossierNode(){
   var panel=byId("p-aircraft");if(!panel)return null;
   var node=byId("sd-dossier");
@@ -2181,7 +2201,7 @@ function sdBars(rows){
     var w=(p.num!=null&&max>0)?Math.max(2,Math.round(100*p.num/max)):0;
     return '<li><span class="sd-d-barlab">'+sdEsc(p.label)+'</span>'
       +'<span class="sd-d-bar">'+(w?'<i style="width:'+w+'%"></i>':'')+'</span>'
-      +'<span class="sd-d-barnum">'+(p.num!=null?sdFmt(p.num):"\u2014")+'</span></li>';
+      +'<span class="sd-d-barnum">'+(p.num!=null?sdFmt(p.num):":")+'</span></li>';
   }).join("");
 }
 /* sd-d-quotes: a few records in the file's own words. Field names are not
@@ -2232,7 +2252,7 @@ function sdRender(node,t,raf,rpf,rsm){
     +'<span class="sd-d-tail">'+sdEsc(af.tail||t)+'</span>'
     +(mm?'<span class="sd-d-make">'+sdEsc(mm)+'</span>':'')
     +'<span class="sd-d-count">'+found+' report'+(found===1?"":"s")+'</span>'
-    +(af.first||af.last?'<span class="sd-d-make">first filed '+sdEsc(af.first||"\u2014")+' \u00b7 last filed '+sdEsc(af.last||"\u2014")+'</span>':'')
+    +(af.first||af.last?'<span class="sd-d-make">first filed '+sdEsc(af.first||":")+' \u00b7 last filed '+sdEsc(af.last||":")+'</span>':'')
     +'</div>');
   var fr=af.framing||{};
   parts.push('<section class="sd-d-sec"><h3>Where the write-ups were made</h3>'
@@ -2244,7 +2264,7 @@ function sdRender(node,t,raf,rpf,rsm){
     +'</ul></section>');
   if(rp&&rp.groups&&rp.groups.length){
     var gs=rp.groups.map(function(g){
-      var sys=g.system?" \u2014 "+sdEsc(g.system):"";
+      var sys=g.system?" : "+sdEsc(g.system):"";
       var rec=(g.records&&g.records[0]&&g.records[0].text)
         ?'<blockquote class="sd-d-quote">'+sdEsc(String(g.records[0].text).slice(0,220))+'</blockquote>':"";
       return '<div class="sd-d-rpt"><b>'+sdEsc(g.part||"unnamed part")+'</b>'+sys
@@ -2261,7 +2281,7 @@ function sdRender(node,t,raf,rpf,rsm){
   if(rp&&rp.cannot_show&&rp.cannot_show.length)parts.push(sdLimits(rp.cannot_show));
   var gen=!!(sm&&sm.generated===true);
   var hasSum=sm&&sm.summary&&String(sm.summary).trim();
-  var lab=hasSum?(gen?"Written by a model":"Assembled from recounted numbers \u2014 not written by a model"):"Summary not written";
+  var lab=hasSum?(gen?"Written by a model":"Assembled from recounted numbers : not written by a model"):"Summary not written";
   var sumBody=hasSum?'<p class="sd-d-sum" data-sd-sum="1"></p>'
     :'<p class="sd-d-none">No summary was written for this tail. That is the check working: nothing is shown rather than something wrong.</p>';
   var sumNote=(sm&&sm.note)?'<p class="sd-d-note">'+sdEsc(sm.note)+'</p>':"";
@@ -2314,45 +2334,86 @@ function sdRenderOperator(node,res){
   parts.push(sdLimits(o.cannot_show));
   node.innerHTML=parts.join("");
 }
-/* ---- the part dossier. A count of reports is never left standing as a
-   count of broken parts: aircraft and operators sit beside total, and the
-   spread over operators and years is what turns the count into a finding. ---- */
+/* ---- the part dossier. The reader clicked a part NUMBER, but the file
+   cannot be searched by part number: every figure below, where figures are
+   shown at all, counts reports naming the part's NAME, taken from the case
+   record the reader clicked, and it is labelled as such. The number itself
+   is checked against the file's list of the forty most-written-up part
+   numbers; if it is there, its real fleet-wide figures are shown beside the
+   name counts, and if it is not, that is said plainly. Nothing here claims
+   a count for the number that the file cannot support. ---- */
 function sdRenderPart(node,res){
   var p=(res&&res.status==="fulfilled"&&res.value&&typeof res.value==="object")?res.value:null;
   if(!p){sdRenderFailed(node,"part");return}
-  var pn=(p.part!=null&&String(p.part).trim())?String(p.part).trim():SD.value;
-  var total=sdNum(p.total),shown=sdNum(p.shown),ac=sdNum(p.aircraft),ops=sdNum(p.operators);
+  var pn=(p.part_number!=null&&String(p.part_number).trim())?String(p.part_number).trim():SD.value;
+  var nm=(p.part_name!=null&&String(p.part_name).trim())?String(p.part_name).trim():"";
+  var cond=(p.condition!=null&&String(p.condition).trim())?String(p.condition).trim():"";
+  var hasName=!!nm;
+  var total=(p.total==null)?null:sdNum(p.total);
+  var shown=sdNum(p.shown),ac=sdNum(p.aircraft),ops=sdNum(p.operators);
   var parts=['<p class="sd-d-kick">'+sdKickText("part")+'</p>'];
   parts.push('<div class="sd-d-head"><span class="sd-d-tail">'+sdEsc(pn)+'</span>'
     +'<span class="sd-d-make">part number</span>'
-    +'<span class="sd-d-count">'+sdFmt(total)+' report'+(total===1?"":"s")+'</span></div>');
-  if(total===0){
-    parts.push('<section class="sd-d-sec"><p class="sd-d-none">No report in this file names that part number, so there is no table to draw.</p></section>');
-    parts.push(sdLimits(p.cannot_show));
-    node.innerHTML=parts.join("");
-    return;
+    +(hasName
+      ?'<span class="sd-d-make">figures are for the part named <b>'+sdEsc(nm)+'</b>'+(cond?', condition '+sdEsc(cond):'')+'</span>'
+      :'<span class="sd-d-make">no part name travelled with this number, so no name search was made</span>')
+    +((total!=null)?'<span class="sd-d-count">'+sdFmt(total)+' report'+(total===1?"":"s")+'</span>':'')
+    +'</div>');
+  /* the count, only when the file could answer it: by part NAME */
+  if(!hasName){
+    parts.push('<section class="sd-d-sec"><h3>The count</h3><p class="sd-d-none">'
+      +'No count of reports is shown here, because this file cannot be searched by part number. '
+      +'Open a case sheet and click its part number there: the dossier it opens is counted from the '
+      +'part\u2019s name, which the file does record.</p></section>');
+  }else if(total===0){
+    parts.push('<section class="sd-d-sec"><h3>The count</h3><p class="sd-d-none">'
+      +'No report in this file names the part \u201c'+sdEsc(nm)+'\u201d by name, so there is no table to draw. '
+      +'That is a fact about this name, not about the part number: the file cannot be searched by '
+      +'part number.</p></section>');
+  }else{
+    parts.push('<section class="sd-d-sec"><h3>Reports naming the part \u201c'+sdEsc(nm)+'\u201d</h3>'
+      +'<ul class="sd-d-split">'
+      +'<li>reports, total <b>'+sdFmt(total)+'</b></li>'
+      +'<li>naming <b>'+sdFmt(ac)+'</b> aircraft</li>'
+      +'<li>from <b>'+sdFmt(ops)+'</b> operator'+(ops===1?"":"s")+'</li>'
+      +'<li>shown under the current filters <b>'+sdFmt(shown)+'</b></li>'
+      +'</ul>'
+      +'<p class="sd-d-ops">These figures count every report that names the part by name, which will '
+      +'include other part numbers of the same kind of part. A count of reports is not a count of '
+      +'broken parts: each one is a write-up on one airplane at one operator.</p></section>');
+    var bo=sdBars(p.by_operator);
+    if(bo&&ops>0){
+      var gloss=(ops>=2)
+        ?"The same part failing across "+sdFmt(ops)+" operators reads as a fleet problem rather than a supplier or a shop."
+        :"Concentrated in one operator, the same part failing again reads as a supplier or a shop rather than a fleet problem.";
+      parts.push('<section class="sd-d-sec"><h3>Which operators filed it</h3>'
+        +'<p class="sd-d-ops">'+sdEsc(gloss)+'</p>'
+        +'<ul class="sd-d-bars">'+bo+'</ul></section>');
+    }
+    var by=sdBars(p.by_year);
+    if(by)parts.push('<section class="sd-d-sec"><h3>When the reports were filed</h3><ul class="sd-d-bars">'+by+'</ul></section>');
+    var q=sdQuotes(p.records);
+    if(q)parts.push(q);
   }
-  parts.push('<section class="sd-d-sec"><h3>The count</h3>'
-    +'<ul class="sd-d-split">'
-    +'<li>reports, total <b>'+sdFmt(total)+'</b></li>'
-    +'<li>naming <b>'+sdFmt(ac)+'</b> aircraft</li>'
-    +'<li>from <b>'+sdFmt(ops)+'</b> operator'+(ops===1?"":"s")+'</li>'
-    +'<li>shown under the current filters <b>'+sdFmt(shown)+'</b></li>'
-    +'</ul>'
-    +'<p class="sd-d-ops">A count of reports is not a count of broken parts: each one is a write-up on one airplane at one operator.</p></section>');
-  var bo=sdBars(p.by_operator);
-  if(bo&&ops>0){
-    var gloss=(ops>=2)
-      ?"The same part failing across "+sdFmt(ops)+" operators reads as a fleet problem rather than a supplier or a shop."
-      :"Concentrated in one operator, the same part failing again reads as a supplier or a shop rather than a fleet problem.";
-    parts.push('<section class="sd-d-sec"><h3>Which operators filed it</h3>'
-      +'<p class="sd-d-ops">'+sdEsc(gloss)+'</p>'
-      +'<ul class="sd-d-bars">'+bo+'</ul></section>');
+  /* the forty: the one place the file speaks about part numbers directly */
+  var sd=p.same_defect;
+  if(sd&&typeof sd==="object"){
+    parts.push('<section class="sd-d-sec"><h3>This part number, fleet-wide</h3>'
+      +'<p class="sd-d-frame">'+sdEsc(pn)+' is among the forty most-written-up part numbers in this file.'
+      +((sd.part_name!=null&&String(sd.part_name).trim())?' The file records it as \u201c'+sdEsc(sd.part_name)+'\u201d'+((sd.condition!=null&&String(sd.condition).trim())?', condition '+sdEsc(sd.condition):'')+'.':'')
+      +'</p>'
+      +'<ul class="sd-d-split">'
+      +'<li>reports fleet-wide <b>'+sdFmt(sd.reports)+'</b></li>'
+      +'<li>aircraft <b>'+sdFmt(sd.aircraft)+'</b></li>'
+      +'<li>operators <b>'+sdFmt(sd.operators)+'</b></li>'
+      +'</ul>'
+      +'<p class="sd-d-ops">These are the real figures for the part number itself, from the file\u2019s own '
+      +'list : not the name counts above.</p></section>');
+  }else if(pn){
+    parts.push('<section class="sd-d-sec"><h3>This part number, fleet-wide</h3>'
+      +'<p class="sd-d-none">'+sdEsc(pn)+' is not among the forty most-written-up part numbers in this '
+      +'file, so the file gives no fleet-wide figure for the number itself. Nothing is invented for it.</p></section>');
   }
-  var by=sdBars(p.by_year);
-  if(by)parts.push('<section class="sd-d-sec"><h3>When the reports were filed</h3><ul class="sd-d-bars">'+by+'</ul></section>');
-  var q=sdQuotes(p.records);
-  if(q)parts.push(q);
   parts.push(sdLimits(p.cannot_show));
   node.innerHTML=parts.join("");
 }
@@ -2362,21 +2423,29 @@ function sdReq(kind,val){
   var e=encodeURIComponent(val);
   if(kind==="tail")return[sdGetJSON("airframe/"+e),sdGetJSON("repeats/"+e),sdGetJSON("summary/"+e)];
   if(kind==="operator")return[sdGetJSON("operator/"+e)];
-  return[sdGetJSON("part/"+e)];
+  /* part: the path segment is the part number the reader clicked; the name
+     and condition, taken from the case record they clicked it in, are what
+     the file can actually search */
+  var q=[];
+  if(SD.pname)q.push("name="+encodeURIComponent(SD.pname));
+  if(SD.pcond)q.push("condition="+encodeURIComponent(SD.pcond));
+  return[sdGetJSON("part/"+e+(q.length?"?"+q.join("&"):""))];
 }
 function sdRenderCached(node){
-  var rs=SD.cache[sdKey(SD.kind,SD.value)];
+  var rs=SD.cache[sdCurKey()];
   node.dataset.sdDone="1";
   if(!rs){sdRenderFailed(node,SD.kind);return}
   if(SD.kind==="tail")sdRender(node,SD.value,rs[0],rs[1],rs[2]);
   else if(SD.kind==="operator")sdRenderOperator(node,rs[0]);
   else sdRenderPart(node,rs[0]);
 }
-function sdOpen(kind,val){
+function sdOpen(kind,val,name,cond){
   if(!SD_KIND[kind])return;
   val=String(val==null?"":val).trim();if(!val)return;
   SD.kind=kind;SD.value=val;
-  var key=sdKey(kind,val);
+  SD.pname=(name==null)?"":String(name).trim();
+  SD.pcond=(cond==null)?"":String(cond).trim();
+  var key=sdCurKey();
   var tab=document.querySelector('#vstrip .vtab[data-view="p-aircraft"]');
   if(tab)try{tab.click()}catch(_){}
   var node=sdDossierNode();if(!node)return;
@@ -2385,7 +2454,8 @@ function sdOpen(kind,val){
   if(SD.cache[key]){sdRenderCached(node);return}
   node.dataset.sdDone="";
   node.innerHTML='<p class="sd-d-kick">'+sdKickText(kind)+'</p>'
-    +'<p class="sd-d-none">Reading the file for the '+sdEsc(SD_KIND[kind])+' '+sdEsc(val)+'\u2026</p>';
+    +'<p class="sd-d-none">Reading the file for the '+sdEsc(SD_KIND[kind])+' '+sdEsc(val)
+    +(SD.pname?', named '+sdEsc(SD.pname):'')+'\u2026</p>';
   if(SD.inflight===key)return;
   SD.inflight=key;
   Promise.allSettled(sdReq(kind,val)).then(function(rs){
@@ -2405,7 +2475,7 @@ function sdOpen(kind,val){
 }
 function sdOpenTail(t){sdOpen("tail",t)}
 function sdOpenOperator(c){sdOpen("operator",c)}
-function sdOpenPart(p){sdOpen("part",p)}
+function sdOpenPart(p,name,cond){sdOpen("part",p,name,cond)}
 function sdBootFromURL(){
   var q=new URLSearchParams(location.search);
   var t=q.get("tail");
@@ -2423,7 +2493,10 @@ function sdRrTail(reg){
 window.rrTail=sdRrTail;
 /* sd-dossier wiring: delegated at the document with capture, so it survives
    every redraw. The dossier markers stop the event before the cell's own
-   setFilter can run; a click on the value itself still filters. */
+   setFilter can run; a click on the value itself still filters. A part
+   number opened from a case sheet carries its part name and condition with
+   it; one opened from a bare P/N mention carries only the number, and the
+   dossier says honestly what that means. */
 document.addEventListener("click",function(e){
   var el=e.target&&e.target.closest?e.target.closest('[data-ask^="tail|"],[data-sd-op],[data-sd-part]'):null;
   if(!el)return;
@@ -2433,7 +2506,10 @@ document.addEventListener("click",function(e){
   }
   if(el.hasAttribute("data-sd-part")){
     e.preventDefault();e.stopPropagation();
-    sdOpenPart(el.getAttribute("data-sd-part"));return;
+    sdOpenPart(el.getAttribute("data-sd-part"),
+               el.getAttribute("data-sd-partname")||"",
+               el.getAttribute("data-sd-partcond")||"");
+    return;
   }
   var v=(el.getAttribute("data-ask")||"").slice(5);
   if(v)sdOpenTail(v);
@@ -2447,14 +2523,19 @@ document.addEventListener("keydown",function(e){
   var op=t.getAttribute("data-sd-op");
   if(op){e.preventDefault();sdOpenOperator(op);return}
   var pn=t.getAttribute("data-sd-part");
-  if(pn){e.preventDefault();sdOpenPart(pn)}
+  if(pn){
+    e.preventDefault();
+    sdOpenPart(pn,t.getAttribute("data-sd-partname")||"",t.getAttribute("data-sd-partcond")||"");
+  }
 },true);
 addEventListener("popstate",function(){try{sdBootFromURL()}catch(_){}});
 /* sd-mark: the second way in from the table. Beside each operator value that
    setFilter owns, a small marker opens the operator dossier; a code.cd that
-   really carries a P/N opens the part dossier. Model cells are left to
-   setFilter alone, and the part number row this block drew is skipped, since
-   its own code already carries data-sd-part. */
+   really carries a P/N opens the part dossier : with the number only,
+   because the record table gives no part name to search by, and the
+   dossier says so rather than counting nothing and calling it zero. Model
+   cells are left to setFilter alone, and the part number row this block
+   drew is skipped, since its own code already carries data-sd-part. */
 function sdMarkCells(){
   var OPRE=/setFilter\s*\(\s*(['"])operator\1\s*,\s*(['"])([^'"]*)\2/;
   var i,sp,ns=document.querySelectorAll("span.c[onclick*='setFilter']");
@@ -2486,24 +2567,24 @@ function sdMarkCells(){
     c.dataset.sdPart=pn;
     c.setAttribute("role","button");
     c.setAttribute("tabindex","0");
-    c.setAttribute("aria-label","Open the dossier for part number "+pn);
+    c.setAttribute("aria-label","Open the dossier for part number "+pn+", searched only if a part name is known");
     c.classList.add("sd-pnlink");
   }
 }
 function sdDossierKick(){
   if(!SD.kind||!SD.value)return;
   var node=sdDossierNode();if(!node)return;
-  var key=sdKey(SD.kind,SD.value);
+  var key=sdCurKey();
   if(node.isConnected&&node.dataset.sdKey===key&&node.dataset.sdDone==="1")return;
   node.dataset.sdKey=key;
   if(SD.cache[key])sdRenderCached(node);
-  else sdOpen(SD.kind,SD.value);
+  else sdOpen(SD.kind,SD.value,SD.pname,SD.pcond);
 }
 
 /* ============ sd-locate: api/locate reads the mechanic's own words and says
    where the defect was. One control sits above the record table, where the
-   write-ups already are. It sends the first 25 write-ups now on screen \u2014
-   never more, the endpoint's own limit \u2014 and says that is what it sent.
+   write-ups already are. It sends the first 25 write-ups now on screen :
+   never more, the endpoint's own limit : and says that is what it sent.
    A row is marked only when the model's location came back with a span the
    endpoint could quote verbatim from the write-up; what it could not prove
    comes back as dropped_unverifiable plus a note, and both are shown. Every
@@ -2556,7 +2637,7 @@ function sdLocBar(){
     bar.setAttribute("role","region");
     bar.setAttribute("aria-label","A model\u2019s reading of where the write-ups on screen say the defect was");
     bar.innerHTML='<button type="button" class="sdbtn" id="sd-locbtn">Locate these write-ups</button>'
-      +'<span class="sd-loc-exp">Sends the first 25 write-ups now on screen \u2014 no more, the reader\u2019s own limit \u2014 to a model that reads where each defect was. A location is kept only when the quoted words appear verbatim in the write-up; what it cannot prove is dropped and counted. Everything here is a model\u2019s reading, not the FAA\u2019s zone codes.</span>'
+      +'<span class="sd-loc-exp">Sends the first 25 write-ups now on screen : no more, the reader\u2019s own limit : to a model that reads where each defect was. A location is kept only when the quoted words appear verbatim in the write-up; what it cannot prove is dropped and counted. Everything here is a model\u2019s reading, not the FAA\u2019s zone codes.</span>'
       +'<div id="sd-locsum" hidden></div>';
     bar.addEventListener("click",function(e){
       var b=e.target&&e.target.closest?e.target.closest("#sd-locbtn"):null;
@@ -2739,7 +2820,6 @@ else{pass();sdBootFromURL()}
 addEventListener("load",pass);
 addEventListener("resize",kick);
 })();
-
 
 /* ---- 10: how to read each panel, written by the model ---- */
 
@@ -3509,7 +3589,7 @@ table.reps th{ font-size:11px; background:transparent; color:var(--ash);
 .rail.open[data-rail=when] .track{ overflow-x:auto; overscroll-behavior-x:contain }
 `;document.head.appendChild(s);})();
 
-(function(){var s=document.createElement('style');s.id='sdr-css-39';s.textContent=`#sentence{display:none!important}
+(function(){var s=document.createElement('style');s.id='sdr-css-40';s.textContent=`#sentence{display:none!important}
 #sd-sink{display:none!important}
 .card.land{display:none!important}
 #vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}
@@ -3586,6 +3666,7 @@ tr.wrote td{padding:0 0 14px}
 #sd-dossier .sd-d-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:2px 0 6px}
 #sd-dossier .sd-d-tail{font-family:'Instrument Serif',Georgia,serif;font-size:30px;color:var(--ink)}
 #sd-dossier .sd-d-make{font-size:12.5px;color:#6b6560}
+#sd-dossier .sd-d-make b{font-weight:600;color:var(--ink)}
 #sd-dossier .sd-d-count{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;color:var(--rust-text,#b8431f)}
 #sd-dossier .sd-d-sec{margin:12px 0 0;padding:10px 14px;border:1px solid var(--line);border-left:3px solid var(--rust);background:var(--card);border-radius:4px}
 #sd-dossier .sd-d-sec h3{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ash);margin:0 0 7px}
@@ -3638,5 +3719,4 @@ code.cd.sd-pnlink:focus-visible{outline:2px solid var(--rust-text,#b8431f);outli
 .sd-loc .sd-loc-tag{display:inline-block;margin:0 8px 0 0;padding:1px 6px;font:600 9px/1.5 Archivo,system-ui,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:#7a5b00;background:#fff;border:1px solid #e6d8ae;border-radius:3px;vertical-align:1px}
 .sd-loc .sd-loc-where{color:var(--ink);font-weight:600;font-style:normal}
 .sd-loc .sd-loc-span{color:#7a5b00;font-style:italic}
-@media(max-width:700px){#sd-locbar{padding:8px 10px}#sd-locbar .sd-loc-exp{font-size:11px}.sd-loc{font-size:12px}}
-`;document.head.appendChild(s);})();
+@media(max-width:700px){#sd-locbar{padding:8px 10px}#sd-locbar .sd-loc-exp{font-size:11px}.sd-loc{font-size:12px}}`;document.head.appendChild(s);})();

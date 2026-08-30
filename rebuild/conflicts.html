@@ -55,7 +55,8 @@ async function load(){
   const d=await (await fetch("api/conflicts")).json();
   document.getElementById("n").innerHTML=d.total+"<span> found so far</span>";
   document.getElementById("not").innerHTML=d.what_this_is_not.map(x=>`<li>${esc(x)}</li>`).join("");
-  document.getElementById("list").innerHTML=d.entries.map(e=>`
+  const iso=e=>{const m=(e.date||"").match(/(\d\d)\/(\d\d)\/(\d{4})/);return m?m[3]+m[1]+m[2]:""};
+  document.getElementById("list").innerHTML=d.entries.slice().sort((a,b)=>iso(b).localeCompare(iso(a))).map(e=>`
     <div class="e">
       <div class="meta">${esc(e.date||"")} &nbsp;·&nbsp; ${esc(e.tail?"N"+e.tail:"")}
         &nbsp;·&nbsp; ${esc(e.operator||"")} &nbsp;·&nbsp; record ${esc(e.id)}</div>

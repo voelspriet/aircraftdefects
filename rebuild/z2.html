@@ -145,8 +145,8 @@ a.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--
 
   <div class="desk">
     <div class="ask">
-      <select id="kind" aria-label="What to look for"><option value="">anything</option><option value="q">words the mechanic wrote</option><option value="operator">an airline</option><option value="tail">a tail number</option><option value="model">an aircraft type</option><option value="part">a part</option><option value="jasc">a system code</option></select>
-      <input id="qin" maxlength="300" placeholder="Ask a question, or type it: bird strike · N617FE · Southwest · Boeing 737 · CHAFED" aria-label="Ask the file or search">
+      <select id="kind" aria-label="What to look for"><option value="q">words the mechanic wrote</option><option value="operator">an airline</option><option value="tail">a tail number</option><option value="model">an aircraft type</option><option value="part">a part</option><option value="jasc">a system code</option><option value="" selected>anything</option></select><datalist id="sugg"></datalist>
+      <input id="qin" list="sugg" maxlength="300" placeholder="Ask a question, or type it: bird strike · N617FE · Southwest · Boeing 737 · CHAFED" aria-label="Ask the file or search">
       <button id="askBtn" type="button">Ask</button><button id="srchBtn" class="ghost" type="button">Search</button>
     </div>
     <div class="period" id="period"><span class="lab">Period</span>
@@ -196,7 +196,16 @@ var PRETTY={ata:"system",from:"from",to:"to",q:"words",operator:"airline",tail:"
 
 /* ---- desk ---- */
 function chips(){var c=$("#chips");c.innerHTML="";var any=false;sel().forEach(function(v,k){any=true;var s=D.createElement("span");var lab=(k==="q"&&/^[0-9][0-9a-z\-]{5,}$/i.test(v))?"part number or code":(PRETTY[k]||k);s.innerHTML=esc(lab)+" "+esc(ZLABEL[v]||(k==="operator"?opName(v):v))+'<button type="button" aria-label="remove">×</button>';s.querySelector("button").onclick=function(){var p=q();p.delete(k);go(p)};c.appendChild(s)});if(any||view()){var cl=D.createElement("span");cl.className="clear";cl.innerHTML='<button type="button" style="padding:0">clear all, back to the start</button>';cl.querySelector("button").onclick=function(){location.href="/z/"};c.appendChild(cl)}}
-$("#srchBtn").onclick=function(){var v=$("#qin").value.trim();if(!v)return;var k=$("#kind").value||"q";var p=q();if(k==="tail")v=v.toUpperCase().replace(/^N/,"");p.set(k,v);go(p)};
+/* hand-written, 31 August 2026: suggestions per kind, from the selection */
+function suggest(){var k=$("#kind").value,dl=$("#sugg");dl.innerHTML="";if(!k)return;var qs=selQS([k==="jasc"?"ata":k]);function fill(items){dl.innerHTML=items.slice(0,40).map(function(x){return '<option value="'+esc(x[0])+'">'+esc(x[1]||"")+'</option>'}).join("")}
+  if(k==="operator"){api("/api/breakdown?by=operator"+(qs?"&"+qs:"")).then(function(d){fill((d.rows||[]).filter(function(r){return r.key}).map(function(r){return [opName(r.key),r.key+" · "+num(r.n)]}))}).catch(function(){})}
+  else if(k==="model"){api("/api/breakdown?by=model"+(qs?"&"+qs:"")).then(function(d){fill((d.rows||[]).filter(function(r){return r.key}).map(function(r){return [String(r.key).replace(/^[A-Z]+\s+/,""),(r.label||r.key)+" · "+num(r.n)]}))}).catch(function(){})}
+  else if(k==="part"){api("/api/breakdown?by=part"+(qs?"&"+qs:"")).then(function(d){fill((d.rows||[]).filter(function(r){return r.key}).map(function(r){return [String(r.key).toLowerCase(),num(r.n)]}))}).catch(function(){})}
+  else if(k==="tail"){api("/api/repeat-offenders?"+qs).then(function(rows){fill((rows||[]).map(function(r){return ["N"+r.tail,opName(r.operator)+" · "+r.make+" "+r.model+" · "+num(r.n)]}))}).catch(function(){})}
+  else if(k==="jasc"){fill(SYS.map(function(x){return [x[0],x[1]]}))}
+  else if(k==="q"){api("/api/phrases?"+qs).then(function(d){fill((d.rows||[]).filter(function(r){return r.in_selection>=3&&/^[a-z][a-z\-\/]{2,}$/.test(r.word)}).sort(function(a,b){return b.in_selection-a.in_selection}).map(function(r){return [r.word,num(r.in_selection)]}))}).catch(function(){})}}
+$("#kind").onchange=function(){suggest();$("#qin").focus()};
+$("#srchBtn").onclick=function(){var v=$("#qin").value.trim();if(!v)return;var k=$("#kind").value||"q";var p=q();if(k==="tail")v=v.toUpperCase().replace(/^N/,"");if(k==="operator"){var code=Object.keys(OPS).find(function(c){return c===v.toUpperCase()||opName(c).toLowerCase()===v.toLowerCase()});if(code)v=code}if(k==="jasc")k="ata";p.set(k,v);go(p)};
 $("#qin").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();$("#askBtn").click()}});
 $("#askBtn").onclick=function(){var v=$("#qin").value.trim();if(!v)return;var d=$("#draft");d.innerHTML='<div class="draft"><span class="lab">GLM-5.3-Flash is reading your question</span></div>';
   fetch("/z/api/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({q:v})}).then(function(r){return r.json()}).then(function(a){

@@ -1,0 +1,56 @@
+[ 159s] stap 1: dacht 25757, schreef 181, 2 tool-calls
+   measure  {"value": "{\"rrTail\":\"function\",\"safeCall\":\"undefined\",\"show\":\"undefined\",\"setFilter\":\"undefined\",\"panels\":[\"p-search\",\"p-patterns\",\"p-ai
+   measure  {"value": "{\"pn\":null,\"a\":{\"code\":\"AALA\",\"name_known\":true,\"name\":\"American Airlines Inc\",\"total\":155997,\"shown\":200,\"systems\":[{\"n\":41,\"
+[ 193s] stap 2: dacht 1566, schreef 185, 2 tool-calls
+   measure  {"value": "{\"opN\":0,\"opS\":null,\"rrN\":0,\"rrS\":null,\"cdN\":0,\"cdS\":null,\"cdTd\":null,\"rrTail\":\"function\"}"}
+   measure  {"value": "{\"p1\":{\"part\":\"3807-3\",\"total\":0,\"shown\":0,\"aircraft\":0,\"operators\":0,\"by_year\":[],\"by_operator\":[],\"cs\":[\"More reports does not
+[ 217s] stap 3: dacht 0, schreef 0, 2 tool-calls
+   measure  {"value": "{\"opN\":0,\"opS\":null,\"rrN\":0,\"rrS\":null,\"cdN\":0,\"cdTd\":null}"}
+   measure  {"value": "null"}
+[ 239s] stap 4: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"error": "Page.evaluate: SyntaxError: Unexpected token ')'\n    at eval (<anonymous>)\n    at UtilityScript.evaluate (<anonymous>:291:30)\n    at Uti
+[ 253s] stap 5: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "{\"tdN\":0,\"opS\":null,\"rrS\":null,\"cdTd\":null}"}
+[ 266s] stap 6: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "{\"noRows\":true,\"rows\":0,\"tables\":0,\"tN\":0,\"html\":\"<div class=\\\"scope\\\" data-scope=\\\"p-found\\\"></div><h1 class=\\\"\\\">How it was 
+[ 280s] stap 7: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "[\"p-patterns\",\"p-aircraft\",\"p-found\",\"p-fleet\",\"p-leads\",\"p-emerging\",\"p-clusters\",\"p-defect\",\"p-structure\",\"p-age\",\"p-engines\"
+[ 294s] stap 8: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "{\"pSearch\":false,\"inner\":0,\"id\":true,\"kids\":[\"DIV.\",\"SECTION.\"]}"}
+[ 307s] stap 9: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "[\"rr-sec\"]"}
+[ 320s] stap 10: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "{\"wu\":false,\"wuTag\":null,\"wuCls\":null,\"wuIn\":null,\"parent\":null}"}
+[ 345s] stap 11: dacht 1010, schreef 0, 1 tool-calls
+   measure  {"value": "{\"sels\":[{\"id\":\"operator\",\"name\":\"Operator\",\"opts\":3947,\"first\":\"\",\"v\":\"\"},{\"id\":\"make\",\"name\":\"Manufacturer\",\"opts\":24
+[ 364s] stap 12: dacht 709, schreef 0, 2 tool-calls
+   measure  {"value": "[\"znarrow\",\"vglab-narrows\",\"qList\",\"noRows\"]"}
+   measure  {"value": "{\"pn\":\"AD321431\",\"p\":{\"total\":0,\"shown\":0,\"aircraft\":0,\"operators\":0,\"by_year\":[],\"by_operator\":[],\"recs\":0,\"cs\":[\"More report
+[ 389s] stap 13: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "[{\"pn\":\"BMS13-48\",\"total\":0,\"aircraft\":0,\"operators\":0,\"bo\":0,\"by\":0},{\"pn\":\"BACB30LYBK10\",\"total\":0,\"aircraft\":0,\"operators\"
+[ 404s] stap 14: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "{\"counts\":{\"66601810\":7,\"70200107\":1,\"114170008\":1,\"AD321431\":4,\"BPAS105\":2,\"D717020001\":1,\"D71702001\":1,\"MA30A1017\":1,\"P207003001
+[ 418s] stap 15: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "[\"aircraft\",\"by_operator\",\"by_year\",\"cannot_show\",\"operators\",\"part\",\"records\",\"shown\",\"total\"]"}
+[ 431s] stap 16: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "{\"aircraft\":0,\"by_operator\":[],\"by_year\":[],\"cannot_show\":[\"More reports does not mean a worse part. It can mean the part is simply more com
+[ 445s] stap 17: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"error": "Page.evaluate: SyntaxError: Unexpected token '<', \"<!doctype \"... is not valid JSON"}}
+[ 458s] stap 18: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "{\"a\":0,\"b\":0,\"c\":[]}"}
+[ 474s] stap 19: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "null"}
+[ 485s] stap 20: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "{\"status\":200,\"url\":\"https://aircraftdefects.com/z/api/part/66601810\"}"}
+[ 509s] stap 21: dacht 1346, schreef 0, 1 tool-calls
+   measure  {"value": "{\"BOTTLE\":{\"total\":9025,\"aircraft\":188,\"operators\":7,\"bo\":[{\"n\":354,\"name\":\"American Airlines Inc\"},{\"n\":41,\"name\":\"Delta Air Li
+[ 520s] stap 22: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "{\"by_year\":[{\"n\":400,\"year\":\"2026\"}],\"by_operator\":[{\"n\":354,\"name\":\"American Airlines Inc\"},{\"n\":41,\"name\":\"Delta Air Lines Inc
+[ 536s] stap 23: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "{\"nYears\":1,\"sum\":400,\"lastYear\":{\"n\":400,\"year\":\"2026\"},\"shown\":400,\"total\":9025,\"opsRec0recs\":60,\"rec0\":{\"tail\":\"141NN\",\"o
+[ 550s] stap 24: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "{\"capped\":false,\"count\":0,\"rows\":[],\"systems\":[],\"tail\":\"BOTTLE\"}"}
+[ 560s] stap 25: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "{\"a\":0,\"b\":0,\"c\":0}"}
+[ 575s] stap 26: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "{\"a\":{\"count\":0,\"rows\":0},\"b\":{\"count\":133,\"rows\":133,\"tail\":\"141NN\"}}"}

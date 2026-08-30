@@ -1,0 +1,56 @@
+[  85s] stap 1: dacht 157, schreef 123, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[  97s] stap 2: dacht 110, schreef 110, 2 tool-calls
+   measure  {"value": {"clickCount": 0, "clicks": [], "rows": []}}
+   parent   {"value": {"clickCount": 0, "clicks": [], "hasLoadTail": "function"}}
+[ 120s] stap 3: dacht 97, schreef 101, 2 tool-calls
+   parent   {"value": {"loadTail": "async function loadTail(t){\n  t=String(t||\"\").trim().toUpperCase().replace(/[^A-Z0-9]/g,\"\");\n  if(!t)return; show(\"p-aircraft\");
+   parent   {"value": {"wuHtml": null, "tables": 13}}
+[ 144s] stap 4: dacht 406, schreef 0, 1 tool-calls
+   measure  {"value": {"panels": [{"id": "p-search", "html": 336555}, {"id": "p-patterns", "html": 872}, {"id": "p-aircraft", "html": 429}, {"id": "p-found", "html": 722}, 
+[ 160s] stap 5: dacht 340, schreef 0, 1 tool-calls
+   measure  {"value": {"noRows": true, "noRowsHidden": false, "rows": 0, "rowSample": "none"}}
+[ 175s] stap 6: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"clicked": true, "html": "<p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and buries the one you have.</p><p clas
+[ 188s] stap 7: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"wuCount": 0, "wuHtml": null, "tailClickables": 0, "anyDataAsk": 0}}
+[ 202s] stap 8: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"noRowsExists": true, "hidden": false, "display": "block", "rows": 0, "bodyLen": 889340}}
+[ 212s] stap 9: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"textContent": "\n  \n  \n    \n      Text\n      \n      \n    \n    \n      Operator\n      Any operatorSouthwest Airlines Co (SWAA)American Airlin
+[ 225s] stap 10: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": [{"tag": "DIV", "id": "sdControls", "cls": "", "hidden": false, "disp": "block", "htmlLen": 335120}, {"tag": "SECTION", "id": "rr-sec", "cls": "", "hi
+[ 239s] stap 11: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"kids": [{"tag": "DIV", "id": "iAim", "cls": "aim", "hidden": false, "disp": "block", "len": 0}, {"tag": "DIV", "id": "", "cls": "bar", "hidden": fal
+[ 257s] stap 12: dacht 391, schreef 0, 1 tool-calls
+   parent   {"value": {"names": ["showDirectoryPicker", "showOpenFilePicker", "showSaveFilePicker", "showFreshness", "renderTabs", "show", "showStarters", "showChange", "re
+[ 271s] stap 13: dacht 0, schreef 0, 1 tool-calls
+   parent   {"value": {"renderTail": "function renderTail(){ markClipped(); gridify(); syncSwipeHint(); markHits(); rove(); }", "hits": [25975], "inlineScripts": 1}}
+[ 284s] stap 14: dacht 0, schreef 0, 1 tool-calls
+   parent   {"value": {"ctx": "peratorDesignator)}</span>`\n      : `<span class=\"absent term\" ${jt(NO_OPERATOR)}>no operator named</span>`}</td>\n    <td><span class=\"c
+[ 308s] stap 15: dacht 1616, schreef 140, 1 tool-calls
+   parent   {"value": {"before": "\"tscroll\"><table class=\"reports\">`+headRow;\n  LASTMONTH=null;\n  const body=r.rows.map((x,i)=>{\n    const j=x._jasc||{}, ch=j.chapte
+[ 330s] stap 16: dacht 999, schreef 98, 1 tool-calls
+   measure  {"value": {"wu": 0, "reps": 0, "tails": 0, "ops": 0, "parts": 0, "noRows": true, "chips": ""}}
+[ 345s] stap 17: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"noRowsHtml": "<p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and buries the one you have.</p><p class=\"muted\"
+[ 363s] stap 18: dacht 674, schreef 0, 1 tool-calls
+   measure  {"value": {"reps": 100, "tails": 0, "noRowsGone": false, "chips": ""}}
+[ 380s] stap 19: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"repHtml": null, "parents": null}}
+[ 389s] stap 20: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"reps": 0, "repHtml": null, "where": null}}
+[ 410s] stap 21: dacht 785, schreef 0, 1 tool-calls
+   measure  {"value": {"reps": 100, "repHtml": "<tr class=\"rep\" data-month=\"2026-08\" data-zone=\"\" role=\"row\"><td role=\"gridcell\">26 August 2026<span class=\"sub\"
+[ 432s] stap 22: dacht 1098, schreef 98, 1 tool-calls
+   measure  {"value": {"tails": ["<td role=\"gridcell\"><span class=\"absent\">no N-number</span></td>", "<td role=\"gridcell\"><span class=\"absent\">no N-number</span></t
+[ 460s] stap 23: dacht 1660, schreef 141, 2 tool-calls
+   measure  {"value": {"tail": "617FE", "pHtml": "<div class=\"scope\" data-scope=\"p-aircraft\"></div><h2>Aircraft</h2><p class=\"sdrs-guidance\" data-sdrs-note=\"aircraft
+   parent   {"value": {"keys": ["cannot_show", "code", "name", "name_known", "name_note", "records", "shown", "systems", "total"], "name_known": true, "name": "Continental 
+[ 509s] stap 24: dacht 3327, schreef 167, 2 tool-calls
+   parent   {"value": {"code": "QR9R", "name_known": false, "name": null, "name_note": "This designator resolves to no name. 2,732 of the 3,945 designators in this file do 
+   parent   {"value": {"keys": ["aircraft", "by_operator", "by_year", "cannot_show", "operators", "part", "records", "shown", "total"], "part": "1317", "total": 0, "shown":
+[ 533s] stap 25: dacht 0, schreef 103, 1 tool-calls
+   measure  {"value": {"r0": "<tr class=\"rep\" data-month=\"2026-08\" data-zone=\"\" role=\"row\"><td role=\"gridcell\">26 August 2026<span class=\"sub\">N617FE</span></td
+[ 552s] stap 26: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"wuAttrs": null, "btns": 1, "lastBtn": "<button class=\"ghost\" type=\"button\" aria-label=\"Open report QR9R2026082600003, N, SENSOR\" onclick=\"ope

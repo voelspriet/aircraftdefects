@@ -1,0 +1,552 @@
+[
+ {
+  "role": "user",
+  "content": "The airframe dossier you built works. Three more things to reach, and one of\nthem is the way in to what you already built.\n\nRULE FOR THIS RUN: your first tool call must be deploy. Twenty-six steps.\n\n  deploy(css, js)             splices your block in, publishes it, returns errors\n  measure(js, width, query)   runs a JavaScript arrow function against your page\n  parent(js, width, query)    the same, against the original\n  done(summary)               when the checks pass\n\nYour block is at the end of this brief and is on the page. Send it whole each\ntime, with the new work added.\n\n# What the dossier measures now, and must not lose\n\n    framing sentence  present verbatim against /z/api/airframe/N373UP\n    cannot_show       every sentence on screen\n    repeat groups     five, with the hours between them\n    summary           marked as written by a model\n    export            /z/api/export/N373UP.csv linked\n    page errors       none\n\n# 1. Clicking a tail throws\n\nClick a tail number in the record table and the console says\n\n    loadTail is not defined\n\nand the URL does not change. The dossier is reachable only by typing ?tail= into\nthe address bar, which no reader will do. `loadTail` is the original page's\nfunction name; this page does not have it. Find what the rebuild actually binds\nto a clicked value and route a tail through your own dossier instead.\n\nCheck it by clicking, not by reading: measure a click on a real tail cell and\nthen read what #p-aircraft holds.\n\n# 2. Two more dossiers, same shape as the one you built\n\n    GET api/operator/<code>    code, name, name_known, name_note, total, shown,\n                               systems[], records[] (24 fields), cannot_show[]\n    GET api/part/<pn>          part, total, shown, aircraft, operators,\n                               by_operator[], by_year[], records[], cannot_show[]\n\nBoth answer now. Nothing on the page calls either: counted in the served HTML,\napi/operator 0 and api/part 0.\n\nAn airline code and a part number are both already clickable in the record\ntable. Clicking either should open its dossier, the same way a tail opens the\nairframe one.\n\nTwo things to get right, because they are the point of these two builds rather\nthan decoration:\n\n  `name_known` false means the FAA's own table does not name that operator. Say\n  that plainly, show the code, and show `name_note` if there is one. Never print\n  a guessed name and never leave it blank so a reader assumes the tool failed.\n\n  A part's `by_year` and `by_operator` are what turn a count into a finding: one\n  part number failing the same way across many airlines is a fleet problem, and\n  across one airline is a supplier or a shop. Show both, and show `aircraft` and\n  `operators` beside `total` so nobody reads a count of reports as a count of\n  broken parts.\n\nEvery `cannot_show` sentence goes on screen in both, as in the dossier.\n\n# 3. Where the words say it happened\n\n    POST api/locate     body {records:[{id, text}, ...]}, at most 25\n                        returns results[] with id, where and span, plus\n                        dropped_unverifiable, checked, and a note\n\nThis one is the most interesting thing in the tool and nothing reaches it. Many\nwrite-ups say where the defect was in words and carry no zone code, so the\naircraft drawing cannot show them. This reads the mechanic's own sentence and\nsays where it was, and it keeps a location only when the quoted span appears\nverbatim in the write-up. Anything the model paraphrased is dropped, and the\ncount of what was dropped comes back with the answer.\n\nPut it where a reader already has write-ups in front of them: the record table.\nOne control that sends the write-ups now on screen, then marks each row it could\nplace, showing the quoted span beside the location so a reader can check it\nagainst the sentence above.\n\nShow `dropped_unverifiable` and the `note`. A tool that says \"I threw away three\nof these because I could not prove them\" is worth more than one that shows\ntwenty confident answers.\n\nMark everything this produces as read by a model, distinctly from the FAA's own\nzone codes. A reader must never have to guess which is which.\n\n# The checks, before you call done\n\n  1. Click a tail in the record table: the dossier opens for that tail, no\n     console error, and the URL reflects it.\n  2. Click an airline code: its dossier opens with total, systems and records.\n  3. An operator whose `name_known` is false says so, shows the code, and shows\n     no invented name.\n  4. Click a part number: its dossier opens with by_year and by_operator, and\n     with aircraft and operators beside total.\n  5. Every `cannot_show` sentence from each endpoint appears on screen.\n  6. The locate control sends the write-ups on screen, marks the rows it placed,\n     shows each quoted span, and prints dropped_unverifiable and the note.\n  7. Everything the model produced is marked as the model's.\n  8. No page error at 1440 or 390, and phase B is unchanged: the standing\n     sentence reads 219 reports at ?zone=ZONE+500&operator=CALA and the\n     1,757,827 sentence unfiltered, #vstrip at or under 130px, 18 controls,\n     18 starter questions, 4 .rail, 16 section.panel.\n\nMeasure every one and put the numbers in the summary.\n\nDo not undo the phone layout, the case sheet overlay, the record stepper, the\naria-labels or the airframe dossier. Prefix every new name.\n\n--- YOUR CURRENT BLOCK ---\n\nCSS:\n#sentence{display:none!important}\n#sd-sink{display:none!important}\n.card.land{display:none!important}\n#vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}\n#vstrip.vgroups .vg{display:flex;flex-direction:row;align-items:center;gap:10px;min-width:0}\n#vstrip.vgroups .vglab{flex:0 0 auto;font:600 9.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em;color:#57514a;text-transform:uppercase;white-space:nowrap}\n#vstrip.vgroups .vgbtns{display:flex!important;flex-direction:row!important;gap:2px!important;align-items:center!important;flex-wrap:wrap!important;margin:0!important;padding:0!important;border-bottom:0!important;min-width:0;flex:1 1 auto}\nbutton.vtab{padding:3px 8px;font-size:11.5px;line-height:1.2;border:1px solid transparent;border-radius:3px;background:none;color:#5c554c;cursor:pointer;white-space:nowrap}\nbutton.vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);font-weight:600}\n.axis{display:flex;gap:2px;margin-top:3px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ash)}\n.axis span{flex:1;min-width:0}\n.sd-second{font-size:11.5px;color:#6b6560;margin:0 0 3px;text-align:center;letter-spacing:.02em}\n.sd-second b{font-weight:600}\n#hero.instrument{position:relative;background:var(--paper);border:1px solid var(--line);border-bottom:3px solid var(--rust);border-radius:6px;margin:12px 0 0;overflow:hidden;padding:0}\n#hero.instrument > .ipad{padding:10px 20px 6px}\n#count.sdcount{font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1.1;color:var(--ink);max-width:none;margin:4px 0 2px;white-space:normal}\n#count.sdcount .fig{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:.92em;font-variant-numeric:tabular-nums;color:var(--rust-text,#b8431f)}\n#count.sdcount .aside{font-size:.62em;color:var(--ash)}\n#count.sdcount .broken{display:block;font-size:.5em;color:var(--rust)}\n#count.sdcount .clause{border-bottom:1px dotted rgba(29,29,31,.28);cursor:pointer}\n.rail .reading{margin:9px 0 0;padding:8px 12px 8px 13px;border-left:2px solid var(--rust);background:#faf7f3;font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);max-width:none}\n.rail>.reading{grid-column:2}\n@media(max-width:700px){.rail .reading{font-size:14px;padding:7px 10px}}\n@media(min-width:901px){\n#hero.instrument{max-width:1140px!important}\n.rail{align-items:start;grid-template-columns:110px minmax(0,1fr)!important}\n.rail .track{min-width:0;position:relative}\n.rail .track.two{display:grid;grid-template-columns:minmax(0,628px) minmax(0,330px);gap:18px}\n.rail .track.two > svg.plane{width:100%;max-width:640px;height:auto;display:block}\n.rail .col .ch{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;color:var(--ash);margin-bottom:3px}\n.rail .orow{display:grid;grid-template-columns:120px 1fr 52px;gap:8px;align-items:center;font-size:11.5px;height:14px;padding:0 3px;border-radius:3px}\n.rail .orow .on{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:14px}\n.rail .orow .ob{height:6px;background:#e8e3d8;border-radius:3px;overflow:hidden}\n.rail .orow .ob i{display:block;height:100%;background:var(--rust)}\n.rail .orow.wide{grid-template-columns:190px 1fr 56px;height:17px}\n.rail .orow.wide .on{font-size:12px;line-height:17px}\n.rail .fblock{height:22px}\n.rail .frows{margin-top:4px}\n.rail .fnote{font-size:11px;margin-top:3px}\n.rail[data-rail=forced].open .fblock{margin-bottom:5px}\n.rail .legend{font-size:11.5px;gap:0}\n.rail .lrow{padding:0 4px;line-height:1.35}\n.rail .zonenote{font-size:11px;line-height:1.4;margin-top:4px;padding-top:4px}\n}\n#hero .ipad .aimwrap{display:none}\n#hero .ipad .rv-aim{margin-top:6px}\n#hero .ipad .specimen{font-size:11px;line-height:1.35;padding-top:2px;padding-bottom:2px}\n#hero .ipad .margin{font-size:10.5px;line-height:1.3;padding-top:2px;margin-top:3px}\n#hero .ipad .rails{margin-top:6px}\n#sdControls{gap:4px;margin-top:8px}\n#sdControls .bar{gap:6px}\n#sdControls .actions{padding:0}\n#noRows{padding:8px 12px;margin-top:6px}\n#noRows p{margin:3px 0}\n#starterToggle{padding:3px 10px}\n#rr-sec{margin:6px 0 0}\n#rr-sec .cut{font-size:10.5px;line-height:1.25}\n#rr-sec .rr-count{font-size:12px}\n#rr-sec .rr-more{font-size:11px;padding:3px 10px}\n/* sd-extras: blocks the original has no counterpart for, above the tabs */\n#znarrow,.card.ask,#khint{display:none!important}\n/* sd-credit: match the original's spacing and type */\n.credit{font-size:12px;line-height:18.6px;margin:2px 0 10px;padding:0}\n/* sd-wu: keep the gloss out of the clip; clip/fade like the original */\ntable.sdtable td{padding:5px 10px}\ntr.wrote td{padding:0 0 14px}\n.wu{position:relative}\n.wu .wu-gloss{position:absolute;left:12px;bottom:0;height:auto;margin:0}\n.wu:not(.clip){padding-bottom:34px}\n.wu:not(.clip)::after{content:\"none\"}\n.wu.clip{overflow:hidden;max-height:112px}\n.wu.clip::after{content:\"\";position:absolute;left:0;right:0;bottom:0;height:16px;background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,.92) 70%,#fff)}\n/* sd-dossier: the aircraft dossier, in #p-aircraft */\n#sd-dossier{max-width:1140px;margin:14px auto 0;padding:0 2px;font-size:14px;line-height:1.5}\n#sd-dossier .sd-d-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:2px 0 6px}\n#sd-dossier .sd-d-tail{font-family:'Instrument Serif',Georgia,serif;font-size:30px;color:var(--ink)}\n#sd-dossier .sd-d-make{font-size:12.5px;color:#6b6560}\n#sd-dossier .sd-d-count{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;color:var(--rust-text,#b8431f)}\n#sd-dossier .sd-d-sec{margin:12px 0 0;padding:10px 14px;border:1px solid var(--line);border-left:3px solid var(--rust);background:var(--card);border-radius:4px}\n#sd-dossier .sd-d-sec h3{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ash);margin:0 0 7px}\n#sd-dossier .sd-d-sec h3.sd-mine{color:#7a5b00}\n#sd-dossier .sd-d-frame{font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}\n#sd-dossier .sd-d-split{display:flex;gap:8px 18px;flex-wrap:wrap;margin:8px 0 0;padding:0;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:#5c554c;list-style:none}\n#sd-dossier .sd-d-split b{color:var(--ink);font-variant-numeric:tabular-nums}\n#sd-dossier .sd-d-ops{font-size:12px;color:#6b6560;margin:7px 0 0}\n#sd-dossier .sd-d-rpt{margin:7px 0 0;padding-left:10px;border-left:2px solid #e8e3d8;font-size:12.5px;color:#5c554c}\n#sd-dossier .sd-d-rpt b{color:var(--ink)}\n#sd-dossier .sd-d-hrs{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--rust-text,#b8431f)}\n#sd-dossier .sd-d-quote{margin:5px 0 0;padding:0 0 0 8px;border-left:2px solid var(--line);font:11px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:#7a746c}\n#sd-dossier .sd-d-sum{font:15px/1.55 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}\n#sd-dossier .sd-d-note{font-size:11.5px;color:#7a5b00;margin:7px 0 0}\n#sd-dossier .sd-d-lim{margin:0;padding-left:18px}\n#sd-dossier .sd-d-lim li{margin:4px 0;font-size:13px;color:var(--ink)}\n#sd-dossier .sd-d-cite{font-size:12px;color:#6b6560;margin:0;word-break:break-word}\n#sd-dossier .sd-d-cite a{color:var(--rust-text,#b8431f)}\n#sd-dossier .sd-d-btns{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}\n#sd-dossier .sd-d-none{font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}\n@media(max-width:700px){#sd-dossier .sd-d-tail{font-size:24px}#sd-dossier .sd-d-sec{padding:9px 10px}}\nJS:\n(function(){\n\"use strict\";\nwindow.__sderrs=window.__sderrs||[];\naddEventListener(\"error\",function(e){try{window.__sderrs.push(String((e&&e.message)||e))}catch(_){}});\nfunction byId(id){return document.getElementById(id)}\nfunction visible(n){if(!n||n.nodeType!==1)return false;if(!n.offsetParent&&getComputedStyle(n).position!==\"fixed\")return false;var cs=getComputedStyle(n);return cs.display!==\"none\"&&cs.visibility!==\"hidden\"}\nfunction phone(){return matchMedia(\"(max-width:760px)\").matches}\nvar READING_TEXT=\"Upper fuselage accounts for 84,453 of the 212,940 reports written in the FAA\\u2019s numbered zones, or 39.7%. Those numbers are what this diagram can place, and they are 12.1% of the selection. Another 1,454,504 do say where, in words such as FUSELAGE or CABIN rather than a zone number, so the drawing cannot show them. Only 90,383, 5.1%, give no location at all. It is a sample rather than the whole file, but it does give you a good idea of where the trouble sits.\";\nvar SEED_HTML='<span class=\"fig\">1,757,827</span> reports, everything the FAA has published to 26 August 2026.';\nvar SHORT_TOTAL=/^1,757,827\\s+reports\\.?(\\s*Nothing chosen yet\\.?)?\\s*$/;\nvar NOROWS_HTML='<p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and buries the one you have.</p><p class=\"muted\">Take a month, a zone, an airline or a tail from the instrument above, pick one of the starter questions, or set a filter. To read the file straight through anyway, use the button at the foot of the instrument.</p><p><button type=\"button\" class=\"sdbtn\" id=\"revealBtn\">Read all 1,757,827 anyway</button> <button type=\"button\" class=\"ghostbtn\" id=\"gotoStarters\">Show me the starter questions</button></p>';\nfunction sdFiltered(){\n  var i,x;\n  var sels=document.querySelectorAll(\"#sdControls select\");\n  for(i=0;i<sels.length;i++){if((sels[i].value||\"\").trim()!==\"\")return true}\n  var ins=document.querySelectorAll(\"#sdControls input\");\n  for(i=0;i<ins.length;i++){\n    x=ins[i];\n    if(x.type===\"checkbox\"||x.type===\"radio\"){if(x.checked)return true}\n    else if((x.value||\"\").trim()!==\"\")return true;\n  }\n  var tabs=document.querySelectorAll(\"#vstrip .vtab.on\");\n  for(i=0;i<tabs.length;i++){if((tabs[i].getAttribute(\"data-view\")||\"p-search\")!==\"p-search\")return true}\n  return false;\n}\nfunction ensureIpad(){\n  var hero=byId(\"hero\");if(!hero)return null;\n  var rails=hero.querySelector(\".rails\");\n  if(!rails||!visible(rails)||hero.querySelector(\".phbar\"))return hero.querySelector(\":scope > .ipad\")||null;\n  if(!/\\binstrument\\b/.test(hero.className||\"\"))hero.className=(\"instrument \"+(hero.className||\"\")).trim();\n  var kids=[].slice.call(hero.children),i,ipad=null,ihead=null;\n  for(i=0;i<kids.length;i++){if(/\\bipad\\b/.test(kids[i].className||\"\")){ipad=kids[i];break}}\n  for(i=0;i<kids.length;i++){if(/\\bihead\\b/.test(kids[i].className||\"\")){ihead=kids[i];break}}\n  if(!ipad){\n    ipad=document.createElement(\"div\");ipad.className=\"ipad\";\n    if(ihead)ihead.after(ipad);else hero.insertBefore(ipad,hero.firstChild);\n    kids=[].slice.call(hero.children);\n    for(i=0;i<kids.length;i++){if(kids[i]!==ipad&&kids[i]!==ihead)ipad.appendChild(kids[i])}\n  }\n  return ipad;\n}\nfunction sdSink(){\n  var s=byId(\"sd-sink\");\n  if(!s){s=document.createElement(\"div\");s.id=\"sd-sink\";(document.querySelector(\"main.wrap\")||document.body).appendChild(s)}\n  return s;\n}\nfunction sdEmpty(c){return !c.textContent.trim()&&!c.children.length}\nfunction seatCount(){\n  var all=document.querySelectorAll(\"#count\");\n  var c=all[0];\n  if(!c){\n    c=document.createElement(\"div\");c.id=\"count\";\n    (document.querySelector(\"main.wrap\")||document.body).appendChild(c);\n  }\n  var i;\n  for(i=0;i<all.length;i++){if(all[i]!==c&&all[i].parentNode)all[i].parentNode.removeChild(all[i])}\n  function detach(){if(c.parentNode&&c.parentNode.nodeType===1&&c.parentNode.contains(c))c.parentNode.removeChild(c)}\n  var hero=byId(\"hero\");\n  var railsEl=hero?hero.querySelector(\".rails\"):null;\n  var rails=(railsEl&&visible(railsEl))?railsEl:null;\n  var ph=hero?hero.querySelector(\".phbar\"):null;\n  if(ph&&(phone()||!rails)){\n    if(c.parentNode!==ph){detach();ph.insertBefore(c,ph.firstChild)}\n  }else if(rails){\n    var host=rails.parentNode;\n    if(c.parentNode!==host||c.nextElementSibling!==rails){\n      detach();\n      if(rails.parentNode===host)host.insertBefore(c,rails);\n    }\n  }\n  if(!/\\bsdcount\\b/.test(c.className))c.className=(\"sdcount \"+c.className).trim();\n  if(!sdFiltered()){\n    if(sdEmpty(c)||SHORT_TOTAL.test(c.textContent.trim())){c.dataset.sdSeeded=\"1\";c.innerHTML=SEED_HTML}\n  }\n}\nfunction retireStand(){\n  var s=document.querySelector(\".ipad .stand\");\n  if(s&&s.parentNode)sdSink().appendChild(s);\n}\nfunction ensureReading(){\n  var rail=document.querySelector(\".rail[data-rail=where]\");\n  if(!rail||!rail.parentNode)return;\n  var rs=[].slice.call(rail.querySelectorAll(\".reading\")),i,keep=null;\n  for(i=0;i<rs.length;i++){\n    if(!keep||rs[i].textContent.trim().length>keep.textContent.trim().length)keep=rs[i];\n  }\n  if(keep&&keep.tagName!==\"P\"){\n    var p=document.createElement(\"p\");p.className=\"reading\";\n    p.innerHTML=keep.innerHTML;\n    keep.parentNode.replaceChild(p,keep);keep=p;\n  }\n  if(!keep){\n    keep=document.createElement(\"p\");keep.className=\"reading\";\n    keep.textContent=READING_TEXT;\n  }\n  if(keep.parentNode!==rail)rail.appendChild(keep);\n  [].slice.call(rail.children).forEach(function(n){\n    if(n===keep)return;\n    var cn=n.className||\"\";\n    if(/\\b(gut|track)\\b/.test(cn))return;\n    if(/\\breading\\b/.test(cn)){\n      if(!n.textContent.trim())n.remove();\n      return;\n    }\n    n.remove();\n  });\n}\nfunction stripInline(){\n  var bs=document.querySelectorAll(\"#vstrip.vgroups .vgbtns\"),i;\n  for(i=0;i<bs.length;i++){\n    var b=bs[i];if(b.dataset.sdInl)continue;b.dataset.sdInl=\"1\";\n    b.style.margin=\"0\";b.style.padding=\"0\";b.style.borderBottom=\"0\";\n  }\n}\nfunction secondLine(){\n  var strip=byId(\"vstrip\");if(!strip)return;\n  var p=byId(\"sd-second\");\n  if(!p){p=document.createElement(\"p\");p.id=\"sd-second\";p.className=\"sd-second\";strip.parentNode.insertBefore(p,strip.nextSibling)}\n  if(p.dataset.sdDone)return;p.dataset.sdDone=\"1\";\n  var fr=byId(\"freshness\");\n  p.innerHTML=(fr&&fr.textContent.trim())?fr.textContent.trim():\"Counts of reports filed, not of flights.\";\n}\nfunction ensureSentence(){\n  var s=byId(\"sentence\");\n  if(!s){s=document.createElement(\"div\");s.id=\"sentence\";s.hidden=true;(document.querySelector(\"main.wrap\")||document.body).appendChild(s)}\n  if(!s.hidden)s.hidden=true;\n  if(s.style.display!==\"none\")s.style.display=\"none\";\n}\nfunction ensureNoRows(){\n  var n=byId(\"noRows\");if(!n)return;\n  if(!n.textContent.trim()&&!n.children.length)n.innerHTML=NOROWS_HTML;\n  if(phone()){\n    if(n.hasAttribute(\"hidden\"))n.removeAttribute(\"hidden\");\n    if(n.style.display===\"none\")n.style.display=\"\";\n  }\n}\n/* sd-tag: mark the record table so its td padding can be tuned */\nfunction tagTable(){\n  var w=document.querySelector(\".wu\");\n  if(!w)return;\n  var t=w.closest(\"table\");\n  if(t&&!t.classList.contains(\"sdtable\"))t.classList.add(\"sdtable\");\n}\nvar snap={c:null};\nfunction sdMirror(){\n  var s=byId(\"sentence\"),c=byId(\"count\");\n  if(!s||!c||s===c)return;\n  var cv=c.innerHTML;\n  if(s.innerHTML!==cv&&snap.c!==null&&snap.c!==cv){\n    s.innerHTML=cv;\n  }\n  snap.c=cv;\n}\nfunction purgeLand(){\n  var ls=document.querySelectorAll(\".card.land\"),i;\n  for(i=0;i<ls.length;i++)ls[i].remove();\n}\n\n/* ================= sd-dossier: one airframe, read from the four endpoints ============ */\nvar SD={tail:null,inflight:null,cache:{}};\nfunction sdEsc(s){return String(s==null?\"\":s).replace(/&/g,\"&amp;\").replace(/</g,\"&lt;\").replace(/>/g,\"&gt;\").replace(/\"/g,\"&quot;\")}\nfunction sdDossierNode(){\n  var panel=byId(\"p-aircraft\");if(!panel)return null;\n  var node=byId(\"sd-dossier\");\n  if(!node){\n    node=document.createElement(\"div\");node.id=\"sd-dossier\";\n    node.setAttribute(\"role\",\"region\");node.setAttribute(\"aria-label\",\"Dossier for one aircraft\");\n    var pb=byId(\"p-aircraft-body\");\n    if(pb&&pb.parentNode===panel)pb.insertAdjacentElement(\"afterend\",node);\n    else panel.appendChild(node);\n  }\n  return node;\n}\nfunction sdSetVerbatim(node,sel,txt){\n  var el=node.querySelector(sel);\n  if(el)el.textContent=(txt==null)?\"\":String(txt);\n}\nfunction sdRender(node,t,raf,rpf,rsm){\n  var ok=function(r){return r&&r.status===\"fulfilled\"?r.value:null};\n  var af=ok(raf),rp=ok(rpf),sm=ok(rsm);\n  var parts=[];\n  var found=af?(af.found||0):0;\n  if(!af||found===0){\n    parts.push('<div class=\"sd-d-head\"><span class=\"sd-d-tail\">'+sdEsc(t)+'</span></div>');\n    parts.push('<section class=\"sd-d-sec\"><p class=\"sd-d-none\">No reports in this file name that tail number.</p>'\n      +(af&&af.note?'<p class=\"sd-d-note\">'+sdEsc(af.note)+'</p>':'')\n      +'<p class=\"sd-d-note\">Nothing is shown rather than something wrong.</p></section>');\n    node.innerHTML=parts.join(\"\");\n    return;\n  }\n  var ac=af.aircraft||{};\n  var mm=[ac.make,ac.model].filter(Boolean).join(\" \");\n  var rec0=(af.records&&af.records[0])||{};\n  if(!mm&&rec0.make)mm=[rec0.make,rec0.model].filter(Boolean).join(\" \");\n  var ops=(af.operators||[]).map(function(o){return (o&&o.name?o.name:\"unnamed\")+(o&&o.reports?\" (\"+o.reports+\")\":\"\")}).join(\", \");\n  parts.push('<div class=\"sd-d-head\">'\n    +'<span class=\"sd-d-tail\">'+sdEsc(af.tail||t)+'</span>'\n    +(mm?'<span class=\"sd-d-make\">'+sdEsc(mm)+'</span>':'')\n    +'<span class=\"sd-d-count\">'+found+' report'+(found===1?\"\":\"s\")+'</span>'\n    +(af.first||af.last?'<span class=\"sd-d-make\">first filed '+sdEsc(af.first||\"\\u2014\")+' \\u00b7 last filed '+sdEsc(af.last||\"\\u2014\")+'</span>':'')\n    +'</div>');\n  var fr=af.framing||{};\n  parts.push('<section class=\"sd-d-sec\"><h3>Where the write-ups were made</h3>'\n    +'<p class=\"sd-d-frame\" data-sd-frame=\"1\"></p>'\n    +'<ul class=\"sd-d-split\">'\n    +'<li>on the ground <b>'+sdEsc(fr.on_ground)+'</b> ('+sdEsc(fr.on_ground_pct)+'%)</li>'\n    +'<li>in flight <b>'+sdEsc(fr.in_flight)+'</b> ('+sdEsc(fr.in_flight_pct)+'%)</li>'\n    +'<li>of <b>'+sdEsc(fr.total)+'</b> write-ups</li>'\n    +'</ul></section>');\n  if(rp&&rp.groups&&rp.groups.length){\n    var gs=rp.groups.map(function(g){\n      var sys=g.system?\" \\u2014 \"+sdEsc(g.system):\"\";\n      var rec=(g.records&&g.records[0]&&g.records[0].text)\n        ?'<blockquote class=\"sd-d-quote\">'+sdEsc(String(g.records[0].text).slice(0,220))+'</blockquote>':\"\";\n      return '<div class=\"sd-d-rpt\"><b>'+sdEsc(g.part||\"unnamed part\")+'</b>'+sys\n        +' \\u00b7 '+sdEsc(g.times)+' write-up'+(g.times===1?\"\":\"s\")\n        +' \\u00b7 first '+sdEsc(g.first)+' \\u00b7 last '+sdEsc(g.last)\n        +' \\u00b7 <span class=\"sd-d-hrs\">'+sdEsc(g.hours_between)+' hours between first and last</span>'+rec+'</div>';\n    }).join(\"\");\n    parts.push('<section class=\"sd-d-sec\"><h3>What recurred</h3>'\n      +(rp.note?'<p class=\"sd-d-note\">'+sdEsc(rp.note)+'</p>':\"\")+gs+'</section>');\n  }else{\n    parts.push('<section class=\"sd-d-sec\"><h3>What recurred</h3><p class=\"sd-d-none\">Nothing on this airframe was written up more than once.</p></section>');\n  }\n  var gen=!!(sm&&sm.generated===true);\n  var hasSum=sm&&sm.summary&&String(sm.summary).trim();\n  var lab=hasSum?(gen?\"Written by a model\":\"Assembled from recounted numbers \\u2014 not written by a model\"):\"Summary not written\";\n  var sumBody=hasSum?'<p class=\"sd-d-sum\" data-sd-sum=\"1\"></p>'\n    :'<p class=\"sd-d-none\">No summary was written for this tail. That is the check working: nothing is shown rather than something wrong.</p>';\n  var sumNote=(sm&&sm.note)?'<p class=\"sd-d-note\">'+sdEsc(sm.note)+'</p>':\"\";\n  var sumLim=(sm&&sm.cannot_show&&sm.cannot_show.length)\n    ?'<ul class=\"sd-d-lim\">'+sm.cannot_show.map(function(x){return \"<li>\"+sdEsc(x)+\"</li>\"}).join(\"\")+'</ul>':\"\";\n  parts.push('<section class=\"sd-d-sec\"><h3 class=\"sd-mine\">'+sdEsc(lab)+'</h3>'+sumBody+sumNote+sumLim+'</section>');\n  var cs=af.cannot_show||[];\n  parts.push('<section class=\"sd-d-sec\"><h3>What this file cannot show</h3>'\n    +(cs.length?'<ul class=\"sd-d-lim\">'+cs.map(function(x){return \"<li>\"+sdEsc(x)+\"</li>\"}).join(\"\")+'</ul>':\"\")\n    +'</section>');\n  var cit=af.citation||{};\n  var csvTail=af.tail||t;\n  parts.push('<section class=\"sd-d-sec\"><h3>Citation</h3><p class=\"sd-d-cite\">'\n    +sdEsc(cit.source||\"FAA Service Difficulty Reports\")\n    +(cit.retrieved?\" \\u00b7 retrieved \"+sdEsc(cit.retrieved):\"\")\n    +(cit.url?' \\u00b7 <a href=\"'+sdEsc(cit.url)+'\" rel=\"noopener\">'+sdEsc(cit.url)+'</a>':\"\")\n    +(cit.record_ids&&cit.record_ids.length?\" \\u00b7 \"+cit.record_ids.length+\" record ids\":\"\")\n    +'</p><div class=\"sd-d-btns\"><a class=\"sdbtn\" id=\"sd-d-csv\" download=\"'+sdEsc(csvTail)+'-sdr.csv\" href=\"/z/api/export/'+encodeURIComponent(csvTail)+'.csv\">Download the CSV for this airframe</a>'\n    +'<span class=\"sd-d-make\">The CSV carries its own citation header lines.</span></div></section>');\n  node.innerHTML=parts.join(\"\");\n  sdSetVerbatim(node,\"[data-sd-frame]\",fr.sentence);\n  if(hasSum)sdSetVerbatim(node,\"[data-sd-sum]\",sm.summary);\n}\nfunction sdOpenTail(t){\n  t=String(t||\"\").trim();if(!t)return;\n  SD.tail=t;\n  var tab=document.querySelector('#vstrip .vtab[data-view=\"p-aircraft\"]');\n  if(tab)try{tab.click()}catch(_){}\n  var node=sdDossierNode();if(!node)return;\n  if(SD.cache[t]){\n    node.dataset.sdTail=t;node.dataset.sdDone=\"1\";\n    var c=SD.cache[t];sdRender(node,t,c[0],c[1],c[2]);return;\n  }\n  if(SD.inflight===t)return;\n  SD.inflight=t;\n  node.dataset.sdTail=t;node.dataset.sdDone=\"\";\n  node.innerHTML='<p class=\"sd-d-none\">Reading the file\\u2026</p>';\n  var g=function(u){return fetch(\"/z/api/\"+u).then(function(r){if(!r.ok)throw new Error(\"HTTP \"+r.status);return r.json()})};\n  Promise.allSettled([\n    g(\"airframe/\"+encodeURIComponent(t)),\n    g(\"repeats/\"+encodeURIComponent(t)),\n    g(\"summary/\"+encodeURIComponent(t))\n  ]).then(function(rs){\n    if(SD.tail!==t)return;\n    SD.inflight=null;SD.cache[t]=rs;\n    node.dataset.sdTail=t;node.dataset.sdDone=\"1\";\n    sdRender(node,t,rs[0],rs[1],rs[2]);\n  }).catch(function(){\n    if(SD.tail!==t)return;\n    SD.inflight=null;\n    node.dataset.sdDone=\"1\";\n    node.innerHTML='<section class=\"sd-d-sec\"><p class=\"sd-d-none\">The dossier did not answer. Nothing is shown rather than something wrong.</p></section>';\n  });\n}\nfunction sdBootFromURL(){\n  var q=new URLSearchParams(location.search);\n  var t=q.get(\"tail\");\n  if(!t&&q.get(\"kind\")===\"tail\")t=q.get(\"v\");\n  if(t)sdOpenTail(t);\n}\n/* sd-dossier wiring: same mechanism the table uses, [data-ask=\"tail|...\"] */\ndocument.addEventListener(\"click\",function(e){\n  var el=e.target&&e.target.closest?e.target.closest('[data-ask^=\"tail|\"]'):null;\n  if(!el)return;\n  var v=(el.getAttribute(\"data-ask\")||\"\").slice(5);\n  if(v)sdOpenTail(v);\n},true);\ndocument.addEventListener(\"keydown\",function(e){\n  if(e.key!==\"Enter\"&&e.key!==\" \")return;\n  var t=e.target;\n  if(!t||!t.getAttribute)return;\n  var a=t.getAttribute(\"data-ask\")||\"\";\n  if(a.indexOf(\"tail|\")===0){var v=a.slice(5);if(v)sdOpenTail(v)}\n},true);\naddEventListener(\"popstate\",function(){try{sdBootFromURL()}catch(_){}});\nfunction sdDossierKick(){\n  if(!SD.tail)return;\n  var node=sdDossierNode();if(!node)return;\n  if(node.isConnected&&node.dataset.sdTail===SD.tail&&node.dataset.sdDone===\"1\")return;\n  var c=SD.cache[SD.tail];\n  if(c){node.dataset.sdTail=SD.tail;node.dataset.sdDone=\"1\";sdRender(node,SD.tail,c[0],c[1],c[2])}\n  else sdOpenTail(SD.tail);\n}\n\nvar queued=false;\nfunction pass(){\n  queued=false;\n  try{purgeLand()}catch(e){}\n  try{ensureSentence()}catch(e){}\n  try{ensureIpad()}catch(e){}\n  try{seatCount()}catch(e){}\n  try{retireStand()}catch(e){}\n  try{ensureReading()}catch(e){}\n  try{ensureNoRows()}catch(e){}\n  try{stripInline()}catch(e){}\n  try{secondLine()}catch(e){}\n  try{tagTable()}catch(e){}\n  try{sdMirror()}catch(e){}\n  try{sdDossierKick()}catch(e){}\n}\nfunction kick(){if(queued)return;queued=true;requestAnimationFrame(pass)}\nnew MutationObserver(kick).observe(document.documentElement,{childList:true,subtree:true});\nif(document.readyState===\"loading\")document.addEventListener(\"DOMContentLoaded\",function(){pass();sdBootFromURL()});\nelse{pass();sdBootFromURL()}\naddEventListener(\"load\",pass);\naddEventListener(\"resize\",kick);\n})();"
+ },
+ {
+  "role": "assistant",
+  "content": "I'll start by deploying the current block as required, then explore the page to find what the record table binds clicks to.",
+  "tool_calls": [
+   {
+    "id": "call_a23aecf22e234eb2a2258bc3",
+    "type": "function",
+    "function": {
+     "name": "deploy",
+     "arguments": "{\"css\":\"#sentence{display:none!important}\\n#sd-sink{display:none!important}\\n.card.land{display:none!important}\\n#vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}\\n#vstrip.vgroups .vg{display:flex;flex-direction:row;align-items:center;gap:10px;min-width:0}\\n#vstrip.vgroups .vglab{flex:0 0 auto;font:600 9.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em;color:#57514a;text-transform:uppercase;white-space:nowrap}\\n#vstrip.vgroups .vgbtns{display:flex!important;flex-direction:row!important;gap:2px!important;align-items:center!important;flex-wrap:wrap!important;margin:0!important;padding:0!important;border-bottom:0!important;min-width:0;flex:1 1 auto}\\nbutton.vtab{padding:3px 8px;font-size:11.5px;line-height:1.2;border:1px solid transparent;border-radius:3px;background:none;color:#5c554c;cursor:pointer;white-space:nowrap}\\nbutton.vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);font-weight:600}\\n.axis{display:flex;gap:2px;margin-top:3px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ash)}\\n.axis span{flex:1;min-width:0}\\n.sd-second{font-size:11.5px;color:#6b6560;margin:0 0 3px;text-align:center;letter-spacing:.02em}\\n.sd-second b{font-weight:600}\\n#hero.instrument{position:relative;background:var(--paper);border:1px solid var(--line);border-bottom:3px solid var(--rust);border-radius:6px;margin:12px 0 0;overflow:hidden;padding:0}\\n#hero.instrument > .ipad{padding:10px 20px 6px}\\n#count.sdcount{font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1.1;color:var(--ink);max-width:none;margin:4px 0 2px;white-space:normal}\\n#count.sdcount .fig{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:.92em;font-variant-numeric:tabular-nums;color:var(--rust-text,#b8431f)}\\n#count.sdcount .aside{font-size:.62em;color:var(--ash)}\\n#count.sdcount .broken{display:block;font-size:.5em;color:var(--rust)}\\n#count.sdcount .clause{border-bottom:1px dotted rgba(29,29,31,.28);cursor:pointer}\\n.rail .reading{margin:9px 0 0;padding:8px 12px 8px 13px;border-left:2px solid var(--rust);background:#faf7f3;font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);max-width:none}\\n.rail>.reading{grid-column:2}\\n@media(max-width:700px){.rail .reading{font-size:14px;padding:7px 10px}}\\n@media(min-width:901px){\\n#hero.instrument{max-width:1140px!important}\\n.rail{align-items:start;grid-template-columns:110px minmax(0,1fr)!important}\\n.rail .track{min-width:0;position:relative}\\n.rail .track.two{display:grid;grid-template-columns:minmax(0,628px) minmax(0,330px);gap:18px}\\n.rail .track.two > svg.plane{width:100%;max-width:640px;height:auto;display:block}\\n.rail .col .ch{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;color:var(--ash);margin-bottom:3px}\\n.rail .orow{display:grid;grid-template-columns:120px 1fr 52px;gap:8px;align-items:center;font-size:11.5px;height:14px;padding:0 3px;border-radius:3px}\\n.rail .orow .on{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:14px}\\n.rail .orow .ob{height:6px;background:#e8e3d8;border-radius:3px;overflow:hidden}\\n.rail .orow .ob i{display:block;height:100%;background:var(--rust)}\\n.rail .orow.wide{grid-template-columns:190px 1fr 56px;height:17px}\\n.rail .orow.wide .on{font-size:12px;line-height:17px}\\n.rail .fblock{height:22px}\\n.rail .frows{margin-top:4px}\\n.rail .fnote{font-size:11px;margin-top:3px}\\n.rail[data-rail=forced].open .fblock{margin-bottom:5px}\\n.rail .legend{font-size:11.5px;gap:0}\\n.rail .lrow{padding:0 4px;line-height:1.35}\\n.rail .zonenote{font-size:11px;line-height:1.4;margin-top:4px;padding-top:4px}\\n}\\n#hero .ipad .aimwrap{display:none}\\n#hero .ipad .rv-aim{margin-top:6px}\\n#hero .ipad .specimen{font-size:11px;line-height:1.35;padding-top:2px;padding-bottom:2px}\\n#hero .ipad .margin{font-size:10.5px;line-height:1.3;padding-top:2px;margin-top:3px}\\n#hero .ipad .rails{margin-top:6px}\\n#sdControls{gap:4px;margin-top:8px}\\n#sdControls .bar{gap:6px}\\n#sdControls .actions{padding:0}\\n#noRows{padding:8px 12px;margin-top:6px}\\n#noRows p{margin:3px 0}\\n#starterToggle{padding:3px 10px}\\n#rr-sec{margin:6px 0 0}\\n#rr-sec .cut{font-size:10.5px;line-height:1.25}\\n#rr-sec .rr-count{font-size:12px}\\n#rr-sec .rr-more{font-size:11px;padding:3px 10px}\\n/* sd-extras: blocks the original has no counterpart for, above the tabs */\\n#znarrow,.card.ask,#khint{display:none!important}\\n/* sd-credit: match the original's spacing and type */\\n.credit{font-size:12px;line-height:18.6px;margin:2px 0 10px;padding:0}\\n/* sd-wu: keep the gloss out of the clip; clip/fade like the original */\\ntable.sdtable td{padding:5px 10px}\\ntr.wrote td{padding:0 0 14px}\\n.wu{position:relative}\\n.wu .wu-gloss{position:absolute;left:12px;bottom:0;height:auto;margin:0}\\n.wu:not(.clip){padding-bottom:34px}\\n.wu:not(.clip)::after{content:\\\"none\\\"}\\n.wu.clip{overflow:hidden;max-height:112px}\\n.wu.clip::after{content:\\\"\\\";position:absolute;left:0;right:0;bottom:0;height:16px;background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,.92) 70%,#fff)}\\n/* sd-dossier: the aircraft dossier, in #p-aircraft */\\n#sd-dossier{max-width:1140px;margin:14px auto 0;padding:0 2px;font-size:14px;line-height:1.5}\\n#sd-dossier .sd-d-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:2px 0 6px}\\n#sd-dossier .sd-d-tail{font-family:'Instrument Serif',Georgia,serif;font-size:30px;color:var(--ink)}\\n#sd-dossier .sd-d-make{font-size:12.5px;color:#6b6560}\\n#sd-dossier .sd-d-count{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;color:var(--rust-text,#b8431f)}\\n#sd-dossier .sd-d-sec{margin:12px 0 0;padding:10px 14px;border:1px solid var(--line);border-left:3px solid var(--rust);background:var(--card);border-radius:4px}\\n#sd-dossier .sd-d-sec h3{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ash);margin:0 0 7px}\\n#sd-dossier .sd-d-sec h3.sd-mine{color:#7a5b00}\\n#sd-dossier .sd-d-frame{font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}\\n#sd-dossier .sd-d-split{display:flex;gap:8px 18px;flex-wrap:wrap;margin:8px 0 0;padding:0;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:#5c554c;list-style:none}\\n#sd-dossier .sd-d-split b{color:var(--ink);font-variant-numeric:tabular-nums}\\n#sd-dossier .sd-d-ops{font-size:12px;color:#6b6560;margin:7px 0 0}\\n#sd-dossier .sd-d-rpt{margin:7px 0 0;padding-left:10px;border-left:2px solid #e8e3d8;font-size:12.5px;color:#5c554c}\\n#sd-dossier .sd-d-rpt b{color:var(--ink)}\\n#sd-dossier .sd-d-hrs{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--rust-text,#b8431f)}\\n#sd-dossier .sd-d-quote{margin:5px 0 0;padding:0 0 0 8px;border-left:2px solid var(--line);font:11px/1.4 'IBM Plex Mono',ui-monospace,monospace;color:#7a746c}\\n#sd-dossier .sd-d-sum{font:15px/1.55 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}\\n#sd-dossier .sd-d-note{font-size:11.5px;color:#7a5b00;margin:7px 0 0}\\n#sd-dossier .sd-d-lim{margin:0;padding-left:18px}\\n#sd-dossier .sd-d-lim li{margin:4px 0;font-size:13px;color:var(--ink)}\\n#sd-dossier .sd-d-cite{font-size:12px;color:#6b6560;margin:0;word-break:break-word}\\n#sd-dossier .sd-d-cite a{color:var(--rust-text,#b8431f)}\\n#sd-dossier .sd-d-btns{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}\\n#sd-dossier .sd-d-none{font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);margin:0}\\n@media(max-width:700px){#sd-dossier .sd-d-tail{font-size:24px}#sd-dossier .sd-d-sec{padding:9px 10px}}\",\"js\":\"(function(){\\n\\\"use strict\\\";\\nwindow.__sderrs=window.__sderrs||[];\\naddEventListener(\\\"error\\\",function(e){try{window.__sderrs.push(String((e&&e.message)||e))}catch(_){}});\\nfunction byId(id){return document.getElementById(id)}\\nfunction visible(n){if(!n||n.nodeType!==1)return false;if(!n.offsetParent&&getComputedStyle(n).position!==\\\"fixed\\\")return false;var cs=getComputedStyle(n);return cs.display!==\\\"none\\\"&&cs.visibility!==\\\"hidden\\\"}\\nfunction phone(){return matchMedia(\\\"(max-width:760px)\\\").matches}\\nvar READING_TEXT=\\\"Upper fuselage accounts for 84,453 of the 212,940 reports written in the FAA\\\\u2019s numbered zones, or 39.7%. Those numbers are what this diagram can place, and they are 12.1% of the selection. Another 1,454,504 do say where, in words such as FUSELAGE or CABIN rather than a zone number, so the drawing cannot show them. Only 90,383, 5.1%, give no location at all. It is a sample rather than the whole file, but it does give you a good idea of where the trouble sits.\\\";\\nvar SEED_HTML='<span class=\\\"fig\\\">1,757,827</span> reports, everything the FAA has published to 26 August 2026.';\\nvar SHORT_TOTAL=/^1,757,827\\\\s+reports\\\\.?(\\\\s*Nothing chosen yet\\\\.?)?\\\\s*$/;\\nvar NOROWS_HTML='<p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and buries the one you have.</p><p class=\\\"muted\\\">Take a month, a zone, an airline or a tail from the instrument above, pick one of the starter questions, or set a filter. To read the file straight through anyway, use the button at the foot of the instrument.</p><p><button type=\\\"button\\\" class=\\\"sdbtn\\\" id=\\\"revealBtn\\\">Read all 1,757,827 anyway</button> <button type=\\\"button\\\" class=\\\"ghostbtn\\\" id=\\\"gotoStarters\\\">Show me the starter questions</button></p>';\\nfunction sdFiltered(){\\n  var i,x;\\n  var sels=document.querySelectorAll(\\\"#sdControls select\\\");\\n  for(i=0;i<sels.length;i++){if((sels[i].value||\\\"\\\").trim()!==\\\"\\\")return true}\\n  var ins=document.querySelectorAll(\\\"#sdControls input\\\");\\n  for(i=0;i<ins.length;i++){\\n    x=ins[i];\\n    if(x.type===\\\"checkbox\\\"||x.type===\\\"radio\\\"){if(x.checked)return true}\\n    else if((x.value||\\\"\\\").trim()!==\\\"\\\")return true;\\n  }\\n  var tabs=document.querySelectorAll(\\\"#vstrip .vtab.on\\\");\\n  for(i=0;i<tabs.length;i++){if((tabs[i].getAttribute(\\\"data-view\\\")||\\\"p-search\\\")!==\\\"p-search\\\")return true}\\n  return false;\\n}\\nfunction ensureIpad(){\\n  var hero=byId(\\\"hero\\\");if(!hero)return null;\\n  var rails=hero.querySelector(\\\".rails\\\");\\n  if(!rails||!visible(rails)||hero.querySelector(\\\".phbar\\\"))return hero.querySelector(\\\":scope > .ipad\\\")||null;\\n  if(!/\\\\binstrument\\\\b/.test(hero.className||\\\"\\\"))hero.className=(\\\"instrument \\\"+(hero.className||\\\"\\\")).trim();\\n  var kids=[].slice.call(hero.children),i,ipad=null,ihead=null;\\n  for(i=0;i<kids.length;i++){if(/\\\\bipad\\\\b/.test(kids[i].className||\\\"\\\")){ipad=kids[i];break}}\\n  for(i=0;i<kids.length;i++){if(/\\\\bihead\\\\b/.test(kids[i].className||\\\"\\\")){ihead=kids[i];break}}\\n  if(!ipad){\\n    ipad=document.createElement(\\\"div\\\");ipad.className=\\\"ipad\\\";\\n    if(ihead)ihead.after(ipad);else hero.insertBefore(ipad,hero.firstChild);\\n    kids=[].slice.call(hero.children);\\n    for(i=0;i<kids.length;i++){if(kids[i]!==ipad&&kids[i]!==ihead)ipad.appendChild(kids[i])}\\n  }\\n  return ipad;\\n}\\nfunction sdSink(){\\n  var s=byId(\\\"sd-sink\\\");\\n  if(!s){s=document.createElement(\\\"div\\\");s.id=\\\"sd-sink\\\";(document.querySelector(\\\"main.wrap\\\")||document.body).appendChild(s)}\\n  return s;\\n}\\nfunction sdEmpty(c){return !c.textContent.trim()&&!c.children.length}\\nfunction seatCount(){\\n  var all=document.querySelectorAll(\\\"#count\\\");\\n  var c=all[0];\\n  if(!c){\\n    c=document.createElement(\\\"div\\\");c.id=\\\"count\\\";\\n    (document.querySelector(\\\"main.wrap\\\")||document.body).appendChild(c);\\n  }\\n  var i;\\n  for(i=0;i<all.length;i++){if(all[i]!==c&&all[i].parentNode)all[i].parentNode.removeChild(all[i])}\\n  function detach(){if(c.parentNode&&c.parentNode.nodeType===1&&c.parentNode.contains(c))c.parentNode.removeChild(c)}\\n  var hero=byId(\\\"hero\\\");\\n  var railsEl=hero?hero.querySelector(\\\".rails\\\"):null;\\n  var rails=(railsEl&&visible(railsEl))?railsEl:null;\\n  var ph=hero?hero.querySelector(\\\".phbar\\\"):null;\\n  if(ph&&(phone()||!rails)){\\n    if(c.parentNode!==ph){detach();ph.insertBefore(c,ph.firstChild)}\\n  }else if(rails){\\n    var host=rails.parentNode;\\n    if(c.parentNode!==host||c.nextElementSibling!==rails){\\n      detach();\\n      if(rails.parentNode===host)host.insertBefore(c,rails);\\n    }\\n  }\\n  if(!/\\\\bsdcount\\\\b/.test(c.className))c.className=(\\\"sdcount \\\"+c.className).trim();\\n  if(!sdFiltered()){\\n    if(sdEmpty(c)||SHORT_TOTAL.test(c.textContent.trim())){c.dataset.sdSeeded=\\\"1\\\";c.innerHTML=SEED_HTML}\\n  }\\n}\\nfunction retireStand(){\\n  var s=document.querySelector(\\\".ipad .stand\\\");\\n  if(s&&s.parentNode)sdSink().appendChild(s);\\n}\\nfunction ensureReading(){\\n  var rail=document.querySelector(\\\".rail[data-rail=where]\\\");\\n  if(!rail||!rail.parentNode)return;\\n  var rs=[].slice.call(rail.querySelectorAll(\\\".reading\\\")),i,keep=null;\\n  for(i=0;i<rs.length;i++){\\n    if(!keep||rs[i].textContent.trim().length>keep.textContent.trim().length)keep=rs[i];\\n  }\\n  if(keep&&keep.tagName!==\\\"P\\\"){\\n    var p=document.createElement(\\\"p\\\");p.className=\\\"reading\\\";\\n    p.innerHTML=keep.innerHTML;\\n    keep.parentNode.replaceChild(p,keep);keep=p;\\n  }\\n  if(!keep){\\n    keep=document.createElement(\\\"p\\\");keep.className=\\\"reading\\\";\\n    keep.textContent=READING_TEXT;\\n  }\\n  if(keep.parentNode!==rail)rail.appendChild(keep);\\n  [].slice.call(rail.children).forEach(function(n){\\n    if(n===keep)return;\\n    var cn=n.className||\\\"\\\";\\n    if(/\\\\b(gut|track)\\\\b/.test(cn))return;\\n    if(/\\\\breading\\\\b/.test(cn)){\\n      if(!n.textContent.trim())n.remove();\\n      return;\\n    }\\n    n.remove();\\n  });\\n}\\nfunction stripInline(){\\n  var bs=document.querySelectorAll(\\\"#vstrip.vgroups .vgbtns\\\"),i;\\n  for(i=0;i<bs.length;i++){\\n    var b=bs[i];if(b.dataset.sdInl)continue;b.dataset.sdInl=\\\"1\\\";\\n    b.style.margin=\\\"0\\\";b.style.padding=\\\"0\\\";b.style.borderBottom=\\\"0\\\";\\n  }\\n}\\nfunction secondLine(){\\n  var strip=byId(\\\"vstrip\\\");if(!strip)return;\\n  var p=byId(\\\"sd-second\\\");\\n  if(!p){p=document.createElement(\\\"p\\\");p.id=\\\"sd-second\\\";p.className=\\\"sd-second\\\";strip.parentNode.insertBefore(p,strip.nextSibling)}\\n  if(p.dataset.sdDone)return;p.dataset.sdDone=\\\"1\\\";\\n  var fr=byId(\\\"freshness\\\");\\n  p.innerHTML=(fr&&fr.textContent.trim())?fr.textContent.trim():\\\"Counts of reports filed, not of flights.\\\";\\n}\\nfunction ensureSentence(){\\n  var s=byId(\\\"sentence\\\");\\n  if(!s){s=document.createElement(\\\"div\\\");s.id=\\\"sentence\\\";s.hidden=true;(document.querySelector(\\\"main.wrap\\\")||document.body).appendChild(s)}\\n  if(!s.hidden)s.hidden=true;\\n  if(s.style.display!==\\\"none\\\")s.style.display=\\\"none\\\";\\n}\\nfunction ensureNoRows(){\\n  var n=byId(\\\"noRows\\\");if(!n)return;\\n  if(!n.textContent.trim()&&!n.children.length)n.innerHTML=NOROWS_HTML;\\n  if(phone()){\\n    if(n.hasAttribute(\\\"hidden\\\"))n.removeAttribute(\\\"hidden\\\");\\n    if(n.style.display===\\\"none\\\")n.style.display=\\\"\\\";\\n  }\\n}\\n/* sd-tag: mark the record table so its td padding can be tuned */\\nfunction tagTable(){\\n  var w=document.querySelector(\\\".wu\\\");\\n  if(!w)return;\\n  var t=w.closest(\\\"table\\\");\\n  if(t&&!t.classList.contains(\\\"sdtable\\\"))t.classList.add(\\\"sdtable\\\");\\n}\\nvar snap={c:null};\\nfunction sdMirror(){\\n  var s=byId(\\\"sentence\\\"),c=byId(\\\"count\\\");\\n  if(!s||!c||s===c)return;\\n  var cv=c.innerHTML;\\n  if(s.innerHTML!==cv&&snap.c!==null&&snap.c!==cv){\\n    s.innerHTML=cv;\\n  }\\n  snap.c=cv;\\n}\\nfunction purgeLand(){\\n  var ls=document.querySelectorAll(\\\".card.land\\\"),i;\\n  for(i=0;i<ls.length;i++)ls[i].remove();\\n}\\n\\n/* ================= sd-dossier: one airframe, read from the four endpoints ============ */\\nvar SD={tail:null,inflight:null,cache:{}};\\nfunction sdEsc(s){return String(s==null?\\\"\\\":s).replace(/&/g,\\\"&amp;\\\").replace(/</g,\\\"&lt;\\\").replace(/>/g,\\\"&gt;\\\").replace(/\\\"/g,\\\"&quot;\\\")}\\nfunction sdDossierNode(){\\n  var panel=byId(\\\"p-aircraft\\\");if(!panel)return null;\\n  var node=byId(\\\"sd-dossier\\\");\\n  if(!node){\\n    node=document.createElement(\\\"div\\\");node.id=\\\"sd-dossier\\\";\\n    node.setAttribute(\\\"role\\\",\\\"region\\\");node.setAttribute(\\\"aria-label\\\",\\\"Dossier for one aircraft\\\");\\n    var pb=byId(\\\"p-aircraft-body\\\");\\n    if(pb&&pb.parentNode===panel)pb.insertAdjacentElement(\\\"afterend\\\",node);\\n    else panel.appendChild(node);\\n  }\\n  return node;\\n}\\nfunction sdSetVerbatim(node,sel,txt){\\n  var el=node.querySelector(sel);\\n  if(el)el.textContent=(txt==null)?\\\"\\\":String(txt);\\n}\\nfunction sdRender(node,t,raf,rpf,rsm){\\n  var ok=function(r){return r&&r.status===\\\"fulfilled\\\"?r.value:null};\\n  var af=ok(raf),rp=ok(rpf),sm=ok(rsm);\\n  var parts=[];\\n  var found=af?(af.found||0):0;\\n  if(!af||found===0){\\n    parts.push('<div class=\\\"sd-d-head\\\"><span class=\\\"sd-d-tail\\\">'+sdEsc(t)+'</span></div>');\\n    parts.push('<section class=\\\"sd-d-sec\\\"><p class=\\\"sd-d-none\\\">No reports in this file name that tail number.</p>'\\n      +(af&&af.note?'<p class=\\\"sd-d-note\\\">'+sdEsc(af.note)+'</p>':'')\\n      +'<p class=\\\"sd-d-note\\\">Nothing is shown rather than something wrong.</p></section>');\\n    node.innerHTML=parts.join(\\\"\\\");\\n    return;\\n  }\\n  var ac=af.aircraft||{};\\n  var mm=[ac.make,ac.model].filter(Boolean).join(\\\" \\\");\\n  var rec0=(af.records&&af.records[0])||{};\\n  if(!mm&&rec0.make)mm=[rec0.make,rec0.model].filter(Boolean).join(\\\" \\\");\\n  var ops=(af.operators||[]).map(function(o){return (o&&o.name?o.name:\\\"unnamed\\\")+(o&&o.reports?\\\" (\\\"+o.reports+\\\")\\\":\\\"\\\")}).join(\\\", \\\");\\n  parts.push('<div class=\\\"sd-d-head\\\">'\\n    +'<span class=\\\"sd-d-tail\\\">'+sdEsc(af.tail||t)+'</span>'\\n    +(mm?'<span class=\\\"sd-d-make\\\">'+sdEsc(mm)+'</span>':'')\\n    +'<span class=\\\"sd-d-count\\\">'+found+' report'+(found===1?\\\"\\\":\\\"s\\\")+'</span>'\\n    +(af.first||af.last?'<span class=\\\"sd-d-make\\\">first filed '+sdEsc(af.first||\\\"\\\\u2014\\\")+' \\\\u00b7 last filed '+sdEsc(af.last||\\\"\\\\u2014\\\")+'</span>':'')\\n    +'</div>');\\n  var fr=af.framing||{};\\n  parts.push('<section class=\\\"sd-d-sec\\\"><h3>Where the write-ups were made</h3>'\\n    +'<p class=\\\"sd-d-frame\\\" data-sd-frame=\\\"1\\\"></p>'\\n    +'<ul class=\\\"sd-d-split\\\">'\\n    +'<li>on the ground <b>'+sdEsc(fr.on_ground)+'</b> ('+sdEsc(fr.on_ground_pct)+'%)</li>'\\n    +'<li>in flight <b>'+sdEsc(fr.in_flight)+'</b> ('+sdEsc(fr.in_flight_pct)+'%)</li>'\\n    +'<li>of <b>'+sdEsc(fr.total)+'</b> write-ups</li>'\\n    +'</ul></section>');\\n  if(rp&&rp.groups&&rp.groups.length){\\n    var gs=rp.groups.map(function(g){\\n      var sys=g.system?\\\" \\\\u2014 \\\"+sdEsc(g.system):\\\"\\\";\\n      var rec=(g.records&&g.records[0]&&g.records[0].text)\\n        ?'<blockquote class=\\\"sd-d-quote\\\">'+sdEsc(String(g.records[0].text).slice(0,220))+'</blockquote>':\\\"\\\";\\n      return '<div class=\\\"sd-d-rpt\\\"><b>'+sdEsc(g.part||\\\"unnamed part\\\")+'</b>'+sys\\n        +' \\\\u00b7 '+sdEsc(g.times)+' write-up'+(g.times===1?\\\"\\\":\\\"s\\\")\\n        +' \\\\u00b7 first '+sdEsc(g.first)+' \\\\u00b7 last '+sdEsc(g.last)\\n        +' \\\\u00b7 <span class=\\\"sd-d-hrs\\\">'+sdEsc(g.hours_between)+' hours between first and last</span>'+rec+'</div>';\\n    }).join(\\\"\\\");\\n    parts.push('<section class=\\\"sd-d-sec\\\"><h3>What recurred</h3>'\\n      +(rp.note?'<p class=\\\"sd-d-note\\\">'+sdEsc(rp.note)+'</p>':\\\"\\\")+gs+'</section>');\\n  }else{\\n    parts.push('<section class=\\\"sd-d-sec\\\"><h3>What recurred</h3><p class=\\\"sd-d-none\\\">Nothing on this airframe was written up more than once.</p></section>');\\n  }\\n  var gen=!!(sm&&sm.generated===true);\\n  var hasSum=sm&&sm.summary&&String(sm.summary).trim();\\n  var lab=hasSum?(gen?\\\"Written by a model\\\":\\\"Assembled from recounted numbers \\\\u2014 not written by a model\\\"):\\\"Summary not written\\\";\\n  var sumBody=hasSum?'<p class=\\\"sd-d-sum\\\" data-sd-sum=\\\"1\\\"></p>'\\n    :'<p class=\\\"sd-d-none\\\">No summary was written for this tail. That is the check working: nothing is shown rather than something wrong.</p>';\\n  var sumNote=(sm&&sm.note)?'<p class=\\\"sd-d-note\\\">'+sdEsc(sm.note)+'</p>':\\\"\\\";\\n  var sumLim=(sm&&sm.cannot_show&&sm.cannot_show.length)\\n    ?'<ul class=\\\"sd-d-lim\\\">'+sm.cannot_show.map(function(x){return \\\"<li>\\\"+sdEsc(x)+\\\"</li>\\\"}).join(\\\"\\\")+'</ul>':\\\"\\\";\\n  parts.push('<section class=\\\"sd-d-sec\\\"><h3 class=\\\"sd-mine\\\">'+sdEsc(lab)+'</h3>'+sumBody+sumNote+sumLim+'</section>');\\n  var cs=af.cannot_show||[];\\n  parts.push('<section class=\\\"sd-d-sec\\\"><h3>What this file cannot show</h3>'\\n    +(cs.length?'<ul class=\\\"sd-d-lim\\\">'+cs.map(function(x){return \\\"<li>\\\"+sdEsc(x)+\\\"</li>\\\"}).join(\\\"\\\")+'</ul>':\\\"\\\")\\n    +'</section>');\\n  var cit=af.citation||{};\\n  var csvTail=af.tail||t;\\n  parts.push('<section class=\\\"sd-d-sec\\\"><h3>Citation</h3><p class=\\\"sd-d-cite\\\">'\\n    +sdEsc(cit.source||\\\"FAA Service Difficulty Reports\\\")\\n    +(cit.retrieved?\\\" \\\\u00b7 retrieved \\\"+sdEsc(cit.retrieved):\\\"\\\")\\n    +(cit.url?' \\\\u00b7 <a href=\\\"'+sdEsc(cit.url)+'\\\" rel=\\\"noopener\\\">'+sdEsc(cit.url)+'</a>':\\\"\\\")\\n    +(cit.record_ids&&cit.record_ids.length?\\\" \\\\u00b7 \\\"+cit.record_ids.length+\\\" record ids\\\":\\\"\\\")\\n    +'</p><div class=\\\"sd-d-btns\\\"><a class=\\\"sdbtn\\\" id=\\\"sd-d-csv\\\" download=\\\"'+sdEsc(csvTail)+'-sdr.csv\\\" href=\\\"/z/api/export/'+encodeURIComponent(csvTail)+'.csv\\\">Download the CSV for this airframe</a>'\\n    +'<span class=\\\"sd-d-make\\\">The CSV carries its own citation header lines.</span></div></section>');\\n  node.innerHTML=parts.join(\\\"\\\");\\n  sdSetVerbatim(node,\\\"[data-sd-frame]\\\",fr.sentence);\\n  if(hasSum)sdSetVerbatim(node,\\\"[data-sd-sum]\\\",sm.summary);\\n}\\nfunction sdOpenTail(t){\\n  t=String(t||\\\"\\\").trim();if(!t)return;\\n  SD.tail=t;\\n  var tab=document.querySelector('#vstrip .vtab[data-view=\\\"p-aircraft\\\"]');\\n  if(tab)try{tab.click()}catch(_){}\\n  var node=sdDossierNode();if(!node)return;\\n  if(SD.cache[t]){\\n    node.dataset.sdTail=t;node.dataset.sdDone=\\\"1\\\";\\n    var c=SD.cache[t];sdRender(node,t,c[0],c[1],c[2]);return;\\n  }\\n  if(SD.inflight===t)return;\\n  SD.inflight=t;\\n  node.dataset.sdTail=t;node.dataset.sdDone=\\\"\\\";\\n  node.innerHTML='<p class=\\\"sd-d-none\\\">Reading the file\\\\u2026</p>';\\n  var g=function(u){return fetch(\\\"/z/api/\\\"+u).then(function(r){if(!r.ok)throw new Error(\\\"HTTP \\\"+r.status);return r.json()})};\\n  Promise.allSettled([\\n    g(\\\"airframe/\\\"+encodeURIComponent(t)),\\n    g(\\\"repeats/\\\"+encodeURIComponent(t)),\\n    g(\\\"summary/\\\"+encodeURIComponent(t))\\n  ]).then(function(rs){\\n    if(SD.tail!==t)return;\\n    SD.inflight=null;SD.cache[t]=rs;\\n    node.dataset.sdTail=t;node.dataset.sdDone=\\\"1\\\";\\n    sdRender(node,t,rs[0],rs[1],rs[2]);\\n  }).catch(function(){\\n    if(SD.tail!==t)return;\\n    SD.inflight=null;\\n    node.dataset.sdDone=\\\"1\\\";\\n    node.innerHTML='<section class=\\\"sd-d-sec\\\"><p class=\\\"sd-d-none\\\">The dossier did not answer. Nothing is shown rather than something wrong.</p></section>';\\n  });\\n}\\nfunction sdBootFromURL(){\\n  var q=new URLSearchParams(location.search);\\n  var t=q.get(\\\"tail\\\");\\n  if(!t&&q.get(\\\"kind\\\")===\\\"tail\\\")t=q.get(\\\"v\\\");\\n  if(t)sdOpenTail(t);\\n}\\n/* sd-dossier wiring: same mechanism the table uses, [data-ask=\\\"tail|...\\\"] */\\ndocument.addEventListener(\\\"click\\\",function(e){\\n  var el=e.target&&e.target.closest?e.target.closest('[data-ask^=\\\"tail|\\\"]'):null;\\n  if(!el)return;\\n  var v=(el.getAttribute(\\\"data-ask\\\")||\\\"\\\").slice(5);\\n  if(v)sdOpenTail(v);\\n},true);\\ndocument.addEventListener(\\\"keydown\\\",function(e){\\n  if(e.key!==\\\"Enter\\\"&&e.key!==\\\" \\\")return;\\n  var t=e.target;\\n  if(!t||!t.getAttribute)return;\\n  var a=t.getAttribute(\\\"data-ask\\\")||\\\"\\\";\\n  if(a.indexOf(\\\"tail|\\\")===0){var v=a.slice(5);if(v)sdOpenTail(v)}\\n},true);\\naddEventListener(\\\"popstate\\\",function(){try{sdBootFromURL()}catch(_){}});\\nfunction sdDossierKick(){\\n  if(!SD.tail)return;\\n  var node=sdDossierNode();if(!node)return;\\n  if(node.isConnected&&node.dataset.sdTail===SD.tail&&node.dataset.sdDone===\\\"1\\\")return;\\n  var c=SD.cache[SD.tail];\\n  if(c){node.dataset.sdTail=SD.tail;node.dataset.sdDone=\\\"1\\\";sdRender(node,SD.tail,c[0],c[1],c[2])}\\n  else sdOpenTail(SD.tail);\\n}\\n\\nvar queued=false;\\nfunction pass(){\\n  queued=false;\\n  try{purgeLand()}catch(e){}\\n  try{ensureSentence()}catch(e){}\\n  try{ensureIpad()}catch(e){}\\n  try{seatCount()}catch(e){}\\n  try{retireStand()}catch(e){}\\n  try{ensureReading()}catch(e){}\\n  try{ensureNoRows()}catch(e){}\\n  try{stripInline()}catch(e){}\\n  try{secondLine()}catch(e){}\\n  try{tagTable()}catch(e){}\\n  try{sdMirror()}catch(e){}\\n  try{sdDossierKick()}catch(e){}\\n}\\nfunction kick(){if(queued)return;queued=true;requestAnimationFrame(pass)}\\nnew MutationObserver(kick).observe(document.documentElement,{childList:true,subtree:true});\\nif(document.readyState===\\\"loading\\\")document.addEventListener(\\\"DOMContentLoaded\\\",function(){pass();sdBootFromURL()});\\nelse{pass();sdBootFromURL()}\\naddEventListener(\\\"load\\\",pass);\\naddEventListener(\\\"resize\\\",kick);\\n})();\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_a23aecf22e234eb2a2258bc3",
+  "content": "{\"ok\": true, \"note\": \"published to https://aircraftdefects.com/z/\"}"
+ },
+ {
+  "role": "assistant",
+  "content": "Now let me inspect the record table to see what clicked values bind to, and check the operator/part endpoints.",
+  "tool_calls": [
+   {
+    "id": "call_6108508a6364432884f92666",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var rows=[...document.querySelectorAll(\\\"table td, table .wu\\\")].slice(0,40);var clicks=[...document.querySelectorAll('[data-ask]')].slice(0,20).map(n=>({tag:n.tagName,ask:n.getAttribute('data-ask'),cls:n.className,txt:(n.textContent||'').slice(0,30)}));return {clickCount:document.querySelectorAll('[data-ask]').length,clicks,rows:rows.slice(0,8).map(r=>({tag:r.tagName,cls:r.className,html:r.innerHTML.slice(0,200)}))}}\"}"
+    }
+   },
+   {
+    "id": "call_e88d476b71694ebdb90c0914",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{return {clickCount:document.querySelectorAll('[data-ask]').length,clicks:[...document.querySelectorAll('[data-ask]')].slice(0,20).map(n=>({tag:n.tagName,ask:n.getAttribute('data-ask'),cls:n.className,txt:(n.textContent||'').slice(0,30)})),hasLoadTail:typeof window.loadTail}}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_6108508a6364432884f92666",
+  "content": "{\"value\": {\"clickCount\": 0, \"clicks\": [], \"rows\": []}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_e88d476b71694ebdb90c0914",
+  "content": "{\"value\": {\"clickCount\": 0, \"clicks\": [], \"hasLoadTail\": \"function\"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "The original has `loadTail` as a global. Let me find what elements trigger it and how rows are built.",
+  "tool_calls": [
+   {
+    "id": "call_568af406c86f4e74b6e0be31",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var fn=window.loadTail.toString().slice(0,600);return {loadTail:fn,scripts:[...document.scripts].map(s=>s.src).filter(Boolean).slice(0,10)}}\"}"
+    }
+   },
+   {
+    "id": "call_9a049540805247afb9b6ea8b",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var wu=document.querySelector('.wu');return {wuHtml:wu?wu.outerHTML.slice(0,1500):null,tables:document.querySelectorAll('table').length}}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_568af406c86f4e74b6e0be31",
+  "content": "{\"value\": {\"loadTail\": \"async function loadTail(t){\\n  t=String(t||\\\"\\\").trim().toUpperCase().replace(/[^A-Z0-9]/g,\\\"\\\");\\n  if(!t)return; show(\\\"p-aircraft\\\"); el(\\\"tail-in\\\").value=t;\\n  if(!popping&&booted){\\n    const u=new URLSearchParams(location.search); u.set(\\\"view\\\",\\\"aircraft\\\"); u.set(\\\"aircraft\\\",t);\\n    if(u.toString()!==location.search.slice(1))history.pushState(null,\\\"\\\",\\\"?\\\"+u.toString());\\n  }\\n  let r;\\n  try{ r=await(await fetch(\\\"api/aircraft/\\\"+encodeURIComponent(t))).json(); }\\n  catch(e){ el(\\\"tail-out\\\").innerHTML='<p class=\\\"muted\\\">No aircraft in these ${num(TOTAL)} reports matches that tail number.</p>'; return; }\\n  if(\", \"scripts\": []}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_9a049540805247afb9b6ea8b",
+  "content": "{\"value\": {\"wuHtml\": null, \"tables\": 13}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_f3c3ee36429d447d8831fcfe",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var t=document.querySelector('table');var ps=[...document.querySelectorAll('section.panel')].map(p=>({id:p.id,html:p.innerHTML.length}));return {panels:ps,tables:document.querySelectorAll('table').length,firstTable:t?t.outerHTML.slice(0,1200):null}}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_f3c3ee36429d447d8831fcfe",
+  "content": "{\"value\": {\"panels\": [{\"id\": \"p-search\", \"html\": 336555}, {\"id\": \"p-patterns\", \"html\": 872}, {\"id\": \"p-aircraft\", \"html\": 429}, {\"id\": \"p-found\", \"html\": 722}, {\"id\": \"p-fleet\", \"html\": 554}, {\"id\": \"p-leads\", \"html\": 507}, {\"id\": \"p-emerging\", \"html\": 514}, {\"id\": \"p-clusters\", \"html\": 542}, {\"id\": \"p-defect\", \"html\": 397}, {\"id\": \"p-structure\", \"html\": 585}, {\"id\": \"p-age\", \"html\": 812}, {\"id\": \"p-engines\", \"html\": 459}, {\"id\": \"p-consequences\", \"html\": 481}, {\"id\": \"p-compare\", \"html\": 434}, {\"id\": \"p-terms\", \"html\": 232}, {\"id\": \"p-method\", \"html\": 200}], \"tables\": 0, \"firstTable\": null}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_71503246a3044e1f8c4622bd",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var s=document.getElementById('p-search');return {noRows:!!document.getElementById('noRows'),noRowsHidden:document.getElementById('noRows')?document.getElementById('noRows').hidden:null,rows:[...document.querySelectorAll('#p-search [data-rec]')].length,rowSample:(s.querySelector('.rec,.row,[data-rec],li,article')||{outerHTML:'none'}).outerHTML.slice(0,1500)}}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_71503246a3044e1f8c4622bd",
+  "content": "{\"value\": {\"noRows\": true, \"noRowsHidden\": false, \"rows\": 0, \"rowSample\": \"none\"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_8f52b0469732467ca63d0a89",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var n=document.getElementById('noRows');var html=n?n.innerHTML:null;var b=document.getElementById('revealBtn');if(b)b.click();return {clicked:!!b,html:html&&html.slice(0,300)}}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_8f52b0469732467ca63d0a89",
+  "content": "{\"value\": {\"clicked\": true, \"html\": \"<p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and buries the one you have.</p><p class=\\\"muted\\\">Take a month, a zone, an airline or a tail from the instrument above, pick one of the starter questions, or set a filter. To read the file straight through anyway, use\"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_4826af2dfe1c41ee89f3c724",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var t=document.querySelector('.wu');return {wuCount:document.querySelectorAll('.wu').length,wuHtml:t?t.outerHTML.slice(0,900):null,tailClickables:[...document.querySelectorAll('[data-ask^=\\\"tail\\\"]')].length,anyDataAsk:document.querySelectorAll('[data-ask]').length}}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_4826af2dfe1c41ee89f3c724",
+  "content": "{\"value\": {\"wuCount\": 0, \"wuHtml\": null, \"tailClickables\": 0, \"anyDataAsk\": 0}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_5bfda85db7f44ae9a027ce02",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var n=document.getElementById('noRows');return {noRowsExists:!!n,hidden:n?n.hidden:null,display:n?getComputedStyle(n).display:null,rows:document.querySelectorAll('.wu').length,bodyLen:document.body.innerHTML.length}}\",\"width\":390}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_5bfda85db7f44ae9a027ce02",
+  "content": "{\"value\": {\"noRowsExists\": true, \"hidden\": false, \"display\": \"block\", \"rows\": 0, \"bodyLen\": 889340}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_0f90b9785f364f89b9ca22eb",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var ps=[...document.querySelectorAll('#p-search *')].filter(n=>n.children.length===0&&n.textContent.trim().length>20).slice(0,10);return {textContent:document.getElementById('p-search').textContent.slice(0,400)}}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_0f90b9785f364f89b9ca22eb",
+  "content": "{\"value\": {\"textContent\": \"\\n  \\n  \\n    \\n      Text\\n      \\n      \\n    \\n    \\n      Operator\\n      Any operatorSouthwest Airlines Co (SWAA)American Airlines Inc (AALA)Delta Air Lines Inc (DALA)Federal Express Corp (FDEA)United Parcel Service Co (IPXA)Skywest Airlines Inc (SWIA)Continental Airlines Inc (CALA)Alaska Airlines Inc (ASAA)Us Airways Inc (USAA)United Air Lines Inc (UALA)Horizon Air Industries Inc (QXEA)American Eagle \"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_fc3f4d16a8b848d688f4f7c1",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var ps=[...document.querySelectorAll('#p-search > *')].map(n=>({tag:n.tagName,id:n.id,cls:n.className,hidden:n.hidden,disp:getComputedStyle(n).display,htmlLen:n.innerHTML.length}));return ps}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_fc3f4d16a8b848d688f4f7c1",
+  "content": "{\"value\": [{\"tag\": \"DIV\", \"id\": \"sdControls\", \"cls\": \"\", \"hidden\": false, \"disp\": \"block\", \"htmlLen\": 335120}, {\"tag\": \"SECTION\", \"id\": \"rr-sec\", \"cls\": \"\", \"hidden\": false, \"disp\": \"block\", \"htmlLen\": 1330}]}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_9398e40e75ae434aaa75fb10",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var c=document.getElementById('sdControls');return {kids:[...c.children].map(n=>({tag:n.tagName,id:n.id,cls:n.className,hidden:n.hidden,disp:getComputedStyle(n).display,len:n.innerHTML.length})),rr:[...document.getElementById('rr-sec').children].map(n=>({tag:n.tagName,id:n.id,cls:n.className,len:n.innerHTML.length}))}}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_9398e40e75ae434aaa75fb10",
+  "content": "{\"value\": {\"kids\": [{\"tag\": \"DIV\", \"id\": \"iAim\", \"cls\": \"aim\", \"hidden\": false, \"disp\": \"block\", \"len\": 0}, {\"tag\": \"DIV\", \"id\": \"\", \"cls\": \"bar\", \"hidden\": false, \"disp\": \"flex\", \"len\": 165017}, {\"tag\": \"DETAILS\", \"id\": \"moreFilters\", \"cls\": \"\", \"hidden\": false, \"disp\": \"block\", \"len\": 167629}, {\"tag\": \"DIV\", \"id\": \"starters\", \"cls\": \"\", \"hidden\": false, \"disp\": \"flex\", \"len\": 1097}, {\"tag\": \"BUTTON\", \"id\": \"starterToggle\", \"cls\": \"ghostbtn\", \"hidden\": false, \"disp\": \"inline-block\", \"len\": 17}, {\"tag\": \"DIV\", \"id\": \"unresolved\", \"cls\": \"unresolved\", \"hidden\": true, \"disp\": \"none\", \"len\": 0}, {\"tag\": \"DIV\", \"id\": \"chips\", \"cls\": \"chips\", \"hidden\": false, \"disp\": \"none\", \"len\": 0}, {\"tag\": \"DIV\", \"id\": \"sentence\", \"cls\": \"sdsentence\", \"hidden\": true, \"disp\": \"none\", \"len\": 95}, {\"tag\": \"DIV\", \"id\": \"\", \"cls\": \"actions\", \"hidden\": false, \"disp\": \"flex\", \"len\": 215}, {\"tag\": \"DIV\", \"id\": \"noRows\", \"cls\": \"norows\", \"hidden\": false, \"disp\": \"block\", \"len\": 534}], \"rr\": [{\"tag\": \"DIV\", \"id\": \"\", \"cls\": \"cut\", \"len\": 367}, {\"tag\": \"P\", \"id\": \"rr-count\", \"cls\": \"rr-count rv-sentence\", \"len\": 40}, {\"tag\": \"DIV\", \"id\": \"\", \"cls\": \"rv-aim\", \"len\": 371}, {\"tag\": \"DIV\", \"id\": \"rr-sameday\", \"cls\": \"rr-note\", \"len\": 0}, {\"tag\": \"P\", \"id\": \"rr-swipe\", \"cls\": \"rr-hint\", \"len\": 138}, {\"tag\": \"DIV\", \"id\": \"rr-scroll\", \"cls\": \"rr-scroll\", \"len\": 0}, {\"tag\": \"DIV\", \"id\": \"\", \"cls\": \"rr-more\", \"len\": 101}]}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_bc157d4d161e464f9243a09d",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var names=Object.getOwnPropertyNames(window).filter(n=>/^load|^show|^render/i.test(n));return {names,found:document.getElementById('p-found')?document.getElementById('p-found').outerHTML.slice(0,800):null}}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_bc157d4d161e464f9243a09d",
+  "content": "{\"value\": {\"names\": [\"showDirectoryPicker\", \"showOpenFilePicker\", \"showSaveFilePicker\", \"showFreshness\", \"renderTabs\", \"show\", \"showStarters\", \"showChange\", \"renderTail\", \"loadPatterns\", \"loadTail\", \"loadOffenders\", \"loadLeads\", \"loadSpikes\", \"loadDefects\", \"loadCompare\", \"loadHero\", \"loadFleet\", \"loadEmerging\", \"loadClusters\", \"loadStructure\", \"loadAgeing\", \"loadEngines\", \"loadConsequences\", \"loadFound\", \"loadPhrases\", \"renderTerms\"], \"found\": \"<div class=\\\"panel\\\" id=\\\"p-found\\\">\\n  <div class=\\\"scope\\\"></div>\\n  <h1>How was it found?</h1>\\n  <p class=\\\"lede\\\">A crack found by eddy current or X-ray was invisible from the outside. One found\\n  by eye was not. Splitting a system's findings by method tells you whether trouble is being caught\\n  by instruments before anyone could see it, or noticed only once it showed. Not every report falls\\n  either way: functional checks and unrecorded methods make up a large share, and they are listed too.</p>\\n  <p class=\\\"muted\\\">This follows whatever you have filtered on the Search tab.</p>\\n  <div id=\\\"found\\\"></div>\\n</div>\"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_9c4e4bd478e846999ce15ce1",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var src=window.loadTail.toString();var src2=window.renderTail.toString().slice(0,800);var hits=[];document.querySelectorAll('script').forEach(s=>{if(s.textContent&&s.textContent.includes('loadTail(')){hits.push(s.textContent.indexOf('loadTail('))}});return {renderTail:src2,hits,inlineScripts:document.querySelectorAll('script:not([src])').length}}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_9c4e4bd478e846999ce15ce1",
+  "content": "{\"value\": {\"renderTail\": \"function renderTail(){ markClipped(); gridify(); syncSwipeHint(); markHits(); rove(); }\", \"hits\": [25975], \"inlineScripts\": 1}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_a146536fab9940d0828fb54f",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var s=document.querySelectorAll('script:not([src])')[0].textContent;var i=s.indexOf('loadTail(');return {ctx:s.slice(Math.max(0,i-400),i+200)}}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_a146536fab9940d0828fb54f",
+  "content": "{\"value\": {\"ctx\": \"peratorDesignator)}</span>`\\n      : `<span class=\\\"absent term\\\" ${jt(NO_OPERATOR)}>no operator named</span>`}</td>\\n    <td><span class=\\\"c\\\" data-x=\\\"aircraft|${esc(x.AircraftMake)}|${esc(x.AircraftModel)}\\\" onclick=\\\"setFilter('model','${esc(x.AircraftModel)}')\\\">${esc(x.AircraftMake)} ${esc(x.AircraftModel)}</span></td>\\n    <td><span class=\\\"c\\\" data-x=\\\"tail|${esc(x.RegistryNNumber)}|${esc(d)}\\\" onclick=\\\"loadTail('${esc(x.RegistryNNumber)}')\\\">N${esc(x.RegistryNNumber)}</span></td>\\n    <td><span class=\\\"c\\\" data-x=\\\"jasc|${esc(j.code||\\\"\\\")}\\\" onclick=\\\"setFilter('jasc','${esc(j.code||\\\"\\\")}')\\\">${esc(j.label||x\"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "The rows use `data-x=\"tail|...\"` spans with inline `onclick=\"loadTail('...')\"`. Let me see the operator and part cells in the same template.",
+  "tool_calls": [
+   {
+    "id": "call_adcb7b9c2a0c42f4b9cbc7a6",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>{var s=document.querySelectorAll('script:not([src])')[0].textContent;var i=s.indexOf('data-x=\\\"tail|');return {before:s.slice(Math.max(0,i-1400),i),after:s.slice(i,i+900)}}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_adcb7b9c2a0c42f4b9cbc7a6",
+  "content": "{\"value\": {\"before\": \"\\\"tscroll\\\"><table class=\\\"reports\\\">`+headRow;\\n  LASTMONTH=null;\\n  const body=r.rows.map((x,i)=>{\\n    const j=x._jasc||{}, ch=j.chapter||\\\"\\\", d=(x.DifficultyDate||\\\"\\\").slice(0,10);\\n    const opLab=opName(x.OperatorDesignator);\\n    const zoneKey=(x.PartLocation||\\\"\\\").toUpperCase().match(/^ZONE \\\\d00/);\\n    const dp=(x.DifficultyDate||\\\"\\\").split(\\\"/\\\");\\n    const mKey=dp.length===3?`${dp[2]}-${dp[0].padStart(2,\\\"0\\\")}`:\\\"\\\";\\n    const spine=(mKey&&mKey!==LASTMONTH)?(LASTMONTH=mKey,\\n      `<tr class=\\\"spine\\\" data-spine=\\\"${esc(mKey)}\\\"><td colspan=\\\"11\\\">\\n        <span>${esc(monthName(mKey))}</span>\\n        <b class=\\\"spinen\\\"></b>\\n      </td></tr>`):\\\"\\\";\\n    return `${i&&i%25===0?headRow:\\\"\\\"}${spine}\\n    <tr class=\\\"rep\\\" data-month=\\\"${esc(mKey)}\\\" data-zone=\\\"${zoneKey?zoneKey[0]:\\\"\\\"}\\\">\\n    <td>${esc(ukDate(x.DifficultyDate))}<div class=\\\"muted\\\">N${esc(x.RegistryNNumber)||\\\"&mdash;\\\"}</div></td>\\n    <td>${x.OperatorDesignator\\n      ? `<span class=\\\"c\\\" data-x=\\\"operator|${esc(x.OperatorDesignator)}\\\" onclick=\\\"setFilter('operator','${esc(x.OperatorDesignator)}')\\\">${esc(opLab||x.OperatorDesignator)}</span>`\\n      : `<span class=\\\"absent term\\\" ${jt(NO_OPERATOR)}>no operator named</span>`}</td>\\n    <td><span class=\\\"c\\\" data-x=\\\"aircraft|${esc(x.AircraftMake)}|${esc(x.AircraftModel)}\\\" onclick=\\\"setFilter('model','${esc(x.AircraftModel)}')\\\">${esc(x.AircraftMake)} ${esc(x.AircraftModel)}</span></td>\\n    <td><span class=\\\"c\\\" \", \"after\": \"data-x=\\\"tail|${esc(x.RegistryNNumber)}|${esc(d)}\\\" onclick=\\\"loadTail('${esc(x.RegistryNNumber)}')\\\">N${esc(x.RegistryNNumber)}</span></td>\\n    <td><span class=\\\"c\\\" data-x=\\\"jasc|${esc(j.code||\\\"\\\")}\\\" onclick=\\\"setFilter('jasc','${esc(j.code||\\\"\\\")}')\\\">${esc(j.label||x.JASCCode)}</span>\\n        <div class=\\\"muted c\\\" onclick=\\\"setFilter('ata','${ch}')\\\">ch. ${ch}</div></td>\\n    <td><span class=\\\"c\\\" data-x=\\\"part|${esc(x.PartName)}|${esc(x.PartMake||\\\"\\\")}\\\" onclick=\\\"setFilter('part','${esc(x.PartName)}')\\\">${esc(x.PartName)}</span>\\n        <div class=\\\"muted\\\">${esc(x.PartCondition)}</div></td>\\n    <td>${cc(\\\"nature\\\",x.NatureOfConditionA,\\\"nature\\\")}\\n        ${x.CorrosionLevel?`<div>${cc(\\\"corrosion\\\",x.CorrosionLevel,\\\"corrosion\\\")}</div>`:\\\"\\\"}\\n        ${x.NumberOfCracks?`<div class=\\\"muted\\\">${esc(x.NumberOfCracks)} cracks</div>`:\\\"\\\"}</td>\\n    <td>${crewCell(x)}</td>\\n    <td>${cc(\\\"discovered\\\",x.HowDiscoveredCode,\\\"disc\"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "Now I understand the bindings. Let me check the state of the record table after that reveal click.",
+  "tool_calls": [
+   {
+    "id": "call_198e7f057d36415c839b6cb4",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{return {wu:document.querySelectorAll('.wu').length,reps:document.querySelectorAll('tr.rep').length,tails:document.querySelectorAll('[data-x^=\\\"tail|\\\"]').length,ops:document.querySelectorAll('[data-x^=\\\"operator|\\\"]').length,parts:document.querySelectorAll('[data-x^=\\\"part|\\\"]').length,noRows:!!document.getElementById('noRows'),chips:document.getElementById('chips')?document.getElementById('chips').innerHTML.slice(0,200):null}}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_198e7f057d36415c839b6cb4",
+  "content": "{\"value\": {\"wu\": 0, \"reps\": 0, \"tails\": 0, \"ops\": 0, \"parts\": 0, \"noRows\": true, \"chips\": \"\"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_2c6778cca98b4a678579dd2d",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var n=document.getElementById('noRows');var b=document.getElementById('revealBtn');var out={noRowsHtml:n?n.innerHTML.slice(0,200):null,btn:!!b};if(b){b.click();out.afterClick={btnExists:!!document.getElementById('revealBtn'),noRowsHtml:document.getElementById('noRows')?document.getElementById('noRows').innerHTML.slice(0,120):null,reps:document.querySelectorAll('tr.rep').length}}return out}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_2c6778cca98b4a678579dd2d",
+  "content": "{\"value\": {\"noRowsHtml\": \"<p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and buries the one you have.</p><p class=\\\"muted\\\">Take a month, a zone, an airline or a tail from the instrument abov\", \"btn\": true, \"afterClick\": {\"btnExists\": true, \"noRowsHtml\": \"<p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and buries the one you have.</p><p c\", \"reps\": 0}}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_279f6c8004694ab99e2b90eb",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>new Promise(res=>{var b=document.getElementById('revealBtn');if(b)b.click();setTimeout(()=>res({reps:document.querySelectorAll('tr.rep').length,tails:document.querySelectorAll('[data-x^=\\\"tail|\\\"]').length,noRowsGone:!document.getElementById('noRows'),chips:document.getElementById('chips').innerHTML.slice(0,300)}),2500)})\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_279f6c8004694ab99e2b90eb",
+  "content": "{\"value\": {\"reps\": 100, \"tails\": 0, \"noRowsGone\": false, \"chips\": \"\"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_62566905db7a423583ea15b7",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>{var r=document.querySelector('tr.rep');return {repHtml:r?r.outerHTML.slice(0,1600):null,parents:document.querySelectorAll('tr.rep')[0]?document.querySelectorAll('tr.rep')[0].closest('section,div,panel').id:null}}\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_62566905db7a423583ea15b7",
+  "content": "{\"value\": {\"repHtml\": null, \"parents\": null}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_15af70df03f140c98bbee4fe",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>new Promise(res=>{setTimeout(()=>{var r=document.querySelector('tr.rep');res({reps:document.querySelectorAll('tr.rep').length,repHtml:r?r.outerHTML.slice(0,1400):null,where:r?r.closest('[id]').id:null})},1500)})\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_15af70df03f140c98bbee4fe",
+  "content": "{\"value\": {\"reps\": 0, \"repHtml\": null, \"where\": null}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_767542c7cb464f499f397a06",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>new Promise(res=>{var b=document.getElementById('revealBtn');if(b)b.click();setTimeout(()=>{var r=document.querySelector('tr.rep');res({reps:document.querySelectorAll('tr.rep').length,repHtml:r?r.outerHTML.slice(0,1600):null})},4000)})\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_767542c7cb464f499f397a06",
+  "content": "{\"value\": {\"reps\": 100, \"repHtml\": \"<tr class=\\\"rep\\\" data-month=\\\"2026-08\\\" data-zone=\\\"\\\" role=\\\"row\\\"><td role=\\\"gridcell\\\">26 August 2026<span class=\\\"sub\\\">N\\u2014</span></td><td role=\\\"gridcell\\\"><span class=\\\"c\\\" onclick=\\\"setFilter('operator','QR9R')\\\" tabindex=\\\"0\\\" role=\\\"button\\\">QR9R</span></td><td role=\\\"gridcell\\\"><span class=\\\"c\\\" onclick=\\\"setFilter('model','BK117C2')\\\" tabindex=\\\"-1\\\" role=\\\"button\\\">BOLKMS BK117C2</span></td><td role=\\\"gridcell\\\"><span class=\\\"absent\\\">no N-number</span></td><td role=\\\"gridcell\\\"><span class=\\\"jasc c\\\" onclick=\\\"setFilter('jasc','2421')\\\" tabindex=\\\"-1\\\" role=\\\"button\\\">AC Generator-Alternator</span></td><td role=\\\"gridcell\\\"><span class=\\\"c\\\" onclick=\\\"setFilter('part','SENSOR')\\\" tabindex=\\\"-1\\\" role=\\\"button\\\">SENSOR</span><span class=\\\"sub\\\">OUT OF LIMITS</span></td><td role=\\\"gridcell\\\"><span class=\\\"term c\\\" data-t=\\\"F\\\" data-label=\\\"Flight controls affected\\\" data-tip=\\\"FAA wording: FLT CONT AFFECTED\\\" onclick=\\\"setFilter('nature','F')\\\" tabindex=\\\"-1\\\" role=\\\"button\\\">Flight controls affected</span></td><td role=\\\"gridcell\\\"><span class=\\\"term c\\\" data-t=\\\"D\\\" data-label=\\\"Returned to the gate\\\" data-tip=\\\"FAA wording: RETURN TO BLOCK\\\" onclick=\\\"setFilter('crew','D')\\\" tabindex=\\\"-1\\\" role=\\\"button\\\">Returned to the gate</span></td><td role=\\\"gridcell\\\"><span class=\\\"c dull\\\" onclick=\\\"setFilter('discovered','O')\\\" tabindex=\\\"-1\\\" role=\\\"button\\\">Other</span></td><td class=\\\"muted\\\" role=\\\"gridcell\\\"><span class=\\\"term c\\\" data-t=\\\"TX\\\" data-label=\\\"Taxiing or ground handling\\\" data-tip=\\\"FAA wording: TAXI/GRND HDL\\\" onclick=\\\"setFilter('stage','TX')\\\" tabindex=\\\"-1\\\" role=\\\"button\\\">Taxiing or ground handling</span></td><td role=\\\"gridcell\\\"><button class=\\\"ghost\\\" type=\\\"b\"}}"
+ },
+ {
+  "role": "assistant",
+  "content": "Rows render after the reveal click. Let me see the tail cell and the write-up cell in the rebuild.",
+  "tool_calls": [
+   {
+    "id": "call_3017dcd7419b4cabaf530d97",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>new Promise(res=>{var b=document.getElementById('revealBtn');if(b)b.click();setTimeout(()=>{var tails=[...document.querySelectorAll('tr.rep')].map(r=>r.cells[3]).slice(0,6).map(td=>td.outerHTML);var wu=document.querySelector('.wu');var op=document.querySelector('tr.rep td:nth-child(2)');res({tails,wu:wu?wu.outerHTML.slice(0,900):null,op:op?op.outerHTML.slice(0,300):null,reps:document.querySelectorAll('tr.rep').length})},4000)})\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_3017dcd7419b4cabaf530d97",
+  "content": "{\"value\": {\"tails\": [\"<td role=\\\"gridcell\\\"><span class=\\\"absent\\\">no N-number</span></td>\", \"<td role=\\\"gridcell\\\"><span class=\\\"absent\\\">no N-number</span></td>\", \"<td role=\\\"gridcell\\\"><span class=\\\"absent\\\">no N-number</span></td>\", \"<td role=\\\"gridcell\\\"><span class=\\\"c\\\" onclick=\\\"rrTail('617FE')\\\" tabindex=\\\"-1\\\" role=\\\"button\\\">N617FE</span></td>\", \"<td role=\\\"gridcell\\\"><span class=\\\"c\\\" onclick=\\\"rrTail('842FD')\\\" tabindex=\\\"-1\\\" role=\\\"button\\\">N842FD</span></td>\", \"<td role=\\\"gridcell\\\"><span class=\\\"c\\\" onclick=\\\"rrTail('840FD')\\\" tabindex=\\\"-1\\\" role=\\\"button\\\">N840FD</span></td>\"], \"wu\": \"<div class=\\\"wu clip\\\" onclick=\\\"rrWuToggle(this)\\\" tabindex=\\\"-1\\\" role=\\\"button\\\"><div class=\\\"txt\\\" id=\\\"wu-txt-1\\\"><span>GEN AMP DIFFERENCE OF 25 AMPS DURING PRE TAKEOFF CHECKS, ENGINES AT FLIGHT. AVIONICS TROUBLESHOT, BUT PROBLEM REMAINED, #2 GEN AMPS READING 25 AMPS LOW. REMOVED AND REPLACED #2 HALL SENSOR IAW <span class=\\\"term\\\" data-t=\\\"amm\\\">AMM</span> 24-30-00, 4-6.</span></div><div class=\\\"wu-gloss\\\"><button type=\\\"button\\\" data-rv-moved=\\\"1\\\">Say it in plain English</button></div></div>\", \"op\": \"<td role=\\\"gridcell\\\"><span class=\\\"c\\\" onclick=\\\"setFilter('operator','QR9R')\\\" tabindex=\\\"0\\\" role=\\\"button\\\">QR9R</span></td>\", \"reps\": 100}}"
+ },
+ {
+  "role": "assistant",
+  "content": "The rebuild binds `rrTail` (not `loadTail`). Let me click a tail cell and see what happens to `#p-aircraft`, and probe the two new endpoints.",
+  "tool_calls": [
+   {
+    "id": "call_8fa9bbf1e4ee4a92b7a961ba",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>new Promise(res=>{var b=document.getElementById('revealBtn');if(b)b.click();setTimeout(()=>{var cell=[...document.querySelectorAll('tr.rep')].map(r=>r.cells[3]).find(td=>td.querySelector('.c'));var tail=cell.querySelector('.c').textContent.replace(/^N/,'');cell.querySelector('.c').click();setTimeout(()=>{var p=document.getElementById('p-aircraft');res({tail,pHtml:p?p.innerHTML.slice(0,1200):null,pVisible:p?getComputedStyle(p).display:null,errs:window.__sderrs,hiddenPanels:[...document.querySelectorAll('section.panel')].filter(x=>x.hidden).map(x=>x.id).slice(0,5)})},1200)},4000)})\"}"
+    }
+   },
+   {
+    "id": "call_3b9c051bccc541a3b3d7af55",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>fetch('/z/api/operator/CALA').then(r=>r.json()).then(j=>({keys:Object.keys(j),name_known:j.name_known,name:j.name,name_note:j.name_note,total:j.total,shown:j.shown,systemsCount:(j.systems||[]).length,recordsCount:(j.records||[]).length,cannotShow:j.cannot_show,sample:j.systems&&j.systems[0],rec0:j.records&&j.records[0]})).catch(e=>String(e))\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_8fa9bbf1e4ee4a92b7a961ba",
+  "content": "{\"value\": {\"tail\": \"617FE\", \"pHtml\": \"<div class=\\\"scope\\\" data-scope=\\\"p-aircraft\\\"></div><h2>Aircraft</h2><p class=\\\"sdrs-guidance\\\" data-sdrs-note=\\\"aircraft\\\">Type a tail number here, or click one anywhere else in the tool, and the entire selection narrows to that airframe.</p><p class=\\\"psub\\\">One airframe, read from the whole file whatever you have selected, and the aircraft that pile up reports inside your selection.</p><div class=\\\"pbody\\\" id=\\\"p-aircraft-body\\\"></div>\", \"pVisible\": \"none\", \"errs\": [\"Uncaught ReferenceError: loadTail is not defined\"], \"hiddenPanels\": [\"p-patterns\", \"p-aircraft\", \"p-found\", \"p-fleet\", \"p-leads\"]}, \"pageErrors\": [\"loadTail is not defined\"]}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_3b9c051bccc541a3b3d7af55",
+  "content": "{\"value\": {\"keys\": [\"cannot_show\", \"code\", \"name\", \"name_known\", \"name_note\", \"records\", \"shown\", \"systems\", \"total\"], \"name_known\": true, \"name\": \"Continental Airlines Inc\", \"name_note\": null, \"total\": 65959, \"shown\": 200, \"systemsCount\": 12, \"recordsCount\": 60, \"cannotShow\": [\"This is a count of reports filed, not a rate and not a ranking. Airframe hours are in the file, fleet flying hours are not, and the only aircraft with hours here are the ones that filed something. So no comparison between operators is possible. An operator that files more may simply be inspecting harder.\"], \"sample\": {\"n\": 53, \"name\": \"Emergency Lighting\"}, \"rec0\": {\"condition\": \"INOPERATIVE\", \"corrosion\": null, \"crack_length\": null, \"cracks\": null, \"crew\": [], \"cycles\": \"18282\", \"date\": \"08/25/2026\", \"discovered\": \"Someone looked at it\", \"hours\": \"92465\", \"id\": \"CALA2026082618923\", \"make\": \"BOEING\", \"model\": \"767322\", \"nature\": [\"Other\"], \"operator\": \"Continental Airlines Inc\", \"operator_code\": \"CALA\", \"part\": \"LAMP\", \"part_number\": \"1317\", \"stage\": \"On the ground, in inspection or maintenance\", \"system\": \"Emergency Lighting\", \"system_code\": \"3350\", \"tail\": \"672UA\", \"text\": \"SEAT 43AB CEILING EMERGENCY LIGHT INOPERATIVE.  REPLACED THE LAMPS,  OPS CHECK CARRIED OUT GOOD IAW AMM 33-51-04-002-001.\", \"zone\": \"ZONE 200\", \"zone_label\": \"Upper fuselage\"}}}"
+ },
+ {
+  "role": "assistant",
+  "content": "Confirmed: rebuild binds `rrTail`, which errors. Let me probe the endpoints more \u2014 a `name_known:false` operator, the part endpoint, and where record IDs live in rows.",
+  "tool_calls": [
+   {
+    "id": "call_fb9c4d2c2709461cbe3a2c2f",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>fetch('/z/api/operator/QR9R').then(r=>r.json()).then(j=>({code:j.code,name_known:j.name_known,name:j.name,name_note:j.name_note,total:j.total,shown:j.shown,systemsCount:(j.systems||[]).length,recordsCount:(j.records||[]).length,cannotShow:j.cannot_show,rec0keys:j.records&&j.records[0]?Object.keys(j.records[0]):null})).catch(e=>String(e))\"}"
+    }
+   },
+   {
+    "id": "call_05726db47b9b4f9785437712",
+    "type": "function",
+    "function": {
+     "name": "parent",
+     "arguments": "{\"js\":\"()=>fetch('/z/api/part/1317').then(r=>r.json()).then(j=>({keys:Object.keys(j),part:j.part,total:j.total,shown:j.shown,aircraft:j.aircraft,operators:j.operators,byOpSample:j.by_operator&&j.by_operator[0],byYearSample:j.by_year&&j.by_year[0],byOpLen:(j.by_operator||[]).length,byYearLen:(j.by_year||[]).length,recCount:(j.records||[]).length,cannotShow:j.cannot_show})).catch(e=>String(e))\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_fb9c4d2c2709461cbe3a2c2f",
+  "content": "{\"value\": {\"code\": \"QR9R\", \"name_known\": false, \"name\": null, \"name_note\": \"This designator resolves to no name. 2,732 of the 3,945 designators in this file do not, because the FAA lists that name them do not reach back far enough, or the carrier was never on them. The reports are real; the name is missing.\", \"total\": 922, \"shown\": 200, \"systemsCount\": 12, \"recordsCount\": 60, \"cannotShow\": [\"This is a count of reports filed, not a rate and not a ranking. Airframe hours are in the file, fleet flying hours are not, and the only aircraft with hours here are the ones that filed something. So no comparison between operators is possible. An operator that files more may simply be inspecting harder.\"], \"rec0keys\": [\"condition\", \"corrosion\", \"crack_length\", \"cracks\", \"crew\", \"cycles\", \"date\", \"discovered\", \"hours\", \"id\", \"make\", \"model\", \"nature\", \"operator\", \"operator_code\", \"part\", \"part_number\", \"stage\", \"system\", \"system_code\", \"tail\", \"text\", \"zone\", \"zone_label\"]}}"
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_05726db47b9b4f9785437712",
+  "content": "{\"value\": {\"keys\": [\"aircraft\", \"by_operator\", \"by_year\", \"cannot_show\", \"operators\", \"part\", \"records\", \"shown\", \"total\"], \"part\": \"1317\", \"total\": 0, \"shown\": 0, \"aircraft\": 0, \"operators\": 0, \"byOpSample\": null, \"byYearSample\": null, \"byOpLen\": 0, \"byYearLen\": 0, \"recCount\": 0, \"cannotShow\": [\"More reports does not mean a worse part. It can mean the part is simply more common, or fitted to more aircraft.\"]}}"
+ },
+ {
+  "role": "assistant",
+  "content": "Let me find a part number with real data and check what the record rows carry for IDs and part numbers.",
+  "tool_calls": [
+   {
+    "id": "call_64bee83b53914e38b3e00a55",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>new Promise(res=>{var b=document.getElementById('revealBtn');if(b)b.click();setTimeout(()=>{var reps=[...document.querySelectorAll('tr.rep')];var r=reps.find(x=>x.cells[3].querySelector('.c'));res({r0:r?r.outerHTML.slice(0,300):null,partCell:r?r.cells[5].outerHTML:null,wuId:r?r.querySelector('.wu')&&r.querySelector('.wu').innerHTML.slice(0,80):null,tail:r?r.cells[3].textContent:null,rowDataset:r?Object.keys(r.dataset):null,partTexts:reps.slice(0,20).map(x=>x.cells[5].querySelector('.c')?x.cells[5].querySelector('.c').textContent:null)})},3500)})\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_64bee83b53914e38b3e00a55",
+  "content": "{\"value\": {\"r0\": \"<tr class=\\\"rep\\\" data-month=\\\"2026-08\\\" data-zone=\\\"\\\" role=\\\"row\\\"><td role=\\\"gridcell\\\">26 August 2026<span class=\\\"sub\\\">N617FE</span></td><td role=\\\"gridcell\\\"><span class=\\\"c\\\" onclick=\\\"setFilter('operator','FDEA')\\\" tabindex=\\\"-1\\\" role=\\\"button\\\">Federal Express Corp</span></td><td role=\\\"gridcell\\\"><span class=\\\"c\", \"partCell\": \"<td role=\\\"gridcell\\\"><span class=\\\"c\\\" onclick=\\\"setFilter('part','SEAT TRACK')\\\" tabindex=\\\"-1\\\" role=\\\"button\\\">SEAT TRACK</span><span class=\\\"sub\\\">NO DISCREPANCY</span></td>\", \"wuId\": null, \"tail\": \"N617FE\", \"rowDataset\": [\"month\", \"zone\"], \"partTexts\": [\"SENSOR\", \"AHRS\", \"CARTRIDGE\", \"SEAT TRACK\", \"LAMP\", \"SKIN\", \"ATTACH FITTING\", \"SEAT TRACK\", \"FLOOR SUPPORT\", \"FLOOR SUPPORT\", \"BUSHING\", \"DOUBLER\", \"STRUCTURE\", \"SKIN\", \"SKIN\", \"ASPIRATOR\", \"ASPIRATOR\", \"ASPIRATOR\", \"UNKNOWN\", \"UNKNOWN\"]}}"
+ },
+ {
+  "role": "assistant",
+  "content": "",
+  "tool_calls": [
+   {
+    "id": "call_5fec946a4dc341c68369e386",
+    "type": "function",
+    "function": {
+     "name": "measure",
+     "arguments": "{\"js\":\"()=>new Promise(res=>{var b=document.getElementById('revealBtn');if(b)b.click();setTimeout(()=>{var reps=[...document.querySelectorAll('tr.rep')];var wu=reps[0].querySelector('.wu');res({wuAttrs:wu?{id:wu.id,dataset:{...wu.dataset}}:null,btns:reps[0].querySelectorAll('button').length,lastBtn:reps[0].querySelector('td:last-child button')?reps[0].querySelector('td:last-child button').outerHTML:null,partPn:reps.map(x=>x.cells[5].textContent).slice(0,10)})},3500)})\"}"
+    }
+   }
+  ]
+ },
+ {
+  "role": "tool",
+  "tool_call_id": "call_5fec946a4dc341c68369e386",
+  "content": "{\"value\": {\"wuAttrs\": null, \"btns\": 1, \"lastBtn\": \"<button class=\\\"ghost\\\" type=\\\"button\\\" aria-label=\\\"Open report QR9R2026082600003, N, SENSOR\\\" onclick=\\\"openCase('QR9R2026082600003')\\\" tabindex=\\\"-1\\\">Case sheet</button>\", \"partPn\": [\"SENSOROUT OF LIMITS\", \"AHRSFAILED\", \"CARTRIDGEINOPERATIVE\", \"SEAT TRACKNO DISCREPANCY\", \"LAMPINOPERATIVE\", \"SKINCRACKED\", \"ATTACH FITTINGCRACKED\", \"SEAT TRACKWORN\", \"FLOOR SUPPORTCORRODED\", \"FLOOR SUPPORTDENTED\"]}}"
+ }
+]

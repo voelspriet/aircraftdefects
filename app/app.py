@@ -719,6 +719,12 @@ def conflicts_page():
     return send_from_directory(app.static_folder, "conflicts.html")
 
 
+@app.get("/z/case/<rid>")
+def case_page(rid):
+    """Hand-written, 31 August 2026: one report on its own page."""
+    return send_from_directory(app.static_folder, "case.html")
+
+
 @app.get("/z/img/<name>")
 def z_img(name):
     """Hand-written, 31 August 2026: the few images the page carries."""

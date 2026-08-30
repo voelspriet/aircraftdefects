@@ -34,8 +34,11 @@ tail, an airline, a type; and a period line (all, this year, last year, last
 Click anything and it becomes the selection: a zone on the aircraft drawing, a
 month, an airline, a crew action, a system, a word. The chosen thing appears
 in big red type above the findings, with the period beneath it, then a counted
-sentence, then the first 25 reports. Every report opens in the page as a case
-sheet with every code spelled out.
+sentence, then the first 25 reports. Every report opens on its own page,
+`/case/<control number>`: the mechanic's words with copy-the-quote and
+copy-the-citation buttons, every code spelled out with the FAA's wording
+beside it, the five model questions, links to the FAA's own search and the
+flight trackers for the tail, and the way back to the selection it came from.
 
 Sixteen leads under the fold each become the main screen when clicked, and
 everything in them is clickable too. There is always a way back: the

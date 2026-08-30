@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Case sheet · aircraftdefects.com</title>
+<!-- hand-written, 31 August 2026: one report, on its own page. Every code spelled out with the FAA's wording beside it,
+     the mechanic's words as filed, five questions for the model, and the way back to the selection it came from. -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--paper:#f6f4ee;--ink:#1c1b17;--ash:#6f6a62;--rust:#b8431f;--model:#245c5a;--model-bg:#ecf2f1;--edge:#c6dbd8;--void:#5b5470;--void-bg:#efedf2;--line:#d8d2c6;
+--serif:'Instrument Serif',Georgia,serif;--sans:Archivo,system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 15px/1.55 var(--sans)}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 32px 90px}
+.mast{display:flex;justify-content:space-between;gap:16px;font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ash)}
+.mast a{color:var(--rust);text-decoration:none}
+.crumb{font:400 12px/1.6 var(--mono);color:var(--ash);margin:18px 0 6px}.crumb a{color:var(--ash)}.crumb b{font-weight:500;color:var(--ink)}
+h1{font:400 44px/1.05 var(--serif);margin:10px 0 4px;letter-spacing:-.01em}h1 .id{font:400 14px var(--mono);color:var(--ash);display:block;margin-top:8px;letter-spacing:.04em}
+.sub{font:400 17px/1.5 var(--sans);color:var(--ash);margin:0 0 22px;max-width:76ch}
+.eyebrow{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ash);margin:30px 0 10px}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:44px;align-items:start}
+.raw{font:400 15px/1.7 var(--mono);white-space:pre-wrap;background:#fffdf8;border-left:3px solid var(--line);padding:14px 18px;max-width:82ch}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}.acts button{font:500 12.5px/1 var(--sans);padding:8px 12px;border:1px solid var(--ink);background:#fff;border-radius:3px;cursor:pointer}.acts button.done{border-color:var(--model);color:var(--model)}
+.warn{border-left:3px solid var(--void);background:var(--void-bg);color:var(--void);padding:12px 16px;font:400 13.5px/1.55 var(--sans);max-width:74ch}.warn p{margin:0 0 6px}.warn p:last-child{margin:0}
+table.sheet{border-collapse:collapse;width:100%}table.sheet td{padding:9px 10px 9px 0;border-top:1px solid var(--line);vertical-align:top;font-size:14px}
+table.sheet td:first-child{font:600 10.5px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ash);width:200px;padding-top:12px}
+table.sheet b{font-weight:600}.code{font:400 12px var(--mono);color:var(--ash);margin-left:6px}
+.faa{font:400 12.5px/1.5 var(--sans);color:var(--ash);margin-top:3px;max-width:66ch}.faa i{font:500 10px var(--mono);letter-spacing:.08em;font-style:normal;margin-right:6px}
+.note{font:400 12px/1.5 var(--sans);color:var(--void)}
+.links a{display:block;padding:10px 0;border-top:1px solid var(--line);color:var(--ink);text-decoration:none}.links a:hover{color:var(--rust)}.links a b{font-weight:600}.links a span{display:block;font-size:12.5px;color:var(--ash)}
+.pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.pick a,.pick button{font:500 13px/1.3 var(--sans);padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:100px;color:var(--ink);text-decoration:none;cursor:pointer}.pick a:hover,.pick button:hover{border-color:var(--rust);color:var(--rust)}
+.cite{font:400 13px/1.6 var(--mono);color:var(--ink);background:#fff;border:1px solid var(--line);padding:12px 14px;max-width:82ch;white-space:pre-wrap}
+/* the model block, as on the main page */
+.mc{margin:10px 0 6px}.mc__go{font:500 13px/1.2 var(--sans);padding:8px 12px;border:1px solid var(--model);background:#fff;color:var(--model);border-radius:3px;cursor:pointer;text-align:left;width:100%}
+.mc__go b{display:block;font:400 11px/1.3 var(--mono);color:var(--ash);margin-top:2px}.mc__go:disabled{opacity:.55;cursor:default}
+.mc__meter{display:none;align-items:center;gap:12px;font:500 11px/1 var(--mono);letter-spacing:.06em;color:var(--model);margin:8px 0 0;text-transform:uppercase}
+.mc[data-state="pending"] .mc__meter,.mc[data-state="streaming"] .mc__meter{display:flex}
+.mc__spin{width:36px;height:2px;background:linear-gradient(90deg,var(--model) 0 40%,transparent 40% 100%);background-size:200% 100%;animation:sweep 1.1s linear infinite}@keyframes sweep{to{background-position:-200% 0}}
+.mc__stop{font:500 11px/1 var(--mono);border:1px solid var(--model);background:none;color:var(--model);padding:4px 8px;border-radius:3px;cursor:pointer}
+.mc__body{display:none;margin-top:8px}.mc[data-state="streaming"] .mc__body,.mc[data-state="done"] .mc__body,.mc[data-state="abstain"] .mc__body,.mc[data-state="error"] .mc__body,.mc[data-state="cancelled"] .mc__body{display:block}
+.model{padding:14px 18px;border-left:2px solid var(--model);background:var(--model-bg)}.model .lab{font:600 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--model);margin:0 0 8px}
+.model p.out{font:400 17px/1.55 var(--serif);margin:0;white-space:pre-wrap}.model .prov{font:400 11.5px/1.5 var(--mono);color:var(--ash);margin:8px 0 0}
+.mc[data-state="abstain"] .out{color:#6d8f8c}.mc[data-state="error"] .model{border-left-color:var(--void);background:var(--void-bg)}
+.foot{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);font:400 12px/1.6 var(--mono);color:var(--ash)}
+@media(max-width:900px){.wrap{padding:22px 18px 70px}.grid{grid-template-columns:1fr;gap:28px}h1{font-size:32px}table.sheet td:first-child{width:130px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="mast"><span>FAA service difficulty report · case sheet</span><span><a id="back" href="/">↖ back to your selection</a> · <a href="/">aircraftdefects.com</a></span></div>
+  <div class="crumb" id="crumb"></div>
+  <h1 id="h1">Reading the file…</h1>
+  <p class="sub" id="sub"></p>
+  <div class="grid">
+    <div>
+      <p class="eyebrow">The mechanic’s words, as filed</p>
+      <p class="raw" id="raw"></p>
+      <div class="acts"><button data-copy="quote">Copy the quote</button><button data-copy="cite">Copy the citation</button><button data-copy="link">Copy the link</button><button data-copy="all">Copy all three</button></div>
+      <p class="eyebrow">Ask the model about this report</p>
+      <div id="mc"></div>
+      <p class="eyebrow">Every code on this report, spelled out</p>
+      <p class="sub" style="font-size:13.5px;margin-bottom:8px">The FAA’s own wording is kept beside the plain English so you can quote either.</p>
+      <table class="sheet" id="sheet"></table>
+    </div>
+    <div>
+      <p class="eyebrow">Before you publish this</p>
+      <div class="warn" id="warn"></div>
+      <p class="eyebrow">Check it against the source</p>
+      <div class="links" id="links"></div>
+      <p class="eyebrow">This aircraft</p>
+      <div class="pick" id="more"></div>
+      <p class="eyebrow">How to cite it</p>
+      <div class="cite" id="cite"></div>
+    </div>
+  </div>
+  <div class="foot" id="foot"></div>
+</div>
+<script>
+var D=document,$=function(s){return D.querySelector(s)};
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function num(n){return (n==null?"":Number(n).toLocaleString("en-US"))}
+var id=(location.pathname.match(/case\/([A-Za-z0-9]+)/)||[])[1]||new URLSearchParams(location.search).get("id");
+var sel=new URLSearchParams(location.search).get("sel")||"";
+var ROOT=location.pathname.indexOf("/z/")===0?"/z/":"/";
+$("#back").href=ROOT+(sel?"?"+sel:"");
+var OPS={};
+function opName(c){return OPS[c]?OPS[c].replace(/\b(INC|LLC|CORP|CORPORATION|CO|COMPANY|LTD)\.?$/i,"").trim():""}
+/* the streaming block */
+function mc(label,sub,url){var box=D.createElement("section");box.className="mc";box.dataset.state="idle";
+  box.innerHTML='<button type="button" class="mc__go">'+esc(label)+(sub?"<b>"+esc(sub)+"</b>":"")+'</button><div class="mc__meter"><span class="mc__spin"></span><span class="mc__count">reading</span><span class="mc__clock">0.0 s</span><button type="button" class="mc__stop">Stop</button></div><div class="mc__body"><div class="model"><p class="lab">Read by GLM-5.3-Flash</p><p class="out"></p><p class="prov"></p></div></div>';
+  var go=box.querySelector(".mc__go"),out=box.querySelector(".out"),prov=box.querySelector(".prov"),es=null,t0=0,tick=null,got="",chk=null;
+  function st(s){box.dataset.state=s}
+  function fin(kind,d){if(tick)clearInterval(tick);if(es)es.close();go.disabled=false;var secs=d&&d.seconds!=null?d.seconds+" s":((Date.now()-t0)/1000).toFixed(1)+" s";
+    if(kind==="done"){st("done");var body=got.replace(/\n?\s*(NEXT|CHECKS):[\s\S]*$/,"").trim();out.textContent=body;
+      if(chk&&chk.length){var row=D.createElement("div");row.className="pick";chk.forEach(function(c){if(!c||!c.filters)return;var a=D.createElement("a");var p=new URLSearchParams();Object.keys(c.filters).forEach(function(k){var v=String(c.filters[k]);if(k==="tail")v=v.replace(/^N/i,"");p.set(k,v)});a.href=ROOT+"?"+p.toString();a.textContent=c.label||Object.values(c.filters).join(" ");row.appendChild(a)});out.appendChild(row)}
+      prov.textContent="read by GLM-5.3-Flash, this report, all fields, "+secs+(d&&d.tokens?", "+num(d.tokens)+" tokens":"")+". Its words, not the FAA’s."}
+    else if(kind==="abstain"){st("abstain");prov.textContent="GLM-5.3-Flash would not answer."}
+    else if(kind==="cancelled"){st("cancelled");prov.textContent="stopped by you at "+secs+". Partial."}
+    else{st("error");out.textContent="The call to GLM-5.3-Flash failed"+(d&&d.message?" ("+d.message+")":"")+". Nothing has changed on this page."}}
+  function start(){got="";chk=null;out.textContent="";prov.textContent="";go.disabled=true;st("pending");t0=Date.now();tick=setInterval(function(){box.querySelector(".mc__clock").textContent=((Date.now()-t0)/1000).toFixed(1)+" s"},100);
+    es=new EventSource(url());es.addEventListener("meta",function(){box.querySelector(".mc__count").textContent="reading this report"});
+    es.addEventListener("checks",function(e){try{chk=JSON.parse(e.data)}catch(x){}});
+    es.addEventListener("delta",function(e){var s;try{s=JSON.parse(e.data)}catch(x){s=e.data}if(box.dataset.state!=="streaming")st("streaming");got+=s;out.textContent=got.replace(/\n?\s*(NEXT|CHECKS):[\s\S]*$/,"")});
+    es.addEventListener("abstain",function(e){var d={};try{d=JSON.parse(e.data)}catch(x){}out.textContent=d.text||"The model would not say.";fin("abstain",d)});
+    es.addEventListener("done",function(e){var d={};try{d=JSON.parse(e.data)}catch(x){}fin("done",d)});
+    es.addEventListener("error",function(e){var d={};try{d=JSON.parse(e.data||"{}")}catch(x){}if(box.dataset.state==="pending"||box.dataset.state==="streaming")fin("error",d)});
+    box.querySelector(".mc__stop").onclick=function(){fin("cancelled")}}
+  go.onclick=start;return box}
+function dateWords(d){var m=(d||"").match(/(\d\d)\/(\d\d)\/(\d{4})/);if(!m)return d||"";return new Date(+m[3],+m[1]-1,+m[2]).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})}
+function copy(text,btn){navigator.clipboard.writeText(text).then(function(){btn.classList.add("done");var t=btn.textContent;btn.textContent="Copied";setTimeout(function(){btn.textContent=t;btn.classList.remove("done")},1600)})}
+fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OPS=m||{}}).catch(function(){}).then(function(){return fetch("/z/api/sheet/"+encodeURIComponent(id))}).then(function(r){return r.json()}).then(function(d){
+  if(d.error){$("#h1").textContent="No report with control number "+id;return}
+  var raw=d.raw||{},tail=(raw.RegistryNNumber||"").trim(),op=(raw.OperatorDesignator||"").trim(),opn=opName(op),model=((raw.AircraftMake||"")+" "+(raw.AircraftModel||"")).trim(),date=dateWords(raw.DifficultyDate);
+  var found=((raw.PartName||"")+" "+(raw.PartCondition||"")).replace(/UNKNOWN/g,"").trim().toLowerCase();
+  D.title="Report "+id+" · "+model+(tail?" N"+tail:"")+" · aircraftdefects.com";
+  $("#crumb").innerHTML='<a href="'+ROOT+'">every report</a>'+(sel?' › <a href="'+ROOT+'?'+esc(sel)+'">your selection</a>':'')+' › <b>report '+esc(id)+'</b>';
+  $("#h1").innerHTML=esc(model)+(tail?', N'+esc(tail):'')+'<span class="id">'+(opn?esc(opn):(op?esc(op)+' (operator not in the FAA cross-reference)':'operator not recorded'))+' · '+esc(date)+' · control number '+esc(id)+'</span>';
+  $("#sub").textContent=(found?found.charAt(0).toUpperCase()+found.slice(1)+". ":"")+"One report, as the mechanic filed it. It is evidence of what was written up, not of what happened.";
+  $("#raw").textContent=d.text||"(no write-up)";
+  var link=location.origin+ROOT.replace(/\/$/,"")+"/case/"+id;
+  var cite="FAA Service Difficulty Report "+id+". Difficulty dated "+date+(raw.SubmissionDate?", submitted to the FAA "+String(raw.SubmissionDate).slice(0,10):"")+". Source: FAA Service Difficulty Reporting System, https://sdrs.faa.gov. Read at "+link;
+  $("#cite").textContent=cite;
+  D.querySelectorAll("[data-copy]").forEach(function(b){b.onclick=function(){var k=b.dataset.copy;copy(k==="quote"?d.text:k==="cite"?cite:k==="link"?link:('"'+d.text+'"\n\n'+cite+'\n'+link),b)}});
+  var w=[];w.push(sel?"You reached this report through a selection ("+decodeURIComponent(sel).replace(/&/g,", ").replace(/=/g," ")+"). It is one report, not the selection.":"You opened this report by its control number, so no selection was applied.");
+  if(op&&!opn)w.push("Operator code "+op+" is not in the FAA cross-reference used here (the December 2006 edition), so no name is asserted.");
+  if(raw.PrecautionaryProcedureA&&raw.PrecautionaryProcedureA!=="K")w.push("The crew action recorded here is what the FAA form says the crew did, not a description of severity.");
+  w.push("Quote the mechanic’s words as filed. The FAA publishes no per-report permalink, so cite the control number and this page.");
+  $("#warn").innerHTML=w.map(function(x){return '<p>'+esc(x)+'</p>'}).join("");
+  $("#sheet").innerHTML=(d.rows||[]).map(function(r){return '<tr><td>'+esc(r.field)+'</td><td><b>'+esc(r.value)+'</b>'+(r.code&&r.code!==r.value?'<span class="code">'+esc(r.code)+'</span>':'')+(r.faa?'<div class="faa"><i>FAA WORDING</i>'+esc(r.faa)+'</div>':'')+(r.note?'<div class="note">'+esc(r.note)+'</div>':'')+'</td></tr>'}).join("");
+  var L=[['https://sdrs.faa.gov/Query.aspx','The FAA’s own search','It posts a form rather than answering an address: paste the control number '+id+' into its Operator Control Number box.']];
+  if(tail){L.push(['https://flightaware.com/live/flight/N'+tail,'FlightAware · N'+tail,'Where this aircraft is now and where it has been.']);L.push(['https://www.flightradar24.com/data/aircraft/n'+tail.toLowerCase(),'Flightradar24 · N'+tail,'The same aircraft on the other tracker.']);L.push(['https://registry.faa.gov/aircraftinquiry/Search/NNumberResult?nNumberTxt='+tail,'FAA registry · N'+tail,'Who owns it, according to the FAA.'])}
+  $("#links").innerHTML=L.map(function(x){return '<a href="'+esc(x[0])+'" target="_blank" rel="noopener"><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></a>'}).join("");
+  var more=[];if(tail)more.push([ROOT+"?tail="+encodeURIComponent(tail),"every report on N"+tail]);if(op)more.push([ROOT+"?operator="+encodeURIComponent(op),"every report by "+(opn||op)]);if(raw.PartName&&raw.PartName!=="UNKNOWN")more.push([ROOT+"?part="+encodeURIComponent(raw.PartName),"this part, every airline"]);
+  var iso=(raw.DifficultyDate||"").match(/(\d\d)\/(\d\d)\/(\d{4})/);if(iso)more.push([ROOT+"?from="+iso[3]+"-"+iso[1]+"-"+iso[2]+"&to="+iso[3]+"-"+iso[1]+"-"+iso[2],"everything filed that day"]);
+  $("#more").innerHTML=more.map(function(x){return '<a href="'+esc(x[0])+'">'+esc(x[1])+'</a>'}).join("");
+  if(tail)fetch("/api/aircraft/N"+encodeURIComponent(tail)).then(function(r){return r.json()}).then(function(a){if(a&&a.count!=null)$("#more").insertAdjacentHTML("afterbegin",'<span style="font:400 13px/2.2 var(--sans);color:var(--ash);margin-right:6px">This airframe appears in '+num(a.count)+' report'+(a.count===1?"":"s")+'.</span>')}).catch(function(){});
+  var slim={};Object.keys(raw).forEach(function(k){if(k!=="Discrepancy"&&raw[k]!=null&&raw[k]!=="")slim[k]=raw[k]});var recq="rec="+encodeURIComponent(JSON.stringify(slim))+"&text="+encodeURIComponent((raw.Discrepancy||"").slice(0,4000));
+  [["explain","What actually happened?","the whole report, explained for a first-time reader"],["danger","Was anyone in danger?","only what the report states, and what it does not"],["repair","What did the mechanics do?","step by step, and what was left unsaid"],["why","Does it say why?","quoted if it does; said plainly if it does not"],["checks","What should we check next?","same aircraft, part, airline or day: each one a click"]].forEach(function(x){$("#mc").appendChild(mc(x[1],x[2],function(){return "/z/api/stream/case?q="+x[0]+"&"+recq}))});
+  $("#foot").textContent=(d.source||"")+" Counts are of reports filed, not of flights; no rate is claimed.";
+}).catch(function(e){$("#h1").textContent="The file did not answer ("+(e&&e.message||e)+"). Reload."});
+</script>
+</body>
+</html>

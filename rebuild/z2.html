@@ -110,7 +110,7 @@ h1 .here{color:var(--rust)}
 .pick input{border-radius:3px;min-width:180px}
 .sum .bigsel{font:400 44px/1.05 var(--serif);color:var(--rust);margin:0;padding-top:36px;scroll-margin-top:24px;border-top:1px solid var(--line)}.sum .bigsel+h2{padding-top:6px;border-top:0}
 .sum h2{font:400 26px/1.2 var(--serif);margin:0 0 10px;padding-top:36px;border-top:1px solid var(--line)}.sum .facts{font:400 15px/1.6 var(--sans);max-width:74ch;margin:0 0 14px}.sum .facts b{font:500 14px var(--mono)}
-.tbl tr.rec{cursor:pointer}.tbl tr.rec:hover td{background:#efeae0}
+.tbl tr.rec{cursor:pointer}.tbl tr.rec.key td{color:var(--rust);font-weight:600}.tbl tr.rec:hover td{background:#efeae0}
 .leads h2{font:400 26px/1.2 var(--serif);margin:0 0 4px;padding-top:36px;border-top:1px solid var(--line)}
 .scope{font:500 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ash);margin:22px 0 10px}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 28px}
@@ -348,7 +348,7 @@ function wait(){return '<p class="cannot">Reading the file…</p>'}
 function fail(e){return '<p class="cannot">This view did not load ('+esc(e&&e.message||e)+'). Nothing has changed.</p>'}
 var R={};
 R.freefall=function(box){box.innerHTML=head("freefall")+'<p class="sub" style="max-width:70ch">Rory Kennedy’s <i>Freefall: A Reckoning for Boeing</i> (Netflix, 19 August 2026) turns on three aircraft and one whistleblower. Two of the three, Lion Air 610 and Ethiopian 302, were foreign-registered and can never appear in an FAA service-difficulty file. The third is here, filed by the airline’s own mechanics.</p><div id="ff"></div>';var ff=box.querySelector("#ff");
-  function tbl(rows,raw,cap){var h='<div class="tblwrap"><table class="tbl"><tr><th>date</th><th>tail</th><th>airline</th><th>aircraft</th><th>what was found</th><th>crew did</th></tr>';rows.forEach(function(a){h+='<tr class="rec" data-case="'+esc(a.id)+'"><td>'+esc(a.date)+'</td><td>'+(a.tail?"N"+esc(a.tail):"")+'</td><td title="'+esc(a.op)+'">'+esc(opName(a.op))+'</td><td>'+esc(a.model)+'</td><td>'+esc(a.found)+'</td><td>'+esc(crewWords(a.crew))+'</td></tr>'});
+  function tbl(rows,raw,cap){var h='<div class="tblwrap"><table class="tbl"><tr><th>date</th><th>tail</th><th>airline</th><th>aircraft</th><th>what was found</th><th>crew did</th></tr>';rows.forEach(function(a){h+='<tr class="rec'+(a.id==="ASAA2024010547162"?" key":"")+'" data-case="'+esc(a.id)+'"><td>'+esc(a.date)+'</td><td>'+(a.tail?"N"+esc(a.tail):"")+'</td><td title="'+esc(a.op)+'">'+esc(opName(a.op))+'</td><td>'+esc(a.model)+'</td><td>'+esc(a.found)+'</td><td>'+esc(crewWords(a.crew))+'</td></tr>'});
     var d=D.createElement("div");d.innerHTML=h+'</table></div>'+(cap?'<p class="cannot">'+cap+'</p>':'');d.querySelectorAll("tr.rec").forEach(function(tr){tr.onclick=function(){openCase(tr.dataset.case,rows.find(function(a){return a.id===tr.dataset.case}),raw.find(function(x){return x.OperatorControlNumber===tr.dataset.case}))}});return d}
   function chap(t,sub){var d=D.createElement("div");d.innerHTML='<div class="h" style="margin-top:22px">'+esc(t)+'</div><p class="sub">'+sub+'</p>';ff.appendChild(d);return d}
   var c1=chap("N704AL, Alaska Airlines 737-9: the door plug","Two reports. The second is the blow-out on 5 January 2024. The first was filed five days earlier: a door hard to open, aircraft grounded. Click either to read it and ask the model.");

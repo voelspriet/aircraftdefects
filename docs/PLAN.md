@@ -335,3 +335,30 @@ Candidates, none built yet:
 
 The one rule, same as everywhere else: where a picture can only place part of the
 selection, it says so underneath, in the same size type.
+
+---
+
+## G. The phone, made simple — **pending**, deferred 30 August
+
+The instrument is four rails, a 380-month strip and an aircraft diagram. It is
+operated, not read, and it does not belong on a phone. Below a breakpoint the
+page should carry the count, the findings that stand on their own numbers, and a
+way through to the whole thing for anyone who wants it.
+
+Not a wall. A reader who taps a link and hits a dead end does not share it, so
+whatever this becomes it has to send the phone visitor away with the journalism
+even when it cannot give them the tool. The paperwork gap is the strongest thing
+to send them away with: median filing lag 7 days, 99th percentile 1,745 days,
+and 215,890 reports, 12.3%, over a year.
+
+Deferred because nothing is broken by waiting. The phone layout works today:
+0px of sideways overflow at 390px and every check green.
+
+- [ ] the count and the span, which is the argument in one line
+- [ ] two or three findings as plain sentences with their numbers
+- [ ] one line saying why the instrument is not here, without apologising
+- [ ] the search kept if it can be, so a tail number still answers
+- [ ] a way through to the whole page, the way "Read all 1,757,827 anyway" works
+      on the desk
+- [ ] the breakpoint chosen from where the instrument stops being operable, and
+      the measurement that chose it recorded here

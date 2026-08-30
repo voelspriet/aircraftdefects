@@ -997,3 +997,59 @@ that says what it should do.
     rounds   42, 42b, 42c, 43, 43b, 43c
     of which shipped nothing but a mandated first deploy   0
     hand characters added to page code                     0
+
+---
+
+## F29. The measurer invents an interface too
+
+30 August, the same afternoon as F28, and it is F28's argument turned around.
+
+F28 recorded four times in one morning that the model wrote correct work against
+something that was not there: `window.caseSheet` where the page calls `openCase`,
+a deletion it had no channel to perform, sixteen selectors against a guessed DOM,
+and a rule that lost on specificity. The conclusion drawn there was that a writer
+who cannot see the system will invent an interface and then build against it
+faithfully.
+
+That is not a property of the model. It happened five times to the harness on the
+same day, and the harness is hand-written.
+
+    a date check that reported "0 airframes checked" and passed
+    a tap-target check reading state left behind by the hover sweep
+    a hover check that counted a control restyling itself, and reported a
+        485px move that does not reproduce
+    a duration check that ran on the landing page, where no repeat rows exist,
+        matched nothing and passed
+    a label check built on ?take=zone|ZONE 700, a URL the application never
+        emits: `take=` is an attribute the click handler reads, not a query
+        parameter
+
+The last is the closest match to the model's own failures. It was not lazy or
+too narrow. It examined a page carefully, found real 400s and a real empty
+render, and reported them accurately. The page was correct and the URL was
+invented. A fault was manufactured, and would have been manufactured again on
+every run.
+
+Two consequences worth keeping.
+
+**The pattern is structural, not a property of who is writing.** Anything writing
+against a system it cannot fully see will invent an interface and then test or
+build against it in good faith. The model does it with names. The harness does it
+with URLs. Both produce work that is internally correct and externally attached
+to nothing, and neither produces an error.
+
+**So the gate needs the same discipline it imposes.** Its rule now is that it may
+only drive URL forms the application itself produces, with the reason written
+beside the check. A click on the Landing gear row produces `?zone=ZONE+700`, and
+that is the address to test. This is the harness equivalent of the rule that
+saved the model rounds: do not write a selector that is not in the markup you
+were given.
+
+### One correction to the record
+
+Commit `3e691b9` says the label printed an ellipsis instead of a number under a
+zone filter. It did not. That symptom existed only on the invented URL. The
+operator half of that commit is real and verified: `?operator=SWAA` printed
+244,532, Southwest's own total, inside a sentence promising the panels ignore
+your selection. The fix stands and is right for both, because the label must
+carry the corpus figure whatever is filtered. The zone fault never existed.

@@ -1211,6 +1211,13 @@ def _stream_response(meta, prompt, effort, max_tokens, recs=None, meta_of=None, 
                     if m:
                         text = text[:m.start()].rstrip()
                         yield _sse("next", _next_three(m.group(1), base or {}))
+                    m = re.search(r"\n?\s*CHECKS:\s*(\[[\s\S]*\])\s*$", text)
+                    if m:
+                        text = text[:m.start()].rstrip()
+                        try:
+                            yield _sse("checks", json.loads(m.group(1)))
+                        except Exception:
+                            yield _sse("checks", [])
                     if recs:
                         sents, stats = verify_text(text, recs)
                         yield _sse("verify", {"sentences": sents, "stats": stats, "records": meta_of or {}})
@@ -1716,7 +1723,7 @@ ASKS = {
  "danger":  "Was anyone in danger at any point, according only to what the report states? Say what it states and what it does not; do not speculate.",
  "repair":  "What did the mechanics do about it, step by step, and what did they leave undone or unsaid?",
  "why":     "Does the report give any cause? If it does, quote it. If it does not, say so plainly and do not guess.",
- "checks":  "What should we check next in this file: same aircraft, same part, same airline, same day, same system? Say in two or three plain sentences why each is worth a look, using only what this record says. Then, on its own last line, write CHECKS: followed by a JSON list of the searches, each {\"label\": short words, \"filters\": {field: value}} using only these fields: tail (the N-number without the N), operator (designator), model, part, ata (two-digit chapter), from and to (YYYY-MM-DD). Use only values that appear in the decoded fields.",
+ "checks":  "What should we check next in this file: same aircraft, same part, same airline, same day, same system? In two or three plain sentences, addressed to the reader as we, say which of these are worth a look and why, using only what this record says; do not discuss what the record lacks. Then, on its own last line, write CHECKS: followed by a JSON list of the searches, each {\"label\": short words, \"filters\": {field: value}} using only these fields: tail (the N-number without the N), operator (designator), model, part, ata (two-digit chapter), from and to (YYYY-MM-DD). Use only values that appear in the decoded fields.",
 }
 
 @app.get("/z/api/stream/case")
@@ -1733,6 +1740,7 @@ def stream_case():
     except Exception:
         facts = {}
     prompt = (ASKS[which] + "\n" + NOVICE.split("End with")[0] + "\n" + ABSTAIN +
+              "\nDo not print the record number, part numbers, model codes or the registration; say the aircraft type and airline in plain words. "
               "\nPlain prose, no JSON, at most 140 words.\n\nEvery coded field on this report, decoded:\n"
               + json.dumps(facts, ensure_ascii=False) + "\n\nThe write-up, verbatim:\n" + text)
     rid = (raw.get("OperatorControlNumber") if isinstance(raw, dict) else None) or "THIS"

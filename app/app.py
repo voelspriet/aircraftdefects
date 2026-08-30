@@ -177,13 +177,49 @@ def _parse_date(s):
         return None
 
 
+# ---- hand-written, 30 August 2026, counted in MODEL_USE.md -------------------
+# The dossier answered from a tail's whole history while the instrument honoured
+# the zone and dates in the same URL: ?tail=928NN&zone=ZONE+900 showed 7 in the
+# sentence and 103 in the dossier, captioned "lavatories and galleys". One page,
+# two counts. Every airframe view now takes the same filters the instrument
+# takes, applied to the raw rows before anything is derived from them.
+def _selection_filter(rows):
+    """Keep only rows inside the request's zone / from / to, if any are given."""
+    zone = (request.args.get("zone") or "").strip().upper()
+    lo = (request.args.get("from") or "").strip()
+    hi = (request.args.get("to") or "").strip()
+    if not (zone or lo or hi):
+        return rows
+    def iso(r):
+        d = r.get("DifficultyDate") or ""
+        m = re.match(r"(\d\d)/(\d\d)/(\d{4})", d)
+        return f"{m.group(3)}-{m.group(1)}-{m.group(2)}" if m else ""
+    out = []
+    for r in rows:
+        # the file writes "ZONE 900 - LAV/G"; the instrument asks for "ZONE 900".
+        # match the code as a prefix, the way the parent's search does.
+        if zone and not (r.get("PartLocation") or "").strip().upper().startswith(zone):
+            continue
+        d = iso(r)
+        if lo and (not d or d < lo):
+            continue
+        if hi and (not d or d > hi):
+            continue
+        out.append(r)
+    return out
+
+def _selection_caption():
+    zone = request.args.get("zone"); lo = request.args.get("from"); hi = request.args.get("to")
+    return {"zone": zone or None, "from": lo or None, "to": hi or None,
+            "filtered": bool(zone or lo or hi)}
+
 @app.get("/z/api/airframe/<tail>")
 def airframe(tail):
     t = re.sub(r"[^A-Za-z0-9]", "", tail).upper().lstrip("N")
     d = api("/api/aircraft/" + t)
-    rows = d.get("rows") or []
+    rows = _selection_filter(d.get("rows") or [])
     if not rows:
-        return jsonify(tail="N" + t, found=0,
+        return jsonify(tail="N" + t, found=0, selection=_selection_caption(),
                        note="No reports in this file name that tail number. That is not "
                             "evidence about the aircraft. It may never have been registered "
                             "in the United States, or nothing was ever filed."), 200
@@ -194,7 +230,8 @@ def airframe(tail):
     recs = dated + undated
     ops = Counter(r["operator"] or r["operator_code"] for r in recs if r["operator_code"])
     return jsonify(
-        tail="N" + t, found=d.get("count", len(recs)), capped=d.get("capped"),
+        tail="N" + t, found=len(recs), capped=d.get("capped"),
+        selection=_selection_caption(),
         aircraft={"make": recs[0]["make"], "model": recs[0]["model"]},
         operators=[{"name": k, "reports": v} for k, v in ops.most_common()],
         systems=d.get("systems"),
@@ -439,7 +476,7 @@ def repeats(tail):
     the data, so each gets its own sentence, and hours_between stays None in
     both. A group is never dropped for either reason."""
     t = re.sub(r"[^A-Za-z0-9]", "", tail).upper().lstrip("N")
-    rows = [decorate(r) for r in (api("/api/aircraft/" + t).get("rows") or [])]
+    rows = [decorate(r) for r in _selection_filter(api("/api/aircraft/" + t).get("rows") or [])]
     groups = defaultdict(list)
     for r in rows:
         k = (r["system_code"] or "") + "|" + (r["part"] or "")
@@ -554,7 +591,7 @@ def export_csv(tail):
 @app.get("/z/api/summary/<tail>")
 def summary(tail):
     t = re.sub(r"[^A-Za-z0-9]", "", tail).upper().lstrip("N")
-    raw = api("/api/aircraft/" + t).get("rows") or []
+    raw = _selection_filter(api("/api/aircraft/" + t).get("rows") or [])
     if not raw:
         return jsonify(tail="N" + t, found=0), 200
     recs = [decorate(r) for r in raw]

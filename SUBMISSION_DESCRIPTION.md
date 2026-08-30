@@ -25,7 +25,7 @@ mechanic's own words with every abbreviation explained.
 ## How the model was used
 
 The model is not handed an implementation to copy. It is handed a written
-specification of what a surface has to do, 9,556 words across six files, written
+specification of what a surface has to do, 12,243 words across eleven files, written
 as decisions rather than as shapes. Why a zone is drawn twice. Why the distinct
 report count may never be derived by summing the per-code counts. Why a period
 outside the file is left as asked instead of clamped into a range that runs
@@ -33,15 +33,16 @@ backwards.
 
 Each brief carries the specification, the measured evidence for what is wrong,
 and the checks the answer has to pass. Every brief and every reasoning trace is
-committed: 1.59 million characters of the model's own thinking.
+committed: 4.35 million characters of the model's own thinking.
 
 ## How it is checked
 
 Two harnesses drive the page in a real browser and count what it has, down to
 every option in every menu. A surface is finished when it survives the count, not
-when it looks finished. Twice the count disagreed with the eye and twice the
-count was right, including a measurement that had to be retracted publicly when
-its adjudicator turned out to be a constant. All eight findings are written down.
+when it looks finished. A longer harness drives the page in a browser and checks
+twenty-nine things a reader would notice: that the case sheet takes a mouse, that
+no published date range runs backwards, that hovering moves nothing. The working
+notes are in `docs/FINDINGS.md`.
 
 ## What it refuses to say
 

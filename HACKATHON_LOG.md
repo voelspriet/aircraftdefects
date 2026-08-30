@@ -34,7 +34,7 @@ corrected. **F1.**
 ## 29 August, midday — six specifications
 
 Six agents read the reference implementation and write down what it *does*, not
-what its source says. 9,556 words across six files, one per surface, written as
+what its source says. 12,243 words across eleven files, one per surface, written as
 decisions with the reason attached.
 
 That framing immediately finds a live bug. The zone lookup is keyed on `200`

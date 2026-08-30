@@ -32,8 +32,8 @@ from specifications, and measured in a browser.
 The model is not handed an implementation to copy. It is handed a written
 specification of what a surface has to do, and it decides how.
 
-The specifications are in [`rebuild/specs/`](rebuild/specs/), 9,556 words across
-six files, one per surface. They are written as decisions rather than as shapes,
+The specifications are in [`rebuild/specs/`](rebuild/specs/), 12,243 words across
+eleven files, one per surface. They are written as decisions rather than as shapes,
 because the decisions are the part a model cannot infer:
 
 > Both bars are scaled against the corpus maximum, never against the selection's

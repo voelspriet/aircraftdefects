@@ -106,23 +106,25 @@ the same states in a real browser and count what each one has.
 them, every select with all of its options, every button label, every endpoint.
 
 They run in about ninety seconds, which means a surface is finished when it
-survives the count rather than when it looks finished. Twice already the count
-has disagreed with the eye, and twice the count was right. Both times are written
-down in [`docs/FINDINGS.md`](docs/FINDINGS.md), including a measurement that had
-to be retracted publicly when its adjudicator turned out to be a constant.
+survives the count rather than when it looks finished. A longer harness drives
+the page in a browser and checks twenty-nine things a reader would notice: that
+the case sheet takes a mouse, that no published date range runs backwards, that
+hovering moves nothing. Where the count and the eye disagreed, the working notes
+are in [`docs/FINDINGS.md`](docs/FINDINGS.md).
 
 ## What is in here
 
 | | |
 |---|---|
-| [`rebuild/specs/`](rebuild/specs/) | the six specifications, 9,556 words |
-| [`rebuild/*.prompt.txt`](rebuild/) | every brief sent to the model, verbatim |
-| [`rebuild/*.reasoning.md`](rebuild/) | its reasoning traces, 1.59 million characters kept |
-| [`rebuild/splice.py`](rebuild/splice.py) | merges its blocks, catching the collisions that fail in silence |
-| [`build/parity_*.py`](build/) | the measurement harnesses |
-| [`docs/FINDINGS.md`](docs/FINDINGS.md) | eight findings, including the ones that cost a day |
-| [`docs/PLAN.md`](docs/PLAN.md) | the work plan, with what is genuinely done and what is not |
-| [`MODEL_USE.md`](MODEL_USE.md) | how the model is driven, and what that cost |
+| [`app/app.py`](app/app.py) | the service, and the nine research builds |
+| [`rebuild/specs/`](rebuild/specs/) | the specifications the model was given, 12,243 words |
+| [`build/`](build/) | the measurement harnesses |
+| [`MODEL_USE.md`](MODEL_USE.md) | how the model is driven, and what share of the page is its own |
+| [`docs/PLAN.md`](docs/PLAN.md) | the work plan, and what is genuinely done |
+
+The working record sits under [`rebuild/`](rebuild/), which has its own guide:
+every brief verbatim, every answer, and the reasoning traces, kept rather than
+tidied. [`docs/FINDINGS.md`](docs/FINDINGS.md) is the notebook that goes with it.
 
 ## Running it
 

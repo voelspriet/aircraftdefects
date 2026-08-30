@@ -41,20 +41,15 @@ measurement showed: `43`, then `43b`, then `43c`.
 Everything else on the page came back from the model. The share is counted, with
 file sizes, in [../MODEL_USE.md](../MODEL_USE.md).
 
-## The rounds worth reading, if you only read a few
+## If you are checking the provenance
 
-    04-search         the longest: 2,553 seconds, 378,982 characters of
-                      reasoning, cut off mid-function because max_tokens covers
-                      the thinking and the writing together
-    23-axis           a flex-basis that became a height, because the page had
-                      already set the axis and the answer set only the rest
-    42, 42b, 42c      the same fault three times: a correct replacement dialog
-                      that nothing called, then the repair that worked
-    44, 44b           the same task asked twice, once from a description and
-                      once with the source. 294 seconds against 173.
-    43c-strip         64 seconds, because the brief named why the previous
-                      attempt had had no effect
+Start at `01-instrument`, which is the first round and the largest single answer,
+and read `ask.py` beside it: one brief in, one answer out. `build_all.py` says
+what the page is made of and in what order.
 
-What those rounds cost, and what they taught, is in
-[../docs/FINDINGS.md](../docs/FINDINGS.md) and
-[../docs/NOTES-FOR-ZAI.md](../docs/NOTES-FOR-ZAI.md).
+The rounds that took several attempts are numbered with a letter, and the later
+brief always contains what the measurement showed. `44` and `44b` are the same
+task asked twice and are the shortest way to see how the loop worked in practice.
+
+The working notes that came out of all this are in
+[../docs/FINDINGS.md](../docs/FINDINGS.md).

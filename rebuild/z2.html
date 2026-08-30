@@ -108,7 +108,7 @@ h1 .here{color:var(--rust)}
 .pick{display:flex;flex-wrap:wrap;gap:6px 8px;margin:0 0 14px;align-items:center;font:400 12.5px var(--sans);color:var(--ash)}
 .pick button,.pick select,.pick input{font:500 12.5px var(--sans);padding:5px 11px;min-height:28px;border:1px solid var(--line);border-radius:100px;background:transparent;color:var(--ink);cursor:pointer}.pick button.on{border-color:var(--rust);color:var(--rust)}
 .pick input{border-radius:3px;min-width:180px}
-.sum .bigsel{font:400 44px/1.05 var(--serif);color:var(--rust);margin:0;padding-top:36px;border-top:1px solid var(--line)}.sum .bigsel+h2{padding-top:6px;border-top:0}
+.sum .bigsel{font:400 44px/1.05 var(--serif);color:var(--rust);margin:0;padding-top:36px;scroll-margin-top:24px;border-top:1px solid var(--line)}.sum .bigsel+h2{padding-top:6px;border-top:0}
 .sum h2{font:400 26px/1.2 var(--serif);margin:0 0 10px;padding-top:36px;border-top:1px solid var(--line)}.sum .facts{font:400 15px/1.6 var(--sans);max-width:74ch;margin:0 0 14px}.sum .facts b{font:500 14px var(--mono)}
 .tbl tr.rec{cursor:pointer}.tbl tr.rec:hover td{background:#efeae0}
 .leads h2{font:400 26px/1.2 var(--serif);margin:0 0 4px;padding-top:36px;border-top:1px solid var(--line)}
@@ -186,7 +186,9 @@ function q(){return new URLSearchParams(location.search)}
 function sel(){var p=q();Object.keys(VIEW).forEach(function(k){p.delete(k)});return p}
 function num(n){return (n==null?"":String(n)).replace(/\B(?=(\d{3})+(?!\d))/g,",")}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-function go(p){location.href=location.pathname+(p.toString()?"?"+p.toString():"")+location.hash}
+function go(p){var skip={hero:1,v:1,from:1,to:1};var before=Array.from(q().keys()).filter(function(k){return !skip[k]}).length,after=Array.from(p.keys()).filter(function(k){return !skip[k]}).length;
+  try{if(after>before)sessionStorage.setItem("z-scroll","sum");else sessionStorage.removeItem("z-scroll")}catch(x){}
+  location.href=location.pathname+(p.toString()?"?"+p.toString():"")+location.hash}
 function setRail(r){var p=q();p.set("hero",r);go(p)}
 var ZLABEL={"ZONE 100":"lower fuselage","ZONE 200":"upper fuselage","ZONE 300":"stabilisers","ZONE 400":"engines","ZONE 500":"left wing","ZONE 600":"right wing","ZONE 700":"landing gear","ZONE 800":"doors","ZONE 900":"lavatories, galleys"};
 var ZPOS={"ZONE 200":[334,80,300,130],"ZONE 100":[334,252,300,176],"ZONE 300":[572,36,528,76],"ZONE 800":[4,252,60,170],"ZONE 400":[130,278,270,214],"ZONE 700":[60,278,150,214],"ZONE 500":[470,214,560,150],"ZONE 600":[470,232,560,150],"ZONE 900":[404,252,420,160]};
@@ -427,7 +429,8 @@ function summary(h){var box=$("#sum");var s=sel().toString();if(!s){box.innerHTM
     var hh='<div class="tblwrap"><table class="tbl"><tr><th>date</th><th>tail</th><th>airline</th><th>aircraft</th><th>what was found</th><th>crew did</th></tr>';rows.slice(0,25).forEach(function(a){hh+='<tr class="rec" data-case="'+esc(a.id)+'"><td>'+esc(a.date)+'</td><td>'+(a.tail?"N"+esc(a.tail):"")+'</td><td title="'+esc(a.op)+'">'+esc(opName(a.op))+'</td><td>'+esc(a.model)+'</td><td>'+esc(a.found)+'</td><td>'+esc(crewWords(a.crew))+'</td></tr>'});
     r.innerHTML=hh+'</table></div><p class="cannot">'+num(Math.min(25,rows.length))+' of '+num(d.total||tot)+'. <a href="/z/rebuilt?'+s+'">All of them, with every write-up</a>.</p>';
     r.querySelectorAll("tr.rec").forEach(function(tr){tr.onclick=function(){openCase(tr.dataset.case,rows.find(function(a){return a.id===tr.dataset.case}),d.rows.find(function(x){return x.OperatorControlNumber===tr.dataset.case}))}})}).catch(function(e){r.innerHTML=fail(e)})}
-  box.querySelectorAll("[data-s]").forEach(function(b){b.onclick=function(){box.querySelectorAll("[data-s]").forEach(function(x){x.classList.toggle("on",x===b)});recs(b.dataset.s)}});recs("date")}
+  box.querySelectorAll("[data-s]").forEach(function(b){b.onclick=function(){box.querySelectorAll("[data-s]").forEach(function(x){x.classList.toggle("on",x===b)});recs(b.dataset.s)}});recs("date");
+  try{if(sessionStorage.getItem("z-scroll")==="sum"){sessionStorage.removeItem("z-scroll");var tgt=box.querySelector(".bigsel")||box;setTimeout(function(){tgt.scrollIntoView({block:"start",behavior:"smooth"})},60)}}catch(x){}}
 
 /* ---- leads ---- */
 function leads(h){var v=view();var A=[["patterns","Patterns","what the coded fields say about this slice"],["aircraft","Aircraft","which airframes carry this, and how often"],["found","How it was found","in flight, on the ground, by a warning, by a look"],["recurs","What recurs here","the model reads the write-ups and names what no code captures",1]];

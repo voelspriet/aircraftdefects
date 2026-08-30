@@ -18,6 +18,11 @@ piece of equipment, a failed seal), they file it. These reports are then made
 available to everyone: no sign-in, no fee, no records request. There are
 1,757,827 of them since 1995, on 54,634 separate planes.
 
+
+
+![The government's own form for the door-plug report: every answer a code](screenshots/faa-own-form.png)
+*The government's own form for the door-plug report: every answer a code*
+
 I was shocked. The reports are so bureaucratic that almost everything has been
 replaced by codes, and the codes conflict. A report will never tell you there
 was an issue with the landing gear. It will say `ZONE 700`. An emergency
@@ -64,6 +69,10 @@ Sixteen leads under the fold each become the main screen when clicked. There
 is always a way back: the breadcrumb, the × on every filter, "clear all, back
 to the start".
 
+![The page: four rails, the search line, the aircraft, the report that reads itself](screenshots/the-page.png)
+*The page: four rails, the search line, the aircraft, the report that reads itself*
+
+
 ## Beyond the numbers: the model reads the file
 
 A counter can tell you how much. It cannot tell you what happened. The story
@@ -76,6 +85,10 @@ So the model's job changed. Until that point GLM-5.3-Flash had been the
 builder: describe a page, it writes the code. Now it is inside the page.
 Every teal block is the model reading FAA write-ups at the moment you click,
 on whatever slice of the file you have in front of you.
+
+![The newest crew-action report, told in plain English, with the mechanic's words beneath it](screenshots/plain-english.png)
+*The newest crew-action report, told in plain English, with the mechanic's words beneath it*
+
 
 | You press | The FAA's site | GLM-5.3-Flash here |
 |---|---|---|
@@ -97,11 +110,25 @@ another AI. By twenty lines of ordinary code that asks one question: are these
 words literally in that report? A sentence whose quote fails the check is
 deleted before you ever see it, and the page prints the score: "32 quotes
 checked, 32 verified". Click any sentence and it opens the records that
-sentence stands on. When an answer ends, the model proposes three narrower
+sentence stands on.
+
+![Click a sentence and the records it rests on open beneath it](screenshots/sentence-opens-its-records.png)
+*Click a sentence and the records it rests on open beneath it*
+
+When an answer ends, the model proposes three narrower
 slices worth opening; the server looks each one up first and prints the real
 count, and a suggestion that matches zero reports is dropped. The model
 proposes. The file counts. That division of labour runs through everything
 here.
+
+![Three next clicks, each with its real count](screenshots/next-three-clicks.png)
+*Three next clicks, each with its real count*
+
+
+
+
+![What should we check next: every suggestion is a click](screenshots/what-to-check-next.png)
+*What should we check next: every suggestion is a click*
 
 ### How it was built, in one paragraph each
 
@@ -130,6 +157,11 @@ raised in one line. Asked cold about the film, the model insisted it was
 results. The good parts of this site were not designed in advance. They exist
 because I used the thing, found it irritating, and complained precisely.
 
+
+
+![419 reports on one Boeing 747 freighter, told as a story](screenshots/one-aircraft-end-to-end.png)
+*419 reports on one Boeing 747 freighter, told as a story*
+
 ### Send out a team
 
 For the parts where I did not yet know how the information should look, I
@@ -143,6 +175,11 @@ also cut things, with reasons recorded in
 [`docs/DESIGN-Z2.md`](docs/DESIGN-Z2.md): no chat window over the selection,
 no damage map across aircraft types, no event detection by two model passes
 agreeing. I did not think of most of what shipped.
+
+
+
+![A question with no field: the model says what the file cannot tell you first](screenshots/most-dangerous-question.png)
+*A question with no field: the model says what the file cannot tell you first*
 
 ## What it refuses to say
 

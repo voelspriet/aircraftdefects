@@ -8161,7 +8161,7 @@ window.addEventListener("load", function(){ sdrStripRails(); sdrFixLabels(); sdr
 
 
 
-/* ---- 37: the dead handlers and the part number, written by the model ---- */
+/* ---- 38: the part number read right, and locate, written by the model ---- */
 (function(){
 "use strict";
 window.__sderrs=window.__sderrs||[];
@@ -8374,18 +8374,19 @@ function sdEnsureGlobals(){
 sdEnsureGlobals();
 
 /* ============ sd-recfetch: the case sheet is opened per record and the page
-   fetches that record itself; part_number is one of the fields it returns.
-   The response is picked up in passing: fetch and XHR are wrapped once, and
-   only a response that looks like one record (own part_number field, no
-   records array, and not one of the dossier endpoints) is kept, latest one
-   winning, because the sheet shows one record at a time. ================== */
+   fetches that record itself; the file's part number field is PartNumber,
+   with ComponentPartNumber as the sparse fallback. The response is picked up
+   in passing: fetch and XHR are wrapped once, and only a response that looks
+   like one record (own PartNumber or ComponentPartNumber field, no records
+   array, and not one of the dossier endpoints) is kept, latest one winning,
+   because the sheet shows one record at a time. ========================== */
 var SX={last:null};
 function sdNoteRecord(obj,url){
   try{
     if(!obj||typeof obj!=="object"||Array.isArray(obj))return;
-    if(!Object.prototype.hasOwnProperty.call(obj,"part_number"))return;
+    if(!Object.prototype.hasOwnProperty.call(obj,"PartNumber")&&!Object.prototype.hasOwnProperty.call(obj,"ComponentPartNumber"))return;
     if("records" in obj)return;
-    if(url&&/api\/(airframe|repeats|summary|operator|part|export)(\/|\?|$)/i.test(String(url)))return;
+    if(url&&/api\/(airframe|repeats|summary|operator|part|export|locate)(\/|\?|$)/i.test(String(url)))return;
     SX.last=obj;
     kick();
   }catch(_){}
@@ -8434,12 +8435,15 @@ if(!window.__sdFetchWrapped){
 }
 
 /* ============ sd-pnrow: the case sheet's sixteen rows carry a Part row that
-   names the part ("AHRS"), but the part number appears nowhere on the page.
-   The record endpoint returns part_number, so the sheet gets its own Part
-   number row beside the Part row, and that row is the way into the part
-   dossier. When the record has no part number, the row says so in the same
-   words the sheet uses for its other absent fields, detected from those rows
-   themselves. ============================================================= */
+   names the part, but the part number appeared nowhere on the page \u2014 and
+   worse, a row once said "not recorded" about a number the file records,
+   because the wrong field was read. The record endpoint's field is
+   PartNumber ("17039203426" on JR2R20260825350); ComponentPartNumber is the
+   fallback and is null on most records. Read PartNumber; fall back to
+   ComponentPartNumber only when PartNumber is empty; print "not recorded"
+   only when both really are, in the same words the sheet uses for its other
+   absent fields, detected from those rows themselves. The row is the way
+   into the part dossier. ================================================ */
 function sdIsAbsentText(s){
   if(/^(--|\u2013|\u2014|-)$/.test(s))return true;
   if(/^(none|unknown|n\/a|na|not available|not recorded|not given|not reported|not stated|not captured|no entry|missing|absent|unrecorded)\.?$/i.test(s))return true;
@@ -8494,7 +8498,11 @@ function sdFillPartRow(partRow){
   var vc=row.cells&&row.cells[1];
   if(!vc)return;
   var rec=SX.last;
-  var raw=(rec&&typeof rec==="object")?rec.part_number:null;
+  var raw=null;
+  if(rec&&typeof rec==="object"){
+    raw=rec.PartNumber;
+    if(raw==null||String(raw).trim()==="")raw=rec.ComponentPartNumber;
+  }
   var pn=(raw==null)?"":String(raw).trim();
   var key,ab=null;
   if(pn)key="pn:"+pn;
@@ -8658,6 +8666,8 @@ function sdRender(node,t,raf,rpf,rsm){
   }else{
     parts.push('<section class="sd-d-sec"><h3>What recurred</h3><p class="sd-d-none">Nothing on this airframe was written up more than once.</p></section>');
   }
+  /* the repeats endpoint's own limits, if it states any */
+  if(rp&&rp.cannot_show&&rp.cannot_show.length)parts.push(sdLimits(rp.cannot_show));
   var gen=!!(sm&&sm.generated===true);
   var hasSum=sm&&sm.summary&&String(sm.summary).trim();
   var lab=hasSum?(gen?"Written by a model":"Assembled from recounted numbers \u2014 not written by a model"):"Summary not written";
@@ -8898,6 +8908,216 @@ function sdDossierKick(){
   else sdOpen(SD.kind,SD.value);
 }
 
+/* ============ sd-locate: api/locate reads the mechanic's own words and says
+   where the defect was. One control sits above the record table, where the
+   write-ups already are. It sends the first 25 write-ups now on screen \u2014
+   never more, the endpoint's own limit \u2014 and says that is what it sent.
+   A row is marked only when the model's location came back with a span the
+   endpoint could quote verbatim from the write-up; what it could not prove
+   comes back as dropped_unverifiable plus a note, and both are shown. Every
+   mark carries a "read by a model" tag and amber dashed styling, so it can
+   never be mistaken for the FAA's zone codes in the row above. Results are
+   cached against the write-up's own text, so a redraw re-marks the same
+   sentence with the same reading and never a stale neighbour's. ========== */
+var SDLOC={cache:{},last:null,busy:0,fp:null};
+function sdLocKey(t){
+  var h=5381,i;
+  for(i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;
+  return h.toString(36)+"_"+t.length;
+}
+function sdLocCollect(){
+  var out=[],ws=document.querySelectorAll(".wu"),i,j,wu,td,cl,junk,text;
+  for(i=0;i<ws.length;i++){
+    wu=ws[i];
+    if(!wu.isConnected)continue;
+    td=wu.closest("td");
+    if(!td)continue;
+    cl=wu.cloneNode(true);
+    junk=cl.querySelectorAll(".wu-gloss,[data-sd-locout]");
+    for(j=0;j<junk.length;j++){if(junk[j].parentNode)junk[j].parentNode.removeChild(junk[j])}
+    text=(cl.textContent||"").replace(/\s+/g," ").trim();
+    if(text.length<12)continue;
+    out.push({wu:wu,td:td,text:text,key:sdLocKey(text)});
+  }
+  return out;
+}
+function sdLocFpOf(rows){
+  if(!rows||!rows.length)return "";
+  return rows.length+":"+rows[0].key+":"+rows[rows.length-1].key;
+}
+function sdLocBar(){
+  var anchor=null,w,t,bar;
+  w=document.querySelector(".wu");
+  if(w&&w.isConnected){
+    t=w.closest("table");
+    if(t&&t.isConnected)anchor=t;
+  }
+  bar=byId("sd-locbar");
+  if(!anchor){
+    if(bar&&bar.parentNode)bar.parentNode.removeChild(bar);
+    return;
+  }
+  if(!bar){
+    bar=document.createElement("div");
+    bar.id="sd-locbar";
+    bar.setAttribute("data-sd-model","1");
+    bar.setAttribute("role","region");
+    bar.setAttribute("aria-label","A model\u2019s reading of where the write-ups on screen say the defect was");
+    bar.innerHTML='<button type="button" class="sdbtn" id="sd-locbtn">Locate these write-ups</button>'
+      +'<span class="sd-loc-exp">Sends the first 25 write-ups now on screen \u2014 no more, the reader\u2019s own limit \u2014 to a model that reads where each defect was. A location is kept only when the quoted words appear verbatim in the write-up; what it cannot prove is dropped and counted. Everything here is a model\u2019s reading, not the FAA\u2019s zone codes.</span>'
+      +'<div id="sd-locsum" hidden></div>';
+    bar.addEventListener("click",function(e){
+      var b=e.target&&e.target.closest?e.target.closest("#sd-locbtn"):null;
+      if(!b)return;
+      e.preventDefault();
+      try{sdLocSend()}catch(_){}
+    });
+  }
+  if(bar.parentNode!==anchor.parentNode||bar.nextElementSibling!==anchor){
+    anchor.parentNode.insertBefore(bar,anchor);
+  }
+}
+function sdLocSend(){
+  if(SDLOC.busy)return;
+  var rows=sdLocCollect();
+  if(!rows.length){
+    SDLOC.busy=0;
+    SDLOC.last={fp:"",error:true,msg:"No write-ups are on screen to read."};
+    kick();return;
+  }
+  var batch=rows.slice(0,25),i,payload;
+  payload={records:[]};
+  for(i=0;i<batch.length;i++)payload.records.push({id:String(i),text:batch[i].text});
+  SDLOC.busy=batch.length;
+  SDLOC.last=null;
+  kick();
+  fetch("/z/api/locate",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(payload)
+  }).then(function(r){
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    return r.json();
+  }).then(function(j){
+    SDLOC.busy=0;
+    var res=(j&&Array.isArray(j.results))?j.results:[];
+    var placed={},placedN=0,i,x,idx,where,span;
+    for(i=0;i<res.length;i++){
+      x=res[i];
+      if(!x||typeof x!=="object")continue;
+      idx=Number(x.id);
+      if(!isFinite(idx)||idx<0||idx>=batch.length)continue;
+      where=(x.where==null)?"":String(x.where).trim();
+      span=(x.span==null)?"":String(x.span).trim();
+      if(!where)continue;
+      placed[idx]={where:where,span:span};
+      placedN++;
+    }
+    /* sent rows are settled this run: placed ones keep their reading, the
+       rest are explicitly dropped, so no stale mark survives a re-run */
+    for(i=0;i<batch.length;i++)SDLOC.cache[batch[i].key]=placed[i]||null;
+    SDLOC.last={
+      fp:sdLocFpOf(rows),
+      sent:batch.length,
+      total:rows.length,
+      checked:(j&&j.checked!=null)?sdNum(j.checked):batch.length,
+      placed:placedN,
+      dropped:(j&&j.dropped_unverifiable!=null)?sdNum(j.dropped_unverifiable):(batch.length-placedN),
+      note:(j&&j.note!=null)?String(j.note).trim():""
+    };
+    kick();
+  }).catch(function(){
+    SDLOC.busy=0;
+    SDLOC.last={fp:sdLocFpOf(rows),error:true};
+    kick();
+  });
+}
+function sdLocApply(rows){
+  var i,r,hit,mark,tag,wh,sp;
+  for(i=0;i<rows.length;i++){
+    r=rows[i];
+    hit=Object.prototype.hasOwnProperty.call(SDLOC.cache,r.key)?SDLOC.cache[r.key]:undefined;
+    mark=r.td.querySelector("[data-sd-locout]");
+    if(hit){
+      if(!mark){
+        mark=document.createElement("p");
+        mark.className="sd-loc";
+        mark.setAttribute("data-sd-locout","1");
+        mark.setAttribute("data-sd-model","1");
+        tag=document.createElement("span");
+        tag.className="sd-loc-tag";
+        tag.textContent="read by a model";
+        wh=document.createElement("b");
+        wh.className="sd-loc-where";
+        wh.textContent=hit.where;
+        mark.appendChild(tag);
+        mark.appendChild(wh);
+        if(hit.span){
+          sp=document.createElement("span");
+          sp.className="sd-loc-span";
+          sp.textContent="\u201c"+hit.span+"\u201d";
+          mark.appendChild(sp);
+        }
+        r.td.appendChild(mark);
+      }
+    }else if(hit===null&&mark){
+      mark.parentNode.removeChild(mark);
+    }
+  }
+}
+function sdLocRender(){
+  var bar=byId("sd-locbar");
+  if(!bar)return;
+  var btn=byId("sd-locbtn");
+  var sum=byId("sd-locsum");
+  if(!sum){
+    sum=document.createElement("div");
+    sum.id="sd-locsum";
+    sum.hidden=true;
+    bar.appendChild(sum);
+  }
+  var label=SDLOC.busy?("Reading "+SDLOC.busy+" write-ups\u2026"):"Locate these write-ups";
+  if(btn){
+    if(btn.textContent!==label)btn.textContent=label;
+    var dis=!!SDLOC.busy;
+    if(btn.disabled!==dis)btn.disabled=dis;
+  }
+  var html="",sig="",show=false,last=SDLOC.last;
+  if(SDLOC.busy){
+    html='<p class="sd-loc-line">Sending '+SDLOC.busy+' write-ups to the reader\u2026</p>';
+    sig="busy"+SDLOC.busy;show=true;
+  }else if(last&&last.error){
+    if(last.fp===SDLOC.fp||!last.fp){
+      html='<p class="sd-loc-line">'+sdEsc(last.msg||"The locate endpoint did not answer. Nothing is marked rather than something wrong.")+'</p>';
+      sig="err:"+(last.msg||"");show=true;
+    }
+  }else if(last&&last.fp===SDLOC.fp){
+    var sentTxt=(last.sent>=last.total)
+      ?("all "+last.total+" write-ups now on screen")
+      :("the first "+last.sent+" of the "+last.total+" write-ups now on screen");
+    html='<p class="sd-loc-line">Sent '+sentTxt+'. Checked '+sdFmt(last.checked)+', placed '+sdFmt(last.placed)+', dropped '+sdFmt(last.dropped)+' as unverifiable.</p>'
+      +(last.note?'<p class="sd-loc-note">'+sdEsc(last.note)+'</p>':'');
+    sig="s"+last.sent+"t"+last.total+"c"+last.checked+"p"+last.placed+"d"+last.dropped+"n"+last.note;
+    show=true;
+  }
+  if((sum.getAttribute("data-sd-sig")||"")!==sig){
+    sum.setAttribute("data-sd-sig",sig);
+    if(show){
+      if(sum.hidden)sum.hidden=false;
+      sum.innerHTML=html;
+    }else{
+      if(!sum.hidden)sum.hidden=true;
+      if(sum.innerHTML!=="")sum.innerHTML="";
+    }
+  }
+}
+function sdLocStep(){
+  var rows=sdLocCollect();
+  SDLOC.fp=sdLocFpOf(rows);
+  sdLocApply(rows);
+  sdLocRender();
+}
+
 var queued=false;
 function pass(){
   queued=false;
@@ -8915,6 +9135,8 @@ function pass(){
   try{tagTable()}catch(e){}
   try{sdPartRow()}catch(e){}
   try{sdMarkCells()}catch(e){}
+  try{sdLocBar()}catch(e){}
+  try{sdLocStep()}catch(e){}
   try{sdMirror()}catch(e){}
   try{sdDossierKick()}catch(e){}
 }
@@ -9695,7 +9917,7 @@ table.reps th{ font-size:11px; background:transparent; color:var(--ash);
 .rail.open[data-rail=when] .track{ overflow-x:auto; overscroll-behavior-x:contain }
 `;document.head.appendChild(s);})();
 
-(function(){var s=document.createElement('style');s.id='sdr-css-37';s.textContent=`#sentence{display:none!important}
+(function(){var s=document.createElement('style');s.id='sdr-css-38';s.textContent=`#sentence{display:none!important}
 #sd-sink{display:none!important}
 .card.land{display:none!important}
 #vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}
@@ -9811,6 +10033,20 @@ code.cd.sd-pnlink:focus-visible{outline:2px solid var(--rust-text,#b8431f);outli
 #sd-dossier .sd-d-bars .sd-d-bar i{display:block;height:100%;background:var(--rust)}
 #sd-dossier .sd-d-bars .sd-d-barnum{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
 @media(max-width:700px){#sd-dossier .sd-d-bars li{grid-template-columns:minmax(64px,110px) minmax(40px,1fr) 52px;font-size:10.5px;height:16px}}
+/* sd-locate: the model's reading of where the write-ups say the defect was.
+   Amber, dashed and serif on purpose \\u2014 nothing here may be mistaken for
+   the FAA's own zone codes in the row above. */
+#sd-locbar{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;margin:10px 0 6px;padding:9px 12px;border:1px dashed #c9a24b;background:#fdfaf1;border-radius:4px}
+#sd-locbar .sd-loc-exp{flex:1 1 340px;min-width:0;font-size:11.5px;line-height:1.5;color:#5c554c}
+#sd-locsum{flex-basis:100%;min-width:0}
+#sd-locsum p{margin:3px 0}
+#sd-locsum .sd-loc-line{font-size:12.5px;line-height:1.5;color:var(--ink)}
+#sd-locsum .sd-loc-note{font:italic 13px/1.5 Georgia,'Times New Roman',serif;color:#7a5b00}
+.sd-loc{margin:6px 0 2px;padding:5px 10px;border-left:2px dashed #c9a24b;background:#fdfaf1;font:13px/1.55 Georgia,'Times New Roman',serif;color:#5c554c}
+.sd-loc .sd-loc-tag{display:inline-block;margin:0 8px 0 0;padding:1px 6px;font:600 9px/1.5 Archivo,system-ui,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:#7a5b00;background:#fff;border:1px solid #e6d8ae;border-radius:3px;vertical-align:1px}
+.sd-loc .sd-loc-where{color:var(--ink);font-weight:600;font-style:normal}
+.sd-loc .sd-loc-span{color:#7a5b00;font-style:italic}
+@media(max-width:700px){#sd-locbar{padding:8px 10px}#sd-locbar .sd-loc-exp{font-size:11px}.sd-loc{font-size:12px}}
 `;document.head.appendChild(s);})();
 
 window.drawInstrument=drawInstrument;

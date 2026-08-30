@@ -13,9 +13,9 @@ BASE   = HERE / "bridge.js.bak"          # the bridge, hand-written, joins the h
 JS     = [("17-merge.js",   "17: the instrument's setting"),
           ("19-phone.js",   "19: the phone, the stepper, the ids"),
           ("20-overlay.js", "20: the overlay, the rails, the labels"),
-          ("37-dom.js",     "37: the dead handlers and the part number"),
+          ("38-dom.js",     "38: the part number read right, and locate"),
           (("10-guidance.md", "js"), "10: how to read each panel")]
-CSS    = ["18-css.css", "37-css.css"]
+CSS    = ["18-css.css", "38-css.css"]
 
 out = BASE.read_text()
 for item, label in JS:

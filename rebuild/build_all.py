@@ -16,6 +16,7 @@ JS     = [("17-merge.js",   "17: the instrument's setting"),
           ("41-dom.js",     "41: the disagreements, and the way in"),
           ("42-dom.js",     "42: one dialog, and a guard that survives re-parenting"),
           ("43-dom.js",     "43: the drift, and the names it owns"),
+          ("47-hand.js",    "47: HAND-WRITTEN. one empty state, one count. see MODEL_USE.md"),
           (("10-guidance.md", "js"), "10: how to read each panel")]
 CSS    = ["18-css.css", "41-css.css", "43b-css.css", "43a-css.css", "42-css.css"]
 

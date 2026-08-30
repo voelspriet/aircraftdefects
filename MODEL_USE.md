@@ -105,11 +105,11 @@ The line at the top of this file, "everything on the page is written by the
 model", is the intent and it was not precise enough to be checkable. This section
 is the precise version. Every figure here can be counted from the repository.
 
-    served page, raw                 713,678 characters
-      rebuild/01-instrument.page.html  509,632   model
-      rebuild/bridge.js                204,046   see below
-        of which model blocks          190,820
-        of which hand-written           13,226   1.9% of the page
+    served page, raw                 608,795 characters   (recounted 30 August, after 47)
+      model-written                    592,949   97.4%
+      hand-written                      15,846   2.6%
+        rebuild/bridge.js.bak            13,228   the seam between the two halves
+        rebuild/47-hand.js                2,618   two faults, see below
 
 **`rebuild/bridge.js.bak`, 13,226 characters, is hand-written.** It joins the two
 halves the model built separately. The controls were briefed to call `search(off)`
@@ -149,3 +149,12 @@ served as designed.
     wc -c rebuild/01-instrument.page.html rebuild/bridge.js rebuild/bridge.js.bak
     git log --follow -p rebuild/01-instrument.page.html
     git log --oneline --all | grep -i "hand correction"
+
+**`rebuild/47-hand.js`, 2,618 characters, is hand-written page code.** Added
+30 August at Henk's decision after two model rounds (1,963 s, 54,123 characters)
+answered against element names that do not exist on the page. It does two
+things: hides the desk's "No rows yet, on purpose" whenever a result count is on
+screen, and keeps the airframe dossier off the page when the instrument's
+selection is empty, so a page never shows two different counts. It is 0.43%
+of the served page. Every other block on the page is the model's. The gate that
+checks both behaviours is `build/verify_presentation.py`, also hand-written.

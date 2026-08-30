@@ -409,6 +409,55 @@ def run(url, is_parent=False):
         c.add("the ignores-your-selection label keeps the whole-corpus number",
               not label_faults, "; ".join(label_faults) if label_faults else "operator and zone filters checked")
 
+        # --- the state a CLICK produces ---------------------------------------
+        # Every check above loads a URL and inspects the result. None of them
+        # clicked something and then looked at what a reader sees. Henk found in
+        # five minutes what 27 of them missed: clicking a zone leaves "No rows
+        # yet, on purpose" on screen while the results load underneath, so nine
+        # working features read as dead. Loading the same URL fresh is clean, so
+        # only a click can find it.
+        click_faults = []
+        for _zone in ("Upper fuselage", "Landing gear", "Lavatories and galleys"):
+            try:
+                pg.goto(f"{base}/z/", wait_until="networkidle", timeout=60000)
+                pg.wait_for_timeout(3000)
+                row = pg.locator(f".lrow:has-text('{_zone}')").first
+                if row.count() == 0:
+                    click_faults.append(f"{_zone}: legend row missing"); continue
+                row.scroll_into_view_if_needed(timeout=5000)
+                row.click(timeout=6000)
+                pg.wait_for_timeout(3500)
+            except Exception as e:
+                click_faults.append(f"{_zone}: click failed"); continue
+            st = pg.evaluate("""()=>{const t=document.body.innerText||'';
+                const nr=document.querySelector('.norows');
+                const m=t.match(/([\\d,]+) reports match your selection/);
+                return {emptyShown: !!(nr && getComputedStyle(nr).display!=='none'),
+                        results: m?m[1]:null};}""")
+            if st["emptyShown"] and st["results"]:
+                click_faults.append(f"{_zone}: says 'No rows yet' while showing {st['results']} results")
+            elif not st["results"]:
+                click_faults.append(f"{_zone}: click produced no result count")
+        c.add("clicking a zone does not show a false empty state",
+              not click_faults, "; ".join(click_faults[:3]) if click_faults else "3 zones clicked")
+
+        # A sticky bar must not lie across a control the reader can press.
+        over = pg.evaluate("""()=>{const out=[];
+            document.querySelectorAll('*').forEach(s=>{
+              let cs; try{cs=getComputedStyle(s)}catch(e){return}
+              if(cs.position!=='sticky'&&cs.position!=='fixed')return;
+              const b=s.getBoundingClientRect(); if(b.height<8||b.width<40)return;
+              if(b.top<0||b.top>innerHeight)return;   // not on screen: cannot cover anything
+              document.querySelectorAll('button,a[href],input,select').forEach(c=>{
+                if(s.contains(c)||c.contains(s))return;
+                const r=c.getBoundingClientRect(); if(!(r.width>0&&r.height>0))return;
+                if(!((c.innerText||c.value||'').trim()))return;  // an unlabelled hit box is not a control a reader sees
+                if(r.left<b.right-2&&b.left<r.right-2&&r.top<b.bottom-2&&b.top<r.bottom-2)
+                  out.push(((s.className||'').toString().split(' ')[0]||s.tagName.toLowerCase())
+                           +' lies across "'+((c.innerText||c.value||'').trim().slice(0,26))+'"');});});
+            return [...new Set(out)].slice(0,4);}""")
+        c.add("no sticky bar lies across a control", not over, "; ".join(over))
+
         c.add("no runtime errors", not errs, "; ".join(errs[:2]))
         br.close()
     return c.report()

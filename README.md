@@ -70,6 +70,16 @@ is the state.
 Below it, sixteen panels and the records themselves, each with the mechanic's own
 words underneath and every abbreviation explained.
 
+## What is not the model's
+
+Two blocks of the served page are hand-written, 2.6% of it by character count.
+`rebuild/bridge.js.bak` joins the two halves the model built separately.
+`rebuild/47-hand.js` fixes two faults found by looking at the screen on 30 August
+that two model rounds did not land: an empty state shown over live results, and
+a dossier that ignored the selection and printed a second count. Both are
+counted, with the commands to verify the figures, in
+[`MODEL_USE.md`](MODEL_USE.md). Everything else on the page is GLM-5.3-Flash.
+
 ## Nothing is asserted that the file cannot carry
 
 The data has no fleet sizes and no flying hours, so there are no rates and no

@@ -98,3 +98,54 @@ can check. The one measurement so far that was published and later retracted was
 retracted for exactly that reason: its adjudicator turned out to be a constant
 rather than a judge, so it agreed with everything. See F1 in
 [`docs/FINDINGS.md`](docs/FINDINGS.md).
+
+## What is not written by the model
+
+The line at the top of this file, "everything on the page is written by the
+model", is the intent and it was not precise enough to be checkable. This section
+is the precise version. Every figure here can be counted from the repository.
+
+    served page, raw                 713,678 characters
+      rebuild/01-instrument.page.html  509,632   model
+      rebuild/bridge.js                204,046   see below
+        of which model blocks          190,820
+        of which hand-written           13,226   1.9% of the page
+
+**`rebuild/bridge.js.bak`, 13,226 characters, is hand-written.** It joins the two
+halves the model built separately. The controls were briefed to call `search(off)`
+and expect a promise carrying a total and a corpus; the rows were briefed to live
+in their own closure and announce the figure on an event. Each half assumed the
+other and each built a whole. The bridge is the seam: a `search` that adapts one
+to the other, a single fetch of the corpus figure, a delegated listener for the
+gloss button because another block moves it, and the nineteen field names the
+gloss endpoint takes. It also tucks the desk into the panel it belongs to.
+
+**Three hand corrections to model-written blocks**, all in `rebuild/40-dom.js`,
+all on 30 August, all recorded in the commit that carried them:
+
+  - one missing `+` between two string literals, which `node --check` named on
+    the line. A round would have cost six minutes; the character cost none.
+  - eighteen em dashes replaced, because the standing instruction for this
+    project is that no text produced for it uses them. Two of the replacements
+    read wrong as colons and were then made commas.
+
+Nothing else in any page block has been touched by hand. `rebuild/01-instrument.page.html`
+has never been hand-edited: `git log -p` on it shows only whole blocks arriving
+from `ask.py` and `agent.py`.
+
+**The harness is hand-written and always was.** `ask.py` and `agent.py` call the
+model; `extract.py` pulls blocks out of an answer by its fences; `splice.py`
+merges them and renames the collisions that fail in silence; `build_all.py` says
+what the page is made of and in what order; `build_z.py` publishes it; the seven
+scripts in `build/` measure the result against the parent. None of that is on the
+page. All of it decides what reaches the page, which is why it is listed here.
+
+**The service** in `app/app.py` is the model's, including the nine builds it
+chose and the rewrite of the ninth once the FAA file proved it could not be
+served as designed.
+
+### How to check any of this
+
+    wc -c rebuild/01-instrument.page.html rebuild/bridge.js rebuild/bridge.js.bak
+    git log --follow -p rebuild/01-instrument.page.html
+    git log --oneline --all | grep -i "hand correction"

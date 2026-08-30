@@ -90,7 +90,7 @@ build/count_provenance.py. The service is the model's nine research builds
 plus hand-marked blocks (45%). Every hand-written commit says so in its first
 word.
 
-The whole build, from watching the documentary to this submission, took two
+The whole build, from watching the documentary to this submission, took four
 days and is logged prompt by prompt in HACKATHON_LOG.md and told in full in
 the article above.
 

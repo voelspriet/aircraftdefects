@@ -45,6 +45,7 @@ abstains in a sentence when the write-ups do not carry an answer. All at
 | What differs, two airlines | the newest 150 write-ups from each, plus the counted shares by system | three paragraphs: shared, only A, only B | counts are the file's; "never say one is safer or worse" | 22.5 s, 24,400 tokens |
 | How the trade says it | up to 60 write-ups carrying the word | what mechanics mean by it, with records | abstains under 10 uses | 5 to 15 s |
 | The Freefall page, "what the NTSB found" and "what the film says" | a z.ai web search run by the server first (mirrors and translations dropped, .gov and named outlets first); the model sees only those results | 220 words, every fact numbered to a result; sources rendered as named links | labelled "the web, not the file"; on first attempt the model skipped the search tool and insisted the film was *Downfall* (2022), which is why the search is now done server-side and the model is held to it | 10 to 19 s |
+| The case page, `/case/<id>` | the sheet endpoint decodes every field with the FAA's wording beside the plain label; the five questions run there too | a citable page per record | quote and citation copy buttons; caveats before publishing | instant, one lookup |
 
 ### Prove it
 

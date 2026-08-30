@@ -3,7 +3,7 @@
 Two pages are served from this repository, and the model's part in them is
 different, so this file says which is which before anything else.
 
-**aircraftdefects.com** (also at /z), the page a visitor lands on, is a hand-written frame
+**aircraftdefects.com** , the page a visitor lands on, is a hand-written frame
 (`rebuild/z2.html`, 81,954 characters, written by Claude on 30 and 31 August 2026
 at Henk's decision, after two model rounds against the previous page did not
 land). On that page GLM-5.3-Flash is not the author of the code. It is the

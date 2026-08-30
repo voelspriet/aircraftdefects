@@ -8161,7 +8161,7 @@ window.addEventListener("load", function(){ sdrStripRails(); sdrFixLabels(); sdr
 
 
 
-/* ---- 28: written with its own eyes, written by the model ---- */
+/* ---- 30: written with its own eyes, written by the model ---- */
 (function(){
 "use strict";
 window.__sderrs=window.__sderrs||[];
@@ -8171,7 +8171,22 @@ function visible(n){if(!n||n.nodeType!==1)return false;if(!n.offsetParent&&getCo
 function phone(){return matchMedia("(max-width:760px)").matches}
 var READING_TEXT="Upper fuselage accounts for 84,453 of the 212,940 reports written in the FAA\u2019s numbered zones, or 39.7%. Those numbers are what this diagram can place, and they are 12.1% of the selection. Another 1,454,504 do say where, in words such as FUSELAGE or CABIN rather than a zone number, so the drawing cannot show them. Only 90,383, 5.1%, give no location at all. It is a sample rather than the whole file, but it does give you a good idea of where the trouble sits.";
 var SEED_HTML='<span class="fig">1,757,827</span> reports, everything the FAA has published to 26 August 2026.';
+var SHORT_TOTAL=/^1,757,827\s+reports\.?(\s*Nothing chosen yet\.?)?\s*$/;
 var NOROWS_HTML='<p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and buries the one you have.</p><p class="muted">Take a month, a zone, an airline or a tail from the instrument above, pick one of the starter questions, or set a filter. To read the file straight through anyway, use the button at the foot of the instrument.</p><p><button type="button" class="sdbtn" id="revealBtn">Read all 1,757,827 anyway</button> <button type="button" class="ghostbtn" id="gotoStarters">Show me the starter questions</button></p>';
+function sdFiltered(){
+  var i,x;
+  var sels=document.querySelectorAll("#sdControls select");
+  for(i=0;i<sels.length;i++){if((sels[i].value||"").trim()!=="")return true}
+  var ins=document.querySelectorAll("#sdControls input");
+  for(i=0;i<ins.length;i++){
+    x=ins[i];
+    if(x.type==="checkbox"||x.type==="radio"){if(x.checked)return true}
+    else if((x.value||"").trim()!=="")return true;
+  }
+  var tabs=document.querySelectorAll("#vstrip .vtab.on");
+  for(i=0;i<tabs.length;i++){if((tabs[i].getAttribute("data-view")||"p-search")!=="p-search")return true}
+  return false;
+}
 function ensureIpad(){
   var hero=byId("hero");if(!hero)return null;
   var rails=hero.querySelector(".rails");
@@ -8193,6 +8208,7 @@ function sdSink(){
   if(!s){s=document.createElement("div");s.id="sd-sink";(document.querySelector("main.wrap")||document.body).appendChild(s)}
   return s;
 }
+function sdEmpty(c){return !c.textContent.trim()&&!c.children.length}
 function seatCount(){
   var all=document.querySelectorAll("#count");
   var c=all[0];
@@ -8217,7 +8233,9 @@ function seatCount(){
     }
   }
   if(!/\bsdcount\b/.test(c.className))c.className=("sdcount "+c.className).trim();
-  if(!c.textContent.trim()&&!c.children.length)c.innerHTML=SEED_HTML;
+  if(!sdFiltered()){
+    if(sdEmpty(c)||SHORT_TOTAL.test(c.textContent.trim())){c.dataset.sdSeeded="1";c.innerHTML=SEED_HTML}
+  }
 }
 function retireStand(){
   var s=document.querySelector(".ipad .stand");
@@ -8280,16 +8298,15 @@ function ensureNoRows(){
     if(n.style.display==="none")n.style.display="";
   }
 }
-var snap={s:null,c:null};
-function mirror(){
+var snap={c:null};
+function sdMirror(){
   var s=byId("sentence"),c=byId("count");
   if(!s||!c||s===c)return;
-  var sv=s.innerHTML,cv=c.innerHTML;
-  if(sv!==cv){
-    if(sv!==snap.s&&snap.s!==null){c.innerHTML=sv;cv=sv}
-    else{s.innerHTML=cv;sv=cv}
+  var cv=c.innerHTML;
+  if(s.innerHTML!==cv&&snap.c!==null&&snap.c!==cv){
+    s.innerHTML=cv;
   }
-  snap.s=sv;snap.c=cv;
+  snap.c=cv;
 }
 function purgeLand(){
   var ls=document.querySelectorAll(".card.land"),i;
@@ -8307,7 +8324,7 @@ function pass(){
   try{ensureNoRows()}catch(e){}
   try{stripInline()}catch(e){}
   try{secondLine()}catch(e){}
-  try{mirror()}catch(e){}
+  try{sdMirror()}catch(e){}
 }
 function kick(){if(queued)return;queued=true;requestAnimationFrame(pass)}
 new MutationObserver(kick).observe(document.documentElement,{childList:true,subtree:true});
@@ -9085,7 +9102,7 @@ table.reps th{ font-size:11px; background:transparent; color:var(--ash);
 .rail.open[data-rail=when] .track{ overflow-x:auto; overscroll-behavior-x:contain }
 `;document.head.appendChild(s);})();
 
-(function(){var s=document.createElement('style');s.id='sdr-css-28';s.textContent=`#sentence{display:none!important}
+(function(){var s=document.createElement('style');s.id='sdr-css-30';s.textContent=`#sentence{display:none!important}
 #sd-sink{display:none!important}
 .card.land{display:none!important}
 #vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}

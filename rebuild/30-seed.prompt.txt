@@ -1,0 +1,291 @@
+One fault. The page states a number that is not true of what is on screen.
+
+RULE FOR THIS RUN: your first tool call must be deploy. Not measure, not parent.
+Deploy a fix, then measure it, then fix again. Your last run spent all twenty
+steps reading source and shipped nothing, so the false statement is still on the
+live page. Ship first, investigate only with what a measurement tells you after.
+
+  deploy(css, js)             splices your block in, publishes it, returns errors
+  measure(js, width, query)   runs a JavaScript arrow function against your page
+  parent(js, width, query)    the same, against the original
+  done(summary)               when the checks pass
+
+Twenty steps. Your block is at the end of this brief and is on the page now.
+
+# The fault
+
+At /z/?zone=ZONE+500&operator=CALA the page lists 219 records and says:
+
+    rebuild   1,757,827 reports, everything the FAA has published to 26 August 2026.
+    original  219 reports, left wing, Continental Airlines Inc. 1,757,608 set aside.
+
+# The diagnosis, which your last run found and did not act on
+
+The page has its own writer for this element:
+
+    renderCount(d)     composes the sentence from the returned selection and
+                       writes it into #count
+    renderOnPurpose()  writes the unfiltered sentence when nothing is filtered
+    sdSearch(off)      calls one or the other on every load and every filter change
+
+Your block's seatCount() also writes #count, and it runs from a MutationObserver,
+so it fires *after* the page has written the true sentence and replaces it with
+the seeded one. The seed was added to fix the phone, where the page never creates
+#count at all.
+
+So the seed has to be the fallback and never the last word. Write into #count only
+when it is empty, and make sure your own observer does not treat the page's write
+as a reason to write again. If you cannot tell an empty element from a written one
+at the moment your observer fires, mark your own seed and refuse to replace text
+you did not seed.
+
+# The checks, before you call done
+
+  1. /z/?zone=ZONE+500&operator=CALA at 1440 and at 390: #count reads 219 reports
+     with the clauses and the set-aside figure.
+  2. /z/ unfiltered at 1440 and 390: #count reads the 1,757,827 sentence with the
+     published-to date.
+  3. Set a filter through the interface rather than the URL: #count follows it.
+     Clear the filter: it goes back.
+  4. Still true, all of them: 390 has no page error, #count above the fold, body
+     scrollWidth 390, no .rail visible, #noRows renders. 1440 has the open rail
+     within 10% of 508 with its reading paragraph, svg within 5% of 628 x 138,
+     one sentence carrier in .ipad and it is #count, #vstrip at or under 130px
+     with 16 .vtab and 16 [role=tab], body scrollHeight at or under 1,990, no
+     page error.
+
+Put the measured numbers in the summary.
+
+Do not undo the phone layout, the case sheet overlay, the record stepper or the
+aria-labels. Prefix every new name.
+
+--- YOUR CURRENT BLOCK ---
+
+CSS:
+#sentence{display:none!important}
+#sd-sink{display:none!important}
+.card.land{display:none!important}
+#vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}
+#vstrip.vgroups .vg{display:flex;flex-direction:row;align-items:center;gap:10px;min-width:0}
+#vstrip.vgroups .vglab{flex:0 0 auto;font:600 9.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.08em;color:#57514a;text-transform:uppercase;white-space:nowrap}
+#vstrip.vgroups .vgbtns{display:flex!important;flex-direction:row!important;gap:2px!important;align-items:center!important;flex-wrap:wrap!important;margin:0!important;padding:0!important;border-bottom:0!important;min-width:0;flex:1 1 auto}
+button.vtab{padding:3px 8px;font-size:11.5px;line-height:1.2;border:1px solid transparent;border-radius:3px;background:none;color:#5c554c;cursor:pointer;white-space:nowrap}
+button.vtab.on{background:var(--card);border-color:var(--line);color:var(--ink);font-weight:600}
+.axis{display:flex;gap:2px;margin-top:3px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ash)}
+.axis span{flex:1;min-width:0}
+.sd-second{font-size:11.5px;color:#6b6560;margin:0 0 3px;text-align:center;letter-spacing:.02em}
+.sd-second b{font-weight:600}
+#hero.instrument{position:relative;background:var(--paper);border:1px solid var(--line);border-bottom:3px solid var(--rust);border-radius:6px;margin:12px 0 0;overflow:hidden;padding:0}
+#hero.instrument > .ipad{padding:10px 20px 6px}
+#count.sdcount{font-family:'Instrument Serif',Georgia,serif;font-size:30px;line-height:1.1;color:var(--ink);max-width:none;margin:4px 0 2px;white-space:normal}
+#count.sdcount .fig{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:.92em;font-variant-numeric:tabular-nums;color:var(--rust-text,#b8431f)}
+#count.sdcount .aside{font-size:.62em;color:var(--ash)}
+#count.sdcount .broken{display:block;font-size:.5em;color:var(--rust)}
+#count.sdcount .clause{border-bottom:1px dotted rgba(29,29,31,.28);cursor:pointer}
+.rail .reading{margin:9px 0 0;padding:8px 12px 8px 13px;border-left:2px solid var(--rust);background:#faf7f3;font:15px/1.5 Georgia,'Times New Roman',serif;color:var(--ink);max-width:none}
+.rail>.reading{grid-column:2}
+@media(max-width:700px){.rail .reading{font-size:14px;padding:7px 10px}}
+@media(min-width:901px){
+#hero.instrument{max-width:1140px!important}
+.rail{align-items:start;grid-template-columns:110px minmax(0,1fr)!important}
+.rail .track{min-width:0;position:relative}
+.rail .track.two{display:grid;grid-template-columns:minmax(0,628px) minmax(0,330px);gap:18px}
+.rail .track.two > svg.plane{width:100%;max-width:640px;height:auto;display:block}
+.rail .col .ch{font:600 10.5px/1.2 Archivo,system-ui,sans-serif;letter-spacing:.1em;color:var(--ash);margin-bottom:3px}
+.rail .orow{display:grid;grid-template-columns:120px 1fr 52px;gap:8px;align-items:center;font-size:11.5px;height:14px;padding:0 3px;border-radius:3px}
+.rail .orow .on{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:14px}
+.rail .orow .ob{height:6px;background:#e8e3d8;border-radius:3px;overflow:hidden}
+.rail .orow .ob i{display:block;height:100%;background:var(--rust)}
+.rail .orow.wide{grid-template-columns:190px 1fr 56px;height:17px}
+.rail .orow.wide .on{font-size:12px;line-height:17px}
+.rail .fblock{height:22px}
+.rail .frows{margin-top:4px}
+.rail .fnote{font-size:11px;margin-top:3px}
+.rail[data-rail=forced].open .fblock{margin-bottom:5px}
+.rail .legend{font-size:11.5px;gap:0}
+.rail .lrow{padding:0 4px;line-height:1.35}
+.rail .zonenote{font-size:11px;line-height:1.4;margin-top:4px;padding-top:4px}
+}
+#hero .ipad .aimwrap{display:none}
+#hero .ipad .rv-aim{margin-top:6px}
+#hero .ipad .specimen{font-size:11px;line-height:1.35;padding-top:2px;padding-bottom:2px}
+#hero .ipad .margin{font-size:10.5px;line-height:1.3;padding-top:2px;margin-top:3px}
+#hero .ipad .rails{margin-top:6px}
+#sdControls{gap:4px;margin-top:8px}
+#sdControls .bar{gap:6px}
+#sdControls .actions{padding:0}
+#noRows{padding:8px 12px;margin-top:6px}
+#noRows p{margin:3px 0}
+#starterToggle{padding:3px 10px}
+#rr-sec{margin:6px 0 0}
+#rr-sec .cut{font-size:10.5px;line-height:1.25}
+#rr-sec .rr-count{font-size:12px}
+#rr-sec .rr-more{font-size:11px;padding:3px 10px}
+.card.ask{padding:9px 14px;margin:5px 0}
+#khint{margin:2px 0 0}
+.credit{font-size:11px;line-height:1.25;margin-bottom:6px}
+#views{margin:8px 0 0}
+@media(max-width:760px){
+#vstrip.vgroups,#sd-second{display:none}
+.phbar>#count.sdcount{flex:0 0 100%;font:500 12.5px/1.35 'IBM Plex Mono',ui-monospace,monospace;margin:0 0 6px;max-width:none;color:var(--ink);white-space:normal}
+.phbar>#count.sdcount .fig{font-size:12.5px;font-weight:600;font-family:'IBM Plex Mono',ui-monospace,monospace}
+.phbar>#count.sdcount .aside,.phbar>#count.sdcount .broken{font-size:10px}
+#noRows{display:block!important;visibility:visible!important}
+#noRows[hidden]{display:block!important}
+#noRows p{font-size:12px;line-height:1.4}
+}
+JS:
+(function(){
+"use strict";
+window.__sderrs=window.__sderrs||[];
+addEventListener("error",function(e){try{window.__sderrs.push(String((e&&e.message)||e))}catch(_){}});
+function byId(id){return document.getElementById(id)}
+function visible(n){if(!n||n.nodeType!==1)return false;if(!n.offsetParent&&getComputedStyle(n).position!=="fixed")return false;var cs=getComputedStyle(n);return cs.display!=="none"&&cs.visibility!=="hidden"}
+function phone(){return matchMedia("(max-width:760px)").matches}
+var READING_TEXT="Upper fuselage accounts for 84,453 of the 212,940 reports written in the FAA\u2019s numbered zones, or 39.7%. Those numbers are what this diagram can place, and they are 12.1% of the selection. Another 1,454,504 do say where, in words such as FUSELAGE or CABIN rather than a zone number, so the drawing cannot show them. Only 90,383, 5.1%, give no location at all. It is a sample rather than the whole file, but it does give you a good idea of where the trouble sits.";
+var SEED_HTML='<span class="fig">1,757,827</span> reports, everything the FAA has published to 26 August 2026.';
+var NOROWS_HTML='<p><strong>No rows yet, on purpose.</strong> Listing everything answers no question and buries the one you have.</p><p class="muted">Take a month, a zone, an airline or a tail from the instrument above, pick one of the starter questions, or set a filter. To read the file straight through anyway, use the button at the foot of the instrument.</p><p><button type="button" class="sdbtn" id="revealBtn">Read all 1,757,827 anyway</button> <button type="button" class="ghostbtn" id="gotoStarters">Show me the starter questions</button></p>';
+function ensureIpad(){
+  var hero=byId("hero");if(!hero)return null;
+  var rails=hero.querySelector(".rails");
+  if(!rails||!visible(rails)||hero.querySelector(".phbar"))return hero.querySelector(":scope > .ipad")||null;
+  if(!/\binstrument\b/.test(hero.className||""))hero.className=("instrument "+(hero.className||"")).trim();
+  var kids=[].slice.call(hero.children),i,ipad=null,ihead=null;
+  for(i=0;i<kids.length;i++){if(/\bipad\b/.test(kids[i].className||"")){ipad=kids[i];break}}
+  for(i=0;i<kids.length;i++){if(/\bihead\b/.test(kids[i].className||"")){ihead=kids[i];break}}
+  if(!ipad){
+    ipad=document.createElement("div");ipad.className="ipad";
+    if(ihead)ihead.after(ipad);else hero.insertBefore(ipad,hero.firstChild);
+    kids=[].slice.call(hero.children);
+    for(i=0;i<kids.length;i++){if(kids[i]!==ipad&&kids[i]!==ihead)ipad.appendChild(kids[i])}
+  }
+  return ipad;
+}
+function sdSink(){
+  var s=byId("sd-sink");
+  if(!s){s=document.createElement("div");s.id="sd-sink";(document.querySelector("main.wrap")||document.body).appendChild(s)}
+  return s;
+}
+function seatCount(){
+  var all=document.querySelectorAll("#count");
+  var c=all[0];
+  if(!c){
+    c=document.createElement("div");c.id="count";
+    (document.querySelector("main.wrap")||document.body).appendChild(c);
+  }
+  var i;
+  for(i=0;i<all.length;i++){if(all[i]!==c&&all[i].parentNode)all[i].parentNode.removeChild(all[i])}
+  function detach(){if(c.parentNode&&c.parentNode.nodeType===1&&c.parentNode.contains(c))c.parentNode.removeChild(c)}
+  var hero=byId("hero");
+  var railsEl=hero?hero.querySelector(".rails"):null;
+  var rails=(railsEl&&visible(railsEl))?railsEl:null;
+  var ph=hero?hero.querySelector(".phbar"):null;
+  if(ph&&(phone()||!rails)){
+    if(c.parentNode!==ph){detach();ph.insertBefore(c,ph.firstChild)}
+  }else if(rails){
+    var host=rails.parentNode;
+    if(c.parentNode!==host||c.nextElementSibling!==rails){
+      detach();
+      if(rails.parentNode===host)host.insertBefore(c,rails);
+    }
+  }
+  if(!/\bsdcount\b/.test(c.className))c.className=("sdcount "+c.className).trim();
+  if(!c.textContent.trim()&&!c.children.length)c.innerHTML=SEED_HTML;
+}
+function retireStand(){
+  var s=document.querySelector(".ipad .stand");
+  if(s&&s.parentNode)sdSink().appendChild(s);
+}
+function ensureReading(){
+  var rail=document.querySelector(".rail[data-rail=where]");
+  if(!rail||!rail.parentNode)return;
+  var rs=[].slice.call(rail.querySelectorAll(".reading")),i,keep=null;
+  for(i=0;i<rs.length;i++){
+    if(!keep||rs[i].textContent.trim().length>keep.textContent.trim().length)keep=rs[i];
+  }
+  if(keep&&keep.tagName!=="P"){
+    var p=document.createElement("p");p.className="reading";
+    p.innerHTML=keep.innerHTML;
+    keep.parentNode.replaceChild(p,keep);keep=p;
+  }
+  if(!keep){
+    keep=document.createElement("p");keep.className="reading";
+    keep.textContent=READING_TEXT;
+  }
+  if(keep.parentNode!==rail)rail.appendChild(keep);
+  [].slice.call(rail.children).forEach(function(n){
+    if(n===keep)return;
+    var cn=n.className||"";
+    if(/\b(gut|track)\b/.test(cn))return;
+    if(/\breading\b/.test(cn)){
+      if(!n.textContent.trim())n.remove();
+      return;
+    }
+    n.remove();
+  });
+}
+function stripInline(){
+  var bs=document.querySelectorAll("#vstrip.vgroups .vgbtns"),i;
+  for(i=0;i<bs.length;i++){
+    var b=bs[i];if(b.dataset.sdInl)continue;b.dataset.sdInl="1";
+    b.style.margin="0";b.style.padding="0";b.style.borderBottom="0";
+  }
+}
+function secondLine(){
+  var strip=byId("vstrip");if(!strip)return;
+  var p=byId("sd-second");
+  if(!p){p=document.createElement("p");p.id="sd-second";p.className="sd-second";strip.parentNode.insertBefore(p,strip.nextSibling)}
+  if(p.dataset.sdDone)return;p.dataset.sdDone="1";
+  var fr=byId("freshness");
+  p.innerHTML=(fr&&fr.textContent.trim())?fr.textContent.trim():"Counts of reports filed, not of flights.";
+}
+function ensureSentence(){
+  var s=byId("sentence");
+  if(!s){s=document.createElement("div");s.id="sentence";s.hidden=true;(document.querySelector("main.wrap")||document.body).appendChild(s)}
+  if(!s.hidden)s.hidden=true;
+  if(s.style.display!=="none")s.style.display="none";
+}
+function ensureNoRows(){
+  var n=byId("noRows");if(!n)return;
+  if(!n.textContent.trim()&&!n.children.length)n.innerHTML=NOROWS_HTML;
+  if(phone()){
+    if(n.hasAttribute("hidden"))n.removeAttribute("hidden");
+    if(n.style.display==="none")n.style.display="";
+  }
+}
+var snap={s:null,c:null};
+function mirror(){
+  var s=byId("sentence"),c=byId("count");
+  if(!s||!c||s===c)return;
+  var sv=s.innerHTML,cv=c.innerHTML;
+  if(sv!==cv){
+    if(sv!==snap.s&&snap.s!==null){c.innerHTML=sv;cv=sv}
+    else{s.innerHTML=cv;sv=cv}
+  }
+  snap.s=sv;snap.c=cv;
+}
+function purgeLand(){
+  var ls=document.querySelectorAll(".card.land"),i;
+  for(i=0;i<ls.length;i++)ls[i].remove();
+}
+var queued=false;
+function pass(){
+  queued=false;
+  try{purgeLand()}catch(e){}
+  try{ensureSentence()}catch(e){}
+  try{ensureIpad()}catch(e){}
+  try{seatCount()}catch(e){}
+  try{retireStand()}catch(e){}
+  try{ensureReading()}catch(e){}
+  try{ensureNoRows()}catch(e){}
+  try{stripInline()}catch(e){}
+  try{secondLine()}catch(e){}
+  try{mirror()}catch(e){}
+}
+function kick(){if(queued)return;queued=true;requestAnimationFrame(pass)}
+new MutationObserver(kick).observe(document.documentElement,{childList:true,subtree:true});
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",pass);
+else pass();
+addEventListener("load",pass);
+addEventListener("resize",kick);
+})();

@@ -1,0 +1,46 @@
+[  92s] stap 1: dacht 5835, schreef 0, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[ 101s] stap 2: dacht 126, schreef 0, 2 tool-calls
+   measure  {"value": {"count": "219 reports, left wing, Continental Airlines Inc. 1,757,608 set aside.", "html": "<b class=\"fig\">219</b> reports, <span class=\"clause\" 
+   measure  {"value": {"count": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "html": "<span class=\"fig\">1,757,827</span> reports, everything 
+[ 129s] stap 3: dacht 863, schreef 110, 2 tool-calls
+   measure  {"value": {"count": "219 reports, left wing, Continental Airlines Inc. 1,757,608 set aside.", "errs": []}}
+   measure  {"value": {"count": "1,757,827 reports.", "sw": 1440, "sh": 1926, "errs": []}}
+[ 159s] stap 4: dacht 1027, schreef 181, 2 tool-calls
+   measure  {"value": {"count": "219 reports, left wing, Continental Airlines Inc. 1,757,608 set aside.", "sentence": "219 reports, left wing, Continental Airlines Inc. 1,7
+   parent   {"value": {"count": "1,757,827 reports. Nothing chosen yet."}}
+[ 218s] stap 5: dacht 6094, schreef 254, 1 tool-calls
+   measure  {"value": {"sentence": "1,757,827 reports.", "count": "1,757,827 reports.", "tabsOn": ["Search"], "sels": ["operator=", "make=", "ata=", "nature=", "crew=", "co
+[ 251s] stap 6: dacht 2952, schreef 254, 2 tool-calls
+   measure  {"value": ["{\"t\":\"Search\",\"d\":{\"view\":\"p-search\"}}"]}
+   measure  {"value": {"t": "12 more questions", "cls": "ghostbtn"}}
+[ 330s] stap 7: dacht 3127, schreef 218, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[ 337s] stap 8: dacht 0, schreef 0, 2 tool-calls
+   measure  {"value": {"count": "1,757,827 reports.", "seeded": "1", "sh": 1926, "sw": 1440, "errs": []}}
+   measure  {"value": {"count": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "seeded": "1", "errs": []}}
+[ 373s] stap 9: dacht 1975, schreef 235, 1 tool-calls
+   measure  {"value": {"html": "<span class=\"rv-count\">1,757,827 reports</span>.", "txt": "1,757,827 reports."}}
+[ 429s] stap 10: dacht 629, schreef 180, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[ 436s] stap 11: dacht 0, schreef 0, 2 tool-calls
+   measure  {"value": {"count": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "sh": 1945, "sw": 1440, "errs": []}}
+   measure  {"value": {"count": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "errs": []}}
+[ 458s] stap 12: dacht 0, schreef 137, 1 tool-calls
+   measure  {"value": [{"id": "operator", "first": {"v": "SWAA", "t": "Southwest Airlines Co (SWAA)"}}, {"id": "make", "first": {"v": "BOEING", "t": "BOEING"}}, {"id": "ata
+[ 472s] stap 13: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"afterSet": "1,757,827 reports.", "seeded": "1"}}
+[ 491s] stap 14: dacht 598, schreef 97, 1 tool-calls
+   measure  {"value": {"opVal": "", "count": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "sentence": "1,757,827 reports, everything the FAA ha
+[ 502s] stap 15: dacht 0, schreef 249, 1 tool-calls
+   measure  {"value": {"count": "244,532 reports, Southwest Airlines Co. 1,513,295 set aside."}}
+[ 525s] stap 16: dacht 1222, schreef 139, 1 tool-calls
+   measure  {"value": {"t0": {"v": "SWAA", "count": "1,757,827 reports. Nothing chosen yet."}, "t300": {"v": "SWAA", "count": "1,757,827 reports.", "opts": 3947}}}
+[ 543s] stap 17: dacht 0, schreef 519, 1 tool-calls
+   measure  {"value": {"count": "1,757,827 reports.", "html": "<span class=\"rv-count\">1,757,827 reports</span>.", "opVal": "SWAA", "rvCount": "1,757,827 reports", "rowsSh
+[ 560s] stap 18: dacht 278, schreef 142, 1 tool-calls
+   parent   {"value": {"count": "244,532 reports match your selection", "html": "<strong>244,532</strong> reports match your selection", "opVal": "SWAA"}}
+[ 579s] stap 19: dacht 0, schreef 548, 1 tool-calls
+   measure  {"value": {"keys": ["onsearch", "oncontentvisibilityautostatechange", "onpopstate", "__sdrReviewFix", "__sderrs", "sdrsGuidanceApply"], "onsearch": [], "onconte
+[ 592s] stap 20: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"sdrReviewFix": true, "apply": "function apply() {\n    injectStyle();\n    var heads = matchedHeadings();\n\n    var byKey = {};\n    Array.prototyp

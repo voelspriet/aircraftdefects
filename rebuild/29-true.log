@@ -1,0 +1,43 @@
+[  17s] stap 1: dacht 1137, schreef 0, 2 tool-calls
+   measure  {"value": {"countText": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "counts": ["1,757,827 reports, everything the FAA has publishe
+   parent   {"value": {"countText": "219 reports match your selection"}}
+[  39s] stap 2: dacht 268, schreef 0, 2 tool-calls
+   parent   {"value": {"html": "<strong>219</strong> reports match your selection", "text": "219 reports match your selection"}}
+   parent   {"value": {"html": "<strong>1,757,827 reports.</strong> Nothing chosen yet.", "text": "1,757,827 reports. Nothing chosen yet."}}
+[  76s] stap 3: dacht 1707, schreef 0, 2 tool-calls
+   measure  {"value": {"sentence": {"hidden": true, "text": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "html": "<span class=\"fig\">1,757,827
+   measure  {"value": {"sentence": {"hidden": true, "text": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "html": "<span class=\"fig\">1,757,827
+[ 129s] stap 4: dacht 3334, schreef 0, 1 tool-calls
+   measure  {"value": {"inlineLens": [30921, 8478, 413919], "scripts": [], "bodyLen": 886863, "hasSentenceInSource": true, "hasCountInSource": true}}
+[ 143s] stap 5: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"prev": [{"cls": "chips", "tag": "DIV", "text": ""}, {"cls": "unresolved", "tag": "DIV", "text": ""}, {"cls": "ghostbtn", "tag": "BUTTON", "text": "1
+[ 158s] stap 6: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "\n    }\n    n.remove();\n  });\n}\nfunction stripInline(){\n  var bs=document.querySelectorAll(\"#vstrip.vgroups .vgbtns\"),i;\n  for(i=0;i<bs.lengt
+[ 173s] stap 7: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": ["her than the whole file, but it does give you a good idea of where the trouble sits.\";\nvar SEED_HTML='<span class=\"fig\">1,757,827</span> reports
+[ 187s] stap 8: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "v,k){if(v!=null&&v!=='')q.set(k,Array.isArray(v)?v.join(','):String(v));});\n    else if(p)Object.keys(p).forEach(function(k){var v=p[k];if(v!=null&&
+[ 202s] stap 9: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"n": 1, "hits": ["){var v=extra[k];if(v!=null&&v!=='')q.set(k,String(v));});\n  return q.toString();}\nfunction selQS(){return rrQS();}\nfunction rrG
+[ 216s] stap 10: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"n": 11, "hits": ["){detach();ph.insertBefore(c,ph.firstChild)}\n  }else if(rails){\n    var host=rails.parentNode;\n    if(c.parentNode!==host||c.ne
+[ 230s] stap 11: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"n": 12, "hits": ["ment.body).appendChild(s)} return s; } function seatCount(){ var all=document.querySelectorAll(\"#count\"); var c=all[0]; if(!c){ 
+[ 240s] stap 12: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"n": 1, "hits": ["ld(kids[i])}\n  }\n  return ipad;\n}\nfunction sdSink(){\n  var s=byId(\"sd-sink\");\n  if(!s){s=document.createElement(\"div\");s.
+[ 253s] stap 13: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"n": 2, "hits": ["v><div class=\"ipad\"><div class=\"aim\" id=\"iAim\" aria-live=\"polite\"></div><div class=\"hand\" id=\"iHand\" data-txt=\"Click a
+[ 267s] stap 14: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"n": 0, "hits": []}}
+[ 283s] stap 15: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"n": 1, "hits": ["[i]!==ipad&&kids[i]!==ihead)ipad.appendChild(kids[i])}\n  }\n  return ipad;\n}\nfunction sdSink(){\n  var s=byId(\"sd-sink\");\n  i
+[ 297s] stap 16: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"n": 8, "hits": [":#8b7f76;font-size:12px}', '.mprose p{max-width:78ch;font-size:14px;line-height:1.6;margin:0 0 12px}', '.mprose b{color:#8a2a17}', 
+[ 313s] stap 17: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"i": 235987, "j": 240278, "k": 239730, "sd2Near": "ined\")heroData=null;}catch(_e){}\n  buildChips();\n}\n\n/* ---------- search wrapper: guards, emp
+[ 326s] stap 18: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": "function sdSearch(off){\n  var g=sd2Guard();\n  if(g){sdNoSearch(g);return;}\n  if(!sd2HasFilter()&&!REVEALED){renderOnPurpose();return;}\n  var nr=s
+[ 339s] stap 19: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"renderCount": "function renderCount(d){\n  var p=params().toString();\n  var stale=(HERO_FOR_06!==null&&HERO_FOR_06!==p);\n  var corpus=(d.corpus!=n
+[ 455s] stap 20: dacht 11881, schreef 0, 1 tool-calls
+   measure  {"value": {"LAST_TOTAL": null, "HERO_FOR_06": null, "sd2Total": null, "REVEALED": null, "sd2Sentence": null}}

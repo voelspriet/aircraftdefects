@@ -719,6 +719,14 @@ def conflicts_page():
     return send_from_directory(app.static_folder, "conflicts.html")
 
 
+@app.get("/z/img/<name>")
+def z_img(name):
+    """Hand-written, 31 August 2026: the few images the page carries."""
+    if not re.fullmatch(r"[a-z0-9\-]+\.(webp|png|jpg|svg)", name):
+        return jsonify(error="no such image"), 404
+    return send_from_directory(app.static_folder, name, max_age=86400)
+
+
 @app.get("/z/")
 @app.get("/z")
 def index():

@@ -114,3 +114,48 @@ stays drawn when the rail is shut, the gutters carry values, all four rails stat
 what their figures amount to, the crew ladder is back to eight, the specimen
 reads as decoded English. Sixteen tabs and thirty-one panels below it. The
 records themselves are still being built.
+
+
+## 30 August — the quiet page, and the model changes jobs
+
+The model-built page could not be repaired by more model rounds, so the roles
+were swapped, disclosed in every commit: Claude writes the frame by hand
+(`rebuild/z2.html`), GLM-5.3-Flash becomes the reader. A design panel of
+twenty (one lens each) and a red team chose what ships; the cuts and reasons
+are in docs/DESIGN-Z2.md. By the end of the day: the four rails always on
+screen with a breadcrumb, the chosen thing in big red above the findings, the
+pre-read specimen cached by record id on disk, five questions per report,
+"what recurs" over any selection, and the red Freefall cell with N704AL's two
+reports and the door-plug fleet inspection.
+
+## 31 August — Prove it, the case page, and the film
+
+**Prove it.** After every stream the server splits the answer into sentences
+and checks every quote as a literal substring of the record it cites; failing
+sentences are deleted and the page prints the count. The first live run caught
+its own false positive (counted facts like "(AALA, 514)" are not quotes) and
+one real removal. **Next three clicks** are resolved to real counts, zeroes
+dropped. A generic question is answered from the newest 200 write-ups, honest
+opener first. One airframe end to end (gaps inserted by the server, causal
+verbs banned), two airlines compared, and for the film's page a web search the
+server runs itself after the model, asked cold, insisted the film was
+*Downfall* (2022): now it may only use the search results, one named source
+per sentence.
+
+**Found in production while filming:** gunicorn's default request line (4094
+bytes) rejected the case-sheet questions for long write-ups; "The call to
+GLM-5.3-Flash failed" was a 1998-era limit, raised to 32k in the unit file.
+The model also read 01/05/2024 as the first of May (dates now reach it spelled
+out) and invented WN for Southwest (codes now held to the FAA's list).
+
+**The case page.** Every record now opens on its own address,
+`/case/<control number>`, built for citing: the FAA's wording beside the plain
+English, copy buttons, tracker and registry links, the way back to the
+selection. aircraftdefects.com now serves the new page at the root; the
+earlier desk moved to /try1, and parent.aircraftdefects.com redirects there.
+
+**The film** went through five versions to get sync right. Live screen
+recording drifted; the final method captures finished states as 2x screenshots
+plus the model's text, and composes each sentence as a frame-exact slide with
+a push-in and a paced reveal. 5:33 at 2560x1440:
+https://aircraftdefects.com/z/img/film-v5.mp4

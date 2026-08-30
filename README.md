@@ -1,6 +1,7 @@
 # Make it readable
 
 **Live: [aircraftdefects.com](https://aircraftdefects.com/)** · GLM-5.3-Flash, reading the file live · MIT · the earlier desk is kept at [/try1](https://aircraftdefects.com/try1/)
+**Demo film (5:33):** https://aircraftdefects.com/z/img/film-v5.mp4 · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)
 
 A government can publish everything it holds and still answer none of your
 questions.
@@ -34,7 +35,10 @@ tail, an airline, a type; and a period line (all, this year, last year, last
 Click anything and it becomes the selection: a zone on the aircraft drawing, a
 month, an airline, a crew action, a system, a word. The chosen thing appears
 in big red type above the findings, with the period beneath it, then a counted
-sentence, then the first 25 reports. Every report opens on its own page,
+sentence, then the records, 25 at a time through the whole selection. Airlines
+are named from the FAA's own cross-reference rather than shown as codes, and
+the search line suggests real values for whatever kind you pick: airlines by
+name, tails, types, parts, system codes, the mechanics' own words. Every report opens on its own page,
 `/case/<control number>`: the mechanic's words with copy-the-quote and
 copy-the-citation buttons, every code spelled out with the FAA's wording
 beside it, the five model questions, links to the FAA's own search and the
@@ -63,7 +67,7 @@ count. It says "its words, not the FAA's".
 | You press | The FAA's site | GLM-5.3-Flash on /z |
 |---|---|---|
 | Nothing: the front page | a form | the latest report where the crew had to act, already read: the whole record, decoded by the FAA's own tables, told in 110 words for someone who has never seen one, technical terms linked to a Perplexity search. Pre-read at ingest for fifteen landing states and cached by record, so it is on screen in a second |
-| Any report | a row | a case sheet with five questions: what actually happened, was anyone in danger, what did the mechanics do, does it say why, what should we check next. The last one comes back as clickable searches |
+| Any report | a row | its own page, `/case/<control number>`: the write-up with copy-the-quote and copy-the-citation buttons, every code spelled out with the FAA's wording kept beside the plain English, "before you publish this" caveats, links to the FAA's search, FlightAware, Flightradar24 and the registry for the tail, and five questions: what actually happened, was anyone in danger, what did the mechanics do, does it say why, what should we check next. The last one comes back as clickable searches |
 | **Read what recurs in these** on any selection | a count | reads up to 300 write-ups and writes prose, not a list, naming what recurs that no coded box captures, one verbatim quote per paragraph with its record number |
 | **Ask** with a question the filters cannot hold ("what plane is the most dangerous") | nothing | says first what the file cannot tell you (danger, injuries, rates), then the closest thing it can, from the counts and the newest 200 write-ups, with quotes. It never says "most dangerous"; it says "most written up" |
 | **Ask** with a question the filters can hold | a form with nineteen boxes | draft filter chips, checked against the FAA's own code tables and airline list, shown before anything runs. On first test it invented WN for Southwest; the designator is SWAA; it is now held to the list |
@@ -150,13 +154,14 @@ May.
 
 | | |
 |---|---|
-| `rebuild/z2.html` | the page at /z, hand-written |
+| `rebuild/z2.html`, `rebuild/case.html` | the page and the case page, hand-written |
 | `app/app.py` | the service: the file's API, the model calls, the verifier |
 | `rebuild/specs/`, `rebuild/*.prompt.txt` | the specifications and briefs the model was given for /z/rebuilt |
 | `MODEL_USE.md` | every live call, its guard and its cost; the provenance count |
 | `docs/DESIGN-Z2.md` | the design panel of twenty and the red team's cuts |
 | `docs/FINDINGS.md`, `HACKATHON_LOG.md` | the working notebook |
 | `build/` | the browser harnesses and the provenance counter |
+| `video/` | the demo film pipeline: narration, captured states, frame-exact slides |
 
 MIT. The data is the FAA's, published under its own terms. Codes are decoded
 from the FAA's own lookup tables; airline names come from its December 2006

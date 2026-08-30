@@ -1,57 +1,98 @@
 # Make it readable
 
-**Live: [aircraftdefects.com](https://aircraftdefects.com/) · MIT · GLM-5.3-Flash reads the file live** (the earlier desk is at /try1)
-
+**Live: [aircraftdefects.com](https://aircraftdefects.com/)** · MIT · GLM-5.3-Flash reads the file live
 **Demo film (5:33):** https://aircraftdefects.com/z/img/film-v5.mp4
+**The build, written up:** https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with
+**The earlier desk**, kept for comparison: https://aircraftdefects.com/try1/
 
-A government can publish everything it holds and still answer none of your
-questions. The FAA publishes 1,757,827 aircraft defect reports going back to
-1995, on 54,634 aircraft, free to read and almost never read. A report says
-`ZONE 700` where it means the landing gear, and `A` where it means the crew
-landed somewhere they had not planned to.
+## The problem
 
-This is an instrument for reading it. GLM-5.3-Flash reads the file live: every teal block on the page is the model reading write-ups on the spot, every quote it makes is checked against the record before you see it, and the frame it arrives in is hand-written (see MODEL_USE.md for who wrote what).
+I was watching *Freefall: A Reckoning for Boeing* on Netflix and saw relatives
+of victims trying to read a government website. The FAA publishes 1,757,827
+aircraft defect reports since 1995, on 54,634 aircraft, free to read and almost
+never read, because everything is a code. `ZONE 700` means the landing gear.
+`A` means an unscheduled landing in one box and "filed by an airline" in
+another. The story of every report sits in one free-text field, the mechanic's
+write-up, in trade shorthand, in capitals. The FAA's own site can search the
+characters. It cannot read the words.
 
-## What it does
+The aircraft from the film is in the file: two reports on N704AL, the door
+plug blow-out of 5 January 2024 and, five days earlier, a door that was hard
+to open. Both are on the site, under the red Netflix cell.
 
-Four rails answer the four questions a reporter asks, in the order they ask them.
-When, month by month across thirty-one years. Where, a side view of an aircraft
-shaded by how often each zone is written up. Who, airlines and individual
-airframes. What it forced the crew to do.
+## What GLM-5.3-Flash does here
 
-Every mark is a filter. Click the crown of the fuselage and the desk narrows to
-the 84,453 reports found there, the address bar follows, and the link is the
-state. Below it, sixteen panels and the records themselves, each carrying the
-mechanic's own words with every abbreviation explained.
+Every teal block on the page is the model reading FAA write-ups live, at the
+moment you click, on whatever slice of the file you have in front of you:
 
-## How the model was used
+- **The report reads itself.** The newest crew-action report, told in about a
+  hundred words for someone who has never seen the form, every code decoded
+  through the FAA's own tables. Pre-read at ingest, on screen in a second.
+- **Five questions on any report**: what actually happened, was anyone in
+  danger, what did the mechanics do, does it say why, what should we check
+  next. The last answer comes back as clickable searches.
+- **What recurs**: over any selection the model reads up to 300 write-ups and
+  names what keeps coming back that no coded box was designed to hold.
+- **Prove it.** Every quote the model makes is checked, server-side, as a
+  literal substring of the record it cites. A sentence whose quote fails is
+  deleted before the reader sees it, and the page prints the count ("32 quotes
+  checked, 32 verified"). Click any sentence to open the records it stands on.
+- **Next three clicks**: the model proposes narrower slices; the server
+  resolves each against the file and prints the real count; zeroes are dropped.
+  The model proposes, the file counts.
+- **A question the form cannot hold** ("what plane is the most dangerous"):
+  the answer says first what the file cannot tell you, then gives the closest
+  honest thing, most written up, never most dangerous.
+- **One aircraft, end to end**: every report on a tail, oldest first, told as
+  a story. Gaps over a year are inserted by the server as markers so the model
+  must say "nothing was filed", and the words because, caused, led to and due
+  to are banned: the file records no causes.
+- **Two airlines, what differs**, in the mechanics' own words; the counts stay
+  the file's.
+- **The film's page**: for context the server runs a web search first and the
+  model may only use those results, one named source per sentence, labelled
+  "the web, not the file". (On the first attempt the model answered from
+  memory and got the film wrong; that path is closed.)
+- **Ask the file**: a plain question becomes draft filter chips, validated
+  against the FAA's own code tables and airline list, run only when pressed.
 
-The model is not handed an implementation to copy. It is handed a written
-specification of what a surface has to do, 12,243 words across eleven files, written
-as decisions rather than as shapes. Why a zone is drawn twice. Why the distinct
-report count may never be derived by summing the per-code counts. Why a period
-outside the file is left as asked instead of clamped into a range that runs
-backwards.
+Every block streams, states what it read ("300 of 12,397 write-ups, newest
+first, not a sample of the rest"), how long it took and how many tokens, and
+abstains in one plain sentence when the write-ups do not carry an answer. The
+abstention is displayed as a result. Every report also has a citable page,
+`/case/<control number>`, with the FAA's own wording kept beside the plain
+English, copy-the-quote and copy-the-citation buttons, and links to the FAA's
+search, the flight trackers and the registry for the tail.
 
-Each brief carries the specification, the measured evidence for what is wrong,
-and the checks the answer has to pass. Every brief and every reasoning trace is
-committed: 4.35 million characters of the model's own thinking.
+## Why this is a frontier build, not a wrapper
 
-## How it is checked
+The model's freedom is bounded by ordinary code that makes lying impossible:
+the quote checker is a substring test, the next-click counts are lookups,
+dates reach the model spelled out ("5 January 2024") because it once read
+01/05/2024 as the first of May, the airline codes are held to the FAA's own
+list because it once invented WN for Southwest. When a model must be accurate,
+we stopped asking nicely and wrote the ten lines that check.
 
-Two harnesses drive the page in a real browser and count what it has, down to
-every option in every menu. A surface is finished when it survives the count, not
-when it looks finished. A longer harness drives the page in a browser and checks
-twenty-nine things a reader would notice: that the case sheet takes a mouse, that
-no published date range runs backwards, that hovering moves nothing. The working
-notes are in `docs/FINDINGS.md`.
+Measured: a single report reads in 2 to 9 s; 300 write-ups in about 30 s and
+260k tokens; the whole file would be 1.52 billion tokens, which is why it is
+not read whole and MODEL_USE.md says so. The site also carries what the model
+refused to build, with reasons, in docs/DESIGN-Z2.md: no danger rankings, no
+causes, no rates, because the file has no denominators.
 
-## What it refuses to say
+## Who wrote what
 
-The file has no fleet sizes and no flying hours, so there are no rates and no
-league table of airlines. Counts are counts of reports filed, not of flights.
-Where a picture can place only part of the selection it says so underneath, in
-the same size type. An unrecognised value in a link runs no query at all and says
-why, rather than answering with the whole corpus under a filtered heading.
+Two pages are served and the honest answer differs. The page at / is a
+hand-written frame (rebuild/z2.html); on it the model is the reader, and every
+live call is listed with its prompt, guard and cost in MODEL_USE.md. The page
+at /try1 and the one at /z/rebuilt are the model's own earlier builds from
+written specifications, with hand-written shares counted, not claimed, by
+build/count_provenance.py. The service is the model's nine research builds
+plus hand-marked blocks (45%). Every hand-written commit says so in its first
+word.
 
-Inspired by Rory Kennedy's *Freefall: A Reckoning for Boeing*.
+The whole build, from watching the documentary to this submission, took two
+days and is logged prompt by prompt in HACKATHON_LOG.md and told in full in
+the article above.
+
+Inspired by Rory Kennedy's *Freefall: A Reckoning for Boeing*. Built by Henk
+van Ess with GLM-5.3-Flash reading and Claude writing the frame.

@@ -362,3 +362,14 @@ Deferred because nothing is broken by waiting. The phone layout works today:
       on the desk
 - [ ] the breakpoint chosen from where the instrument stops being operable, and
       the measurement that chose it recorded here
+
+
+---
+
+## Closing state, 31 August
+
+The plan above tracked the model-built page, which is preserved at /try1 and
+/z/rebuilt. The page that ships at aircraftdefects.com is the hand-written
+frame with the model as reader; what it does, who wrote what and what every
+call costs are in README.md and MODEL_USE.md, and the two days are logged in
+HACKATHON_LOG.md.

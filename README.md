@@ -136,7 +136,7 @@ May.
 ## Running it
 
     export ZAI_API_KEY=...
-    python3 app/app.py                        # the service, port 8000, behind nginx at /z
+    python3 app/app.py                        # the service, gunicorn on 127.0.0.1:8211, behind nginx at /z
     scp rebuild/z2.html host:/opt/sdrz/static/index.html
     curl https://aircraftdefects.com/z/api/specimen/warm   # pre-read the landing states after each FAA refresh
     python3 build/count_provenance.py         # who wrote /z/rebuilt

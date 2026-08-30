@@ -1568,6 +1568,48 @@ def operators_map():
         _OPS = out
     return jsonify(_OPS)
 
+
+# ---- hand-written, 31 August 2026: the full case sheet, every code spelled out ----
+# The FAA's own wording is kept beside the plain label so either can be quoted.
+SHEET_FIELDS = [
+ ("DifficultyDate", "Date of the difficulty", None), ("OperatorDesignator", "Airline", "operator"), ("SubmitterTypeCode", "Filed by", "submitter"),
+ ("AircraftMake", "Aircraft make", None), ("AircraftModel", "Aircraft model", None), ("RegistryNNumber", "Tail number", None), ("AircraftSerialNumber", "Aircraft serial number", None),
+ ("AircraftTotalTime", "Hours on the airframe", None), ("AircraftTotalCycles", "Cycles (take-offs and landings)", None),
+ ("JASCCode", "System", "jasc"), ("PartName", "Part", None), ("PartCondition", "Condition of the part", None), ("PartNumber", "Part number", None), ("PartMake", "Part make", None),
+ ("PartLocation", "Where on the aircraft", "part_location"), ("PartSerialNumber", "Part serial number", None), ("PartSinceCode", "Part time since", "time_since"), ("PartTimeSince", "Part hours since", None), ("PartTotalTime", "Part total hours", None), ("PartTotalCycles", "Part total cycles", None),
+ ("NatureOfConditionA", "What was found", "nature"), ("NatureOfConditionB", "What was found (2)", "nature"), ("NatureOfConditionC", "What was found (3)", "nature"),
+ ("PrecautionaryProcedureA", "What the crew did", "precaution"), ("PrecautionaryProcedureB", "What the crew did (2)", "precaution"), ("PrecautionaryProcedureC", "What the crew did (3)", "precaution"), ("PrecautionaryProcedureD", "What the crew did (4)", "precaution"),
+ ("StageOfOperationCode", "Stage of flight", "stage"), ("HowDiscoveredCode", "How it was found", "discovered"), ("CorrosionLevel", "Corrosion level", "corrosion"), ("CrackLength", "Crack length", None), ("NumberOfCracks", "Number of cracks", None),
+ ("ComponentName", "Component", None), ("ComponentMake", "Component make", None), ("ComponentModel", "Component model", None), ("ComponentPartNumber", "Component part number", None), ("ComponentLocation", "Component location", None),
+ ("SDRType", "Report type", "sdr_type"), ("ReceivingRegionCode", "FAA region", "region"), ("ReceivingDistrictOffice", "FAA district office", "district"), ("SubmissionDate", "Submitted to the FAA", None), ("OperatorControlNumber", "Control number", None),
+]
+@app.get("/z/api/sheet/<rid>")
+def sheet(rid):
+    raw = api("/api/case/" + rid)
+    if not isinstance(raw, dict) or not raw.get("OperatorControlNumber"):
+        return jsonify(error="no such record"), 404
+    tables = gloss_tables(); rows = []
+    for field, label, table in SHEET_FIELDS:
+        v = raw.get(field)
+        if v in (None, "", " "): continue
+        row = {"field": label, "code": str(v), "value": str(v), "faa": None, "note": None}
+        if field == "DifficultyDate":
+            row["value"] = _date_words(v) or v
+        if table:
+            t = tables.get(table) or {}; e = t.get(str(v).strip().upper())
+            if isinstance(e, dict):
+                row["value"] = e.get("label") or e.get("faa") or str(v); row["faa"] = e.get("faa") if e.get("faa") != row["value"] else None; row["note"] = e.get("note")
+            elif isinstance(e, str):
+                row["value"] = e
+            else:
+                row["note"] = "Not in the FAA table used here. Shown as filed."
+            if table == "jasc" and not isinstance(e, dict):
+                ch = t.get(str(v).strip()[:2] + "00")
+                if isinstance(ch, dict): row["value"] = ch.get("label") or str(v); row["faa"] = ch.get("faa")
+        rows.append(row)
+    return jsonify(id=rid, raw=raw, rows=rows, text=raw.get("Discrepancy") or "",
+                   source="FAA Service Difficulty Reports; codes decoded with the FAA's own tables (%s)." % (tables.get("_source", {}).get("edition", "") if isinstance(tables.get("_source"), dict) else ""))
+
 @app.get("/z/api/stream/vocab")
 def stream_vocab():
     word = (request.args.get("word") or "").strip().upper()

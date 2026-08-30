@@ -108,7 +108,7 @@ h1 .here{color:var(--rust)}
 .pick{display:flex;flex-wrap:wrap;gap:6px 8px;margin:0 0 14px;align-items:center;font:400 12.5px var(--sans);color:var(--ash)}
 .pick button,.pick select,.pick input{font:500 12.5px var(--sans);padding:5px 11px;min-height:28px;border:1px solid var(--line);border-radius:100px;background:transparent;color:var(--ink);cursor:pointer}.pick button.on{border-color:var(--rust);color:var(--rust)}
 .pick input{border-radius:3px;min-width:180px}
-.sum h2{font:400 26px/1.2 var(--serif);margin:0 0 10px;padding-top:36px;border-top:1px solid var(--line)}.sum .facts{font:400 15px/1.6 var(--sans);max-width:74ch;margin:0 0 14px}.sum .facts b{font:500 14px var(--mono)}
+.sum .bigsel{font:400 44px/1.05 var(--serif);color:var(--rust);margin:0;padding-top:36px;border-top:1px solid var(--line)}.sum .bigsel+h2{padding-top:6px;border-top:0}
 .sum h2{font:400 26px/1.2 var(--serif);margin:0 0 10px;padding-top:36px;border-top:1px solid var(--line)}.sum .facts{font:400 15px/1.6 var(--sans);max-width:74ch;margin:0 0 14px}.sum .facts b{font:500 14px var(--mono)}
 .tbl tr.rec{cursor:pointer}.tbl tr.rec:hover td{background:#efeae0}
 .leads h2{font:400 26px/1.2 var(--serif);margin:0 0 4px;padding-top:36px;border-top:1px solid var(--line)}
@@ -159,7 +159,6 @@ a.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--
   <div class="foot"><span id="footnote">counts are of reports filed, not of flights · no rate is claimed</span><span><a id="readAll" href="#">read all</a> · <a href="#leads">find leads</a> · <a href="/z/rebuilt?view=p-codes">every code explained</a> · <a href="https://github.com/voelspriet/aircraftdefects-z#readme">method</a></span></div>
 </div>
 
-<div class="leads" id="sum"></div>
 <div class="leads" id="sum"></div>
 <div class="leads" id="leads">
   <h2>Find leads</h2>
@@ -247,7 +246,7 @@ fetch("/z/api/hero?"+sel().toString()).then(function(r){return r.json()}).then(f
 fetch("/z/api/specimen?"+(/view=freefall/.test(location.hash)?"tail=704AL&crew=A":sel().toString())).then(function(r){return r.json()}).then(spec).catch(function(){});
 addEventListener("hashchange",function(){if(view()==="freefall")fetch("/z/api/specimen?tail=704AL&crew=A").then(function(r){return r.json()}).then(spec).catch(function(){})});
 
-function draw(){var h=H,tot=h.total||0,corpus=h.corpus||tot,filtered=sel().toString().length>0;
+function draw(){var h=H;(h.crew||[]).forEach(function(c){if(c.code&&c.label)ZLABEL[c.code]=c.label});(h.zones||[]).forEach(function(z){if(z.code&&z.label&&!ZLABEL[z.code])ZLABEL[z.code]=z.label.toLowerCase()});if(typeof SYS!=="undefined")SYS.forEach(function(x){if(x&&x[0]&&x[1]&&!ZLABEL[x[0]])ZLABEL[x[0]]=x[1]});var h=H,tot=h.total||0,corpus=h.corpus||tot,filtered=sel().toString().length>0;
   var sp=h.span;sp=(typeof sp==="string")?sp:(sp&&sp.from&&sp.to?sp.from+" to "+sp.to:"1 Jan 1995 to today");$("#mast").textContent="FAA service difficulty reports · "+sp;
   var railName={where:"<span class=here>where</span> on the aircraft they were found",when:"<span class=here>when</span> they were filed, month by month",who:"<span class=here>who</span> filed them, airline and tail",forced:"<span class=here>what they forced</span> the crew to do"}[RAIL];
   $("#h1").innerHTML="<b>"+num(tot)+"</b> reports, "+railName+"."+(filtered?' <span style="font:italic 22px var(--serif);color:var(--ash)">'+num(corpus-tot)+" set aside.</span>":"");
@@ -385,23 +384,6 @@ R.recurs=function(box){box.innerHTML=head("recurs")+'<div id="pb"></div>';var pb
 function renderView(v){var box=$("#hero");box.innerHTML="";var bk=D.createElement("a");bk.className="back";bk.href="#";bk.setAttribute("data-back","");bk.textContent="← back to the aircraft";bk.onclick=function(e){e.preventDefault();setView(null)};box.appendChild(bk);var d=D.createElement("div");d.className="view";box.appendChild(d);try{(R[v]||function(b){b.innerHTML=fail("no such view")})(d)}catch(e){d.innerHTML=fail(e)}}
 
 /* ---- summary of the selection: counted first, the model on a button, then the records ---- */
-function summary(h){var box=$("#sum");var s=sel().toString();if(!s){box.innerHTML="";return}
-  box.classList.add("sum");var tot=h.total||0;var chips=[];sel().forEach(function(v,k){chips.push((PRETTY[k]||k)+" "+(ZLABEL[v]||v))});
-  box.innerHTML='<h2>'+num(tot)+' reports, '+esc(chips.join(", "))+'</h2><p class="facts" id="facts">counting…</p><div id="sumMc"></div><p class="scope" style="margin-top:22px">The records, newest first</p><div class="pick" id="sortRow"><span>sort by</span><button type="button" data-s="date" class="on">date</button><button type="button" data-s="operator">airline</button><button type="button" data-s="model">aircraft</button><button type="button" data-s="crew">crew action</button></div><div id="recs"></div>';
-  var f=[];f.push("<b>"+num(h.crew_reports||0)+"</b> forced the crew to act");
-  var zs=(h.zones||[]).slice().sort(function(a,b){return b.n-a.n});if(zs.length&&zs[0].n)f.push("most on the <b>"+esc(zs[0].label.toLowerCase())+"</b>, "+num(zs[0].n));
-  var ops=(h.operator_rows||h.operators||[]);if(ops.length)f.push("most filed by <b>"+esc(ops[0].label||ops[0].name||ops[0].o||ops[0].operator||ops[0].key||"")+"</b>, "+num(ops[0].n||ops[0].reports));
-  var ms=(h.months||[]).slice().sort(function(a,b){return (b.n||0)-(a.n||0)});if(ms.length&&ms[0].n)f.push("busiest month <b>"+esc(ms[0].label||ms[0].m||ms[0].key||"")+"</b>, "+num(ms[0].n));
-  var crew=h.crew_reports||0,z=zs.length&&zs[0].n?zs[0]:null,o=ops.length?ops[0]:null,mo=ms.length&&ms[0].n?ms[0]:null;
-  var sent="These "+num(tot)+" reports "+(crew?"include <b>"+num(crew)+"</b> where the crew had to act":"record nothing the crew had to do")+". "+(z?"Most of the ones with a zone sit on the <b>"+esc(z.label.toLowerCase())+"</b> ("+num(z.n)+"). ":"")+(o?"<b>"+esc(o.label||o.name||o.o||o.key)+"</b> filed the most ("+num(o.n||o.reports)+")":"")+(mo?(o?", and the":"The")+" busiest month was <b>"+esc(mo.label||mo.m||mo.key)+"</b> ("+num(mo.n)+").":".");
-  $("#facts").innerHTML=sent+" <span style='color:var(--ash)'>Counted from the records; the model has not read these yet.</span>";
-  if(sel().get("tail")){$("#sumMc").appendChild(mc("Read this aircraft end to end","GLM-5.3-Flash reads every report on N"+sel().get("tail")+" in date order · gaps over a year are marked, no cause is claimed · 5 to 40 seconds",function(){return "/z/api/stream/airframe?tail="+encodeURIComponent(sel().get("tail"))}))}
-  var n=Math.min(300,tot);$("#sumMc").appendChild(mc("Read what recurs in these",(tot>300?num(n)+" of "+num(tot)+" write-ups, newest first, not a sample of the rest":"all "+num(n)+" write-ups")+" · about 30 seconds",function(){return"/z/api/stream/recurs?"+s}));
-  function recs(sort){var r=$("#recs");r.innerHTML='<p class="cannot">Reading the file…</p>';fetch("/api/search?limit=100&"+s).then(function(x){return x.json()}).then(function(d){var rows=(d.rows||[]).map(decorateRow);
-    var key={date:function(a){return a.iso},operator:function(a){return a.op},model:function(a){return a.model},crew:function(a){return a.crew}}[sort];rows.sort(function(a,b){var x=key(a),y=key(b);return sort==="date"?(y>x?1:-1):(x>y?1:x<y?-1:0)});
-    var hh='<div class="tblwrap"><table class="tbl"><tr><th>date</th><th>tail</th><th>airline</th><th>aircraft</th><th>what was found</th><th>crew did</th></tr>';rows.forEach(function(a){hh+='<tr><td>'+esc(a.date)+'</td><td><button type="button" data-k="tail" data-v="'+esc(a.tail)+'">'+(a.tail?"N"+esc(a.tail):"")+'</button></td><td><button type="button" data-k="operator" data-v="'+esc(a.op)+'">'+esc(a.op)+'</button></td><td><button type="button" data-k="model" data-v="'+esc(a.model)+'">'+esc(a.model)+'</button></td><td><a href="/z/rebuilt?case='+esc(a.id)+'">'+esc(a.found)+'</a></td><td>'+esc(a.crew)+'</td></tr>'});r.innerHTML=hh+'</table></div><p class="cannot">100 of '+num(d.total||tot)+'. <a href="/z/rebuilt?'+s+'">All of them, with every write-up</a>.</p>';wireBars(r)}).catch(function(e){r.innerHTML=fail(e)})}
-  box.querySelectorAll("[data-s]").forEach(function(b){b.onclick=function(){box.querySelectorAll("[data-s]").forEach(function(x){x.classList.toggle("on",x===b)});recs(b.dataset.s)}});recs("date")}
-var LAB={HowDiscoveredCode:"how found",StageOfOperationCode:"stage",PartLocation:"where",CorrosionLevel:"corrosion",AircraftTotalTime:"airframe hours",AircraftTotalCycles:"cycles",JASCCode:"system code",PartNumber:"part number",PartMake:"part make",SubmitterTypeCode:"filed by"};
 function openCase(id,a,raw){var old=D.getElementById("case");if(old)old.remove();var box=D.createElement("div");box.id="case";box.className="leads sum";
   var rows=Object.keys(raw||{}).filter(function(k){return raw[k]&&!/^_|Discrepancy|OperatorControlNumber|DifficultyDate|RegistryNNumber|OperatorDesignator|AircraftMake|AircraftModel|NatureOfCondition|PrecautionaryProcedure/.test(k)}).map(function(k){return '<tr><td style="color:var(--ash)">'+esc(LAB[k]||k.replace(/([A-Z])/g," $1").toLowerCase().trim())+'</td><td>'+esc(raw[k])+'</td></tr>'}).join("");
   box.innerHTML='<h2>'+esc(a.model)+(a.tail?", N"+esc(a.tail):"")+' <span style="font-size:16px;color:var(--ash)">· '+esc(a.date)+' · '+esc(a.op)+' · record '+esc(id)+'</span></h2><div class="body" style="margin-top:14px"><div><p class="eyebrow">The mechanic’s words, as filed</p><p class="raw">'+esc(raw.Discrepancy||"")+'</p><div id="caseMc"></div></div><div><p class="eyebrow">Every code on this report</p><table class="tbl">'+rows+'</table></div><p class="cannot"><a href="/z/rebuilt?case='+esc(id)+'">Full case sheet with the FAA wording</a> · <a href="#" data-close>close</a></p></div></div>';
@@ -416,7 +398,8 @@ function decorateRow(r){var d=r.DifficultyDate||"",m=d.match(/(\d\d)\/(\d\d)\/(\
 /* ---- the selection: counted summary, the model on a button, then the first 25 records, each a click ---- */
 function summary(h){var box=$("#sum");var s=sel().toString();if(!s){box.innerHTML="";box.classList.remove("sum");return}
   box.classList.add("sum");var tot=h.total||0;var chips=[];sel().forEach(function(v,k){chips.push((PRETTY[k]||k)+" "+(ZLABEL[v]||v))});
-  box.innerHTML='<h2>'+num(tot)+' reports, '+esc(chips.join(", "))+'</h2><p class="facts" id="facts"></p><div id="sumMc"></div><p class="scope" style="margin-top:22px">The first 25 of them · click one to open it</p><div class="pick" id="sortRow"><span>sort by</span><button type="button" data-s="date" class="on">newest</button><button type="button" data-s="operator">airline</button><button type="button" data-s="model">aircraft</button><button type="button" data-s="crew">crew action</button></div><div id="recs"></div>';
+  var big=[];sel().forEach(function(v,k){if(k!=="from"&&k!=="to"&&k!=="hero"&&k!=="v")big.push(ZLABEL[v]||(k==="tail"?"N"+v:v))});var per=[];sel().forEach(function(v,k){if(k==="from"||k==="to")per.push((PRETTY[k]||k)+" "+v)});
+  box.innerHTML=(big.length?'<p class="bigsel">'+esc(big.join(" · "))+'</p>':'')+'<h2>'+num(tot)+' reports'+(per.length?', '+esc(per.join(", ")):'')+'</h2><p class="facts" id="facts"></p><div id="sumMc"></div><p class="scope" style="margin-top:22px">The first 25 of them · click one to open it</p><div class="pick" id="sortRow"><span>sort by</span><button type="button" data-s="date" class="on">newest</button><button type="button" data-s="operator">airline</button><button type="button" data-s="model">aircraft</button><button type="button" data-s="crew">crew action</button></div><div id="recs"></div>';
   var f=["<b>"+num(h.crew_reports||0)+"</b> forced the crew to act"];
   var zs=(h.zones||[]).slice().sort(function(a,b){return b.n-a.n});if(zs.length&&zs[0].n)f.push("most on the <b>"+esc(zs[0].label.toLowerCase())+"</b>, "+num(zs[0].n));
   var ops=(h.operator_rows||h.operators||[]);if(ops.length)f.push("most filed by <b>"+esc(ops[0].label||ops[0].name||ops[0].o||ops[0].operator||ops[0].key||"")+"</b>, "+num(ops[0].n||ops[0].reports));

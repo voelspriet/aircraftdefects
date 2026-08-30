@@ -3,7 +3,6 @@
 **Live: [aircraftdefects.com](https://aircraftdefects.com/)** · MIT · GLM-5.3-Flash reads the file live
 **Demo film (5:33):** https://aircraftdefects.com/z/img/film-v5.mp4
 **The build, written up:** https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with
-**The earlier desk**, kept for comparison: https://aircraftdefects.com/try1/
 
 ## The problem
 
@@ -84,8 +83,8 @@ causes, no rates, because the file has no denominators.
 Two pages are served and the honest answer differs. The page at / is a
 hand-written frame (rebuild/z2.html); on it the model is the reader, and every
 live call is listed with its prompt, guard and cost in MODEL_USE.md. The page
-at /try1 and the one at /z/rebuilt are the model's own earlier builds from
-written specifications, with hand-written shares counted, not claimed, by
+at /z/rebuilt is the model's own earlier build from
+written specifications, with the hand-written share counted, not claimed, by
 build/count_provenance.py. The service is the model's nine research builds
 plus hand-marked blocks (45%). Every hand-written commit says so in its first
 word.

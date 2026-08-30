@@ -151,8 +151,7 @@ out) and invented WN for Southwest (codes now held to the FAA's list).
 **The case page.** Every record now opens on its own address,
 `/case/<control number>`, built for citing: the FAA's wording beside the plain
 English, copy buttons, tracker and registry links, the way back to the
-selection. aircraftdefects.com now serves the new page at the root; the
-earlier desk moved to /try1, and parent.aircraftdefects.com redirects there.
+selection. aircraftdefects.com now serves the new page at the root.
 
 **The film** went through five versions to get sync right. Live screen
 recording drifted; the final method captures finished states as 2x screenshots

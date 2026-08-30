@@ -1172,16 +1172,15 @@ def stream_recurs():
     listing = "\n".join("[%s] %s" % (i, t[:600]) for i, t in texts)
     scope = ("all %d write-ups in this selection" % n if n >= total
              else "the newest %d of %d write-ups in this selection, not a sample of the rest" % (n, total))
-    prompt = ("You are reading %s, verbatim, from FAA service difficulty reports. Name what "
-              "recurs across them that no coded field captures: three to six things. For each, "
-              "one plain sentence, then two or three verbatim quotes in their original capitals, "
-              "each ending with its record number in square brackets exactly as given. You are "
-              "describing these %d write-ups only; do not claim a count you have not pointed to, "
-              "and say 'several' or 'a few' rather than a number you did not verify. Say nothing "
-              "about cause, safety or rates. %s\n\n%s" % (scope, n, ABSTAIN, listing))
-    # first live run: 57 s, 40,026 tokens, zero words. max_tokens is a budget
-    # shared with the thinking, and at high effort the reasoning ate all of it
-    # (MODEL_USE.md records the same trap). Low effort, larger budget.
+    prompt = ("You are reading %s, verbatim, from FAA service difficulty reports, on behalf of a reader "
+              "who has never seen one. Write it as a short piece of plain prose, not a list and not a report: "
+              "first one paragraph saying, in everyday words, what these write-ups are mostly about and what "
+              "keeps coming back that no coded box would show; then at most four short paragraphs, one per "
+              "recurring thing, each explaining it in plain language and ending with ONE short quote of no more "
+              "than fifteen words in the mechanic's own capitals, followed by its record number in square "
+              "brackets exactly as given. Expand shorthand the first time it appears. Say 'several' or 'a few' "
+              "rather than a count you have not verified. Say nothing about cause, safety or rates. Do not dump "
+              "codes. %s\n\n%s" % (scope, ABSTAIN, listing))
     return _stream_response({"read": n, "of": total, "what": "write-ups", "scope": scope},
                             prompt, "low", 8000)
 
@@ -1286,11 +1285,11 @@ def ask_file():
 # read by the model, so the page opens with the reading in place. Cached by
 # record id; a new record triggers one call. The FAA feed refreshes three
 # times a day, so at most three calls a day.
-_SPEC = {"id": None, "data": None}
+_SPEC = {}   # key -> reading, one per selection
 
 @app.get("/z/api/specimen")
 def specimen():
-    params = {k: v for k, v in request.args.items() if v and k not in ("hero", "view", "case")}
+    params = {k: v for k, v in request.args.items() if v and k not in ("hero", "view", "case", "v")}
     params.setdefault("crew", "A")
     params["limit"] = 1
     d = api("/api/search", **params)
@@ -1299,8 +1298,8 @@ def specimen():
         return jsonify(none=True, total=d.get("total", 0))
     r = rows[0]; rid = r.get("OperatorControlNumber")
     key = rid + "|" + json.dumps(params, sort_keys=True)
-    if _SPEC["id"] == key and _SPEC["data"]:
-        return jsonify(_SPEC["data"])
+    if key in _SPEC:
+        return jsonify(_SPEC[key])
     rec = decorate(r)
     text = rec["text"]
     facts = {k: v for k, v in rec.items() if v and k not in ("text", "id")}
@@ -1314,5 +1313,53 @@ def specimen():
         err = str(e)[:120]
     out = {"record": rec, "plain": plain, "error": err, "read_at": time.strftime("%H:%M"),
            "seconds": round(time.time() - t0, 1), "total": d.get("total"), "model": MODEL}
-    _SPEC["id"] = key; _SPEC["data"] = out
+    _SPEC[key] = out
     return jsonify(out)
+
+
+@app.get("/z/api/specimen/warm")
+def specimen_warm():
+    """Pre-read the specimen for the states a reader lands on. Called by the
+    feed's cron after each FAA refresh; until that cron exists, called by hand."""
+    import datetime
+    y = datetime.date.today().year
+    states = [{}] + [{"zone": "ZONE %d00" % i} for i in range(1, 10)] + \
+             [{"from": "%d-01-01" % y}, {"from": "%d-01-01" % (y-1), "to": "%d-12-31" % (y-1)}]
+    done = []
+    for st in states:
+        with app.test_request_context("/z/api/specimen", query_string=st):
+            try:
+                r = specimen()
+                d = r.get_json() if hasattr(r, "get_json") else {}
+                done.append({"state": st, "ok": bool(d and d.get("plain")), "seconds": (d or {}).get("seconds")})
+            except Exception as e:
+                done.append({"state": st, "ok": False, "error": str(e)[:80]})
+    return jsonify(warmed=done)
+
+
+# ---- hand-written, 30 August 2026: five questions a reader can put to one record ----
+ASKS = {
+ "explain": "Explain what actually happened, for someone who has never read one of these forms.",
+ "danger":  "Was anyone in danger at any point, according only to what the report states? Say what it states and what it does not; do not speculate.",
+ "repair":  "What did the mechanics do about it, step by step, and what did they leave undone or unsaid?",
+ "why":     "Does the report give any cause? If it does, quote it. If it does not, say so plainly and do not guess.",
+ "checks":  "What should we check next in this file: same aircraft, same part, same airline, same day, same system? Say in two or three plain sentences why each is worth a look, using only what this record says. Then, on its own last line, write CHECKS: followed by a JSON list of the searches, each {\"label\": short words, \"filters\": {field: value}} using only these fields: tail (the N-number without the N), operator (designator), model, part, ata (two-digit chapter), from and to (YYYY-MM-DD). Use only values that appear in the decoded fields.",
+}
+
+@app.get("/z/api/stream/case")
+def stream_case():
+    which = (request.args.get("q") or "explain").strip()
+    text = (request.args.get("text") or "").strip()
+    if which not in ASKS or not text:
+        return jsonify(error="no question"), 400
+    facts = {}
+    try:
+        raw = json.loads(request.args.get("rec") or "{}")
+        if isinstance(raw, dict) and raw:
+            rec = decorate(raw); facts = {k: v for k, v in rec.items() if v and k not in ("text", "id")}
+    except Exception:
+        facts = {}
+    prompt = (ASKS[which] + "\n" + NOVICE.split("End with")[0] + "\n" + ABSTAIN +
+              "\nPlain prose, no JSON, at most 140 words.\n\nEvery coded field on this report, decoded:\n"
+              + json.dumps(facts, ensure_ascii=False) + "\n\nThe write-up, verbatim:\n" + text)
+    return _stream_response({"read": 1, "of": 1, "what": "this report, all fields"}, prompt, "low", 1500)

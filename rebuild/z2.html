@@ -76,7 +76,8 @@ h1 .here{color:var(--rust)}
 .rail .pn{font:400 12px/1.4 var(--sans);color:var(--ash)}
 .foot{display:flex;flex-wrap:wrap;gap:10px 26px;justify-content:space-between;margin-top:22px;font:400 12px/1.5 var(--mono);color:var(--ash)}
 .foot span{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
-.foot a,.cannot a,.cannot button{color:var(--ash);display:inline-block;padding:4px 0;min-height:24px;line-height:16px}
+.foot a,.cannot a,.cannot button{color:var(--ash);display:inline-block;line-height:24px}
+.raw u{line-height:24px}
 /* rails as heroes */
 .months{display:flex;align-items:flex-end;gap:1px;height:120px;border-bottom:1px solid var(--line)}
 .mo{flex:1 1 0;min-width:1px;background:var(--zone);cursor:pointer;border:0;padding:0}.mo:hover,.mo.on{background:var(--rust)}
@@ -125,7 +126,7 @@ a.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--
 <div class="wrap">
   <div class="mast"><span id="mast">FAA service difficulty reports</span><a href="/z/" style="text-decoration:none;color:var(--rust)" title="Back to the start: every report, nothing chosen">↖ start again · aircraftdefects.com/z</a></div>
   <h1 id="h1"><b>…</b> reports</h1>
-  <p class="promise">Every one carries a mechanic’s write-up in trade shorthand. <em>GLM-5.3-Flash</em> reads them live to explain to you what actually happened, and says what it cannot answer.</p>
+  <p class="promise">Every one carries a mechanic’s write-up in trade shorthand. <em>GLM-5.3-Flash</em> reads them live to explain to you what actually happened.</p>
 
   <div class="desk">
     <div class="ask">
@@ -203,7 +204,9 @@ function mc(label,sub,url){var box=D.createElement("section");box.className="mc"
   var go_=box.querySelector(".mc__go"),out=box.querySelector(".out"),prov=box.querySelector(".prov"),es=null,t0=0,tick=null,meta=null,got="";
   function st(s){box.dataset.state=s;box.setAttribute("aria-busy",s==="pending"||s==="streaming"?"true":"false")}
   function fin(kind,d){if(tick)clearInterval(tick);if(es)es.close();go_.disabled=false;var read=meta?num(meta.read)+" of "+num(meta.of)+" "+(meta.what||""):"";var secs=d&&d.seconds!=null?d.seconds+" s":((Date.now()-t0)/1000).toFixed(1)+" s";
-    if(kind==="done"){st("done");out.innerHTML=esc(got).replace(/\[([A-Z0-9]{8,24})\]/g,'<a href="/z/rebuilt?case=$1" style="font:500 11px var(--mono);color:var(--model);vertical-align:super">$1</a>');prov.textContent="read by GLM-5.3-Flash, "+read+", "+secs+(d&&d.tokens?", "+num(d.tokens)+" tokens":"")+". Its words, not the FAA’s."}
+    if(kind==="done"){st("done");var body=got,checks=null;var m=got.match(/CHECKS:\s*(\[[\s\S]*\])\s*$/);if(m){try{checks=JSON.parse(m[1]);body=got.slice(0,m.index).trim()}catch(x){}}
+      out.innerHTML=esc(body).replace(/\[([A-Z0-9]{8,24})\]/g,'<a href="/z/rebuilt?case=$1" style="font:500 11px var(--mono);color:var(--model);vertical-align:super">$1</a>');
+      if(checks&&checks.length){var row=D.createElement("div");row.className="pick";row.style.marginTop="10px";checks.forEach(function(c){if(!c||!c.filters)return;var b=D.createElement("button");b.type="button";b.textContent=c.label||Object.values(c.filters).join(" ");b.onclick=function(){var p=new URLSearchParams();Object.keys(c.filters).forEach(function(k){var v=String(c.filters[k]);if(k==="tail")v=v.replace(/^N/i,"");p.set(k,v)});go(p)};row.appendChild(b)});out.appendChild(row)}prov.textContent="read by GLM-5.3-Flash, "+read+", "+secs+(d&&d.tokens?", "+num(d.tokens)+" tokens":"")+". Its words, not the FAA’s."}
     else if(kind==="abstain"){st("abstain");prov.textContent="GLM-5.3-Flash would not answer. "+read+"."}
     else if(kind==="cancelled"){st("cancelled");prov.textContent="stopped by you at "+secs+". Partial."}
     else{st("error");out.textContent="The call to GLM-5.3-Flash failed"+(d&&d.message?" ("+d.message+")":"")+". Nothing has changed on this page."}}
@@ -220,7 +223,7 @@ D.addEventListener("click",function(e){var u=e.target.closest&&e.target.closest(
 /* ---- data ---- */
 var H=null;function render(){if(H)draw()}
 fetch("/z/api/hero?"+sel().toString()).then(function(r){return r.json()}).then(function(h){H=h;draw()}).catch(function(){$("#hero").innerHTML='<p class="cannot">The file did not answer. Reload.</p>'});
-fetch("/z/api/specimen?v=2&"+sel().toString()).then(function(r){return r.json()}).then(spec).catch(function(){});
+fetch("/z/api/specimen?"+sel().toString()).then(function(r){return r.json()}).then(spec).catch(function(){});
 
 function draw(){var h=H,tot=h.total||0,corpus=h.corpus||tot,filtered=sel().toString().length>0;
   var sp=h.span;sp=(typeof sp==="string")?sp:(sp&&sp.from&&sp.to?sp.from+" to "+sp.to:"1 Jan 1995 to today");$("#mast").textContent="FAA service difficulty reports · "+sp;
@@ -347,7 +350,9 @@ function summary(h){var box=$("#sum");var s=sel().toString();if(!s){box.innerHTM
   var zs=(h.zones||[]).slice().sort(function(a,b){return b.n-a.n});if(zs.length&&zs[0].n)f.push("most on the <b>"+esc(zs[0].label.toLowerCase())+"</b>, "+num(zs[0].n));
   var ops=(h.operator_rows||h.operators||[]);if(ops.length)f.push("most filed by <b>"+esc(ops[0].label||ops[0].name||ops[0].o||ops[0].operator||ops[0].key||"")+"</b>, "+num(ops[0].n||ops[0].reports));
   var ms=(h.months||[]).slice().sort(function(a,b){return (b.n||0)-(a.n||0)});if(ms.length&&ms[0].n)f.push("busiest month <b>"+esc(ms[0].label||ms[0].m||ms[0].key||"")+"</b>, "+num(ms[0].n));
-  $("#facts").innerHTML=f.join(" · ")+". <span style='color:var(--ash)'>Counted from the records, not written by a model.</span>";
+  var crew=h.crew_reports||0,z=zs.length&&zs[0].n?zs[0]:null,o=ops.length?ops[0]:null,mo=ms.length&&ms[0].n?ms[0]:null;
+  var sent="These "+num(tot)+" reports "+(crew?"include <b>"+num(crew)+"</b> where the crew had to act":"record nothing the crew had to do")+". "+(z?"Most of the ones with a zone sit on the <b>"+esc(z.label.toLowerCase())+"</b> ("+num(z.n)+"). ":"")+(o?"<b>"+esc(o.label||o.name||o.o||o.key)+"</b> filed the most ("+num(o.n||o.reports)+")":"")+(mo?(o?", and the":"The")+" busiest month was <b>"+esc(mo.label||mo.m||mo.key)+"</b> ("+num(mo.n)+").":".");
+  $("#facts").innerHTML=sent+" <span style='color:var(--ash)'>Counted from the records; the model has not read these yet.</span>";
   var n=Math.min(300,tot);$("#sumMc").appendChild(mc("Read what recurs in these",(tot>300?num(n)+" of "+num(tot)+" write-ups, newest first, not a sample of the rest":"all "+num(n)+" write-ups")+" · about 30 seconds",function(){return"/z/api/stream/recurs?"+s}));
   function recs(sort){var r=$("#recs");r.innerHTML='<p class="cannot">Reading the file…</p>';fetch("/api/search?limit=100&"+s).then(function(x){return x.json()}).then(function(d){var rows=(d.rows||[]).map(decorateRow);
     var key={date:function(a){return a.iso},operator:function(a){return a.op},model:function(a){return a.model},crew:function(a){return a.crew}}[sort];rows.sort(function(a,b){var x=key(a),y=key(b);return sort==="date"?(y>x?1:-1):(x>y?1:x<y?-1:0)});
@@ -358,7 +363,10 @@ function openCase(id,a,raw){var old=D.getElementById("case");if(old)old.remove()
   var rows=Object.keys(raw||{}).filter(function(k){return raw[k]&&!/^_|Discrepancy|OperatorControlNumber|DifficultyDate|RegistryNNumber|OperatorDesignator|AircraftMake|AircraftModel|NatureOfCondition|PrecautionaryProcedure/.test(k)}).map(function(k){return '<tr><td style="color:var(--ash)">'+esc(LAB[k]||k.replace(/([A-Z])/g," $1").toLowerCase().trim())+'</td><td>'+esc(raw[k])+'</td></tr>'}).join("");
   box.innerHTML='<h2>'+esc(a.model)+(a.tail?", N"+esc(a.tail):"")+' <span style="font-size:16px;color:var(--ash)">· '+esc(a.date)+' · '+esc(a.op)+' · record '+esc(id)+'</span></h2><div class="body" style="margin-top:14px"><div><p class="eyebrow">The mechanic’s words, as filed</p><p class="raw">'+esc(raw.Discrepancy||"")+'</p><div id="caseMc"></div></div><div><p class="eyebrow">Every code on this report</p><table class="tbl">'+rows+'</table></div><p class="cannot"><a href="/z/rebuilt?case='+esc(id)+'">Full case sheet with the FAA wording</a> · <a href="#" data-close>close</a></p></div></div>';
   var sum=D.getElementById("sum");sum.insertAdjacentElement("afterend",box);box.querySelector("[data-close]").onclick=function(e){e.preventDefault();box.remove()};
-  box.querySelector("#caseMc").appendChild(mc("Say it in plain English","this write-up, read by the model, live",function(){var slim={};Object.keys(raw).forEach(function(k){if(k!=="Discrepancy"&&raw[k]!=null&&raw[k]!=="")slim[k]=raw[k]});return"/z/api/stream/gloss?rec="+encodeURIComponent(JSON.stringify(slim))+"&text="+encodeURIComponent((raw.Discrepancy||"").slice(0,4000))}));
+  var slim={};Object.keys(raw).forEach(function(k){if(k!=="Discrepancy"&&raw[k]!=null&&raw[k]!=="")slim[k]=raw[k]});var recq="rec="+encodeURIComponent(JSON.stringify(slim))+"&text="+encodeURIComponent((raw.Discrepancy||"").slice(0,4000));
+  var QS=[["explain","What actually happened?","the whole report, explained for a first-time reader"],["danger","Was anyone in danger?","only what the report states, and what it does not"],["repair","What did the mechanics do?","step by step, and what was left unsaid"],["why","Does it say why?","quoted if it does; said plainly if it does not"],["checks","What should we check next?","same aircraft, part, airline or day: each one a click"]];
+  var qbox=box.querySelector("#caseMc");qbox.insertAdjacentHTML("beforebegin",'<p class="eyebrow" style="margin-top:16px">Ask the model about this report</p>');
+  QS.forEach(function(x){qbox.appendChild(mc(x[1],x[2],function(){return"/z/api/stream/case?q="+x[0]+"&"+recq}))});
   box.scrollIntoView({block:"start",behavior:"smooth"})}
 function decorateRow(r){var d=r.DifficultyDate||"",m=d.match(/(\d\d)\/(\d\d)\/(\d{4})/);return {id:r.OperatorControlNumber,date:d,iso:m?m[3]+"-"+m[1]+"-"+m[2]:"",tail:r.RegistryNNumber||"",op:r.OperatorDesignator||"",model:((r.AircraftMake||"")+" "+(r.AircraftModel||"")).trim(),found:((r.PartName||"")+" "+(r.PartCondition||"")).trim().toLowerCase()||"(no part named)",crew:[r.PrecautionaryProcedureA,r.PrecautionaryProcedureB].filter(function(x){return x&&x!=="K"&&x!=="0"}).join(",")||""}}
 
@@ -370,7 +378,9 @@ function summary(h){var box=$("#sum");var s=sel().toString();if(!s){box.innerHTM
   var zs=(h.zones||[]).slice().sort(function(a,b){return b.n-a.n});if(zs.length&&zs[0].n)f.push("most on the <b>"+esc(zs[0].label.toLowerCase())+"</b>, "+num(zs[0].n));
   var ops=(h.operator_rows||h.operators||[]);if(ops.length)f.push("most filed by <b>"+esc(ops[0].label||ops[0].name||ops[0].o||ops[0].operator||ops[0].key||"")+"</b>, "+num(ops[0].n||ops[0].reports));
   var ms=(h.months||[]).slice().sort(function(a,b){return (b.n||0)-(a.n||0)});if(ms.length&&ms[0].n)f.push("busiest month <b>"+esc(ms[0].label||ms[0].m||ms[0].key||"")+"</b>, "+num(ms[0].n));
-  $("#facts").innerHTML=f.join(" · ")+". <span style='color:var(--ash)'>Counted from the records, not written by a model.</span>";
+  var crew=h.crew_reports||0,z=zs.length&&zs[0].n?zs[0]:null,o=ops.length?ops[0]:null,mo=ms.length&&ms[0].n?ms[0]:null;
+  var sent="These "+num(tot)+" reports "+(crew?"include <b>"+num(crew)+"</b> where the crew had to act":"record nothing the crew had to do")+". "+(z?"Most of the ones with a zone sit on the <b>"+esc(z.label.toLowerCase())+"</b> ("+num(z.n)+"). ":"")+(o?"<b>"+esc(o.label||o.name||o.o||o.key)+"</b> filed the most ("+num(o.n||o.reports)+")":"")+(mo?(o?", and the":"The")+" busiest month was <b>"+esc(mo.label||mo.m||mo.key)+"</b> ("+num(mo.n)+").":".");
+  $("#facts").innerHTML=sent+" <span style='color:var(--ash)'>Counted from the records; the model has not read these yet.</span>";
   var n=Math.min(300,tot);$("#sumMc").appendChild(mc("Read what recurs in these",(tot>300?num(n)+" of "+num(tot)+" write-ups, newest first, not a sample of the rest":"all "+num(n)+" write-ups")+" · about 30 seconds",function(){return"/z/api/stream/recurs?"+s}));
   function recs(sort){var r=$("#recs");r.innerHTML='<p class="cannot">Reading the file…</p>';fetch("/api/search?limit=100&"+s).then(function(x){return x.json()}).then(function(d){var rows=(d.rows||[]).map(decorateRow);
     var key={date:function(a){return a.iso},operator:function(a){return a.op},model:function(a){return a.model},crew:function(a){return a.crew}}[sort];rows.sort(function(a,b){var x=key(a),y=key(b);return sort==="date"?(y>x?1:y<x?-1:0):(x>y?1:x<y?-1:0)});
@@ -383,7 +393,10 @@ function openCase(id,a,raw){var old=D.getElementById("case");if(old)old.remove()
   var rows=Object.keys(raw||{}).filter(function(k){return raw[k]&&!/^_|Discrepancy|OperatorControlNumber|DifficultyDate|RegistryNNumber|OperatorDesignator|AircraftMake|AircraftModel|NatureOfCondition|PrecautionaryProcedure/.test(k)}).map(function(k){return '<tr><td style="color:var(--ash)">'+esc(LAB[k]||k.replace(/([A-Z])/g," $1").toLowerCase().trim())+'</td><td>'+esc(raw[k])+'</td></tr>'}).join("");
   box.innerHTML='<h2>'+esc(a.model)+(a.tail?", N"+esc(a.tail):"")+' <span style="font-size:16px;color:var(--ash)">· '+esc(a.date)+' · '+esc(a.op)+' · record '+esc(id)+'</span></h2><div class="body" style="margin-top:14px"><div><p class="eyebrow">The mechanic’s words, as filed</p><p class="raw">'+esc(raw.Discrepancy||"")+'</p><div id="caseMc"></div></div><div><p class="eyebrow">Every code on this report</p><table class="tbl">'+rows+'</table></div><p class="cannot"><a href="/z/rebuilt?case='+esc(id)+'">Full case sheet with the FAA wording</a> · <a href="#" data-close>close</a></p></div></div>';
   var sum=D.getElementById("sum");sum.insertAdjacentElement("afterend",box);box.querySelector("[data-close]").onclick=function(e){e.preventDefault();box.remove()};
-  box.querySelector("#caseMc").appendChild(mc("Say it in plain English","this write-up, read by the model, live",function(){var slim={};Object.keys(raw).forEach(function(k){if(k!=="Discrepancy"&&raw[k]!=null&&raw[k]!=="")slim[k]=raw[k]});return"/z/api/stream/gloss?rec="+encodeURIComponent(JSON.stringify(slim))+"&text="+encodeURIComponent((raw.Discrepancy||"").slice(0,4000))}));
+  var slim={};Object.keys(raw).forEach(function(k){if(k!=="Discrepancy"&&raw[k]!=null&&raw[k]!=="")slim[k]=raw[k]});var recq="rec="+encodeURIComponent(JSON.stringify(slim))+"&text="+encodeURIComponent((raw.Discrepancy||"").slice(0,4000));
+  var QS=[["explain","What actually happened?","the whole report, explained for a first-time reader"],["danger","Was anyone in danger?","only what the report states, and what it does not"],["repair","What did the mechanics do?","step by step, and what was left unsaid"],["why","Does it say why?","quoted if it does; said plainly if it does not"],["checks","What should we check next?","same aircraft, part, airline or day: each one a click"]];
+  var qbox=box.querySelector("#caseMc");qbox.insertAdjacentHTML("beforebegin",'<p class="eyebrow" style="margin-top:16px">Ask the model about this report</p>');
+  QS.forEach(function(x){qbox.appendChild(mc(x[1],x[2],function(){return"/z/api/stream/case?q="+x[0]+"&"+recq}))});
   box.scrollIntoView({block:"start",behavior:"smooth"})}
 function decorateRow(r){var d=r.DifficultyDate||"",m=d.match(/(\d\d)\/(\d\d)\/(\d{4})/);return {id:r.OperatorControlNumber,date:d,iso:m?m[3]+"-"+m[1]+"-"+m[2]:"",tail:r.RegistryNNumber||"",op:r.OperatorDesignator||"",model:((r.AircraftMake||"")+" "+(r.AircraftModel||"")).trim(),found:((r.PartName||"")+" "+(r.PartCondition||"")).trim().toLowerCase()||"(no part named)",crew:[r.PrecautionaryProcedureA,r.PrecautionaryProcedureB].filter(function(x){return x&&x!=="K"&&x!=="0"}).join(",")||""}}
 

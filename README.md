@@ -140,6 +140,8 @@ May.
 
     export ZAI_API_KEY=...
     python3 app/app.py                        # the service, gunicorn on 127.0.0.1:8211, behind nginx at /z
+    # gunicorn needs --limit-request-line 32768: the case-sheet questions carry the whole record in the URL,
+    # and the default 4094 rejected long write-ups (found 31 August 2026; nginx buffers are already 32k)
     scp rebuild/z2.html host:/opt/sdrz/static/index.html
     curl https://aircraftdefects.com/z/api/specimen/warm   # pre-read the landing states after each FAA refresh
     python3 build/count_provenance.py         # who wrote /z/rebuilt

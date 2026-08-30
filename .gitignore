@@ -7,3 +7,12 @@ __pycache__/
 /app.py
 /index.html
 /conflicts.html
+video/out/
+video/cap/
+video/voice/*.wav
+video/clip/
+video/cards/*.png
+video/cards/*.webm
+video/cards/*.mp4
+video/cards/*.html
+video/*.mp4

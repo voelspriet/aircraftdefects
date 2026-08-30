@@ -3,7 +3,7 @@ V5 = [
  # the hook (over the documentary and the FAA form; reuses 2a-2d voice files)
  ('2a', None), ('2b', None), ('2c', None), ('2d', None),
  # the turn
- ('h1', "So I built a reader for it, and gave it to a language model. GLM-5.3-Flash, from z.ai. It reads the mechanics' shorthand, live, and answers in plain words."),
+ ('hb', "So now you have all the data, and all the numbers. But where is the story? How do you understand the facts? That is where z.ai came in. I gave the file to its language model, GLM-5.3-Flash. It reads the mechanics' shorthand, live, and answers in plain words."),
  ('h2', "Here is what it does that the government's site cannot."),
  # chapter 1
  ('c1t', "One. Say it in plain English."),

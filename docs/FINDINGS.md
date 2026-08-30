@@ -903,3 +903,97 @@ which is what the reference does.
 Thirteen of the rebuild's fourteen selects carry an aria-label. The reference has
 twenty-two selects because its analysis panels are loaded; the difference is not
 a missing label but a panel that has not been opened.
+
+---
+
+## F28. Correct code, correct diagnosis, no effect
+
+30 August. Eleven of nineteen presentation checks failing on the live page, found
+by a parallel session driving a browser. Fixed over six rounds to 21 of 21. The
+faults are ordinary. What they have in common is not.
+
+**The case sheet could not be closed by a mouse.** `#case-wrap` was marked
+`inert`, so Close, the wheel and focus were all switched off. Escape still
+worked, and that asymmetry was the diagnosis: a `keydown` listener on `document`
+with capture is not routed by hit-testing, so it is the one way in that `inert`
+does not cut. Cause: `setSiblings` captures `caseBox` while `#case-box` is still
+a child of `<body>`; a later block re-parents it into `#case-wrap`; the identity
+test meant to exempt the sheet stops matching.
+
+Every one of the nine builds phase C made reachable is opened through that sheet.
+So C's commit, `4b0c449`, said "all nine builds reachable and driven in a
+browser", and that was true of a scripted click and false of a mouse. Playwright's
+`element.click()` dispatches to the node; it does not hit-test. The claim is
+corrected here rather than quietly amended there.
+
+### The same shape, four times in one morning
+
+  1. **`window.caseSheet` against `openCase`.** Asked to repair two
+     implementations that never met, the model wrote a third, correct in every
+     detail, with exactly the guard the fault needed, and exported it under a
+     name nothing calls. The rows are markup reading `onclick="openCase(...)"`,
+     which resolves against the global scope at click time. The page's broken
+     version kept running.
+  2. **A deletion it had no channel to perform.** Its block carried a comment
+     saying the old capture and the `setSiblings` loop "are deleted". They were
+     not. A block appended by `build_all.py` can add and cannot remove. The
+     model narrated the change it intended, and the narration shipped as if it
+     were the change.
+  3. **Sixteen of thirty-eight selectors matching nothing.** `.gutter`, `.zrow`,
+     `.zl`, `.zv`, `.strip .tabs`, `.drawing`, `.wu`, `.absent`, `.mono`. The
+     four selectors that did match are exactly the four faults that got fixed.
+  4. **A rule that lost on specificity.** `#vstrip .vglab` is correct CSS and
+     never applied, because another block declares `#vstrip.vgroups .vglab`, and
+     one id with two classes wins whatever the order.
+
+Every one deployed without an error. No console warning, no failed request, no
+missing element. The server was right, the DOM was right, the code was right.
+
+### Two of the three "remaining" faults were build order
+
+The truncation fix and the phone overflow were both live in the page and being
+painted over by a later block in `build_all.py`'s CSS list. Reordering the list
+fixed both. Neither needed a model round. A build that appends blocks in a list
+will eventually have two blocks arguing, and the argument is silent.
+
+`rebuild/splice_css.py` now names them: sixteen selectors declared twice, twelve
+setting the same property to a different value. `splice.py` has done this for
+JavaScript since the start, renaming a duplicate `pct()` and excising a
+redeclared const. There was no equivalent for CSS until today.
+
+### What the gate costs, and what it caught in itself
+
+`build/verify_presentation.py` drives a real browser: hit-testing, focus, wheel,
+computed geometry at four widths. Three of its own checks were wrong and were
+corrected in the open: it counted a control restyling itself as a layout shift
+and reported a 485px move that does not reproduce, it read state left behind by
+its own hover sweep, and it compared backgrounds so literally that the correct
+fix would have read as a failure. Saying so each time is what makes the other
+eighteen worth believing.
+
+One check was loosened deliberately, with the standard cited in the code: WCAG
+2.5.8 exempts a link inside a sentence from the 24px target. The model raised
+that question in words rather than padding the links quietly, which is the only
+reason it was asked at all.
+
+The gate's aria assertions exist because of a near miss. `setSiblings` writes
+`aria-hidden="true"` alongside `inert`. A repair clearing only `inert` would have
+produced a sheet fully operable by mouse and invisible to every screen reader,
+with `role="dialog" aria-modal="true"` inside it, and all nineteen checks would
+have passed.
+
+### What made the last round fast
+
+The final round took 64 seconds and 2,102 characters. The one before it took
+1,295 seconds and 191,878 characters of reasoning. The difference was a single
+sentence in the brief naming why the previous rule had no effect. The model
+cannot see the page, so a brief that says what a rule did is worth more than one
+that says what it should do.
+
+### The count
+
+    before   11 of 19 failing
+    after    21 of 21 passing
+    rounds   42, 42b, 42c, 43, 43b, 43c
+    of which shipped nothing but a mandated first deploy   0
+    hand characters added to page code                     0

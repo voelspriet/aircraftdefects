@@ -137,7 +137,7 @@ a.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--
 <body>
 <a class="skip" href="#leads">Skip to Find leads</a>
 <div class="wrap">
-  <div class="mast"><span id="mast">FAA service difficulty reports</span><a href="/z/" style="text-decoration:none;color:var(--rust)" title="Back to the start: every report, nothing chosen">↖ start again · aircraftdefects.com/z</a></div>
+  <div class="mast"><span id="mast">FAA service difficulty reports</span><a href="/z/" style="text-decoration:none;color:var(--rust)" title="Back to the start: every report, nothing chosen">↖ start again · aircraftdefects.com</a></div>
   <div class="rails top" id="railsTop" style="margin:18px 0 0"></div>
   <p class="crumb" id="crumb"></p>
   <h1 id="h1"><b>…</b> reports</h1>
@@ -186,6 +186,7 @@ function q(){return new URLSearchParams(location.search)}
 function sel(){var p=q();Object.keys(VIEW).forEach(function(k){p.delete(k)});return p}
 function num(n){return (n==null?"":String(n)).replace(/\B(?=(\d{3})+(?!\d))/g,",")}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+var ROOT=location.pathname.indexOf("/z")===0?"/z/":"/";document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll('a[href="/z/"]').forEach(function(a){a.setAttribute("href",ROOT)})});
 function go(p){var skip={hero:1,v:1,from:1,to:1};var before=Array.from(q().keys()).filter(function(k){return !skip[k]}).length,after=Array.from(p.keys()).filter(function(k){return !skip[k]}).length;
   try{if(after>before)sessionStorage.setItem("z-scroll","sum");else sessionStorage.removeItem("z-scroll")}catch(x){}
   location.href=location.pathname+(p.toString()?"?"+p.toString():"")+location.hash}
@@ -195,7 +196,7 @@ var ZPOS={"ZONE 200":[334,80,300,130],"ZONE 100":[334,252,300,176],"ZONE 300":[5
 var PRETTY={ata:"system",from:"from",to:"to",q:"words",operator:"airline",tail:"tail",model:"type",make:"make",part:"part",jasc:"system",zone:"zone",crew:"crew action",nature:"nature",stage:"stage"};
 
 /* ---- desk ---- */
-function chips(){var c=$("#chips");c.innerHTML="";var any=false;sel().forEach(function(v,k){any=true;var s=D.createElement("span");var lab=(k==="q"&&/^[0-9][0-9a-z\-]{5,}$/i.test(v))?"part number or code":(PRETTY[k]||k);s.innerHTML=esc(lab)+" "+esc(ZLABEL[v]||(k==="operator"?opName(v):v))+'<button type="button" aria-label="remove">×</button>';s.querySelector("button").onclick=function(){var p=q();p.delete(k);go(p)};c.appendChild(s)});if(any||view()){var cl=D.createElement("span");cl.className="clear";cl.innerHTML='<button type="button" style="padding:0">clear all, back to the start</button>';cl.querySelector("button").onclick=function(){location.href="/z/"};c.appendChild(cl)}}
+function chips(){var c=$("#chips");c.innerHTML="";var any=false;sel().forEach(function(v,k){any=true;var s=D.createElement("span");var lab=(k==="q"&&/^[0-9][0-9a-z\-]{5,}$/i.test(v))?"part number or code":(PRETTY[k]||k);s.innerHTML=esc(lab)+" "+esc(ZLABEL[v]||(k==="operator"?opName(v):v))+'<button type="button" aria-label="remove">×</button>';s.querySelector("button").onclick=function(){var p=q();p.delete(k);go(p)};c.appendChild(s)});if(any||view()){var cl=D.createElement("span");cl.className="clear";cl.innerHTML='<button type="button" style="padding:0">clear all, back to the start</button>';cl.querySelector("button").onclick=function(){location.href=ROOT};c.appendChild(cl)}}
 /* hand-written, 31 August 2026: suggestions per kind, from the selection */
 function suggest(){var k=$("#kind").value,dl=$("#sugg");dl.innerHTML="";if(!k)return;var qs=selQS([k==="jasc"?"ata":k]);function fill(items){dl.innerHTML=items.slice(0,40).map(function(x){return '<option value="'+esc(x[0])+'">'+esc(x[1]||"")+'</option>'}).join("")}
   if(k==="operator"){api("/api/breakdown?by=operator"+(qs?"&"+qs:"")).then(function(d){fill((d.rows||[]).filter(function(r){return r.key}).map(function(r){return [opName(r.key),r.key+" · "+num(r.n)]}))}).catch(function(){})}
@@ -279,8 +280,8 @@ function draw(){var h=H;(h.crew||[]).forEach(function(c){if(c.code&&c.label)ZLAB
   if(v){renderView(v)}else if(RAIL==="where")hero.appendChild(plane(h));else if(RAIL==="when")hero.appendChild(months(h));else if(RAIL==="who")hero.appendChild(who(h));else hero.appendChild(forced(h));
   var rails=$("#rails");rails.innerHTML="";var top=$("#railsTop");top.innerHTML="";var all={where:["Where","on the aircraft","nine zones, and what cannot be placed"],when:["When","<b>"+num((h.months||[]).length||380)+"</b> months","the same reports, month by month"],who:["Who","<b>"+num(h.aircraft)+"</b> aircraft","airline and tail"],forced:["What it forced","<b>"+num(h.crew_reports)+"</b> reports","what the crew had to do"]};
   ["where","when","who","forced"].forEach(function(r){var b=D.createElement("button");b.className="rail"+(r===RAIL&&!v?" on":"");b.innerHTML='<div class="q">'+all[r][0]+(r===RAIL&&!v?' <span style="color:var(--rust)">·</span>':'')+'</div><div class="n">'+all[r][1]+'</div><div class="pn">'+all[r][2]+'</div>';b.onclick=function(){location.hash="";setRail(r)};rails.appendChild(b);top.appendChild(b.cloneNode(true));top.lastChild.onclick=b.onclick});
-  var nf=D.createElement("a");nf.className="rail nf"+(v==="freefall"?" on":"");nf.href="/z/#view=freefall";nf.innerHTML='<div class="q">NETFLIX</div><div class="n">Freefall<span style="font-size:15px;color:var(--ash)"> · the film</span></div><div class="pn">'+(v==="freefall"?'Planes from the documentary':'This site is inspired by the documentary: see why and how here')+'</div>';top.appendChild(nf);
-  var cr=[];cr.push('<a href="/z/">every report</a>');var ch=[];sel().forEach(function(v2,k){ch.push((PRETTY[k]||k)+" "+(ZLABEL[v2]||(k==="operator"?opName(v2):v2)))});if(ch.length)cr.push("<b>"+esc(ch.join(", "))+"</b>");cr.push('<a href="'+location.pathname+location.search+'" data-rail>'+({where:"where",when:"when",who:"who",forced:"what it forced"})[RAIL]+'</a>');if(v)cr.push("<b>"+esc(VIEWS[v][0])+"</b>");$("#crumb").innerHTML=cr.join(" › ");
+  var nf=D.createElement("a");nf.className="rail nf"+(v==="freefall"?" on":"");nf.href=ROOT+"#view=freefall";nf.innerHTML='<div class="q">NETFLIX</div><div class="n">Freefall<span style="font-size:15px;color:var(--ash)"> · the film</span></div><div class="pn">'+(v==="freefall"?'Planes from the documentary':'This site is inspired by the documentary: see why and how here')+'</div>';top.appendChild(nf);
+  var cr=[];cr.push('<a href="'+ROOT+'">every report</a>');var ch=[];sel().forEach(function(v2,k){ch.push((PRETTY[k]||k)+" "+(ZLABEL[v2]||(k==="operator"?opName(v2):v2)))});if(ch.length)cr.push("<b>"+esc(ch.join(", "))+"</b>");cr.push('<a href="'+location.pathname+location.search+'" data-rail>'+({where:"where",when:"when",who:"who",forced:"what it forced"})[RAIL]+'</a>');if(v)cr.push("<b>"+esc(VIEWS[v][0])+"</b>");$("#crumb").innerHTML=cr.join(" › ");
   leads(h);summary(h)}
 
 var SYS=[ /* ATA chapter, label, where it sits on the drawing (x,y of the label; ax,ay of the anchor on the airframe) */

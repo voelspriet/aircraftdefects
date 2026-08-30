@@ -1,6 +1,6 @@
 # Make it readable
 
-**Live: [aircraftdefects.com/z](https://aircraftdefects.com/z/)** · GLM-5.3-Flash, reading the file live · MIT
+**Live: [aircraftdefects.com](https://aircraftdefects.com/)** · GLM-5.3-Flash, reading the file live · MIT · the earlier desk is kept at [/try1](https://aircraftdefects.com/try1/)
 
 A government can publish everything it holds and still answer none of your
 questions.
@@ -104,7 +104,7 @@ and [`MODEL_USE.md`](MODEL_USE.md) says why.
 
 Two pages are served, and the honest answer is different for each.
 
-**aircraftdefects.com/z**, the page you land on, is a hand-written frame:
+**aircraftdefects.com** (also served at /z), the page you land on, is a hand-written frame:
 `rebuild/z2.html`, 81,954 characters, written by Claude on 30 and 31 August
 2026 at my decision, after two rounds of asking GLM-5.3-Flash to repair the
 earlier page did not land. On this page the model is not the author of the

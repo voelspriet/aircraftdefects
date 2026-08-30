@@ -1,6 +1,6 @@
 # Make it readable
 
-**Live: [aircraftdefects.com/z](https://aircraftdefects.com/z/) · MIT · GLM-5.3-Flash reads the file live**
+**Live: [aircraftdefects.com](https://aircraftdefects.com/) · MIT · GLM-5.3-Flash reads the file live** (the earlier desk is at /try1)
 
 A government can publish everything it holds and still answer none of your
 questions. The FAA publishes 1,757,827 aircraft defect reports going back to

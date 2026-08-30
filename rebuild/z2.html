@@ -193,7 +193,7 @@ var ZPOS={"ZONE 200":[334,80,300,130],"ZONE 100":[334,252,300,176],"ZONE 300":[5
 var PRETTY={ata:"system",from:"from",to:"to",q:"words",operator:"airline",tail:"tail",model:"type",make:"make",part:"part",jasc:"system",zone:"zone",crew:"crew action",nature:"nature",stage:"stage"};
 
 /* ---- desk ---- */
-function chips(){var c=$("#chips");c.innerHTML="";var any=false;sel().forEach(function(v,k){any=true;var s=D.createElement("span");var lab=(k==="q"&&/^[0-9][0-9a-z\-]{5,}$/i.test(v))?"part number or code":(PRETTY[k]||k);s.innerHTML=esc(lab)+" "+esc(ZLABEL[v]||v)+'<button type="button" aria-label="remove">×</button>';s.querySelector("button").onclick=function(){var p=q();p.delete(k);go(p)};c.appendChild(s)});if(any||view()){var cl=D.createElement("span");cl.className="clear";cl.innerHTML='<button type="button" style="padding:0">clear all, back to the start</button>';cl.querySelector("button").onclick=function(){location.href="/z/"};c.appendChild(cl)}}
+function chips(){var c=$("#chips");c.innerHTML="";var any=false;sel().forEach(function(v,k){any=true;var s=D.createElement("span");var lab=(k==="q"&&/^[0-9][0-9a-z\-]{5,}$/i.test(v))?"part number or code":(PRETTY[k]||k);s.innerHTML=esc(lab)+" "+esc(ZLABEL[v]||(k==="operator"?opName(v):v))+'<button type="button" aria-label="remove">×</button>';s.querySelector("button").onclick=function(){var p=q();p.delete(k);go(p)};c.appendChild(s)});if(any||view()){var cl=D.createElement("span");cl.className="clear";cl.innerHTML='<button type="button" style="padding:0">clear all, back to the start</button>';cl.querySelector("button").onclick=function(){location.href="/z/"};c.appendChild(cl)}}
 $("#srchBtn").onclick=function(){var v=$("#qin").value.trim();if(!v)return;var k=$("#kind").value||"q";var p=q();if(k==="tail")v=v.toUpperCase().replace(/^N/,"");p.set(k,v);go(p)};
 $("#qin").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();$("#askBtn").click()}});
 $("#askBtn").onclick=function(){var v=$("#qin").value.trim();if(!v)return;var d=$("#draft");d.innerHTML='<div class="draft"><span class="lab">GLM-5.3-Flash is reading your question</span></div>';
@@ -404,7 +404,7 @@ function openCase(id,a,raw){var old=D.getElementById("case");if(old)old.remove()
   var qbox=box.querySelector("#caseMc");qbox.insertAdjacentHTML("beforebegin",'<p class="eyebrow" style="margin-top:16px">Ask the model about this report</p>');
   QS.forEach(function(x){qbox.appendChild(mc(x[1],x[2],function(){return"/z/api/stream/case?q="+x[0]+"&"+recq}))});
   box.scrollIntoView({block:"start",behavior:"smooth"})}
-function opName(c){return OPS[c]?OPS[c].replace(/\b(INC|LLC|CORP|CO)\.?$/i,"").trim():(c||"")}
+function opName(c){return OPS[c]?OPS[c].replace(/\b(INC|LLC|CORP|CORPORATION|CO|COMPANY|LTD)\.?$/i,"").trim():(c||"")}
 function crewWords(c){return String(c||"").split(",").filter(Boolean).map(function(k){return (ZLABEL[k]||k).toLowerCase()}).join(", ")}
 function decorateRow(r){var d=r.DifficultyDate||"",m=d.match(/(\d\d)\/(\d\d)\/(\d{4})/);return {id:r.OperatorControlNumber,date:d,iso:m?m[3]+"-"+m[1]+"-"+m[2]:"",tail:r.RegistryNNumber||"",op:r.OperatorDesignator||"",model:((r.AircraftMake||"")+" "+(r.AircraftModel||"")).trim(),found:(((r.PartName||"")+" "+(r.PartCondition||"")).replace(/UNKNOWN/g,"").trim().toLowerCase()||"(no part named)"),crew:[r.PrecautionaryProcedureA,r.PrecautionaryProcedureB].filter(function(x){return x&&x!=="K"&&x!=="0"}).join(",")||""}}
 

@@ -1,3 +1,4 @@
+```css
 /* ============================================================
    vstrip: label wrap + mobile stack, replaces the 43b block
    Selector weight: #vstrip.vgroups .vg .vglab is 1 id + 3
@@ -85,3 +86,4 @@
     height: 24px;
   }
 }
+```

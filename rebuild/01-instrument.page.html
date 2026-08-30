@@ -10080,59 +10080,93 @@ code.cd.sd-pnlink:focus-visible{outline:2px solid var(--rust-text,#b8431f);outli
 }
 `;document.head.appendChild(s);})();
 
-(function(){var s=document.createElement('style');s.id='sdr-css-43b';s.textContent=`/* block 44, replacing block 43 whole.
-   Every selector below appears in the markup measured for this brief. */
+(function(){var s=document.createElement('style');s.id='sdr-css-43b';s.textContent=`/* ============================================================
+   vstrip: label wrap + mobile stack, replaces the 43b block
+   Selector weight: #vstrip.vgroups .vg .vglab is 1 id + 3
+   classes, which beats the other block's 1 id + 2 classes,
+   so no !important is needed anywhere in here.
+   ============================================================ */
 
-/* keeps */
-
-html { background: transparent; }
-/* the canvas falls back to the body's background, and the script below
-   copies the body's computed background onto the root so that html and
-   body share one background with no color guessed here */
-
-.gv {
-  overflow: visible;
-  text-overflow: clip;
-  white-space: normal;
-  overflow-wrap: break-word;
-  word-break: normal;
+/* --- the strip itself never widens its parent --- */
+#vstrip.vgroups {
+  max-width: 100%;
   min-width: 0;
 }
 
-.aim { min-height: 18px; }
-
-.vtab {
-  box-sizing: border-box;
-  min-height: 24px;
-  min-width: 24px;
+/* --- each group can shrink, children may wrap --- */
+#vstrip.vgroups .vg {
+  min-width: 0;
+  max-width: 100%;
 }
 
-/* 1. the group label wraps inside its own row instead of running
-      under the buttons beside it */
-
-#vstrip .vg { min-width: 0; }
-
-#vstrip .vglab {
+/* --- label: beats #vstrip.vgroups .vglab on specificity --- */
+#vstrip.vgroups .vg .vglab {
   flex: 1 1 auto;
   width: auto;
   min-width: 0;
   max-width: 360px;
   white-space: normal;
+  overflow-wrap: break-word;
   line-height: 1.2;
+  align-self: center;
 }
 
-/* 2. the phone month strip scrolls inside its own box */
+#vstrip.vgroups .vg .vglab b {
+  font-weight: 700;
+}
 
-.phstrip {
-  display: flex;
-  flex-wrap: nowrap;
+/* --- button row: shrinks first, wraps inside its own box --- */
+#vstrip.vgroups .vg .vgbtns {
+  flex: 0 1 auto;
+  min-width: 0;
   max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
+  flex-wrap: wrap;
+  row-gap: 2px;
 }
 
-.phmo { flex: 0 0 auto; }`;document.head.appendChild(s);})();
+/* --- buttons keep 24px height, natural width, never clipped --- */
+#vstrip.vgroups .vg .vgbtns .vtab {
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 24px;
+  height: 24px;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   Phone shape: below 768 the label sits above its buttons,
+   the buttons wrap inside their own box, nothing leaves 390.
+   768 and up keep the side by side row above, unchanged.
+   ============================================================ */
+@media (max-width: 767px) {
+  #vstrip.vgroups .vg {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  #vstrip.vgroups .vg .vglab {
+    max-width: none;
+    width: auto;
+    flex: 0 0 auto;
+  }
+
+  #vstrip.vgroups .vg .vgbtns {
+    flex: 0 1 auto;
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  #vstrip.vgroups .vg .vgbtns .vtab {
+    flex: 1 1 auto;
+    min-height: 24px;
+    height: 24px;
+  }
+}`;document.head.appendChild(s);})();
 
 (function(){var s=document.createElement('style');s.id='sdr-css-43a';s.textContent=`/* ==========================================================================
    z-built — the appearance block. Every selector below is declared here

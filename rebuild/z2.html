@@ -251,7 +251,7 @@ D.addEventListener("click",function(e){var u=e.target.closest&&e.target.closest(
 /* hand-written, 31 August 2026: with no filters the page opens on the last 90 days */
 if(!/view=freefall/.test(location.hash)&&(!location.search||!Array.from(new URLSearchParams(location.search).keys()).some(function(k){return k!=="hero"&&k!=="v"}))){var p0=new URLSearchParams(location.search),d0=new Date();d0.setDate(d0.getDate()-90);p0.set("from",d0.toISOString().slice(0,10));history.replaceState(null,"","?"+p0.toString()+location.hash)}
 var H=null;function render(){if(H)draw()}
-fetch("/z/api/hero?"+sel().toString()).then(function(r){return r.json()}).then(function(h){H=h;draw()}).catch(function(){$("#hero").innerHTML='<p class="cannot">The file did not answer. Reload.</p>'});
+var OPS={};fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OPS=m||{}}).catch(function(){}).then(function(){return fetch("/z/api/hero?"+sel().toString())}).then(function(r){return r.json()}).then(function(h){H=h;draw()}).catch(function(){$("#hero").innerHTML='<p class="cannot">The file did not answer. Reload.</p>'});
 fetch("/z/api/specimen?"+(/view=freefall/.test(location.hash)?"tail=704AL&crew=A":sel().toString())).then(function(r){return r.json()}).then(spec).catch(function(){});
 addEventListener("hashchange",function(){if(view()==="freefall")fetch("/z/api/specimen?tail=704AL&crew=A").then(function(r){return r.json()}).then(spec).catch(function(){})});
 
@@ -404,7 +404,6 @@ function openCase(id,a,raw){var old=D.getElementById("case");if(old)old.remove()
   var qbox=box.querySelector("#caseMc");qbox.insertAdjacentHTML("beforebegin",'<p class="eyebrow" style="margin-top:16px">Ask the model about this report</p>');
   QS.forEach(function(x){qbox.appendChild(mc(x[1],x[2],function(){return"/z/api/stream/case?q="+x[0]+"&"+recq}))});
   box.scrollIntoView({block:"start",behavior:"smooth"})}
-var OPS={};fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OPS=m||{}}).catch(function(){});
 function opName(c){return OPS[c]?OPS[c].replace(/\b(INC|LLC|CORP|CO)\.?$/i,"").trim():(c||"")}
 function crewWords(c){return String(c||"").split(",").filter(Boolean).map(function(k){return (ZLABEL[k]||k).toLowerCase()}).join(", ")}
 function decorateRow(r){var d=r.DifficultyDate||"",m=d.match(/(\d\d)\/(\d\d)\/(\d{4})/);return {id:r.OperatorControlNumber,date:d,iso:m?m[3]+"-"+m[1]+"-"+m[2]:"",tail:r.RegistryNNumber||"",op:r.OperatorDesignator||"",model:((r.AircraftMake||"")+" "+(r.AircraftModel||"")).trim(),found:(((r.PartName||"")+" "+(r.PartCondition||"")).replace(/UNKNOWN/g,"").trim().toLowerCase()||"(no part named)"),crew:[r.PrecautionaryProcedureA,r.PrecautionaryProcedureB].filter(function(x){return x&&x!=="K"&&x!=="0"}).join(",")||""}}

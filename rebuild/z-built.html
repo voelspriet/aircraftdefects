@@ -8161,7 +8161,7 @@ window.addEventListener("load", function(){ sdrStripRails(); sdrFixLabels(); sdr
 
 
 
-/* ---- 35: the three dossiers and the way in, written by the model ---- */
+/* ---- 37: the dead handlers and the part number, written by the model ---- */
 (function(){
 "use strict";
 window.__sderrs=window.__sderrs||[];
@@ -8318,6 +8318,208 @@ function sdMirror(){
 function purgeLand(){
   var ls=document.querySelectorAll(".card.land"),i;
   for(i=0;i<ls.length;i++)ls[i].remove();
+}
+
+/* ============ sd-globals: the six inline handlers in the record table call
+   window.setFilter and window.setHero, which live inside the page's IIFE and
+   are invisible to an inline onclick, which resolves against the global scope
+   only. Defined here, only when the page has not exported its own, and
+   re-checked on every pass so a page export always steps in front.
+   setFilter narrows the selection the honest way: every filter on this page
+   is a query parameter, the instrument reads them on load and composes the
+   standing sentence from them, so the parameter is set and the page applies
+   it \u2014 the URL, the sentence and the rows then all agree.
+   setHero takes a rail name and opens that rail. ========================== */
+function sdSetFilter(field,value){
+  try{
+    var f=String(field==null?"":field).trim();
+    if(!f)return;
+    var v=(value==null)?"":String(value).trim();
+    var params=new URLSearchParams(location.search);
+    if(v==="")params.delete(f);else params.set(f,v);
+    var qs=params.toString();
+    var target=location.pathname+(qs?"?"+qs:"")+location.hash;
+    if(target===location.pathname+location.search+location.hash)return;
+    location.href=target;
+  }catch(_){}
+}
+function sdSetHero(name){
+  try{
+    name=String(name==null?"":name).trim().toLowerCase();
+    if(!name)return;
+    var rails=document.querySelectorAll(".rail[data-rail]"),i,r=null,nm;
+    for(i=0;i<rails.length;i++){
+      nm=(rails[i].getAttribute("data-rail")||"").trim().toLowerCase();
+      if(nm===name){r=rails[i];break}
+    }
+    if(!r){
+      var cand=byId("rail-"+name)||byId("rail_"+name);
+      if(cand&&/\brail\b/.test(cand.className||""))r=cand;
+    }
+    if(!r)return;
+    if(!/\bopen\b/.test(r.className||"")){
+      /* give the page's own toggle first crack; headings only, so a stray
+         button inside the rail is never fired */
+      var tog=r.querySelector(".railhead,.rhead,.rail-hd,.rlabel,summary,h2,h3");
+      if(tog){try{tog.click()}catch(_){}}
+    }
+    if(!/\bopen\b/.test(r.className||""))r.classList.add("open");
+    try{r.scrollIntoView({behavior:"smooth",block:"start"})}catch(e){try{r.scrollIntoView()}catch(_){}}
+  }catch(_){}
+}
+function sdEnsureGlobals(){
+  if(typeof window.setFilter!=="function")window.setFilter=sdSetFilter;
+  if(typeof window.setHero!=="function")window.setHero=sdSetHero;
+}
+sdEnsureGlobals();
+
+/* ============ sd-recfetch: the case sheet is opened per record and the page
+   fetches that record itself; part_number is one of the fields it returns.
+   The response is picked up in passing: fetch and XHR are wrapped once, and
+   only a response that looks like one record (own part_number field, no
+   records array, and not one of the dossier endpoints) is kept, latest one
+   winning, because the sheet shows one record at a time. ================== */
+var SX={last:null};
+function sdNoteRecord(obj,url){
+  try{
+    if(!obj||typeof obj!=="object"||Array.isArray(obj))return;
+    if(!Object.prototype.hasOwnProperty.call(obj,"part_number"))return;
+    if("records" in obj)return;
+    if(url&&/api\/(airframe|repeats|summary|operator|part|export)(\/|\?|$)/i.test(String(url)))return;
+    SX.last=obj;
+    kick();
+  }catch(_){}
+}
+if(!window.__sdFetchWrapped){
+  window.__sdFetchWrapped=true;
+  var sdOf=window.fetch;
+  if(typeof sdOf==="function"){
+    window.fetch=function(){
+      var args=arguments,url="";
+      try{url=(args[0]&&args[0].url)?String(args[0].url):String(args[0]||"")}catch(_){}
+      return sdOf.apply(this,arguments).then(function(res){
+        try{
+          if(res&&res.ok&&res.clone){
+            var sdCl=res.clone();
+            sdCl.json().then(function(j){sdNoteRecord(j,url)}).catch(function(){});
+          }
+        }catch(_){}
+        return res;
+      });
+    };
+  }
+  try{
+    var sdXO=(typeof XMLHttpRequest!=="undefined")&&XMLHttpRequest.prototype;
+    if(sdXO&&!sdXO.__sdRecPatched){
+      sdXO.__sdRecPatched=true;
+      var sdOOpen=sdXO.open,sdOSend=sdXO.send;
+      sdXO.open=function(m,u){try{this.__sdUrl=String(u||"")}catch(_){}return sdOOpen.apply(this,arguments)};
+      sdXO.send=function(){
+        var self=this;
+        try{
+          self.addEventListener("load",function(){
+            try{
+              if(self.responseType&&self.responseType!=="text"&&self.responseType!=="")return;
+              var ct="";
+              try{ct=self.getResponseHeader("content-type")||""}catch(_){}
+              if(ct&&!/json/i.test(ct))return;
+              sdNoteRecord(JSON.parse(self.responseText),self.__sdUrl);
+            }catch(_){}
+          });
+        }catch(_){}
+        return sdOSend.apply(this,arguments);
+      };
+    }
+  }catch(_){}
+}
+
+/* ============ sd-pnrow: the case sheet's sixteen rows carry a Part row that
+   names the part ("AHRS"), but the part number appears nowhere on the page.
+   The record endpoint returns part_number, so the sheet gets its own Part
+   number row beside the Part row, and that row is the way into the part
+   dossier. When the record has no part number, the row says so in the same
+   words the sheet uses for its other absent fields, detected from those rows
+   themselves. ============================================================= */
+function sdIsAbsentText(s){
+  if(/^(--|\u2013|\u2014|-)$/.test(s))return true;
+  if(/^(none|unknown|n\/a|na|not available|not recorded|not given|not reported|not stated|not captured|no entry|missing|absent|unrecorded)\.?$/i.test(s))return true;
+  return /^not\s+[a-z][a-z ]{1,24}\.?$/i.test(s);
+}
+function sdAbsence(table){
+  var seen={},best=null,rows=table.rows,i,cells,cell,v;
+  for(i=0;i<rows.length;i++){
+    cells=rows[i].cells;
+    if(!cells||cells.length<2)continue;
+    cell=cells[cells.length-1];
+    v=cell.textContent.trim();
+    if(!v||!sdIsAbsentText(v))continue;
+    if(!seen[v])seen[v]={n:0,cls:cell.className||""};
+    seen[v].n++;
+    if(!best||seen[v].n>seen[best.text].n)best={text:v,cls:seen[v].cls};
+  }
+  return best;
+}
+function sdSheetPartRows(){
+  var out=[],ts=document.querySelectorAll("table"),i,j,t,rows,part,cite;
+  for(i=0;i<ts.length;i++){
+    t=ts[i];rows=t.rows;part=null;cite=null;
+    if(!rows||rows.length<4)continue;
+    for(j=0;j<rows.length;j++){
+      var c0=rows[j].cells&&rows[j].cells[0];
+      if(!c0)continue;
+      var tx=c0.textContent.trim();
+      if(tx==="Part")part=rows[j];
+      else if(tx==="How to cite it")cite=rows[j];
+    }
+    if(part&&cite)out.push(part);
+  }
+  return out;
+}
+function sdFillPartRow(partRow){
+  var nxt=partRow.nextElementSibling,row=null;
+  if(nxt&&nxt.getAttribute&&nxt.getAttribute("data-sd-pnrow")==="1")row=nxt;
+  else if(nxt&&nxt.cells&&nxt.cells[0]&&nxt.cells[0].textContent.trim()==="Part number")return; /* the page drew its own */
+  if(!row){
+    row=document.createElement("tr");
+    row.setAttribute("data-sd-pnrow","1");
+    var lc=partRow.cells[0],vc0=partRow.cells[1];
+    var nl=lc?lc.cloneNode(false):document.createElement("th");
+    var nv=vc0?vc0.cloneNode(false):document.createElement("td");
+    try{nl.removeAttribute("id");nl.removeAttribute("aria-labelledby")}catch(_){}
+    try{nv.removeAttribute("id");nv.removeAttribute("aria-labelledby")}catch(_){}
+    nl.textContent="Part number";
+    row.appendChild(nl);row.appendChild(nv);
+    partRow.parentNode.insertBefore(row,partRow.nextSibling);
+  }
+  var vc=row.cells&&row.cells[1];
+  if(!vc)return;
+  var rec=SX.last;
+  var raw=(rec&&typeof rec==="object")?rec.part_number:null;
+  var pn=(raw==null)?"":String(raw).trim();
+  var key,ab=null;
+  if(pn)key="pn:"+pn;
+  else{ab=sdAbsence(partRow.closest("table"))||{text:"not recorded",cls:""};key="absent:"+ab.text}
+  if(vc.getAttribute("data-sd-pnval")===key)return;
+  vc.setAttribute("data-sd-pnval",key);
+  vc.textContent="";
+  if(pn){
+    var code=document.createElement("code");
+    code.className="cd sd-pnlink";
+    code.textContent=pn;
+    code.setAttribute("data-sd-part",pn);
+    code.setAttribute("role","button");
+    code.setAttribute("tabindex","0");
+    code.setAttribute("aria-label","Open the dossier for part number "+pn);
+    try{code.dataset.sdPnDone="1"}catch(_){}
+    vc.appendChild(code);
+  }else{
+    if(ab&&ab.cls)vc.className=ab.cls;
+    vc.textContent=ab.text;
+  }
+}
+function sdPartRow(){
+  var rows=sdSheetPartRows(),i;
+  for(i=0;i<rows.length;i++){try{sdFillPartRow(rows[i])}catch(_){}}
 }
 
 /* ============ sd-dossier: the panel holds one subject at a time — a tail
@@ -8648,9 +8850,9 @@ document.addEventListener("keydown",function(e){
 },true);
 addEventListener("popstate",function(){try{sdBootFromURL()}catch(_){}});
 /* sd-mark: the second way in from the table. Beside each operator value that
-   setFilter owns, a small marker opens the operator dossier; the P/N code,
-   which is not clickable at all, becomes the way in to the part dossier.
-   Model cells are left to setFilter alone. */
+   setFilter owns, a small marker opens the operator dossier; a code.cd that
+   really carries a P/N (none are measured on this page) would open the part
+   dossier. Model cells are left to setFilter alone. */
 function sdMarkCells(){
   var OPRE=/setFilter\s*\(\s*(['"])operator\1\s*,\s*(['"])([^'"]*)\2/;
   var i,sp,ns=document.querySelectorAll("span.c[onclick*='setFilter']");
@@ -8672,6 +8874,7 @@ function sdMarkCells(){
     c=cs[j];
     if(c.dataset.sdPnDone)continue;
     if(c.closest&&c.closest("#sd-dossier"))continue;
+    if(c.closest&&c.closest("[data-sd-pnrow]"))continue;
     c.dataset.sdPnDone="1";
     tx=(c.textContent||"").trim();
     mm=/^P\/?N\.?\s*(.+)$/i.exec(tx);
@@ -8699,6 +8902,7 @@ var queued=false;
 function pass(){
   queued=false;
   try{if(window.rrTail!==sdRrTail)window.rrTail=sdRrTail}catch(e){}
+  try{sdEnsureGlobals()}catch(e){}
   try{purgeLand()}catch(e){}
   try{ensureSentence()}catch(e){}
   try{ensureIpad()}catch(e){}
@@ -8709,6 +8913,7 @@ function pass(){
   try{stripInline()}catch(e){}
   try{secondLine()}catch(e){}
   try{tagTable()}catch(e){}
+  try{sdPartRow()}catch(e){}
   try{sdMarkCells()}catch(e){}
   try{sdMirror()}catch(e){}
   try{sdDossierKick()}catch(e){}
@@ -9490,7 +9695,7 @@ table.reps th{ font-size:11px; background:transparent; color:var(--ash);
 .rail.open[data-rail=when] .track{ overflow-x:auto; overscroll-behavior-x:contain }
 `;document.head.appendChild(s);})();
 
-(function(){var s=document.createElement('style');s.id='sdr-css-35';s.textContent=`#sentence{display:none!important}
+(function(){var s=document.createElement('style');s.id='sdr-css-37';s.textContent=`#sentence{display:none!important}
 #sd-sink{display:none!important}
 .card.land{display:none!important}
 #vstrip.vgroups{display:flex;flex-direction:column;gap:1px;border-bottom:1px solid var(--line);padding:2px 0 3px;margin:8px 0 6px;min-width:0}

@@ -1,0 +1,47 @@
+[ 122s] stap 1: dacht 889, schreef 0, 1 tool-calls
+   deploy   {"ok": true, "note": "published to https://aircraftdefects.com/z/"}
+[ 139s] stap 2: dacht 586, schreef 160, 2 tool-calls
+   measure  {"value": {"nCells": 0, "samples": [], "filters": [{"tag": "INPUT", "type": "text", "id": "q", "name": "", "opts": null}, {"tag": "SELECT", "type": "select-one"
+   parent   {"value": {"nCells": 630, "samples": [{"tag": "BUTTON", "cls": "", "oc": "setHero('horizon')"}, {"tag": "BUTTON", "cls": "on", "oc": "setHero('anatomy')"}, {"ta
+[ 175s] stap 3: dacht 2212, schreef 230, 2 tool-calls
+   parent   {"value": {"setFilter": "function setFilter(k,v){\n  if(!el(k))return; el(k).value=v; show(\"p-search\"); search(0); showChange();\n}", "setHero": "function set
+   measure  {"value": {"clicked": true, "rows": 0, "cells": 0, "samples": []}}
+[ 203s] stap 4: dacht 0, schreef 262, 2 tool-calls
+   measure  {"value": {"out": {"revealBtn": {"present": true, "txt": "Read all 1,757,827 anyway"}, "gotoStarters": {"present": true, "txt": "Show me the starter questions"}
+   parent   {"value": {"total": 623, "byField": {"jasc": 549, "nature": 24, "crew": 15, "discovered": 14, "stage": 18, "corrosion": 3}, "sampleCode": [{"cls": "c", "oc": "s
+[ 231s] stap 5: dacht 1316, schreef 128, 1 tool-calls
+   parent   {"value": {"clicked": false}}
+[ 247s] stap 6: dacht 0, schreef 0, 2 tool-calls
+   parent   {"value": {"op": {"opts": ["", "SWAA", "AALA", "DALA", "FDEA", "IPXA", "SWIA", "CALA", "ASAA", "USAA", "UALA", "QXEA", "SIMA", "ASOA", "MASA", "REXA", "UIEA", "
+   measure  {"value": {"form": false, "btns": [{"id": "", "txt": "WHENmonth by month", "cls": ""}, {"id": "", "txt": "WHEREon the aircraft", "cls": ""}, {"id": "", "txt": "
+[ 278s] stap 7: dacht 1626, schreef 199, 1 tool-calls
+   measure  {"value": {"clicked": true}}
+[ 293s] stap 8: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"rows": 0, "cells": 0, "cd": 0, "sheetBtn": null, "cels": [], "count": "1,757,827 reports, everything the FAA has published to 26 August 2026.", "sam
+[ 308s] stap 9: dacht 0, schreef 142, 1 tool-calls
+   measure  {"value": {"noRows": "No rows yet, on purpose. Listing everything answers no question and buries the one you have.Take a month, a zone, an air", "tables": 0, "h
+[ 322s] stap 10: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"rows": 202, "cells": 791, "cd": 0, "sheetBtn": "<button class=\"ghost\" type=\"button\" aria-label=\"Open report QR9R2026082600003, N, SENSOR\" oncl
+[ 359s] stap 11: dacht 2997, schreef 271, 2 tool-calls
+   measure  {"value": {"rows": 202, "count": "1,757,827 reports, everything the FAA has published to .", "url": "https://aircraftdefects.com/z/", "openCase": "function", "o
+   measure  {"value": {"ov": [], "dialog": null, "openCase": "function"}}
+[ 383s] stap 12: dacht 0, schreef 0, 1 tool-calls
+   parent   {"value": {"ov": [], "dialog": false, "openCase": "function", "openCaseSrc": "async function openCase(id,fromPop){\n  if(!id)return;\n  if(!fromPop&&!caseFromLi
+[ 394s] stap 13: dacht 0, schreef 0, 2 tool-calls
+   parent   {"value": {"src": "async function openCase(id,fromPop){\n  if(!id)return;\n  if(!fromPop&&!caseFromLink)caseFromLink=false;\n  lastFocus=document.activeElement;
+   measure  {"value": {"src": "function(id){\n  if(currentCase&&String(currentCase.OperatorControlNumber)===String(id)&&caseBox.classList.contains('open'))return;\n  lastFo
+[ 415s] stap 14: dacht 0, schreef 155, 1 tool-calls
+   parent   {"value": {"box": ""}}
+[ 432s] stap 15: dacht 0, schreef 152, 1 tool-calls
+   measure  {"value": {"err": "no case sheet btn"}}
+[ 446s] stap 16: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"wrapDisp": "flex", "boxHtml": "<div class=\"case-panel\" tabindex=\"-1\"><div class=\"case-bar\"><span class=\"case-step\"><button class=\"ghost\" t
+[ 464s] stap 17: dacht 0, schreef 0, 2 tool-calls
+   measure  {"value": {"partRow": null, "ths": []}}
+   parent   {"value": ["AircraftMake", "AircraftModel", "AircraftSerialNumber", "AircraftTotalCycles", "AircraftTotalTime", "ButtLineFrom", "ButtLineFromSide", "ButtlineTo"
+[ 484s] stap 18: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"hasBox": true, "ths": []}}
+[ 505s] stap 19: dacht 683, schreef 154, 1 tool-calls
+   measure  {"value": {"ths": ["Date of the difficulty", "Airline", "Filed by", "Aircraft", "Hours on the airframe", "System", "Part", "Condition of the part", "Where on th
+[ 522s] stap 20: dacht 0, schreef 0, 1 tool-calls
+   measure  {"value": {"partRowHtml": "<tr><th scope=\"row\">Part</th><td>SENSOR</td></tr>", "rrShow": null}}

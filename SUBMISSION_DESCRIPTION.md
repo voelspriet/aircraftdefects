@@ -200,6 +200,12 @@ The whole build, from watching the documentary to this submission, took four
 days and is logged prompt by prompt in [HACKATHON_LOG.md](HACKATHON_LOG.md)
 and told in full in the article above.
 
+Total model spend for the build, from the z.ai console: **$1.07**. Public-interest
+tools usually die at the funding stage, not the idea stage. At a dollar a project
+the arithmetic changes: a journalist with a public dataset and a free weekend can
+ship the interface the agency never built. The data was always public. What fell
+is the cost of making it usable.
+
 Inspired by Rory Kennedy's *Freefall: A Reckoning for Boeing*. Built by Henk
 van Ess, 2026. GLM-5.3-Flash wrote
 the tool at /z/rebuilt from written specifications, and does all the live

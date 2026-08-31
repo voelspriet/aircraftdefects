@@ -18,24 +18,32 @@
 
 ## In one page
 
-**aircraftdefects.com** makes aircraft defect records transparent and readable.
+Every day, aircraft mechanics file service difficulty reports with the FAA: a
+cracked bracket, a failed sensor, corrosion found on inspection. The reports are
+public. They are also close to unreadable, buried behind a government query form,
+written in trade shorthand, returned as raw rows with no context.
 
-**The problem.** Families of crash victims are sent to a government website to
-read what mechanics wrote about the aircraft. The reports are filled with
-bureaucratic codes: a landing gear fault is logged as `ZONE 700`, an emergency
-landing as the letter `A`. That makes safety information the public paid for
-nearly impossible for the public to read.
+**aircraftdefects.com opens that archive.** You can search thirty years of FAA
+service difficulty reports, 1995 to last week, by airline, tail number, aircraft
+type, part, system code or keyword. A model reads each mechanic's write-up and
+says in plain language what actually happened, so a reporter, a pilot or a
+passenger can follow a maintenance trail without holding a maintenance licence.
+It is free and needs no login. Counts reflect reports filed, not incidents, and
+the site calculates no safety rates: the point is to find leads, not to rank
+airlines.
 
-**What it does.** Click any part of the aircraft and see what has been reported
-for that section. GLM-5.3-Flash reads the raw mechanic's log and tells you what
-actually happened, in plain words, at the moment you click. It analyses the file
-and offers seventeen research leads with the next step for each, including the
-aircraft from *Freefall*.
+**The build is the second half of the story.** The scraper, the database, the
+search layer and the interpretation were written with GLM-5.3-Flash over two
+days, and so was the first complete interface, which still runs at
+[/z/rebuilt](https://aircraftdefects.com/z/rebuilt). Total model spend, from the
+z.ai console: **$1.07**.
 
-**Who it is for.** Journalists, researchers and families, who get the clear
-information they are owed rather than the codes it arrived in.
+That number matters more than it looks. Public-interest tools usually die at the
+funding stage, not the idea stage. At a dollar a project the arithmetic changes:
+a journalist with a public dataset and a free weekend can ship the interface the
+agency never built.
 
-Built for the GLM-5.3 Flash Lightning Hackathon.
+The data was always public. What fell is the cost of making it usable.
 
 ## The model is inside the page
 

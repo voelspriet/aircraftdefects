@@ -12,7 +12,7 @@
 ## Inspiration
 
 I was watching *Freefall* on Netflix and saw families of the victims trying to
-read what mechanics had written about the planes. They were sent to a government
+read what mechanics had written about broken planes. They were sent to a government
 website. I went there myself and I was curious and furious at the same time,
 because the landing gear is suddenly `ZONE 700` and an emergency landing is just
 the letter `A`. That is impossible for a person to understand, let alone a

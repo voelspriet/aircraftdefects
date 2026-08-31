@@ -73,7 +73,7 @@ table.sheet b{font-weight:600}.code{font:400 12px var(--mono);color:var(--ash);m
     </div>
     <div>
       <div id="planebox" hidden>
-        <p class="eyebrow">The aircraft, today</p>
+        <p class="eyebrow">The aircraft</p>
         <div class="plane" id="plane"></div>
       </div>
       <p class="eyebrow">Before you publish this</p>
@@ -153,6 +153,7 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
     if(!a||a.error)return;var h="",ac=a.aircraft||{},rg=a.registry||{};
     if(a.photo&&a.photo.src){h+='<a href="'+esc(a.photo.link||"#")+'" target="_blank" rel="noopener"><img src="'+esc(a.photo.src)+'" alt="N'+esc(tail)+'"></a>';
       h+='<p class="credit">Photo © '+esc(a.photo.photographer||"unknown")+' · <a href="'+esc(a.photo.link||"#")+'" target="_blank" rel="noopener">Planespotters.net</a></p>'}
+    h+='<p class="note" style="margin:0 0 10px">Owner and photo show this aircraft as it is today, not necessarily as it was on '+esc(date)+'.</p>';
     var rows=[];
     function px(txt,q){return '<a class="q" href="https://www.perplexity.ai/search?q='+encodeURIComponent(q)+'" target="_blank" rel="noopener" title="Look this up on Perplexity">'+esc(txt)+'</a>'}
     var frame=((ac.manufacturer||"")+" "+(ac.type||"")).trim();
@@ -165,8 +166,7 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
     if(ac.mode_s)rows.push(["Mode S",esc(ac.mode_s)]);
     if(rows.length)h+='<table class="sheet">'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td><b>'+r[1]+'</b></td></tr>'}).join("")+'</table>';
     if(!h)return;
-    h+='<p class="note" style="margin-top:8px">Owner and photo show this aircraft as it is today, not necessarily as it was on '+esc(date)+'.</p>';
-    /* hand-written, 31 August 2026: the FAA's whole registry file, shown only on request */
+    /* hand-written, 31 August 2026: the FAA's whole registry file */
     var full=rg.full||[];
     if(full.length){var street=null,cty=null;
       var rowsD=full.map(function(r){var v=/^\d{8}$/.test(r.v)?ymd(r.v):r.v;

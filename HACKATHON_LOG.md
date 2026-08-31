@@ -157,6 +157,5 @@ selection. aircraftdefects.com now serves the new page at the root.
 recording drifted; the final method captures finished states as 2x screenshots
 plus the model's text, and composes each sentence as a frame-exact slide with
 a push-in and a paced reveal. The full film runs 5:33 at 2560x1440,
-https://aircraftdefects.com/z/img/film-v5.mp4, and the 83-second teaser is
-https://aircraftdefects.com/z/img/demo3.mp4, also in the repository at
-`video/demo3.mp4`.
+https://aircraftdefects.com/z/img/film-v5.mp4, and the 83-second introduction
+is on YouTube: https://www.youtube.com/watch?v=vDMEKsNj7ss.

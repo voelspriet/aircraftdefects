@@ -428,14 +428,22 @@ R.conflicts=function(box){box.innerHTML=head("conflicts")+'<div id="pb">'+wait()
 R.lag=function(box){box.innerHTML=head("lag")+'<div id="pb">'+wait()+'</div>';var pb=box.querySelector("#pb");var qs=selQS();
   api("/api/lag"+(qs?"?"+qs:"")).then(function(d){if(!d.total){pb.innerHTML='<p class="cannot">No report in this selection carries both dates, so no gap can be measured.</p>';return}
     var h='<p class="sub">Of <b>'+num(d.total)+'</b> reports here with both dates, half reached the FAA within <b>'+num(d.median)+' day'+(d.median===1?"":"s")+'</b>. One in twenty took over <b>'+num(d.p95)+'</b> days, one in a hundred over <b>'+num(d.p99)+'</b>; the longest <b>'+num(d.max)+'</b>. <b>'+num(d.over_year)+'</b> reports, '+(100*d.over_year/d.total).toFixed(1)+'%, took more than a year.'+(d.negative?' And <b>'+num(d.negative)+'</b> carry a filing date before the difficulty they describe: counted, and not investigated.':'')+'</p>';
+    var RANGE=[[0,0],[1,7],[8,30],[31,90],[91,365],[366,null]];var P=q(),curMin=P.get("lagmin"),curMax=P.get("lagmax");
     var mx=Math.max.apply(null,d.buckets.map(function(b){return b.n}).concat([1]));
-    h+='<div class="bars"><div class="h">How long the paperwork took</div>';
-    d.buckets.forEach(function(b){h+='<span class="bar" style="--w:'+Math.max(1,Math.round(100*b.n/mx))+'%"><i></i>'+esc(b.label)+' <span style="color:var(--ash)">'+(100*b.n/d.total).toFixed(1)+'%</span></span><b>'+num(b.n)+'</b>'});
+    h+='<div class="bars"><div class="h">How long the paperwork took · a click opens those reports</div>';
+    d.buckets.forEach(function(b,i){var r=RANGE[i],on=curMin===String(r[0])&&(r[1]==null?!curMax:curMax===String(r[1]));
+      h+='<button type="button" data-lagmin="'+r[0]+'"'+(r[1]!=null?' data-lagmax="'+r[1]+'"':'')+(on?' class="on"':'')+'><span class="bar" style="--w:'+Math.max(1,Math.round(100*b.n/mx))+'%"><i></i>'+esc(b.label)+' <span style="color:var(--ash)">'+(100*b.n/d.total).toFixed(1)+'%</span></span><b>'+num(b.n)+'</b></button>'});
     var ys=(d.years||[]).filter(function(y){return y.n>=100});var ymx=Math.max.apply(null,ys.map(function(y){return y.median}).concat([1]));
-    if(ys.length>1){h+='<div class="h">Median gap by year of the difficulty</div>';
-      ys.forEach(function(y){h+='<span class="bar" style="--w:'+Math.max(1,Math.round(100*y.median/ymx))+'%"><i></i>'+y.year+'</span><b>'+num(y.median)+' d</b>'})}
+    if(ys.length>1){h+='<div class="h">Median gap by year of the difficulty · a click opens the year</div>';
+      ys.forEach(function(y){h+='<button type="button" data-yr="'+y.year+'"><span class="bar" style="--w:'+Math.max(1,Math.round(100*y.median/ymx))+'%"><i></i>'+y.year+'</span><b>'+num(y.median)+' d</b></button>'})}
     h+='</div><p class="cannot">The gap is the submission date minus the difficulty date, computed live on this selection; reports missing either date are left out. The negative gaps are almost certainly transcription or date-entry artefacts; the model is not asked to narrate them.</p>';
-    pb.innerHTML=h}).catch(function(e){pb.innerHTML=fail(e)})};
+    pb.innerHTML=h;
+    pb.querySelectorAll("[data-lagmin]").forEach(function(b){b.onclick=function(){var p=q();
+      if(b.classList.contains("on")){p.delete("lagmin");p.delete("lagmax")}
+      else{p.set("lagmin",b.dataset.lagmin);if(b.dataset.lagmax!=null)p.set("lagmax",b.dataset.lagmax);else p.delete("lagmax")}
+      go(p)}});
+    pb.querySelectorAll("[data-yr]").forEach(function(b){b.onclick=function(){var p=q();p.set("from",b.dataset.yr+"-01-01");p.set("to",b.dataset.yr+"-12-31");go(p)}});
+    }).catch(function(e){pb.innerHTML=fail(e)})};
 R.recurs=function(box){box.innerHTML=head("recurs")+'<div id="pb"></div>';var pb=box.querySelector("#pb");var s=sel().toString();var tot=(H&&H.total)||0,n=Math.min(300,tot);
   if(!s){pb.innerHTML='<p class="cannot">Take a zone, a month, an airline or a tail first; then the model can read what recurs in it.</p>';return}
   pb.appendChild(mc("What recurs here",(tot>300?num(n)+" of "+num(tot)+" write-ups, newest first, not a sample of the rest":"all "+num(n)+" write-ups in this selection"),function(){return"/z/api/stream/recurs?"+s}))};

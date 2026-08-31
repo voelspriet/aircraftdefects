@@ -54,7 +54,7 @@ prompt by prompt, including what went wrong.
 
 That number matters more than it looks. Public-interest tools usually die at the
 funding stage, not the idea stage. At a dollar a project the arithmetic changes: a
-journalist with a public dataset and a free weekend can ship the interface the
+researcher with a public dataset and a free weekend can ship the interface the
 agency never built.
 
 The data was always public. What fell is the cost of making it usable.

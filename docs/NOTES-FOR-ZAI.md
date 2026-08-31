@@ -19,10 +19,12 @@ questions, a record table carrying the mechanic's own words, a case sheet with
 seventeen named fields as a focus-trapped dialog, sixteen panels, a phone layout,
 and nine research features it designed itself.
 
-It wrote all of it. The share that is not the model's is itemised in
-`MODEL_USE.md`, file by file with the character counts, and recounted by
-`build/count_provenance.py` so that the number in that table is the repository's
-rather than a claim about it.
+It wrote all of that page, from written specifications, and that page is what
+this document is about. It is kept in the repository and is not the one now
+served: aircraftdefects.com ships a hand-written frame in which the model is the
+live reader instead of the author. The split for the shipped code is counted in
+`MODEL_USE.md` under "Who wrote the code that ships"; the paragraphs about the
+model-built page are under "The earlier page, which is kept but not served".
 
 Three behaviours are worth naming first, because they are the reason we would use
 this model again for journalism, where being wrong in public is the whole risk.

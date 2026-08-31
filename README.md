@@ -16,6 +16,27 @@
 >
 > — [the 83-second introduction](https://www.youtube.com/watch?v=vDMEKsNj7ss)
 
+## In one page
+
+**aircraftdefects.com** makes aircraft defect records transparent and readable.
+
+**The problem.** Families of crash victims are sent to a government website to
+read what mechanics wrote about the aircraft. The reports are filled with
+bureaucratic codes: a landing gear fault is logged as `ZONE 700`, an emergency
+landing as the letter `A`. That makes safety information the public paid for
+nearly impossible for the public to read.
+
+**What it does.** Click any part of the aircraft and see what has been reported
+for that section. GLM-5.3-Flash reads the raw mechanic's log and tells you what
+actually happened, in plain words, at the moment you click. It analyses the file
+and offers seventeen research leads with the next step for each, including the
+aircraft from *Freefall*.
+
+**Who it is for.** Journalists, researchers and families, who get the clear
+information they are owed rather than the codes it arrived in.
+
+Built for the GLM-5.3 Flash Lightning Hackathon.
+
 ## The model is inside the page
 
 Not a counter with a chatbot bolted on. **Fifteen endpoints in this service call

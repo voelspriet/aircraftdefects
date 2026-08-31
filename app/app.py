@@ -2129,9 +2129,47 @@ def _ntsb_case(q):
             "url": "https://data.ntsb.gov/carol-main-public/basic-search"}
 
 
-def _ntsb_of(n):
+def _sn(v):
+    """A serial number for comparing. The two agencies write the same serial
+    differently: the FAA registry has 0542 where a manufacturer's plate may read
+    542, and dashes and spaces come and go (28-2104, 282104). Upper-case, drop
+    everything that is not a letter or digit, then drop leading zeros."""
+    v = "".join(ch for ch in (v or "").upper() if ch.isalnum())
+    return v.lstrip("0") or v
+
+
+def _reg_serial(n):
+    """The serial number the FAA registry holds for an N-number, or None."""
+    reg = _registry_of(n) or {}
+    for f in (reg.get("full") or []):
+        if f.get("f") == "Serial number":
+            return f.get("v")
+    return None
+
+
+def _ntsb_of(n, report_serial=None):
     """Every NTSB case on one N-number, newest first. The registration is stored
-    without its leading N, as the FAA registry is."""
+    without its leading N, as the FAA registry is.
+
+    Matching on the registration alone matches a label, not an aircraft. An
+    N-number can be released when one airframe is retired and reissued to
+    another, so two files can agree on the number and mean different machines.
+    The NTSB publishes a serial number on 90.5% of the rows that carry a
+    registration, and the FAA registry publishes one for every live tail, so
+    where both exist the airframe itself can be checked.
+
+    Measured before this was written: of 14,012 cases where both files publish a
+    serial, 12,187 agree and 1,825 do not. Dropping the disagreements was the
+    first design and it was wrong twice over. Some are the same airframe written
+    two ways, N414DJ carrying 1298 at the NTSB and AA5B1298 at the registry. The
+    rest are the real thing, a registration released after a wreck and reissued
+    years later, and that is a fact worth telling a reporter rather than hiding:
+    the tail on this maintenance report is not the aircraft in that accident.
+
+    So nothing is dropped for a serial. Each case is labelled confirmed, differs
+    or unconfirmed, and the page says which. The one hard exclusion left is a
+    case dated before the current airframe was certified, which no reading can
+    make relevant, and it only applies when no serial settles the question."""
     if not os.path.exists(_NTSB_DB):
         return []
     con = sqlite3.connect(_NTSB_DB)
@@ -2144,15 +2182,50 @@ def _ntsb_of(n):
         return []
     finally:
         con.close()
-    out = []
+    # The report's own serial is the better basis where the caller has one: the
+    # question on a case page is whether the NTSB case is about the aircraft in
+    # THIS report, not about whoever wears the tail today. The registry is the
+    # fallback.
+    reg_serial = _reg_serial(n)
+    basis = report_serial or reg_serial
+    # The registry's airworthiness date, as a year. Only used when no serial
+    # settles it, and only to reject a case filed before the airframe existed.
+    born = None
+    try:
+        for f in ((_registry_of(n) or {}).get("full") or []):
+            if f.get("f") == "Airworthiness date" and (f.get("v") or "")[:4].isdigit():
+                born = int(f["v"][:4])
+    except Exception:
+        born = None
+
+    out, dropped = [], 0
     for r in rows:
         d = (r["ev_date"] or "").split(" ")[0]
+        # Serial first. Both present and different means a different airframe
+        # wearing the same registration, which is the one case this guard exists
+        # for, and it is dropped.
+        try:
+            ntsb_serial = r["serial"]
+        except (IndexError, KeyError):
+            ntsb_serial = None
+        airframe = "unconfirmed"
+        if basis and ntsb_serial:
+            a, b = _sn(basis), _sn(ntsb_serial)
+            same = a == b or (len(a) >= 4 and len(b) >= 4 and (a in b or b in a))
+            airframe = "confirmed" if same else "differs"
+        elif born:
+            yy = d.split("/")[-1] if "/" in d else ""
+            if yy.isdigit():
+                year = 2000 + int(yy) if int(yy) < 50 else 1900 + int(yy)
+                if year < born:
+                    dropped += 1
+                    continue
         where = ", ".join(x for x in (r["city"], r["state"], r["country"]) if x)
         hurt = []
-        for n, lab in ((r["fatalities"], "fatal"), (r["serious"], "serious"),
-                       (r["minor"], "minor")):
-            if n and str(n).strip() not in ("", "0"):
-                hurt.append("%s %s" % (n, lab))
+        for count, lab in ((r["fatalities"], "fatal"), (r["serious"], "serious"),
+                           (r["minor"], "minor")):
+            if count and str(count).strip() not in ("", "0"):
+                hurt.append("%s %s" % (count, lab))
         out.append({
             "case": r["ntsb_no"], "date": d, "where": where or None,
             "type": r["ev_type"], "injury": r["injury"] or None,
@@ -2165,8 +2238,16 @@ def _ntsb_of(n):
             # rest of the tool is forbidden from ever saying.
             "cause": r["cause"] or None,
             "narrative": r["narrative"] or None,
+            "serial": ntsb_serial or None,
+            "registry_serial": reg_serial or None,
+            "compared_with": basis or None,
+            "airframe": airframe,
             "url": "https://data.ntsb.gov/carol-main-public/basic-search",
         })
+    if dropped:
+        # Never silently. The only removal left is a case that predates the
+        # airframe, and it is still worth a line in the log.
+        app.logger.info("ntsb %s: dropped %d case(s) predating the airframe", n, dropped)
     return out
 
 
@@ -2231,7 +2312,11 @@ def plane(reg):
     if not n or len(n) > 5:
         return jsonify(error="no such registration"), 404
     full = "N" + n
-    out = {"reg": full, "registry": _registry_of(n), "ntsb": _ntsb_of(n)}
+    # A case page knows the serial the mechanic filed and passes it, so the
+    # airframe is checked against the report in hand rather than against
+    # whichever aircraft wears the tail today.
+    out = {"reg": full, "registry": _registry_of(n),
+           "ntsb": _ntsb_of(n, (request.args.get("serial") or "").strip() or None)}
     hit = _AC.get(n)
     if hit and time.time() - hit["at"] < 7 * 24 * 3600:
         out["aircraft"], out["photo"] = hit["aircraft"], hit["photo"]

@@ -55,6 +55,7 @@ table.sheet b{font-weight:600}.code{font:400 12px var(--mono);color:var(--ash);m
 .ntsb{margin:18px 0 0;padding:14px 16px;border:1px solid var(--line);border-left:3px solid #8a6a2a;background:#faf7f0;border-radius:3px}
 .ntsb h3{margin:0 0 6px;font:600 14px/1.3 var(--sans,system-ui);color:#7a5a1e;text-transform:none;letter-spacing:0}
 .ntsb .note{margin:6px 0}
+.ntoff{font:600 11px/1.4 var(--sans,system-ui);color:#8a3a1e;text-transform:uppercase;letter-spacing:.04em}
 .ntcase{padding:10px 0;border-top:1px solid var(--line)}
 .ntcase:first-of-type{border-top:0}
 .ntline{margin:0 0 3px;font:600 14px/1.4 var(--sans,system-ui)}
@@ -165,7 +166,11 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
   /* hand-written, 31 August 2026: the aircraft behind the tail number. Sources named on the page:
      the FAA's releasable registry (local copy), adsbdb.com, and one credited Planespotters photo. */
   function ymd(s){var m=String(s||"").match(/^(\d{4})(\d\d)(\d\d)$/);if(!m)return s||"";return new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})}
-  if(tail)fetch("/z/api/plane/N"+encodeURIComponent(tail)).then(function(r){return r.ok?r.json():null}).then(function(a){
+  /* Send the serial the mechanic filed on this very report. The server checks the
+     NTSB's serial against it, so the question answered is whether the accident is
+     about the aircraft in this report, not about whoever holds the tail today. */
+  var repSn=(raw.AircraftSerialNumber||"").trim();
+  if(tail)fetch("/z/api/plane/N"+encodeURIComponent(tail)+(repSn?"?serial="+encodeURIComponent(repSn):"")).then(function(r){return r.ok?r.json():null}).then(function(a){
     if(!a||a.error)return;var h="",ac=a.aircraft||{},rg=a.registry||{};
     if(a.photo&&a.photo.src){h+='<a href="'+esc(a.photo.link||"#")+'" target="_blank" rel="noopener"><img src="'+esc(a.photo.src)+'" alt="N'+esc(tail)+'"></a>';
       h+='<p class="credit">Photo © '+esc(a.photo.photographer||"unknown")+' · <a href="'+esc(a.photo.link||"#")+'" target="_blank" rel="noopener">Planespotters.net</a></p>'}
@@ -189,11 +194,32 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
        here. The reader is told that in the block itself. */
     var nt=a.ntsb||[];
     if(nt.length){
-      h+='<div class="ntsb"><h3>The NTSB has '+nt.length+' case'+(nt.length===1?"":"s")+' on this aircraft</h3>'+
+      /* Say which aircraft, not which tail number. The two files are joined on
+         the registration, and a registration can be reissued to a different
+         airframe after the first is retired. Where the NTSB and the FAA registry
+         publish the same serial number the airframe is settled and the reader is
+         shown the number that settles it; where either is silent the heading
+         says the join is by registration and stops claiming more. */
+      var conf=nt.filter(function(x){return x.airframe==="confirmed"}).length;
+      var sn=(nt.find(function(x){return x.airframe==="confirmed"})||{}).serial;
+      var head=conf===nt.length&&sn
+        ? 'The NTSB has '+nt.length+' case'+(nt.length===1?"":"s")+' on this airframe, serial '+esc(sn)
+        : 'The NTSB has '+nt.length+' case'+(nt.length===1?"":"s")+' on this registration';
+      var off=nt.filter(function(x){return x.airframe==="differs"}).length;
+      var prov;
+      if(conf===nt.length&&sn)
+        prov='Same aircraft, not merely the same tail number: this report and the NTSB both give serial '+esc(sn)+'.';
+      else if(off===nt.length)
+        prov='Read these with care. The serial number on the NTSB case does not match the one on this report, which usually means the registration was released after the accident and later reissued to the aircraft above. Different airframe, same tail.';
+      else
+        prov='Joined on the registration. '+(conf?conf+' of '+nt.length+' confirmed by serial number. ':'')+(off?off+' carr'+(off===1?'ies':'y')+' a different serial from this report, which points to a reissued registration and a different airframe. ':'')+(conf+off<nt.length?'The rest publish no serial in one file or the other. ':'');
+      h+='<div class="ntsb"><h3>'+head+'</h3>'+
          '<p class="note">A different agency and a different file. The FAA reports above record what mechanics found and fixed, not accidents. These are accidents and incidents the NTSB investigated. Neither explains the other, and nothing here connects a case to a report.</p>'+
+         '<p class="note">'+prov+'</p>'+
          nt.map(function(x){
            var bits=[x.where,x.airport,x.phase,x.hurt?x.hurt+" injured":null,x.damage?"aircraft "+x.damage.toLowerCase():null,x.light].filter(Boolean).join(" · ");
-           var h2='<div class="ntcase"><p class="ntline"><b>'+esc(x.case||"")+'</b> · '+esc(x.date||"")+(x.aircraft?' · '+esc(x.aircraft):'')+'</p>';
+           var h2='<div class="ntcase"><p class="ntline"><b>'+esc(x.case||"")+'</b> · '+esc(x.date||"")+(x.aircraft?' · '+esc(x.aircraft):'')+
+             (x.airframe==="differs"?' <span class="ntoff">serial '+esc(x.serial||"")+', not this airframe</span>':'')+'</p>';
            if(bits)h2+='<p class="note">'+esc(bits)+'</p>';
            if(x.cause)h2+='<p class="ntcause"><span class="ntlab">The NTSB found the probable cause to be</span> '+esc(x.cause)+'</p>';
            if(x.narrative){var n=x.narrative, short=n.length>600;

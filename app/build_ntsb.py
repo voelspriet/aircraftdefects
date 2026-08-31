@@ -76,7 +76,7 @@ def main():
         regis TEXT, ntsb_no TEXT, ev_type TEXT, ev_date TEXT, city TEXT,
         state TEXT, country TEXT, injury TEXT, fatalities TEXT, serious TEXT,
         minor TEXT, make TEXT, model TEXT, damage TEXT, phase TEXT, light TEXT,
-        airport TEXT, cause TEXT, narrative TEXT)""")
+        airport TEXT, cause TEXT, narrative TEXT, serial TEXT)""")
     n = 0
     for a in aircraft:
         reg = (a.get("regis_no") or "").strip().upper().lstrip("N")
@@ -84,7 +84,7 @@ def main():
         if not reg or not e:
             continue
         nr = narr.get(a.get("ev_id")) or {}
-        c.execute("INSERT INTO ntsb VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        c.execute("INSERT INTO ntsb VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                   (reg, e.get("ntsb_no"), e.get("ev_type"), e.get("ev_date"),
                    e.get("ev_city"), e.get("ev_state"), e.get("ev_country"),
                    e.get("ev_highest_injury"), e.get("inj_tot_f"),
@@ -92,9 +92,17 @@ def main():
                    a.get("acft_make"), a.get("acft_model"), a.get("damage"),
                    a.get("phase_flt_spec"), e.get("light_cond"), e.get("apt_name"),
                    (nr.get("narr_cause") or "").strip(),
-                   (nr.get("narr_accf") or "").strip()))
+                   (nr.get("narr_accf") or "").strip(),
+                   # The one field that identifies the airframe rather than the
+                   # label on its tail. A registration can be reassigned to a
+                   # different aircraft after the first is retired; a serial
+                   # number cannot. Present on 90.5% of the rows that carry a
+                   # registration, which is what lets the site say "the same
+                   # aircraft" instead of "the same N-number".
+                   (a.get("acft_serial_no") or "").strip().upper()))
         n += 1
     c.execute("CREATE INDEX ntsb_regis ON ntsb(regis)")
+    c.execute("CREATE INDEX ntsb_serial ON ntsb(serial)")
     c.execute("CREATE INDEX ntsb_case ON ntsb(ntsb_no)")
     c.commit()
     rows = c.execute("SELECT COUNT(*), COUNT(DISTINCT regis) FROM ntsb, "

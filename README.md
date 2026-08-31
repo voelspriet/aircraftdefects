@@ -221,12 +221,16 @@ you, with the reading verified line by line.
 ## Running it
 
     export ZAI_API_KEY=...
-    python3 app/app.py                        # the service, gunicorn on 127.0.0.1:8211
-    # gunicorn needs --limit-request-line 32768: the case-sheet questions carry the whole record in the URL,
-    # and the default 4094 rejected long write-ups (found 31 August 2026; nginx buffers are already 32k)
-    scp rebuild/z2.html host:/opt/sdrz/static/index.html
-    curl .../z/api/specimen/warm              # pre-read the landing states after each FAA refresh
-    python3 build/count_provenance.py         # who wrote the earlier page
+
+    # the service. --limit-request-line 32768 is not optional: the case-sheet
+    # questions carry the whole record in the URL, and gunicorn's default 4094
+    # rejected long write-ups (found 31 August 2026; nginx buffers are already 32k)
+    cd app && python3 -m gunicorn -w 2 -b 127.0.0.1:8211 --timeout 300 \
+        --limit-request-line 32768 --limit-request-field_size 32768 app:app
+
+    scp rebuild/z2.html host:/opt/sdrz/static/index.html   # the page
+    curl .../z/api/specimen/warm            # pre-read the landing states after an FAA refresh
+    python3 build/count_provenance.py --check   # fails if the provenance table has drifted
 
 ## What is in here
 

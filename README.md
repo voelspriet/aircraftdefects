@@ -204,13 +204,19 @@ tokens, which is why it is not read whole and
 
 ## Who wrote what
 
-The counting half came together quickly; the reading took two days of those
-loops. The roles are disclosed rather than blended: which surfaces the
-model wrote from written specifications, which parts are a hand-written frame
-around its readings, and what every live call costs are all recorded in
-[`MODEL_USE.md`](MODEL_USE.md), with the shares counted, not claimed, by
-`build/count_provenance.py`. The model's earlier page build is preserved in
-the repository for comparison.
+GLM-5.3-Flash does the reading. Every teal block on the page is the model
+reading FAA write-ups at the moment you click, and
+[`MODEL_USE.md`](MODEL_USE.md) lists each call with its guard and its measured
+cost. It also wrote an earlier version of this page on its own, from the
+written specifications in [`rebuild/specs/`](rebuild/specs/); that version is
+kept in the repository and is not the one served.
+
+The page you land on and the frame around those readings are hand-written. By
+character count of the shipped code, **21.2% is the model's and 78.8% is
+hand-written**, counted by
+[`build/count_provenance.py`](build/count_provenance.py) rather than claimed.
+So this is not a site the model built. It is a site that the model reads for
+you, with the reading verified line by line.
 
 ## Running it
 
@@ -242,6 +248,5 @@ publishing.
 
 Inspired by Rory Kennedy's *Freefall: A Reckoning for Boeing*. Built by Henk
 van Ess, 2026. GLM-5.3-Flash does all the live reading on the page and wrote
-the earlier build; Claude Code wrote the shipped frame. By character count of
-the shipped code, 21.2% is the model's and 78.8% is hand-written, counted by
-[`build/count_provenance.py`](build/count_provenance.py) rather than claimed.
+the earlier build; Claude Code wrote the shipped frame. The split is counted in
+[`MODEL_USE.md`](MODEL_USE.md), see "Who wrote what" above.

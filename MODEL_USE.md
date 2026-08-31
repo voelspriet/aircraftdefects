@@ -165,10 +165,10 @@ retracted for exactly that reason: its adjudicator turned out to be a constant
 rather than a judge, so it agreed with everything. See F1 in
 [`docs/FINDINGS.md`](docs/FINDINGS.md).
 
-## What is not written by the model, on the earlier page
+## Who wrote the code that ships
 
-This section counts the earlier page only. Every figure can be counted from the
-repository with `python3 build/count_provenance.py`.
+Counted, not claimed. Run `python3 build/count_provenance.py --check` and it
+fails if this table has drifted from the repository.
 
     shipped code, raw              233,844 characters
       the model's                   49,668   21.2%
@@ -176,6 +176,12 @@ repository with `python3 build/count_provenance.py`.
         rebuild/z2.html          100,618   hand-written
         rebuild/case.html         23,725   hand-written
         app/app.py               109,501   of which 59,833 hand-written, 49,668 the model's
+
+### The earlier page, which is kept but not served
+
+The paragraphs below describe the model's own build of this page, from the
+specifications in `rebuild/specs/`. None of it is in the figures above, because
+none of it is served.
 
 **`rebuild/bridge.js.bak`, 13,226 characters, is hand-written.** It joins the two
 halves the model built separately. The controls were briefed to call `search(off)`
@@ -202,13 +208,16 @@ from `ask.py` and `agent.py`.
 **The harness is hand-written and always was.** `ask.py` and `agent.py` call the
 model; `extract.py` pulls blocks out of an answer by its fences; `splice.py`
 merges them and renames the collisions that fail in silence; `build_all.py` says
-what the page is made of and in what order; `build_z.py` publishes it; the seven
-scripts in `build/` measure the result against the parent. None of that is on the
+what the page is made of and in what order; `build_z.py` publishes it; the scripts in
+`build/` measure the result in a browser and count the provenance. None of that is on the
 page. All of it decides what reaches the page, which is why it is listed here.
 
-**The service** in `app/app.py` is the model's, including the nine builds it
-chose and the rewrite of the ninth once the FAA file proved it could not be
-served as designed.
+**The service** in `app/app.py` is mixed, and the source says which is which:
+blocks headed `# ---- hand-written` are hand-written, everything else is the
+model's, including the nine research builds it chose and the rewrite of the
+ninth once the FAA file proved it could not be served as designed. The current
+split is at the top of this file and is counted by
+`build/count_provenance.py`.
 
 ### How to check any of this
 
@@ -222,7 +231,7 @@ answered against element names that do not exist on the page. It does two
 things: hides the desk's "No rows yet, on purpose" whenever a result count is on
 screen, and keeps the airframe dossier off the page when the instrument's
 selection is empty, so a page never shows two different counts. It is 0.43%
-of the served page. Every other block on the page is the model's. The gate that
+of the earlier page. Every other block on that page is the model's. The gate that
 checks both behaviours is `build/verify_presentation.py`, also hand-written.
 
 **`rebuild/48-hand.js`** adds the parent's "Skip to the results" link and the AIM AT

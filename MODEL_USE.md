@@ -4,7 +4,7 @@ Two pages are served from this repository, and the model's part in them is
 different, so this file says which is which before anything else.
 
 **aircraftdefects.com** , the page a visitor lands on, is a hand-written frame
-(`rebuild/z2.html`, 81,954 characters, written by Claude on 30 and 31 August 2026
+(`rebuild/z2.html`, 100,618 characters, written by Claude on 30 and 31 August 2026
 at Henk's decision, after two model rounds against the previous page did not
 land). On that page GLM-5.3-Flash is not the author of the code. It is the
 reader of the file: every teal block is the model reading FAA write-ups live,
@@ -16,7 +16,7 @@ written specifications (`rebuild/specs/`), and left in place so the two can be
 compared. Its provenance is counted by `build/count_provenance.py` and recorded
 at the end of this file.
 
-**The service**, `app/app.py`, is 90,003 bytes, of which 40,858 (45.4%) sit in
+**The service**, `app/app.py`, is 109,501 bytes, of which 59,833 (54.6%) sit in
 blocks headed `# ---- hand-written` and the rest is the model's. Count it:
 
     python3 - <<'EOF'
@@ -170,16 +170,12 @@ rather than a judge, so it agreed with everything. See F1 in
 This section counts the earlier page only. Every figure can be counted from the
 repository with `python3 build/count_provenance.py`.
 
-    served page, raw                 81,867 characters
-      model-written                  53,398   65.2%
-      hand-written                   28,469   34.8%
-        rebuild/bridge.js.bak               13,226
-        rebuild/47-hand.js                   2,618
-        rebuild/48-hand.js                   5,137
-        rebuild/49-hand.css                    976
-        rebuild/49-hand.js                   2,756
-        rebuild/50-hand.css                  2,670
-        rebuild/50-hand.js                   1,086
+    shipped code, raw              233,844 characters
+      the model's                   49,668   21.2%
+      hand-written                 184,176   78.8%
+        rebuild/z2.html          100,618   hand-written
+        rebuild/case.html         23,725   hand-written
+        app/app.py               109,501   of which 59,833 hand-written, 49,668 the model's
 
 **`rebuild/bridge.js.bak`, 13,226 characters, is hand-written.** It joins the two
 halves the model built separately. The controls were briefed to call `search(off)`

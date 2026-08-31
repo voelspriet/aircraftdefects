@@ -1,7 +1,7 @@
 # Make it readable
 
 **Live: [aircraftdefects.com](https://aircraftdefects.com/)** · MIT · GLM-5.3-Flash reads the file live
-**Teaser (60 s):** https://aircraftdefects.com/z/img/film-60.mp4 · **full demo film (5:33):** https://aircraftdefects.com/z/img/film-v5.mp4
+**Teaser (83 s):** https://aircraftdefects.com/z/img/demo3.mp4 · **full demo film (5:33):** https://aircraftdefects.com/z/img/film-v5.mp4
 **The build, written up:** https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with
 
 ## The problem
@@ -203,4 +203,5 @@ and told in full in the article above.
 Inspired by Rory Kennedy's *Freefall: A Reckoning for Boeing*. Built by Henk
 van Ess, 2026. GLM-5.3-Flash does all the live reading on the page and wrote
 the earlier build; Claude Code wrote the shipped frame (by character count of
-the shipped code: 25% GLM, 75% Claude, counted, not claimed).
+the shipped code, 21.2% is the model's and 78.8% is hand-written, counted by
+`build/count_provenance.py` rather than claimed).

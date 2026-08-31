@@ -16,6 +16,10 @@ video/cards/*.webm
 video/cards/*.mp4
 video/cards/*.html
 video/*.mp4
+# the teaser ships with the repository: 18MB, and a judge should not have to
+# fetch it from a server that may be gone. The other cuts are 265 and 313MB
+# and stay out.
+!video/demo3.mp4
 video/cap3/
 video/cap4/
 video/slides/

@@ -1,7 +1,7 @@
 # Make it readable
 
 **Live: [aircraftdefects.com](https://aircraftdefects.com/)** · GLM-5.3-Flash, reading the file live · MIT
-**Teaser (60 s):** https://aircraftdefects.com/z/img/film-60.mp4 · **full demo film (5:33):** https://aircraftdefects.com/z/img/film-v5.mp4 · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)
+**Teaser (83 s):** https://aircraftdefects.com/z/img/demo3.mp4 (also in the repository at [`video/demo3.mp4`](video/demo3.mp4)) · **full demo film (5:33):** https://aircraftdefects.com/z/img/film-v5.mp4 · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)
 
 A government can publish everything it holds and still answer none of your
 questions.
@@ -204,8 +204,8 @@ tokens, which is why it is not read whole and
 
 ## Who wrote what
 
-Two hours of building gave the counts. The reading took two days of those
-loops, and the roles are disclosed rather than blended: which surfaces the
+The counting half came together quickly; the reading took two days of those
+loops. The roles are disclosed rather than blended: which surfaces the
 model wrote from written specifications, which parts are a hand-written frame
 around its readings, and what every live call costs are all recorded in
 [`MODEL_USE.md`](MODEL_USE.md), with the shares counted, not claimed, by
@@ -242,5 +242,6 @@ publishing.
 
 Inspired by Rory Kennedy's *Freefall: A Reckoning for Boeing*. Built by Henk
 van Ess, 2026. GLM-5.3-Flash does all the live reading on the page and wrote
-the earlier build; Claude Code wrote the shipped frame (by character count of
-the shipped code: 25% GLM, 75% Claude, counted, not claimed).
+the earlier build; Claude Code wrote the shipped frame. By character count of
+the shipped code, 21.2% is the model's and 78.8% is hand-written, counted by
+[`build/count_provenance.py`](build/count_provenance.py) rather than claimed.

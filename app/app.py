@@ -1591,7 +1591,10 @@ SHEET_FIELDS = [
 ]
 @app.get("/z/api/sheet/<rid>")
 def sheet(rid):
-    raw = api("/api/case/" + rid)
+    try:
+        raw = api("/api/case/" + rid)
+    except Exception:
+        return jsonify(error="no such record"), 404
     if not isinstance(raw, dict) or not raw.get("OperatorControlNumber"):
         return jsonify(error="no such record"), 404
     tables = gloss_tables(); rows = []

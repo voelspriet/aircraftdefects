@@ -1601,6 +1601,19 @@ def operators_map():
 
 # ---- hand-written, 31 August 2026: the full case sheet, every code spelled out ----
 # The FAA's own wording is kept beside the plain label so either can be quoted.
+#
+# The label was not enough. A reader who has never worked on an aircraft learns
+# nothing from "F.O.D.", "RETURN TO BLOCK", "DYE PENETRANT" or a row that reads
+# "Other: other", and 66 of the codes in these five tables carried no note at
+# all. GLM-5.3-Flash wrote one plain sentence for each, from the FAA's own
+# wording, told to explain the thing rather than restate the label and to say
+# plainly when a code means the box was left blank.
+_NOTES = {}
+try:
+    with open(os.path.join(HERE, "code_notes.json")) as _fh:
+        _NOTES = json.load(_fh)
+except Exception:
+    pass
 SHEET_FIELDS = [
  ("DifficultyDate", "Date of the difficulty", None), ("OperatorDesignator", "Airline", "operator"), ("SubmitterTypeCode", "Filed by", "submitter"),
  ("AircraftMake", "Aircraft make", None), ("AircraftModel", "Aircraft model", None), ("RegistryNNumber", "Tail number", None), ("AircraftSerialNumber", "Aircraft serial number", None),
@@ -1640,6 +1653,10 @@ def sheet(rid):
                 row["value"] = e
             else:
                 row["note"] = "Not in the FAA table used here. Shown as filed."
+            # The FAA's tables carry a note on a handful of codes; the model's
+            # explanation fills the rest. The FAA's own wins where both exist.
+            if not row["note"]:
+                row["note"] = (_NOTES.get(table) or {}).get(str(v).strip().upper())
             if table == "jasc" and not isinstance(e, dict):
                 ch = t.get(str(v).strip()[:2] + "00")
                 if isinstance(ch, dict): row["value"] = ch.get("label") or str(v); row["faa"] = ch.get("faa")

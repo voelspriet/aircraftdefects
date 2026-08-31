@@ -1709,6 +1709,27 @@ def ask_file():
     q = (d.get("q") or "").strip()[:300]
     if not q:
         return jsonify(error="no question"), 400
+
+    # ---- hand-written, 31 August 2026: an NTSB case number is a real question
+    # A reporter reading an NTSB report has a case number in front of them and no
+    # tail. The model was right that this file has no field for one, and answering
+    # only that was unhelpful when the answer is one lookup away: the NTSB names
+    # the aircraft, and this file is searchable by tail. So resolve it here and
+    # say plainly which agency each half came from.
+    case = _ntsb_case(q)
+    if case:
+        return jsonify(
+            read=("%s is an NTSB case number, not an FAA one. This file has no field "
+                  "for it. The NTSB names the aircraft on that case, and this file is "
+                  "searchable by tail, so the reports below are the maintenance record "
+                  "for N%s, the aircraft in %s. Nothing here explains that case and the "
+                  "case explains nothing here."
+                  % (case["case"], case["regis"], case["case"])),
+            filters=[{"field": "tail", "value": "N" + case["regis"],
+                      "why": "the aircraft named on NTSB case %s" % case["case"]}],
+            unmapped=[],
+            ntsb=case)
+
     tables = {t: code_list(t) for t in ("nature", "precaution", "stage", "discovered", "part_location")}
     # the model invented operator "WN" for Southwest on first test; the FAA
     # designator is SWAA. Hand it the real list and accept nothing outside it.
@@ -1977,6 +1998,102 @@ def _reg_full(doc):
 _NTSB_DB = os.path.join(HERE, "ntsb.sqlite")
 
 
+# ---- hand-written, 31 August 2026: the aircraft both agencies wrote about ----
+# The one thing neither file can do alone. An aircraft in the FAA maintenance
+# record and in the NTSB accident record is not evidence of anything: an airframe
+# that flies a lot appears in both for the same reason it appears in either. What
+# it is, is a starting point a reporter cannot otherwise assemble, because the two
+# agencies publish separately and neither links to the other.
+#
+# So this ranks by nothing. It lists, newest NTSB case first, and it says in the
+# response what the list does not mean.
+_BOTH = {"at": 0, "payload": None}
+
+
+@app.get("/z/api/both")
+def both_files():
+    # Each row costs one upstream count, so the first build takes about sixteen
+    # seconds. Nobody waits sixteen seconds for a lead. Held for six hours: the
+    # NTSB file changes monthly and the FAA file daily, so a stale count here is
+    # never wrong by much and is never the point of the page.
+    if _BOTH["payload"] and time.time() - _BOTH["at"] < 6 * 3600:
+        return jsonify(_BOTH["payload"])
+    if not os.path.exists(_NTSB_DB):
+        return jsonify(rows=[], note="the NTSB file is not built on this server")
+    con = sqlite3.connect(_NTSB_DB)
+    con.row_factory = sqlite3.Row
+    rows = con.execute(
+        "SELECT regis, ntsb_no, ev_date, ev_type, city, state, country, injury, "
+        "fatalities, make, model, cause FROM ntsb WHERE regis<>'' AND cause<>'' "
+        "ORDER BY substr(ev_date,7,2) DESC, substr(ev_date,1,2) DESC LIMIT 400"
+    ).fetchall()
+    con.close()
+
+    out, seen = [], set()
+    for r in rows:
+        reg = r["regis"]
+        if reg in seen:
+            continue
+        try:
+            d = api("/api/search", tail=reg, limit=1)
+            n = d.get("total") or 0
+        except Exception:
+            n = 0
+        if not n:
+            continue
+        seen.add(reg)
+        out.append({
+            "tail": "N" + reg, "faa_reports": n, "case": r["ntsb_no"],
+            "date": (r["ev_date"] or "").split(" ")[0],
+            "where": ", ".join(x for x in (r["city"], r["state"], r["country"]) if x) or None,
+            "aircraft": " ".join(x for x in (r["make"], r["model"]) if x) or None,
+            "fatalities": r["fatalities"] if (r["fatalities"] or "").strip() not in ("", "0") else None,
+            "cause": r["cause"],
+        })
+        if len(out) >= 40:
+            break
+    payload = dict(
+        rows=out,
+        what_this_is=("Aircraft that appear in both public files: the FAA maintenance "
+                      "record this site is built on, and the NTSB accident record. Newest "
+                      "NTSB case first."),
+        what_this_is_not=[
+            "Not a ranking, and not sorted by anything but date.",
+            "Appearing in both files is not evidence that maintenance caused anything. "
+            "An airframe that flies a great deal appears in both for the same reason it "
+            "appears in either.",
+            "The FAA file records no causes. The probable cause shown is the NTSB's, "
+            "about its own case, and says nothing about any maintenance report.",
+            "The NTSB file begins in January 2008; the FAA file begins in 1995.",
+        ])
+    _BOTH["payload"], _BOTH["at"] = payload, time.time()
+    return jsonify(payload)
+
+
+def _ntsb_case(q):
+    """An NTSB case number looks like DCA22WA158: three letters, two digits, two
+    letters, three digits. Return the case and the tail it names, or None."""
+    m = re.fullmatch(r"\s*([A-Za-z]{3}\d{2}[A-Za-z]{2}\w{3})\s*", q or "")
+    if not m or not os.path.exists(_NTSB_DB):
+        return None
+    con = sqlite3.connect(_NTSB_DB)
+    con.row_factory = sqlite3.Row
+    try:
+        r = con.execute("SELECT * FROM ntsb WHERE UPPER(ntsb_no)=? AND regis<>'' "
+                        "LIMIT 1", (m.group(1).upper(),)).fetchone()
+    except Exception:
+        return None
+    finally:
+        con.close()
+    if not r:
+        return None
+    return {"case": r["ntsb_no"], "regis": r["regis"],
+            "date": (r["ev_date"] or "").split(" ")[0],
+            "where": ", ".join(x for x in (r["city"], r["state"], r["country"]) if x) or None,
+            "aircraft": " ".join(x for x in (r["make"], r["model"]) if x) or None,
+            "url": "https://data.ntsb.gov/carol-main-public/basic-search"}
+
+
 def _ntsb_of(n):
     """Every NTSB case on one N-number, newest first. The registration is stored
     without its leading N, as the FAA registry is."""
@@ -1996,11 +2113,23 @@ def _ntsb_of(n):
     for r in rows:
         d = (r["ev_date"] or "").split(" ")[0]
         where = ", ".join(x for x in (r["city"], r["state"], r["country"]) if x)
+        hurt = []
+        for n, lab in ((r["fatalities"], "fatal"), (r["serious"], "serious"),
+                       (r["minor"], "minor")):
+            if n and str(n).strip() not in ("", "0"):
+                hurt.append("%s %s" % (n, lab))
         out.append({
             "case": r["ntsb_no"], "date": d, "where": where or None,
             "type": r["ev_type"], "injury": r["injury"] or None,
-            "fatalities": r["fatalities"] or None, "damage": r["damage"] or None,
+            "hurt": ", ".join(hurt) or None,
+            "damage": r["damage"] or None, "phase": r["phase"] or None,
+            "light": r["light"] or None, "airport": r["airport"] or None,
             "aircraft": " ".join(x for x in (r["make"], r["model"]) if x) or None,
+            # The NTSB's own probable cause. The FAA file this site is built on
+            # records no causes at all, so this is the one thing here that the
+            # rest of the tool is forbidden from ever saying.
+            "cause": r["cause"] or None,
+            "narrative": r["narrative"] or None,
             "url": "https://data.ntsb.gov/carol-main-public/basic-search",
         })
     return out

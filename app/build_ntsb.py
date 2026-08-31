@@ -32,9 +32,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 URL = ("https://data.ntsb.gov/avdata/FileDirectory/DownloadFile"
        "?fileID=C%3A%5Cavdata%5Cavall.zip")
 DB = os.path.join(HERE, "ntsb.sqlite")
-EV_KEEP = ("ev_id", "ntsb_no", "ev_type", "ev_date", "ev_city", "ev_state",
-           "ev_country", "ev_highest_injury", "inj_tot_f")
-AC_KEEP = ("ev_id", "regis_no", "acft_make", "acft_model", "damage")
+# The NTSB's own words are the point. narr_cause is its probable cause, which is
+# the one thing the FAA file can never carry: that file records what was found and
+# fixed and says nothing about why. narr_accf is the factual narrative, median 947
+# characters, occasionally 36,000, so it is stored whole and shown clipped.
 
 
 def export(mdb, table):
@@ -60,25 +61,34 @@ def main():
         print("reading events and aircraft")
         events = {e["ev_id"]: e for e in export(mdb, "events")}
         aircraft = export(mdb, "aircraft")
+        narr = {}
+        for n in export(mdb, "narratives"):
+            narr.setdefault(n["ev_id"], n)
 
     if os.path.exists(DB):
         os.remove(DB)
     c = sqlite3.connect(DB)
     c.execute("""CREATE TABLE ntsb(
         regis TEXT, ntsb_no TEXT, ev_type TEXT, ev_date TEXT, city TEXT,
-        state TEXT, country TEXT, injury TEXT, fatalities TEXT,
-        make TEXT, model TEXT, damage TEXT)""")
+        state TEXT, country TEXT, injury TEXT, fatalities TEXT, serious TEXT,
+        minor TEXT, make TEXT, model TEXT, damage TEXT, phase TEXT, light TEXT,
+        airport TEXT, cause TEXT, narrative TEXT)""")
     n = 0
     for a in aircraft:
         reg = (a.get("regis_no") or "").strip().upper().lstrip("N")
         e = events.get(a.get("ev_id"))
         if not reg or not e:
             continue
-        c.execute("INSERT INTO ntsb VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+        nr = narr.get(a.get("ev_id")) or {}
+        c.execute("INSERT INTO ntsb VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                   (reg, e.get("ntsb_no"), e.get("ev_type"), e.get("ev_date"),
                    e.get("ev_city"), e.get("ev_state"), e.get("ev_country"),
                    e.get("ev_highest_injury"), e.get("inj_tot_f"),
-                   a.get("acft_make"), a.get("acft_model"), a.get("damage")))
+                   e.get("inj_tot_s"), e.get("inj_tot_m"),
+                   a.get("acft_make"), a.get("acft_model"), a.get("damage"),
+                   a.get("phase_flt_spec"), e.get("light_cond"), e.get("apt_name"),
+                   (nr.get("narr_cause") or "").strip(),
+                   (nr.get("narr_accf") or "").strip()))
         n += 1
     c.execute("CREATE INDEX ntsb_regis ON ntsb(regis)")
     c.commit()

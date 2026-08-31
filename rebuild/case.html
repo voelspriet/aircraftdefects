@@ -55,6 +55,12 @@ table.sheet b{font-weight:600}.code{font:400 12px var(--mono);color:var(--ash);m
 .ntsb{margin:18px 0 0;padding:14px 16px;border:1px solid var(--line);border-left:3px solid #8a6a2a;background:#faf7f0;border-radius:3px}
 .ntsb h3{margin:0 0 6px;font:600 14px/1.3 var(--sans,system-ui);color:#7a5a1e;text-transform:none;letter-spacing:0}
 .ntsb .note{margin:6px 0}
+.ntcase{padding:10px 0;border-top:1px solid var(--line)}
+.ntcase:first-of-type{border-top:0}
+.ntline{margin:0 0 3px;font:600 14px/1.4 var(--sans,system-ui)}
+.ntlab{display:block;font:600 10.5px/1.4 var(--sans,system-ui);letter-spacing:.07em;text-transform:uppercase;color:#8a6a2a;margin-top:6px}
+.ntcause{margin:4px 0 0;font:400 14.5px/1.55 var(--serif,Georgia,serif);color:var(--ink)}
+.ntnarr{margin:4px 0 0;font:400 13.5px/1.55 var(--serif,Georgia,serif);color:var(--ash)}
 </style>
 </head>
 <body>
@@ -185,10 +191,16 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
     if(nt.length){
       h+='<div class="ntsb"><h3>The NTSB has '+nt.length+' case'+(nt.length===1?"":"s")+' on this aircraft</h3>'+
          '<p class="note">A different agency and a different file. The FAA reports above record what mechanics found and fixed, not accidents. These are accidents and incidents the NTSB investigated. Neither explains the other, and nothing here connects a case to a report.</p>'+
-         '<table class="sheet">'+nt.map(function(x){
-           var bits=[x.where,x.injury?"highest injury "+x.injury:null,(x.fatalities&&x.fatalities!=="0")?x.fatalities+" fatal":null,x.damage?"damage "+x.damage:null].filter(Boolean).join(" · ");
-           return '<tr><td>'+esc(x.date||"")+'</td><td><b>'+esc(x.case||"")+'</b>'+(bits?'<br><span class="note">'+esc(bits)+'</span>':'')+'</td></tr>';
-         }).join("")+'</table>'+
+         nt.map(function(x){
+           var bits=[x.where,x.airport,x.phase,x.hurt?x.hurt+" injured":null,x.damage?"aircraft "+x.damage.toLowerCase():null,x.light].filter(Boolean).join(" · ");
+           var h2='<div class="ntcase"><p class="ntline"><b>'+esc(x.case||"")+'</b> · '+esc(x.date||"")+(x.aircraft?' · '+esc(x.aircraft):'')+'</p>';
+           if(bits)h2+='<p class="note">'+esc(bits)+'</p>';
+           if(x.cause)h2+='<p class="ntcause"><span class="ntlab">The NTSB found the probable cause to be</span> '+esc(x.cause)+'</p>';
+           if(x.narrative){var n=x.narrative, short=n.length>600;
+             h2+='<p class="ntnarr"><span class="ntlab">What the NTSB recorded</span> '+esc(short?n.slice(0,600).replace(/\s+\S*$/,"")+"\u2026":n)+
+                 (short?' <a href="https://data.ntsb.gov/carol-main-public/basic-search" target="_blank" rel="noopener">read the full case</a>':'')+'</p>';}
+           return h2+'</div>';
+         }).join("")+
          '<p class="note">Look the case number up at <a href="https://data.ntsb.gov/carol-main-public/basic-search" target="_blank" rel="noopener">the NTSB\'s own search</a>. Its file begins in January 2008; the FAA file above begins in 1995.</p></div>';
     }
     if(!h)return;

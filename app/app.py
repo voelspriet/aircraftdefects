@@ -1593,8 +1593,12 @@ SHEET_FIELDS = [
 def sheet(rid):
     try:
         raw = api("/api/case/" + rid)
-    except Exception:
-        return jsonify(error="no such record"), 404
+    except requests.HTTPError as e:
+        if e.response is not None and e.response.status_code == 404:
+            return jsonify(error="no such record"), 404
+        return jsonify(error="the file did not answer"), 502
+    except requests.RequestException:
+        return jsonify(error="the file did not answer"), 502
     if not isinstance(raw, dict) or not raw.get("OperatorControlNumber"):
         return jsonify(error="no such record"), 404
     tables = gloss_tables(); rows = []

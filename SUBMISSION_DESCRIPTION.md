@@ -25,8 +25,8 @@ the father of one of the victims trying anyway.
 
 The aircraft from the film is in the file. Two reports on N704AL: the door
 plug blow-out of 5 January 2024, in the mechanic's own words, and, five days
-earlier, a door that was hard to open, aircraft grounded. Both sit under the
-red Netflix cell on the front page.
+earlier, a door that was hard to open, aircraft grounded. Both open from the red
+Freefall cell among the leads, at aircraftdefects.com/#view=freefall.
 
 The work fell into two acts. First we had to rebuild the original database
 into something a human can read at all. Then we had to make sense of it,

@@ -34,8 +34,8 @@ government presented it as random unlabeled ingredients on a table.
 The aircraft from the film is in there. Two reports on N704AL, an Alaska
 Airlines 737-9: one filed five days before the door plug blew out (a door hard
 to open, aircraft grounded), and the blow-out itself, in the mechanic's own
-words, filed on 5 January 2024. Both sit under the red Netflix cell at the top
-of the page.
+words, filed on 5 January 2024. Both open from the red Freefall cell among the
+leads, at [#view=freefall](https://aircraftdefects.com/#view=freefall).
 
 ## What the page does
 

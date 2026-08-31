@@ -169,10 +169,10 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
     /* hand-written, 31 August 2026: the FAA's whole registry file, shown only on request */
     var full=rg.full||[];
     if(full.length){var street=null,cty=null;
-      var deep=full.map(function(r){var v=/^\d{8}$/.test(r.v)?ymd(r.v):r.v;
+      var rowsD=full.map(function(r){var v=/^\d{8}$/.test(r.v)?ymd(r.v):r.v;
         if(r.f==="Street")street=r.v;if(r.f==="City, state, zip")cty=r.v;
         var cell=r.f==="Engine"?px(v,v+" aircraft engine"):esc(v);
-        return '<tr><td>'+esc(r.f)+'</td><td><b>'+cell+'</b></td></tr>'}).join("");
+        return {f:r.f,html:'<tr><td>'+esc(r.f)+'</td><td><b>'+cell+'</b></td></tr>'}});
       var map="";
       if(street||cty){
         /* the street field often opens with a care-of line; the part with a digit is the street */
@@ -181,8 +181,13 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
         var q=(st||street||"")+(cty?", "+cty.replace(/, (\d{5})\d{4}$/,", $1"):"");
         map='<iframe class="omap" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q='+encodeURIComponent(q)+'&output=embed"></iframe>'
           +'<p class="credit">The registered owner’s address as it is on the FAA file · <a href="https://www.google.com/maps/search/'+encodeURIComponent(q)+'" target="_blank" rel="noopener">open in Google Maps</a></p>'}
+      /* the map sits right under the address rows, inside the file, not after it */
+      var mapRow=map?'<tr><td colspan="2" style="padding:12px 0 4px">'+map+'</td></tr>':"",placed=false;
+      var deep="";rowsD.forEach(function(r){deep+=r.html;
+        if(mapRow&&!placed&&r.f==="City, state, zip"){deep+=mapRow;placed=true}});
+      if(mapRow&&!placed)deep+=mapRow;
       h+='<button type="button" class="deeper">Research deeper<b>the FAA registry file for N'+esc(tail)+', every field it holds</b></button>'
-      +'<div class="deepbox" hidden><table class="sheet">'+deep+'</table>'+map
+      +'<div class="deepbox" hidden><table class="sheet">'+deep+'</table>'
       +'<p class="note" style="margin-top:8px">The FAA’s releasable registry file for this tail, every field the FAA publishes that is not empty. Codes are spelled out with the FAA’s own key (ardata); anything without a key is shown as filed.</p></div>'}
     $("#plane").innerHTML=h;$("#planebox").hidden=false;
     var db=$("#plane").querySelector(".deeper");

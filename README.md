@@ -1,7 +1,7 @@
 # Make it readable
 
 **Live: [aircraftdefects.com](https://aircraftdefects.com/)** · GLM-5.3-Flash, reading the file live · MIT
-**Demo film (5:33):** https://aircraftdefects.com/z/img/film-v5.mp4 · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)
+**Teaser (60 s):** https://aircraftdefects.com/z/img/film-60.mp4 · **full demo film (5:33):** https://aircraftdefects.com/z/img/film-v5.mp4 · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)
 
 A government can publish everything it holds and still answer none of your
 questions.

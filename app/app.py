@@ -2033,9 +2033,14 @@ def both_files():
     # seconds. Nobody waits sixteen seconds for a lead. Held for six hours: the
     # NTSB file changes monthly and the FAA file daily, so a stale count here is
     # never wrong by much and is never the point of the page.
-    if _BOTH["payload"] and time.time() - _BOTH["at"] < _BOTH_TTL:
+    # The warm cron asks for rebuild=1. Without it the call hit this worker's own
+    # memory copy, returned in 30ms and rewrote nothing, so the file on disk kept
+    # ageing until memory and disk expired together and a reader paid the sixteen
+    # seconds after all. Warming has to skip both caches to be worth running.
+    fresh = request.args.get("rebuild") == "1"
+    if not fresh and _BOTH["payload"] and time.time() - _BOTH["at"] < _BOTH_TTL:
         return jsonify(_BOTH["payload"])
-    ondisk = _both_disk()
+    ondisk = None if fresh else _both_disk()
     if ondisk:
         _BOTH["payload"], _BOTH["at"] = ondisk, time.time()
         return jsonify(ondisk)

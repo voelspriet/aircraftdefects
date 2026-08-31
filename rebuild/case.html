@@ -29,6 +29,8 @@ table.sheet td:first-child{font:600 10.5px/1.4 var(--mono);letter-spacing:.1em;t
 table.sheet b{font-weight:600}.code{font:400 12px var(--mono);color:var(--ash);margin-left:6px}
 .faa{font:400 12.5px/1.5 var(--sans);color:var(--ash);margin-top:3px;max-width:66ch}.faa i{font:500 10px var(--mono);letter-spacing:.08em;font-style:normal;margin-right:6px}
 .note{font:400 12px/1.5 var(--sans);color:var(--void)}
+table.sheet .filed{font:600 14px/1.4 var(--mono);letter-spacing:.01em}
+table.sheet .undec{font:400 12px/1.5 var(--sans);color:var(--ash);margin-top:4px;max-width:66ch}table.sheet .undec i{font:500 10px var(--mono);letter-spacing:.08em;font-style:normal;margin-right:6px}
 table.sheet .note{margin-top:4px;max-width:66ch}table.sheet .note i{font:500 10px var(--mono);letter-spacing:.08em;font-style:normal;margin-right:6px;color:var(--ash)}
 .links a{display:block;padding:10px 0;border-top:1px solid var(--line);color:var(--ink);text-decoration:none}.links a:hover{color:var(--rust)}.links a b{font-weight:600}.links a span{display:block;font-size:12.5px;color:var(--ash)}
 .pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.pick a,.pick button{font:500 13px/1.3 var(--sans);padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:100px;color:var(--ink);text-decoration:none;cursor:pointer}.pick a:hover,.pick button:hover{border-color:var(--rust);color:var(--rust)}
@@ -80,7 +82,7 @@ table.sheet .note i{display:block;font:600 10px/1.5 var(--mono);letter-spacing:.
       <p class="eyebrow">Ask the model about this report</p>
       <div id="mc"></div>
       <p class="eyebrow">Every code on this report, spelled out</p>
-      <p class="sub" style="font-size:13.5px;margin-bottom:8px">The FAA’s own code and wording come first, exactly as filed; the plain English sits under them, so you can quote either.</p>
+      <p class="sub" style="font-size:13.5px;margin-bottom:8px">The first line of every row is the field exactly as the FAA file holds it. Everything under it is added here and says so: what the FAA’s own table calls that code, the plain English, then what it means. Quote the first line.</p>
       <table class="sheet" id="sheet"></table>
     </div>
     <div>
@@ -154,14 +156,21 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
   /* hand-written, 31 August 2026: the FAA's own code and wording lead each row, exactly as
      filed and decodable against the FAA's tables; the plain English sits under them as the
      explanation, never in their place. */
+  /* The record first, then everything this site did to it, in that order and
+     labelled. The row used to lead with FLUID LOSS, which is the FAA table's
+     wording for a field the file stores as the single letter K. That put a
+     decoding where the source belongs and left a reader unable to tell the two
+     apart. Now the first line is the field exactly as filed, and each derived
+     line says where it came from: the FAA's own table, the plain English, the
+     explanation. A note about this site's tables is never labelled as meaning. */
   $("#sheet").innerHTML=(d.rows||[]).map(function(r){
-    var faa=r.faa||r.value;
-    var h='<tr><td>'+esc(r.field)+'</td><td><b>'+esc(faa)+'</b>'+(r.code&&r.code!==faa?'<span class="code">'+esc(r.code)+'</span>':'');
-    /* Only when the plain label differs from the FAA's own wording. Where the two
-       are the same word, printing "IN PLAIN WORDS Other" under "Other" says
-       nothing; the explanation below carries the row instead. */
-    if(r.faa&&r.value&&r.value!==r.faa)h+='<div class="faa"><i>IN PLAIN WORDS</i>'+esc(r.value)+'</div>';
-    return h+(r.note?'<div class="note"><i>WHAT IT MEANS</i>'+esc(r.note)+'</div>':'')+'</td></tr>'}).join("");
+    var filed=r.filed!=null?r.filed:r.code;
+    var h='<tr><td>'+esc(r.field)+'</td><td><b class="filed">'+esc(filed)+'</b>';
+    if(r.faa&&r.faa!==filed)h+='<div class="faa"><i>THE FAA’S TABLE CALLS THIS</i>'+esc(r.faa)+'</div>';
+    if(r.value&&r.value!==filed&&r.value!==r.faa)h+='<div class="faa"><i>IN PLAIN WORDS</i>'+esc(r.value)+'</div>';
+    if(r.note)h+='<div class="note"><i>WHAT IT MEANS</i>'+esc(r.note)+'</div>';
+    if(r.undecoded)h+='<div class="undec"><i>NOT DECODED HERE</i>'+esc(r.undecoded)+'</div>';
+    return h+'</td></tr>'}).join("");
   var L=[['https://sdrs.faa.gov/Query.aspx','The FAA’s own search','It posts a form rather than answering an address: paste the control number '+id+' into its Operator Control Number box.']];
   if(tail){L.push(['https://flightaware.com/live/flight/N'+tail,'FlightAware · N'+tail,'Where this aircraft is now and where it has been.']);L.push(['https://www.flightradar24.com/data/aircraft/n'+tail.toLowerCase(),'Flightradar24 · N'+tail,'The same aircraft on the other tracker.']);L.push(['https://registry.faa.gov/aircraftinquiry/Search/NNumberResult?nNumberTxt='+tail,'FAA registry · N'+tail,'Who owns it, according to the FAA.'])}
   $("#links").innerHTML=L.map(function(x){return '<a href="'+esc(x[0])+'" target="_blank" rel="noopener"><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></a>'}).join("");
@@ -175,11 +184,20 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
      NTSB's serial against it, so the question answered is whether the accident is
      about the aircraft in this report, not about whoever holds the tail today. */
   var repSn=(raw.AircraftSerialNumber||"").trim();
+  function serialKey(v){v=String(v||"").toUpperCase().replace(/[^A-Z0-9]/g,"");return v.replace(/^0+/,"")||v}
   if(tail)fetch("/z/api/plane/N"+encodeURIComponent(tail)+(repSn?"?serial="+encodeURIComponent(repSn):"")).then(function(r){return r.ok?r.json():null}).then(function(a){
     if(!a||a.error)return;var h="",ac=a.aircraft||{},rg=a.registry||{};
     if(a.photo&&a.photo.src){h+='<a href="'+esc(a.photo.link||"#")+'" target="_blank" rel="noopener"><img src="'+esc(a.photo.src)+'" alt="N'+esc(tail)+'"></a>';
       h+='<p class="credit">Photo © '+esc(a.photo.photographer||"unknown")+' · <a href="'+esc(a.photo.link||"#")+'" target="_blank" rel="noopener">Planespotters.net</a></p>'}
-    h+='<p class="note" style="margin:0 0 10px">Owner and photo show this aircraft as it is on an earlier date, not necessarily as it was on '+esc(date)+'.</p>';
+    /* The registry answers for whoever holds the tail today, which on an old
+       report is often not the aircraft the report is about. This page showed a
+       2002 Boeing 717 report above an Air Tractor crop-duster, under a caveat so
+       mild it read as a formality. Where the serials disagree, say it. */
+    var regSn=((rg.full||[]).find(function(f){return f.f==="Serial number"})||{}).v;
+    var moved=repSn&&regSn&&serialKey(regSn)!==serialKey(repSn);
+    h+=moved
+      ? '<p class="note" style="margin:0 0 10px"><b>This is not the aircraft in the report above.</b> The report gives serial '+esc(repSn)+'. N'+esc(tail)+' today is serial '+esc(regSn)+(rg.mfr?', registered as '+esc([rg.mfr,rg.model].filter(Boolean).join(" ")):'')+'. The registration was reissued after the report was filed, and the FAA registry only answers for the aircraft that holds it now.</p>'
+      : '<p class="note" style="margin:0 0 10px">Owner and photo show this aircraft as the registry has it now, not necessarily as it was on '+esc(date)+'.</p>';
     var rows=[];
     function px(txt,q){return '<a class="q" href="https://www.perplexity.ai/search?q='+encodeURIComponent(q)+'" target="_blank" rel="noopener" title="Look this up on Perplexity">'+esc(txt)+'</a>'}
     var frame=((ac.manufacturer||"")+" "+(ac.type||"")).trim();
@@ -260,7 +278,12 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
     $("#plane").innerHTML=h;$("#planebox").hidden=false;
     var bx=$("#plane").querySelector(".deepbox");
     if(bx)bx.appendChild(mc("Make this file readable","what this registry file says, and does not say, in plain words",function(){return "/z/api/stream/registry?reg=N"+encodeURIComponent(tail)},"the FAA registry file for N"+tail));
-  }).catch(function(){});
+  }).catch(function(e){
+    /* A bare catch here hid a TypeError for an hour: the aircraft block simply
+       did not appear, with a silent console and a healthy endpoint. Report it. */
+    console.error("aircraft block:", e);
+    $("#plane").innerHTML='<p class="note">The aircraft details did not load. Nothing above has changed.</p>';
+    $("#planebox").hidden=false;});
   if(!tail){$("#plane").innerHTML='<p class="note">This report names no tail number: it was filed on a part, not on an identified aircraft. There is no aircraft to look up.</p>';$("#planebox").hidden=false}
   if(tail)fetch("/api/aircraft/N"+encodeURIComponent(tail)).then(function(r){return r.json()}).then(function(a){if(a&&a.count!=null)$("#more").insertAdjacentHTML("afterbegin",'<span style="font:400 13px/2.2 var(--sans);color:var(--ash);margin-right:6px">This airframe appears in '+num(a.count)+' report'+(a.count===1?"":"s")+'.</span>')}).catch(function(){});
   var slim={};Object.keys(raw).forEach(function(k){if(k!=="Discrepancy"&&raw[k]!=null&&raw[k]!=="")slim[k]=raw[k]});var recq="rec="+encodeURIComponent(JSON.stringify(slim))+"&text="+encodeURIComponent((raw.Discrepancy||"").slice(0,4000));

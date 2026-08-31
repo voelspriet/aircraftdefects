@@ -1642,7 +1642,13 @@ def sheet(rid):
     for field, label, table in SHEET_FIELDS:
         v = raw.get(field)
         if v in (None, "", " "): continue
-        row = {"field": label, "code": str(v), "value": str(v), "faa": None, "note": None}
+        # "filed" is the field exactly as the FAA file holds it, before this site
+        # touches it. Everything else on the row is derived and is labelled as
+        # such on the page: the FAA's own table wording, the plain English, then
+        # the explanation. A reader must always be able to see the record itself
+        # first and disagree with the rest.
+        row = {"field": label, "filed": str(v), "code": str(v), "value": str(v),
+               "faa": None, "note": None, "undecoded": None}
         if field == "DifficultyDate":
             row["value"] = _date_words(v) or v
         if table:
@@ -1652,7 +1658,10 @@ def sheet(rid):
             elif isinstance(e, str):
                 row["value"] = e
             else:
-                row["note"] = "Not in the FAA table used here. Shown as filed."
+                # Not an explanation of the code. A statement about this site's
+                # tables, and it must not be dressed as meaning: the row still
+                # shows exactly what the file holds, and that stands on its own.
+                row["undecoded"] = "No entry for this code in the FAA tables used here."
             # The FAA's tables carry a note on a handful of codes; the model's
             # explanation fills the rest. The FAA's own wins where both exist.
             if not row["note"]:

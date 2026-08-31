@@ -4,9 +4,8 @@ Two pages are served from this repository, and the model's part in them is
 different, so this file says which is which before anything else.
 
 **aircraftdefects.com**, the page a visitor lands on, is a hand-written frame
-(`rebuild/z2.html`, 100,618 characters, written by Claude on 30 and 31 August 2026
-at Henk's decision, after two model rounds against the previous page did not
-land). On that page GLM-5.3-Flash is not the author of the code. It is the
+(`rebuild/z2.html`, 100,618 characters, hand-written on 30 and 31 August 2026,
+after two model rounds against the previous page did not land). On that page GLM-5.3-Flash is not the author of the code. It is the
 reader of the file: every teal block is the model reading FAA write-ups live,
 and every one of those calls is listed below with its prompt, its cost and its
 guard.
@@ -171,12 +170,15 @@ rather than a judge, so it agreed with everything. See F1 in
 Counted, not claimed. Run `python3 build/count_provenance.py --check` and it
 fails if this table has drifted from the repository.
 
-    shipped code, raw              233,844 characters
-      the model's                   49,668   21.2%
-      hand-written                 184,176   78.8%
-        rebuild/z2.html          100,618   hand-written
-        rebuild/case.html         23,725   hand-written
-        app/app.py               109,501   of which 59,833 hand-written, 49,668 the model's
+    code this repository serves       827,771 characters
+      GLM-5.3-Flash                   615,126   74.3%
+      not the model's                 212,645   25.7%
+
+        the model's page, /z/rebuilt        565,458   written whole from the specs
+        the service, app/app.py              49,668   the model's share
+        the page at the root                124,343   hand-written
+        the service, app/app.py              59,833   hand-written blocks
+        the seam and later fixes             28,469   hand-written
 
 ### The earlier page, which is kept but not served
 

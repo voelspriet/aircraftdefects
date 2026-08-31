@@ -227,19 +227,26 @@ tokens, which is why it is not read whole and
 
 ## Who wrote what
 
-GLM-5.3-Flash does the reading. Every teal block on the page is the model
-reading FAA write-ups at the moment you click, and
-[`MODEL_USE.md`](MODEL_USE.md) lists each call with its guard and its measured
-cost. It also wrote an earlier version of this page on its own, from the
-written specifications in [`rebuild/specs/`](rebuild/specs/); that version is
-kept in the repository and is not the one served.
+**GLM-5.3-Flash wrote a whole working tool on its own**, over two days, from
+nothing but written specifications. Not a demo: four rails, an aircraft shaded
+by where the trouble sits, nineteen filters, the record table, a case sheet, a
+phone layout and nine research features it chose itself. The specifications are
+in [`rebuild/specs/`](rebuild/specs/), 12,243 words. Every brief it was given is
+in [`rebuild/*.prompt.txt`](rebuild/), verbatim. Its own reasoning is committed
+too, 4.35 million characters of it. That page is still running, at
+[aircraftdefects.com/z/rebuilt](https://aircraftdefects.com/z/rebuilt), so it can
+be used rather than described.
 
-The page you land on and the frame around those readings are hand-written. By
-character count of the shipped code, **21.2% is the model's and 78.8% is
-hand-written**, counted by
+**Then the job changed.** A tool that counts write-ups, sorts them and plots
+them still cannot read them, and reading them was the point. So the model moved
+inside the page: fifteen endpoints where it reads the FAA's own words live, each
+one listed in [`MODEL_USE.md`](MODEL_USE.md) with its guard and its measured
+cost. The frame around those readings, the page at the root, is hand-written.
+
+By character count of everything this repository serves, **74.3% is the model's
+and 25.7% is not**, counted by
 [`build/count_provenance.py`](build/count_provenance.py) rather than claimed.
-So this is not a site the model built. It is a site that the model reads for
-you, with the reading verified line by line.
+Run it with `--check` and it fails if the table has drifted.
 
 ## Running it
 
@@ -274,6 +281,7 @@ cross-reference and can be stale, so check current ownership before
 publishing.
 
 Inspired by Rory Kennedy's *Freefall: A Reckoning for Boeing*. Built by Henk
-van Ess, 2026. GLM-5.3-Flash does all the live reading on the page and wrote
-the earlier build; Claude Code wrote the shipped frame. The split is counted in
+van Ess, 2026. GLM-5.3-Flash wrote the tool at
+[/z/rebuilt](https://aircraftdefects.com/z/rebuilt) from written specifications,
+and does all the live reading on the page you land on. The split is counted in
 [`MODEL_USE.md`](MODEL_USE.md), see "Who wrote what" above.

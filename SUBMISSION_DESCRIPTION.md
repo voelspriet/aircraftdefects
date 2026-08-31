@@ -201,7 +201,8 @@ days and is logged prompt by prompt in [HACKATHON_LOG.md](HACKATHON_LOG.md)
 and told in full in the article above.
 
 Inspired by Rory Kennedy's *Freefall: A Reckoning for Boeing*. Built by Henk
-van Ess, 2026. GLM-5.3-Flash does all the live reading on the page and wrote
-the earlier build; Claude Code wrote the shipped frame (by character count of
-the shipped code, 21.2% is the model's and 78.8% is hand-written, counted by
-`build/count_provenance.py` rather than claimed).
+van Ess, 2026. GLM-5.3-Flash wrote
+the tool at /z/rebuilt from written specifications, and does all the live
+reading on the page you land on. By character count of everything this
+repository serves, 74.3% is the model's, counted by
+`build/count_provenance.py` rather than claimed.

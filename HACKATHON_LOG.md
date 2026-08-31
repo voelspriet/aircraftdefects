@@ -119,8 +119,9 @@ records themselves are still being built.
 ## 30 August — the quiet page, and the model changes jobs
 
 The model-built page could not be repaired by more model rounds, so the roles
-were swapped, disclosed in every commit: Claude writes the frame by hand
-(`rebuild/z2.html`), GLM-5.3-Flash becomes the reader. A design panel of
+were swapped: the frame (`rebuild/z2.html`) is written by hand, and
+GLM-5.3-Flash becomes the reader of the file rather than the author of the
+code. A design panel of
 twenty (one lens each) and a red team chose what ships; the cuts and reasons
 are in docs/DESIGN-Z2.md. By the end of the day: the four rails always on
 screen with a breadcrumb, the chosen thing in big red above the findings, the

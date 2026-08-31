@@ -46,6 +46,7 @@ table.sheet b{font-weight:600}.code{font:400 12px var(--mono);color:var(--ash);m
 .plane img{width:100%;display:block;border:1px solid var(--line);background:#fff}
 .plane .credit{font:400 11px/1.5 var(--mono);color:var(--ash);margin:4px 0 10px}.plane .credit a{color:var(--ash)}
 .plane table.sheet td:first-child{width:150px}
+.plane a.q{color:inherit;text-decoration:none;border-bottom:1px dotted var(--ash)}.plane a.q:hover{color:var(--rust);border-bottom-color:var(--rust)}
 .foot{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);font:400 12px/1.6 var(--mono);color:var(--ash)}
 @media(max-width:900px){.wrap{padding:22px 18px 70px}.grid{grid-template-columns:1fr;gap:28px}h1{font-size:32px}table.sheet td:first-child{width:130px}}
 </style>
@@ -150,9 +151,11 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
     if(a.photo&&a.photo.src){h+='<a href="'+esc(a.photo.link||"#")+'" target="_blank" rel="noopener"><img src="'+esc(a.photo.src)+'" alt="N'+esc(tail)+'"></a>';
       h+='<p class="credit">Photo © '+esc(a.photo.photographer||"unknown")+' · <a href="'+esc(a.photo.link||"#")+'" target="_blank" rel="noopener">Planespotters.net</a></p>'}
     var rows=[];
-    if(ac.manufacturer||ac.type)rows.push(["Airframe",esc(((ac.manufacturer||"")+" "+(ac.type||"")).trim())+" <span class='code'>adsbdb</span>"]);
-    if(ac.operator)rows.push(["Operated by",esc(ac.operator)+" <span class='code'>adsbdb</span>"]);
-    if(rg.owner)rows.push(["Registered owner",esc(rg.owner)+(rg.city?", "+esc(rg.city)+(rg.state?" ("+esc(rg.state)+")":""):"")+" <span class='code'>FAA registry</span>"]);
+    function px(txt,q){return '<a class="q" href="https://www.perplexity.ai/search?q='+encodeURIComponent(q)+'" target="_blank" rel="noopener" title="Look this up on Perplexity">'+esc(txt)+'</a>'}
+    var frame=((ac.manufacturer||"")+" "+(ac.type||"")).trim();
+    if(frame)rows.push(["Airframe",px(frame,frame+" aircraft")+" <span class='code'>adsbdb</span>"]);
+    if(ac.operator)rows.push(["Operated by",px(ac.operator,ac.operator+" airline N"+tail)+" <span class='code'>adsbdb</span>"]);
+    if(rg.owner)rows.push(["Registered owner",px(rg.owner+(rg.city?", "+rg.city+(rg.state?" ("+rg.state+")":""):""),'"'+rg.owner+'" aircraft registration N'+tail)+" <span class='code'>FAA registry</span>"]);
     if(rg.year)rows.push(["Built",esc(rg.year)]);
     if(rg.cert_issue)rows.push(["Registered since",esc(ymd(rg.cert_issue))]);
     if(rg.deregistered)rows.push(["Deregistered",(rg.deregistered.date?esc(ymd(rg.deregistered.date))+", ":"")+"last owner "+esc(rg.deregistered.owner||"not recorded")+" <span class='code'>FAA registry</span>"]);

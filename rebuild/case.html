@@ -186,13 +186,11 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
       var deep="";rowsD.forEach(function(r){deep+=r.html;
         if(mapRow&&!placed&&r.f==="City, state, zip"){deep+=mapRow;placed=true}});
       if(mapRow&&!placed)deep+=mapRow;
-      h+='<button type="button" class="deeper">Research deeper<b>the FAA registry file for N'+esc(tail)+', every field it holds</b></button>'
-      +'<div class="deepbox" hidden><table class="sheet">'+deep+'</table>'
+      h+='<div class="deepbox"><table class="sheet">'+deep+'</table>'
       +'<p class="note" style="margin-top:8px">The FAA’s releasable registry file for this tail, every field the FAA publishes that is not empty. Codes are spelled out with the FAA’s own key (ardata); anything without a key is shown as filed.</p></div>'}
     $("#plane").innerHTML=h;$("#planebox").hidden=false;
-    var db=$("#plane").querySelector(".deeper");
-    if(db)db.onclick=function(){db.hidden=true;var bx=$("#plane").querySelector(".deepbox");bx.hidden=false;
-      bx.appendChild(mc("Make this file readable","what this registry file says, and does not say, in plain words",function(){return "/z/api/stream/registry?reg=N"+encodeURIComponent(tail)},"the FAA registry file for N"+tail))};
+    var bx=$("#plane").querySelector(".deepbox");
+    if(bx)bx.appendChild(mc("Make this file readable","what this registry file says, and does not say, in plain words",function(){return "/z/api/stream/registry?reg=N"+encodeURIComponent(tail)},"the FAA registry file for N"+tail));
   }).catch(function(){});
   if(!tail){$("#plane").innerHTML='<p class="note">This report names no tail number: it was filed on a part, not on an identified aircraft. There is no aircraft to look up.</p>';$("#planebox").hidden=false}
   if(tail)fetch("/api/aircraft/N"+encodeURIComponent(tail)).then(function(r){return r.json()}).then(function(a){if(a&&a.count!=null)$("#more").insertAdjacentHTML("afterbegin",'<span style="font:400 13px/2.2 var(--sans);color:var(--ash);margin-right:6px">This airframe appears in '+num(a.count)+' report'+(a.count===1?"":"s")+'.</span>')}).catch(function(){});

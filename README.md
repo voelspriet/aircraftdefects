@@ -24,7 +24,7 @@ whatever slice of the file you have in front of you. Count them yourself: every
 route in `app/app.py` whose body reaches the model. Ten of them stream, so the
 reading appears a sentence at a time. The panels that do it carry a
 `model reads` badge, so you always know which words are the file's and which are
-the model's.
+the model's. Twelve of them are below.
 
 | | what the model does, live |
 |---|---|
@@ -37,6 +37,9 @@ the model's.
 | **one aircraft, end to end** | its life oldest first, one turning point at a time, each pinned to its record |
 | **compare** | the newest 150 write-ups from each of two airlines: shared, only here, only there |
 | **the Freefall page** | the file's own reports on the door-plug fleet, and beneath them, labelled the web and not the file, what the NTSB found |
+| **the FAA registry file** | "Make this file readable": what the registry says about one aircraft **and what it does not**, in 140 words. That the registered owner holds the paper and may be a bank or a trustee rather than whoever flies it, and that the airworthiness class says what the aircraft is certified to do, not what it did |
+| **before you export** | reads the reports your filters selected and says which of them do not belong to what you seem to have meant, quoting the words and the record number, and what the filters will miss |
+| **a question with no field** | ask it something the form cannot hold, "what plane is the most dangerous", and it says first what the file cannot tell you, then draft filter chips checked against the FAA's own code tables and airline list. It invented `WN` for Southwest on the first test; the designator is `SWAA`, so it is handed the real list and nothing outside it is accepted |
 
 ![Seventeen leads, and the panels the model reads live](screenshots/leads.png)
 *Seventeen ways into the file. The two marked `model reads` are the model's own*

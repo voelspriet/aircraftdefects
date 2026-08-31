@@ -42,7 +42,6 @@ of the page.
 One screen. Four rails that are always there, WHERE, WHEN, WHO, WHAT IT
 FORCED, and a breadcrumb; a search line that takes a question or a word, a
 tail, an airline, a type, with real suggestions for each; and a period line.
-The page opens on the last 90 days.
 
 At the top sits a schematic aircraft, seen from the side. The parts that get
 written up most are drawn darker. The parts nobody reports are pale. You land

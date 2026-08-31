@@ -265,8 +265,6 @@ D.addEventListener("click",function(e){var u=e.target.closest&&e.target.closest(
   var b=mc("How the trade says it: "+w,"up to 60 write-ups carrying this word",function(){return"/z/api/stream/vocab?word="+encodeURIComponent(w)});b.dataset.vocab=w;host.appendChild(b);b.querySelector(".mc__go").click()});
 
 /* ---- data ---- */
-/* hand-written, 31 August 2026: with no filters the page opens on the last 90 days */
-if(!/view=freefall/.test(location.hash)&&(!location.search||!Array.from(new URLSearchParams(location.search).keys()).some(function(k){return k!=="hero"&&k!=="v"}))){var p0=new URLSearchParams(location.search),d0=new Date();d0.setDate(d0.getDate()-90);p0.set("from",d0.toISOString().slice(0,10));history.replaceState(null,"","?"+p0.toString()+location.hash)}
 var H=null;function render(){if(H)draw()}
 var OPS={};fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OPS=m||{}}).catch(function(){}).then(function(){return fetch("/z/api/hero?"+sel().toString())}).then(function(r){return r.json()}).then(function(h){H=h;draw()}).catch(function(){$("#hero").innerHTML='<p class="cannot">The file did not answer. Reload.</p>'});
 fetch("/z/api/specimen?"+(/view=freefall/.test(location.hash)?"tail=704AL&crew=A":sel().toString())).then(function(r){return r.json()}).then(spec).catch(function(){});

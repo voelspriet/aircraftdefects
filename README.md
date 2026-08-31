@@ -91,6 +91,7 @@ Administration, and it is published here:
 | the code tables this site decodes from | https://sdrs.faa.gov/References.aspx |
 | what the FAA says the file is | https://sdrs.faa.gov/FAQ.aspx |
 | the bulk files this corpus is built from, one CSV a year | https://external.apic4e.faa.gov/sdrs/retrieve/SDR-2025.csv |
+| the NTSB's accident file, a different agency and a different record | https://data.ntsb.gov/avdata |
 
 Nothing here replaces that. Every record on this site carries its FAA control
 number so you can look it up at the source and check it.

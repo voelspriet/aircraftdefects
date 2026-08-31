@@ -52,6 +52,9 @@ table.sheet b{font-weight:600}.code{font:400 12px var(--mono);color:var(--ash);m
 .plane iframe.omap{width:100%;height:230px;border:1px solid var(--line);display:block;margin-top:12px;background:#fff}
 .foot{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);font:400 12px/1.6 var(--mono);color:var(--ash)}
 @media(max-width:900px){.wrap{padding:22px 18px 70px}.grid{grid-template-columns:1fr;gap:28px}h1{font-size:32px}table.sheet td:first-child{width:130px}}
+.ntsb{margin:18px 0 0;padding:14px 16px;border:1px solid var(--line);border-left:3px solid #8a6a2a;background:#faf7f0;border-radius:3px}
+.ntsb h3{margin:0 0 6px;font:600 14px/1.3 var(--sans,system-ui);color:#7a5a1e;text-transform:none;letter-spacing:0}
+.ntsb .note{margin:6px 0}
 </style>
 </head>
 <body>
@@ -172,6 +175,22 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
     if(rg.deregistered)rows.push(["Deregistered",(rg.deregistered.date?esc(ymd(rg.deregistered.date))+", ":"")+"last owner "+esc(rg.deregistered.owner||"not recorded")+" <span class='code'>FAA registry</span>"]);
     if(ac.mode_s)rows.push(["Mode S",esc(ac.mode_s)]);
     if(rows.length)h+='<table class="sheet">'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td><b>'+r[1]+'</b></td></tr>'}).join("")+'</table>';
+    /* hand-written, 31 August 2026: the other agency's file, kept apart.
+       This site is built on a file that records no accidents, and says so
+       everywhere. The NTSB records the ones it investigated. Showing both and
+       merging neither is the honest thing: a case here explains nothing in the
+       maintenance record above, and the maintenance record explains nothing
+       here. The reader is told that in the block itself. */
+    var nt=a.ntsb||[];
+    if(nt.length){
+      h+='<div class="ntsb"><h3>The NTSB has '+nt.length+' case'+(nt.length===1?"":"s")+' on this aircraft</h3>'+
+         '<p class="note">A different agency and a different file. The FAA reports above record what mechanics found and fixed, not accidents. These are accidents and incidents the NTSB investigated. Neither explains the other, and nothing here connects a case to a report.</p>'+
+         '<table class="sheet">'+nt.map(function(x){
+           var bits=[x.where,x.injury?"highest injury "+x.injury:null,(x.fatalities&&x.fatalities!=="0")?x.fatalities+" fatal":null,x.damage?"damage "+x.damage:null].filter(Boolean).join(" · ");
+           return '<tr><td>'+esc(x.date||"")+'</td><td><b>'+esc(x.case||"")+'</b>'+(bits?'<br><span class="note">'+esc(bits)+'</span>':'')+'</td></tr>';
+         }).join("")+'</table>'+
+         '<p class="note">Look the case number up at <a href="https://data.ntsb.gov/carol-main-public/basic-search" target="_blank" rel="noopener">the NTSB\'s own search</a>. Its file begins in January 2008; the FAA file above begins in 1995.</p></div>';
+    }
     if(!h)return;
     /* hand-written, 31 August 2026: the FAA's whole registry file */
     var full=rg.full||[];

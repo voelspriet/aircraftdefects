@@ -60,6 +60,12 @@ search over the same data is at https://sdrs.faa.gov and its code tables are at
 https://sdrs.faa.gov/References.aspx. The aircraft registry is a separate daily
 file at https://registry.faa.gov/database/ReleasableAircraft.zip.
 
+The NTSB accident file is a different agency's record, published monthly at
+https://data.ntsb.gov/avdata and beginning in January 2008. A case page shows
+any NTSB cases on that tail number, clearly separated. The two files are never
+merged: an NTSB case explains nothing in the maintenance record and the
+maintenance record explains nothing about the case.
+
 ## Citing
 
 Cite the FAA record number, which every page carries, and the FAA's own system at

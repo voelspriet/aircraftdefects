@@ -1963,6 +1963,49 @@ def _reg_full(doc):
     return [{"f": f, "v": v} for f, v in rows if v]
 
 
+# ---- hand-written, 31 August 2026: the other agency's file ------------------
+# This site is built on a file that records what mechanics found and fixed. It
+# records no accidents, and every page says so. The NTSB records the other half.
+#
+# The two are shown side by side and never merged. An NTSB case on a tail does
+# not explain anything in its maintenance record, and the maintenance record
+# explains nothing about the case. Two public files about one aircraft, from two
+# agencies, each labelled, is a fact a reporter can use; a single blended story
+# is not. Built by build_ntsb.py from https://data.ntsb.gov/avdata, which the
+# NTSB refreshes monthly and which begins in January 2008, thirteen years after
+# the FAA file this site is built on.
+_NTSB_DB = os.path.join(HERE, "ntsb.sqlite")
+
+
+def _ntsb_of(n):
+    """Every NTSB case on one N-number, newest first. The registration is stored
+    without its leading N, as the FAA registry is."""
+    if not os.path.exists(_NTSB_DB):
+        return []
+    con = sqlite3.connect(_NTSB_DB)
+    con.row_factory = sqlite3.Row
+    try:
+        rows = con.execute(
+            "SELECT * FROM ntsb WHERE regis=? ORDER BY substr(ev_date,7,2) DESC, "
+            "substr(ev_date,1,2) DESC", (n,)).fetchall()
+    except Exception:
+        return []
+    finally:
+        con.close()
+    out = []
+    for r in rows:
+        d = (r["ev_date"] or "").split(" ")[0]
+        where = ", ".join(x for x in (r["city"], r["state"], r["country"]) if x)
+        out.append({
+            "case": r["ntsb_no"], "date": d, "where": where or None,
+            "type": r["ev_type"], "injury": r["injury"] or None,
+            "fatalities": r["fatalities"] or None, "damage": r["damage"] or None,
+            "aircraft": " ".join(x for x in (r["make"], r["model"]) if x) or None,
+            "url": "https://data.ntsb.gov/carol-main-public/basic-search",
+        })
+    return out
+
+
 def _registry_of(n):
     """The FAA registry row for an N-number (stored without the leading N)."""
     if not os.path.exists(_REG_DB):
@@ -2024,7 +2067,7 @@ def plane(reg):
     if not n or len(n) > 5:
         return jsonify(error="no such registration"), 404
     full = "N" + n
-    out = {"reg": full, "registry": _registry_of(n)}
+    out = {"reg": full, "registry": _registry_of(n), "ntsb": _ntsb_of(n)}
     hit = _AC.get(n)
     if hit and time.time() - hit["at"] < 7 * 24 * 3600:
         out["aircraft"], out["photo"] = hit["aircraft"], hit["photo"]

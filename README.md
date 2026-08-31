@@ -64,7 +64,7 @@ beside the plain English, "before you publish this" caveats, links to the
 FAA's own search, FlightAware, Flightradar24 and the registry for the tail,
 and the way back to the selection it came from.
 
-Sixteen leads under the fold each become the main screen when clicked. There
+Seventeen leads under the fold each become the main screen when clicked. There
 is always a way back: the breadcrumb, the × on every filter, "clear all, back
 to the start".
 

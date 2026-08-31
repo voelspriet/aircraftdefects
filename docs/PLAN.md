@@ -1,11 +1,18 @@
 # Work plan
 
-Five phases, in order, and the order is not negotiable: B is finished when the
-harnesses agree, then C, then D, then E, then F. Instructed 30 August, after I
-proposed skipping C to E in favour of F. Each is ticked off here as it is finished, with what was
-found and what was fixed. Nothing is marked done on the strength of an API
-returning 200: a surface counts as working when it has been driven in a real
-browser.
+**Superseded on 31 August.** This plan tracked the page the model built on its
+own, which is kept in the repository and is no longer served. The page at
+aircraftdefects.com is a hand-written frame with the model as its reader. What
+it does, who wrote what, and what every call costs are in
+[../README.md](../README.md) and [../MODEL_USE.md](../MODEL_USE.md). The plan is
+kept unedited because A, B and C were finished and measured, and because D, E
+and F record work that was chosen against rather than forgotten.
+
+Seven phases, A to G, in order, and the order was not negotiable: B finished
+when the harnesses agreed, then C. Each is ticked off below as it was finished,
+with what was found and what was fixed. Nothing was marked done on the strength
+of an API returning 200: a surface counted as working when it had been driven in
+a real browser.
 
 ---
 
@@ -239,7 +246,7 @@ writes it, agent measures and corrects it.
 
 ---
 
-## D. Multimodal, as the model itself ranked it — **pending**
+## D. Multimodal, as the model itself ranked it — **not built**
 
 From [`build/mm-02-answer.md`](../build/mm-02-answer.md), its own order, and its
 own rejections. It killed video outright on what it called the file-holder test:
@@ -251,21 +258,25 @@ nobody holds relevant video. It killed a render critic as "vision here is theate
 
 ---
 
-## E. Research features that use the model for what only it can do — **pending**
+## E. Research features that use the model for what only it can do — **two of three shipped**
 
 The test for anything here: if a database query could do it, it does not belong.
+Both ticked items ship on the page now, on the hand-written frame rather than on
+the model-built page this plan was written for.
 
-- [ ] analysis across a whole selection, not one record at a time: what recurs in
-      three thousand write-ups that no coded field captures
-- [ ] the vocabulary a trade uses for one failure, so a reporter can search for the
-      words mechanics actually write rather than the words they would guess
+- [x] analysis across a whole selection, not one record at a time: what recurs in
+      three thousand write-ups that no coded field captures.
+      `/z/api/stream/recurs`, reads up to 300 write-ups, every quote verified
+- [x] the vocabulary a trade uses for one failure, so a reporter can search for the
+      words mechanics actually write rather than the words they would guess.
+      `/z/api/stream/vocab?word=`
 - [ ] a full pass over the corpus, once the instrument is calibrated. Measured:
       865 tokens and 1.42s a report, so 1.52 billion tokens and 2.9 days at sixty
       concurrent. Not run, and [MODEL_USE.md](../MODEL_USE.md) says why.
 
 ---
 
-## F. Artwork the data earns — **pending**
+## F. Artwork the data earns — **not built**
 
 The parent tool draws four things and draws them well: a side view of an aircraft
 shaded by where it gets written up, a month strip, ladders of airlines and tails,
@@ -368,7 +379,7 @@ Deferred because nothing is broken by waiting. The phone layout works today:
 
 ## Closing state, 31 August
 
-The plan above tracked the model-built page, which is preserved in the repository. The page that ships at aircraftdefects.com is the hand-written
-frame with the model as reader; what it does, who wrote what and what every
-call costs are in README.md and MODEL_USE.md, and the two days are logged in
-HACKATHON_LOG.md.
+A, B and C finished and measured. E shipped two of its three, on the page that
+replaced this one. D and F were not built, and G was deferred while the phone
+layout still worked. The two days are logged prompt by prompt in
+[../HACKATHON_LOG.md](../HACKATHON_LOG.md).

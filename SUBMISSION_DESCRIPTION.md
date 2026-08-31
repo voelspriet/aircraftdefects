@@ -58,7 +58,7 @@ click.
   can be quoted, "before you publish this" caveats, and links out to the
   FAA's own search, FlightAware, Flightradar24 and the FAA registry for the
   tail.
-- **Sixteen leads** sort the file by what a journalist would actually chase:
+- **Seventeen leads** sort the file by what a journalist would actually chase:
   smoke in the cabin, cracks, engines shut down in flight, same-day clusters
   across a fleet, old airframes, new defects, the paperwork gap, and the 44
   reports where the box a mechanic ticked disagrees with the sentence the

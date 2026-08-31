@@ -74,5 +74,39 @@
  "sdr_type": {
   "A": "The report was filed by an air carrier, meaning an airline-type operator rather than a private flyer.",
   "G": "The report was filed under general aviation, which covers flying outside the airlines, such as private owners, small operators, and flight schools."
+ },
+ "submitter": {
+  "A": "The report was filed by a scheduled airline operating under FAA Part 121, the rules for larger commercial passenger and cargo carriers.",
+  "B": "The report was filed by a certificated repair station, a maintenance shop approved under Part 145 to inspect and repair aircraft and parts for customers.",
+  "C": "The report was filed by an operator flying under Part 91, the general rules that cover private, corporate, and other non-airline flying.",
+  "D": "The report was filed by an individual mechanic rather than by a company.",
+  "E": "The report was filed by a commuter or charter operator certificated under Part 135, which covers smaller scheduled and on-demand commercial flights.",
+  "F": "The report was filed by the manufacturer of the aircraft or of the part involved.",
+  "G": "The report was filed by the FAA itself, such as by one of its inspectors or offices.",
+  "H": "The submitter did not fit any of the listed categories, so this only tells you the filer was something other than the standard types and nothing more specific.",
+  "I": "The report was filed by an operator flying under Part 125, rules that cover certain larger aircraft on non-scheduled flights that do not fit the scheduled airline categories.",
+  "L": "The report was filed by a helicopter operator certificated under Part 133 to carry loads slung outside the aircraft, such as cargo hanging on a line below the helicopter.",
+  "M": "The report was filed by a branch of the military.",
+  "P": "The report was filed by an individual pilot rather than by a company or repair shop.",
+  "S": "The report was filed in connection with a light-sport aircraft, a category of small, simple aircraft that operates under lighter design and maintenance rules than standard certificated planes.",
+  "W": "The report was filed by a foreign airline operating under Part 129, the rules that apply to foreign carriers flying to or from the United States.",
+  "Z": "The report came from an international operator that does not hold an FAA operating certificate, so it sits outside the certificated categories listed above."
+ },
+ "part_location": {
+  "ZONE 000": "The zone was left blank or not entered, so the report does not say where the part sits; this is a gap in the record, not evidence of anything wrong.",
+  "ZONE 100": "The part is in the lower part of the fuselage, the aircraft's main body, generally the belly area underneath.",
+  "ZONE 200": "The part is in the upper part of the fuselage, the aircraft's main body, roughly the top or crown area.",
+  "ZONE 300": "The part is on the tail surfaces, the horizontal and vertical stabilisers that keep the aircraft steady in flight.",
+  "ZONE 400": "The part is in an engine nacelle, the housing around an engine, or on the pylon that attaches the engine to the wing or body.",
+  "ZONE 500": "The part is on the left wing, meaning the wing on the pilot's left when facing forward.",
+  "ZONE 600": "The part is on the right wing, meaning the wing on the pilot's right when facing forward.",
+  "ZONE 700": "The part is on the landing gear, the wheels, struts, and supporting structure the aircraft sits on while on the ground.",
+  "ZONE 800": "The part is on a door, such as a passenger, cargo, service, or emergency exit door.",
+  "ZONE 900": "The part is in a lavatory or galley, meaning a toilet or the onboard kitchen area."
+ },
+ "time_since": {
+  "I": "The hours shown are counted from the part's most recent inspection, so they measure how long it has run since it was last looked at.",
+  "O": "The hours shown are counted from the part's most recent overhaul, a teardown and rebuild intended to restore the part to a serviceable condition.",
+  "R": "The hours shown are counted from the part's most recent repair, a fix of a specific problem rather than a full rebuild."
  }
 }

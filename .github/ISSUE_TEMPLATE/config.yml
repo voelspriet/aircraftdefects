@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: A security problem
+    url: https://github.com/voelspriet/aircraftdefects/security/advisories/new
+    about: Report privately. See SECURITY.md for what belongs here rather than in a public issue.
+  - name: The government file itself
+    url: https://sdrs.faa.gov
+    about: This site reads the FAA's file and does not correct it. A fault in the FAA data belongs with the FAA.

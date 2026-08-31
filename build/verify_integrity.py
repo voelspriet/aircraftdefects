@@ -35,6 +35,7 @@ import certifi
 SITE = "https://aircraftdefects.com"
 CORPUS = 1757827
 CTX = ssl.create_default_context(cafile=certifi.where())
+NOTES_PATH = "app/code_notes.json"
 
 
 def get(url):
@@ -311,16 +312,30 @@ def run(site, n, skip_browser=False):
     # to invent no fact, number or threshold. This is where that is enforced
     # rather than trusted.
     try:
-        notes = json.load(open("app/code_notes.json"))
+        notes = json.load(open(NOTES_PATH))
     except Exception:
         notes = {}
-    numeric = [(t, k, v) for t in notes for k, v in notes[t].items()
-               if re.search(r"\b\d[\d,\.]*\b", v)]
+    # "No numbers at all" was the first rule here and it was too crude. The
+    # explanation of submitter code A has to say Part 121, because Part 121 is
+    # what the FAA's own wording for that code says. The rule that matters is
+    # narrower: every number in an explanation must already appear in that
+    # code's FAA wording or label. A figure the model reached for on its own is
+    # the thing to catch.
+    numeric, total_notes = [], sum(len(v) for v in notes.values())
+    for t in notes:
+        table = gloss.get(t) or {}
+        for k, v in notes[t].items():
+            e = table.get(k)
+            source = " ".join(str(x) for x in (e.values() if isinstance(e, dict) else [e or ""]))
+            source += " " + k
+            for got in re.findall(r"\d[\d,\.]*", v):
+                if got.strip(".,") not in source:
+                    numeric.append("%s %s: %s appears in no FAA wording for that code"
+                                   % (t, k, got))
     dashes = [(t, k) for t in notes for k, v in notes[t].items() if "—" in v or "–" in v]
-    total_notes = sum(len(v) for v in notes.values())
-    c.add("the written explanations state no number of their own",
+    c.add("every number in a written explanation comes from the FAA's own wording",
           total_notes > 0 and not numeric and not dashes,
-          ("%d with a number, %d with a dash" % (len(numeric), len(dashes)))
+          ("; ".join(numeric[:3]) + ("; %d with a dash" % len(dashes) if dashes else ""))
           if (numeric or dashes) else "%d explanations read" % total_notes)
 
     if skip_browser:
@@ -419,6 +434,8 @@ LIES = {
    "a filtered total larger than the file it is drawn from",
  "verdict that does not follow":
    "an NTSB case called confirmed while the two serials disagree",
+ "invented number":
+   "an explanation carrying a figure that is in no FAA wording for that code",
 }
 
 
@@ -456,8 +473,14 @@ def selftest():
                               "serial": "999", "compared_with": "1"}]}
         raise RuntimeError("the self-test asked for " + url)
 
-    global get
+    import tempfile, os
+    lying = {"nature": {"K": "Fluid loss, which the FAA reports in about 38% of cases."}}
+    fh = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
+    json.dump(lying, fh); fh.close()
+
+    global get, NOTES_PATH
     real, get = get, fake_get
+    real_notes, NOTES_PATH = NOTES_PATH, fh.name
     try:
         c = Checks()
         import io, contextlib
@@ -467,6 +490,8 @@ def selftest():
         out = buf.getvalue()
     finally:
         get = real
+        NOTES_PATH = real_notes
+        os.unlink(fh.name)
     failed = [ln for ln in out.splitlines() if ln.strip().startswith("FAIL")]
     caught = {
       "leads with a decoding": "leads with a value the record actually holds",
@@ -476,6 +501,7 @@ def selftest():
       "wrong corpus": "reports and every selection sits inside it",
       "selection outside the file": "reports and every selection sits inside it",
       "verdict that does not follow": "NTSB verdict follows from the two serials",
+      "invented number": "number in a written explanation comes from the FAA's own wording",
     }
     print("\nself-test: a site that lies in %d ways\n" % len(LIES))
     missed = 0

@@ -81,7 +81,19 @@ is usable rather than dangerous.
 ## The file
 
 It is called the Service Difficulty Report, kept by the Federal Aviation
-Administration. When a technician in the United States finds something wrong
+Administration, and it is published here:
+
+| | |
+|---|---|
+| the FAA's own search | https://sdrs.faa.gov |
+| its query form, the one a family is sent to | https://sdrs.faa.gov/Query.aspx |
+| the code tables this site decodes from | https://sdrs.faa.gov/References.aspx |
+| what the FAA says the file is | https://sdrs.faa.gov/FAQ.aspx |
+
+Nothing here replaces that. Every record on this site carries its FAA control
+number so you can look it up at the source and check it.
+
+When a technician in the United States finds something wrong
 with an aircraft, a crack in a component, rust under a fitting, a failed seal,
 they file it. Those reports are public: no sign-in, no fee, no records request.
 There are **1,757,827** of them since 1995, on **54,634** aircraft.
@@ -328,7 +340,8 @@ The split is marked in the source rather than described: blocks headed
 | `build/` | the browser harnesses and the provenance counter |
 | `video/` | the film pipeline: captured page states and frame-exact slides. The earlier cuts used a synthesised narration and are not published; the video linked above is narrated by me |
 
-MIT. The data is the FAA's, published under its own terms. Codes are decoded
+MIT. The data is the FAA's, published by it at https://sdrs.faa.gov under its
+own terms. Codes are decoded
 from the FAA's own lookup tables; airline names come from its December 2006
 cross-reference and can be stale, so check current ownership before
 publishing.

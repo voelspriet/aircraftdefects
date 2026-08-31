@@ -2173,6 +2173,47 @@ def _reg_serial(n):
     return None
 
 
+# The NTSB grades its own cases and this site had been ignoring it, so a flight
+# attendant tripping over a passenger's foot arrived on the page with exactly the
+# weight of a fatal crash. The two fields below are theirs: injury is the highest
+# injury level in the event, damage is what became of the aircraft. Nothing here
+# is a judgement of this site's; it is their grading, read out.
+#
+# A blank is never green. An event with no injury field recorded is unknown, not
+# safe, and it says unknown.
+_SEV = [
+    (4, "Someone died"),
+    (3, "Someone was seriously hurt"),
+    (2, "The aircraft was destroyed"),
+    (2, "Someone was slightly hurt"),
+    (1, "The aircraft was badly damaged, nobody was hurt"),
+    (0, "Nobody was hurt"),
+]
+
+
+def _severity(r):
+    """The NTSB's own grading of one case, as a rank and a plain sentence."""
+    def num(v):
+        v = str(v or "").strip()
+        return v.isdigit() and int(v) > 0
+    inj = (r["injury"] or "").strip().upper()
+    dam = (r["damage"] or "").strip().upper()
+    if inj == "FATL" or num(r["fatalities"]):
+        return {"rank": 4, "label": "Someone died"}
+    if inj == "SERS" or num(r["serious"]):
+        return {"rank": 3, "label": "Someone was seriously hurt"}
+    if dam == "DEST":
+        return {"rank": 2, "label": "The aircraft was destroyed, nobody was hurt"
+                if inj == "NONE" else "The aircraft was destroyed"}
+    if inj == "MINR" or num(r["minor"]):
+        return {"rank": 2, "label": "Someone was slightly hurt"}
+    if inj == "NONE":
+        return {"rank": 1 if dam == "SUBS" else 0,
+                "label": "The aircraft was badly damaged, nobody was hurt"
+                if dam == "SUBS" else "Nobody was hurt"}
+    return {"rank": None, "label": "The NTSB recorded no injury level for this case"}
+
+
 def _ntsb_of(n, report_serial=None):
     """Every NTSB case on one N-number, newest first. The registration is stored
     without its leading N, as the FAA registry is.
@@ -2264,17 +2305,35 @@ def _ntsb_of(n, report_serial=None):
             # rest of the tool is forbidden from ever saying.
             "cause": r["cause"] or None,
             "narrative": r["narrative"] or None,
+            "severity": _severity(r),
             "serial": ntsb_serial or None,
             "registry_serial": reg_serial or None,
             "compared_with": basis or None,
             "airframe": airframe,
             "url": "https://data.ntsb.gov/carol-main-public/basic-search",
         })
+    # Worst first, then newest. A reader scanning an airframe's accident history
+    # should meet the fatal one before the sprained ankle, and an unknown grade
+    # sits above the untroubled cases rather than below them.
+    # Two passes, because Python's sort is stable: newest first, then worst
+    # first, which leaves the newest of the equally serious cases on top.
+    out.sort(key=lambda x: _iso(x["date"]), reverse=True)
+    out.sort(key=lambda x: -(x["severity"]["rank"]
+                             if x["severity"]["rank"] is not None else 2))
     if dropped:
         # Never silently. The only removal left is a case that predates the
         # airframe, and it is still worth a line in the log.
         app.logger.info("ntsb %s: dropped %d case(s) predating the airframe", n, dropped)
     return out
+
+
+def _iso(d):
+    """MM/DD/YY to something sortable, newest first when reversed."""
+    m = re.match(r"(\d\d)/(\d\d)/(\d\d)$", str(d or "").strip())
+    if not m:
+        return "0000-00-00"
+    yy = int(m.group(3))
+    return "%04d-%s-%s" % (2000 + yy if yy < 50 else 1900 + yy, m.group(1), m.group(2))
 
 
 def _registry_of(n):

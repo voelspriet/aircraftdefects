@@ -94,11 +94,44 @@ def main():
         sys.exit("the table is not where this script expects it in MODEL_USE.md")
     line = "%s of %s characters are the model's, %.1f%%" % (f"{model:,}", f"{total:,}", 100 * model / total)
     if m.group(0).strip() == new.strip():
-        print("current: " + line); return
+        # Still check README. The table being current says nothing about the
+        # prose, and the prose is what a reader meets first.
+        print("current: " + line)
+        _readme(model, total, check)
+        return
     if check:
         print("STALE. MODEL_USE.md says:\n%s\n\nthe repository says:\n%s" % (m.group(0), new)); sys.exit(1)
     p.write_text(s[:m.start()] + new + s[m.end():])
     print("rewritten: " + line)
+    _readme(model, total, check)
+
+
+def _readme(model, total, check):
+    """README quotes the same percentage in prose, three times, and nothing was
+    checking it. It said 74.3% for a day after the table had moved to 71.6%,
+    because the figure falls whenever a hand-written line is added and the only
+    thing watching was the file that gets rewritten automatically. A number a
+    jury can check has to be checked here too."""
+    a = round(100 * model / total, 1)
+    b = round(100 - a, 1)
+    p = HERE / "README.md"
+    s = p.read_text()
+    import re as _re
+    stale = sorted({x for x in _re.findall(r"\b(\d{2}\.\d)%", s)} - {str(a), str(b)})
+    if not stale:
+        print("README agrees: %.1f%% / %.1f%%" % (a, b))
+        return
+    if check:
+        print("STALE. README still says %s%% where the repository says %.1f%% and %.1f%%"
+              % ("%, ".join(stale), a, b))
+        sys.exit(1)
+    # Only the two provenance figures, and only where they are stated as a
+    # percentage of this repository's code.
+    for old in stale:
+        s = _re.sub(r"\b%s%%" % _re.escape(old),
+                    ("%.1f%%" % a) if abs(float(old) - a) < abs(float(old) - b) else ("%.1f%%" % b), s)
+    p.write_text(s)
+    print("README brought in line: %.1f%% the model's, %.1f%% not" % (a, b))
 
 
 if __name__ == "__main__":

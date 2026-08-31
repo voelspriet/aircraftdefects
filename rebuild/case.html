@@ -60,7 +60,19 @@ table.sheet .note{margin-top:4px;max-width:66ch}table.sheet .note i{font:500 10p
 table.sheet .note i{display:block;font:600 10px/1.5 var(--mono);letter-spacing:.1em;color:var(--ash);font-style:normal;text-transform:uppercase}
 .ntsb .note{margin:6px 0}
 .ntoff{font:600 11px/1.4 var(--sans,system-ui);color:#8a3a1e;text-transform:uppercase;letter-spacing:.04em}
-.ntcase{padding:10px 0;border-top:1px solid var(--line)}
+/* Green through to red, and grey for a grade the NTSB did not record. Every
+   colour is paired with the sentence beside it, so nothing depends on seeing it. */
+.ntcase{padding:10px 0 10px 12px;border-top:1px solid var(--line);border-left:3px solid var(--sevc,#9aa0a6)}
+/* Two colours per band. The bar and dot carry the saturated colour, which is
+   decoration; the sentence takes a darker shade of the same hue, because at
+   12px bold on this paper the saturated olive, amber and orange measured
+   3.45, 3.30 and 4.09 against a 4.5 minimum. The band a reader can see and
+   the words a reader must read are not the same problem. */
+.ntcase.sev0{--sevc:#2f7d4f;--sevt:#2f7d4f}.ntcase.sev1{--sevc:#7d8a1f;--sevt:#5c6610}
+.ntcase.sev2{--sevc:#b07d10;--sevt:#8a6209}.ntcase.sev3{--sevc:#c2571a;--sevt:#9c400d}
+.ntcase.sev4{--sevc:#a3231b;--sevt:#a3231b}.ntcase.sevx{--sevc:#9aa0a6;--sevt:#63686d}
+.sevlab{margin:0 0 4px;font:600 12px/1.5 var(--sans,system-ui);color:var(--sevt,#63686d);display:flex;align-items:center;gap:7px}
+.sevlab .dot{width:9px;height:9px;border-radius:50%;background:var(--sevc);flex:0 0 9px}
 .ntcase:first-of-type{border-top:0}
 .ntline{margin:0 0 3px;font:600 14px/1.4 var(--sans,system-ui)}
 .ntlab{display:block;font:600 10.5px/1.4 var(--sans,system-ui);letter-spacing:.07em;text-transform:uppercase;color:#8a6a2a;margin-top:6px}
@@ -241,7 +253,14 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
          '<p class="note">'+prov+'</p>'+
          nt.map(function(x){
            var bits=[x.where,x.airport,x.phase,x.hurt?x.hurt+" injured":null,x.damage?"aircraft "+x.damage.toLowerCase():null,x.light].filter(Boolean).join(" · ");
-           var h2='<div class="ntcase"><p class="ntline"><b>'+esc(x.case||"")+'</b> · '+esc(x.date||"")+(x.aircraft?' · '+esc(x.aircraft):'')+
+           /* The NTSB grades its own cases. The band is that grading, read out,
+              and the words carry it: the colour is a second signal for a reader
+              who can see it, never the only one. A case with no injury level
+              recorded is grey and says so, because a blank must not read as
+              green. */
+           var sv=x.severity||{}, rk=(sv.rank===null||sv.rank===undefined)?"x":sv.rank;
+           var h2='<div class="ntcase sev'+esc(rk)+'"><p class="sevlab"><span class="dot"></span>'+esc(sv.label||"")+'</p>'+
+             '<p class="ntline"><b>'+esc(x.case||"")+'</b> · '+esc(x.date||"")+(x.aircraft?' · '+esc(x.aircraft):'')+
              (x.airframe==="differs"?' <span class="ntoff">serial '+esc(x.serial||"")+', not this airframe</span>':'')+'</p>';
            if(bits)h2+='<p class="note">'+esc(bits)+'</p>';
            if(x.cause)h2+='<p class="ntcause"><span class="ntlab">The NTSB found the probable cause to be</span> '+esc(x.cause)+'</p>';

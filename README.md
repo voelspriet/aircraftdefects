@@ -277,6 +277,30 @@ and 25.7% is not**, counted by
 [`build/count_provenance.py`](build/count_provenance.py) rather than claimed.
 Run it with `--check` and it fails if the table has drifted.
 
+## On the second assistant
+
+GitHub lists two contributors. This says what the other one did, so nobody has to
+guess.
+
+GLM-5.3-Flash is the subject of this project. It wrote a whole working tool on
+its own from written specifications, it does every live reading on the page now,
+and it designed the nine research features itself. That is 74.3% of the code this
+repository serves, counted by
+[`build/count_provenance.py`](build/count_provenance.py).
+
+A coding assistant, Claude Code, was used for the other 25.7%: the frame at the
+root that holds the model's readings, the build and splice scripts, the browser
+harnesses that measure the page, the deployment plumbing, and this documentation.
+It also wrote the guards around the model, the substring check that verifies every
+quote and the rules that make it abstain.
+
+It reads nothing for a visitor and appears nowhere on the page. Every word a
+reader sees is either the FAA's or GLM-5.3-Flash's.
+
+The split is marked in the source rather than described: blocks headed
+`# ---- hand-written` in [`app/app.py`](app/app.py), and the file-by-file count in
+[`MODEL_USE.md`](MODEL_USE.md), which `--check` will fail on if it drifts.
+
 ## Running it
 
     export ZAI_API_KEY=...

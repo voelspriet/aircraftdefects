@@ -65,9 +65,13 @@ def main():
         for n in export(mdb, "narratives"):
             narr.setdefault(n["ev_id"], n)
 
-    if os.path.exists(DB):
-        os.remove(DB)
-    c = sqlite3.connect(DB)
+    # Write beside the live file and swap at the end. The service reads this
+    # database on every case page, and a monthly rebuild that truncated it in
+    # place would serve an empty NTSB block for the two minutes it takes.
+    tmpdb = DB + ".new"
+    if os.path.exists(tmpdb):
+        os.remove(tmpdb)
+    c = sqlite3.connect(tmpdb)
     c.execute("""CREATE TABLE ntsb(
         regis TEXT, ntsb_no TEXT, ev_type TEXT, ev_date TEXT, city TEXT,
         state TEXT, country TEXT, injury TEXT, fatalities TEXT, serious TEXT,
@@ -91,10 +95,27 @@ def main():
                    (nr.get("narr_accf") or "").strip()))
         n += 1
     c.execute("CREATE INDEX ntsb_regis ON ntsb(regis)")
+    c.execute("CREATE INDEX ntsb_case ON ntsb(ntsb_no)")
     c.commit()
-    rows = c.execute("SELECT COUNT(*), COUNT(DISTINCT regis) FROM ntsb").fetchone()
+    rows = c.execute("SELECT COUNT(*), COUNT(DISTINCT regis) FROM ntsb, "
+                     "(SELECT 1)").fetchone() if False else c.execute(
+                     "SELECT COUNT(*), COUNT(DISTINCT regis), SUM(cause<>'') "
+                     "FROM ntsb").fetchone()
     c.close()
-    print("wrote %s: %s rows on %s aircraft" % (DB, f"{rows[0]:,}", f"{rows[1]:,}"))
+    if rows[0] < 1000:
+        sys.exit("refusing to swap in a database with only %d rows" % rows[0])
+    before = 0
+    if os.path.exists(DB):
+        try:
+            old = sqlite3.connect(DB)
+            before = old.execute("SELECT COUNT(*) FROM ntsb").fetchone()[0]
+            old.close()
+        except Exception:
+            pass
+    os.replace(tmpdb, DB)
+    print("wrote %s: %s cases on %s aircraft, %s with a probable cause (%+d since "
+          "the last run)" % (DB, f"{rows[0]:,}", f"{rows[1]:,}", f"{rows[2]:,}",
+                             rows[0] - before))
 
 
 if __name__ == "__main__":

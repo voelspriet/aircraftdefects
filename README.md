@@ -328,6 +328,8 @@ The split is marked in the source rather than described: blocks headed
 
     scp rebuild/z2.html host:/opt/sdrz/static/index.html   # the page
     curl .../z/api/specimen/warm            # pre-read the landing states after an FAA refresh
+    python3 app/build_ntsb.py               # the NTSB accident file; needs mdbtools
+    app/refresh_ntsb.sh                     # the same, monthly from cron, with the restart
     python3 build/count_provenance.py --check   # fails if the provenance table has drifted
 
 ## What is in here

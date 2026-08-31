@@ -68,7 +68,7 @@ table.sheet b{font-weight:600}.code{font:400 12px var(--mono);color:var(--ash);m
       <p class="eyebrow">Ask the model about this report</p>
       <div id="mc"></div>
       <p class="eyebrow">Every code on this report, spelled out</p>
-      <p class="sub" style="font-size:13.5px;margin-bottom:8px">The FAA’s own wording is kept beside the plain English so you can quote either.</p>
+      <p class="sub" style="font-size:13.5px;margin-bottom:8px">The FAA’s own code and wording come first, exactly as filed; the plain English sits under them, so you can quote either.</p>
       <table class="sheet" id="sheet"></table>
     </div>
     <div>
@@ -139,7 +139,14 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
   if(raw.PrecautionaryProcedureA&&raw.PrecautionaryProcedureA!=="K")w.push("The crew action recorded here is what the FAA form says the crew did, not a description of severity.");
   w.push("Quote the mechanic’s words as filed. The FAA publishes no per-report permalink, so cite the control number and this page.");
   $("#warn").innerHTML=w.map(function(x){return '<p>'+esc(x)+'</p>'}).join("");
-  $("#sheet").innerHTML=(d.rows||[]).map(function(r){return '<tr><td>'+esc(r.field)+'</td><td><b>'+esc(r.value)+'</b>'+(r.code&&r.code!==r.value?'<span class="code">'+esc(r.code)+'</span>':'')+(r.faa?'<div class="faa"><i>FAA WORDING</i>'+esc(r.faa)+'</div>':'')+(r.note?'<div class="note">'+esc(r.note)+'</div>':'')+'</td></tr>'}).join("");
+  /* hand-written, 31 August 2026: the FAA's own code and wording lead each row, exactly as
+     filed and decodable against the FAA's tables; the plain English sits under them as the
+     explanation, never in their place. */
+  $("#sheet").innerHTML=(d.rows||[]).map(function(r){
+    var faa=r.faa||r.value;
+    var h='<tr><td>'+esc(r.field)+'</td><td><b>'+esc(faa)+'</b>'+(r.code&&r.code!==faa?'<span class="code">'+esc(r.code)+'</span>':'');
+    if(r.faa&&r.value&&r.value!==r.faa)h+='<div class="faa"><i>IN PLAIN WORDS</i>'+esc(r.value)+'</div>';
+    return h+(r.note?'<div class="note">'+esc(r.note)+'</div>':'')+'</td></tr>'}).join("");
   var L=[['https://sdrs.faa.gov/Query.aspx','The FAA’s own search','It posts a form rather than answering an address: paste the control number '+id+' into its Operator Control Number box.']];
   if(tail){L.push(['https://flightaware.com/live/flight/N'+tail,'FlightAware · N'+tail,'Where this aircraft is now and where it has been.']);L.push(['https://www.flightradar24.com/data/aircraft/n'+tail.toLowerCase(),'Flightradar24 · N'+tail,'The same aircraft on the other tracker.']);L.push(['https://registry.faa.gov/aircraftinquiry/Search/NNumberResult?nNumberTxt='+tail,'FAA registry · N'+tail,'Who owns it, according to the FAA.'])}
   $("#links").innerHTML=L.map(function(x){return '<a href="'+esc(x[0])+'" target="_blank" rel="noopener"><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></a>'}).join("");

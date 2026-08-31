@@ -3,39 +3,36 @@
 **Live: [aircraftdefects.com](https://aircraftdefects.com/)** · GLM-5.3-Flash, reading the file live · MIT
 **Video (83 s, my own voice):** https://www.youtube.com/watch?v=vDMEKsNj7ss · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)
 
-A government can publish everything it holds and still answer none of your
-questions.
+> I was watching *Freefall* on Netflix, and I saw families of the victims trying
+> to read what mechanics had written about the planes. They were sent to a very
+> strange governmental website. I went there myself and I was curious and
+> furious at the same time, because the landing gear is suddenly `ZONE 700`, and
+> an emergency landing is just a letter `A`. This is impossible for humans to
+> understand, let alone families of victims. So I decided to make it completely
+> transparent.
+>
+> — [the 83-second introduction](https://www.youtube.com/watch?v=vDMEKsNj7ss)
 
-I viewed *Freefall: A Reckoning for Boeing* on Netflix. Relatives of victims
-were attempting to find answers to their questions partly via a governmental
-website. Row after row of capital letters. Zone numbers. Single character
-codes.
+## The file
 
-What was the database? It is called the Service Difficulty Report and is
-maintained by the Federal Aviation Administration. When technicians in the
-United States find an issue with a plane (a crack in a component, rust under a
-piece of equipment, a failed seal), they file it. These reports are then made
-available to everyone: no sign-in, no fee, no records request. There are
-1,757,827 of them since 1995, on 54,634 separate planes.
+It is called the Service Difficulty Report, kept by the Federal Aviation
+Administration. When a technician in the United States finds something wrong
+with an aircraft, a crack in a component, rust under a fitting, a failed seal,
+they file it. Those reports are public: no sign-in, no fee, no records request.
+There are **1,757,827** of them since 1995, on **54,634** aircraft.
 
+They are also close to unreadable. Almost every answer is a code, and the codes
+collide: `A` in one column means the crew made an emergency landing, and `A`
+elsewhere on the same form means an airline filed the report.
 
+The aircraft from the film is in the file. Two reports on N704AL, an Alaska
+Airlines 737-9: one filed five days before the door plug blew out, a door hard
+to open, aircraft grounded, and the blow-out itself in the mechanic's own words,
+filed on 5 January 2024. Both open from the red Freefall cell among the leads,
+at [#view=freefall](https://aircraftdefects.com/#view=freefall).
 
-![The government's own form for the door-plug report: every answer a code](screenshots/faa-own-form.png)
-*The government's own form for the door-plug report: every answer a code*
-
-I was shocked. The reports are so bureaucratic that almost everything has been
-replaced by codes, and the codes conflict. A report will never tell you there
-was an issue with the landing gear. It will say `ZONE 700`. An emergency
-landing? That is just an `A`. But the same letter elsewhere on the form means
-the report came from an airline. I saw the father of one of the victims
-searching it, trying to make sense of it. It was something public, but the
-government presented it as random unlabeled ingredients on a table.
-
-The aircraft from the film is in there. Two reports on N704AL, an Alaska
-Airlines 737-9: one filed five days before the door plug blew out (a door hard
-to open, aircraft grounded), and the blow-out itself, in the mechanic's own
-words, filed on 5 January 2024. Both open from the red Freefall cell among the
-leads, at [#view=freefall](https://aircraftdefects.com/#view=freefall).
+![The Freefall view: the film's own aircraft, in the file](screenshots/freefall.png)
+*The Freefall view: the film's own aircraft, and what was filed about it*
 
 ## What the page does
 
@@ -68,8 +65,8 @@ Seventeen leads under the fold each become the main screen when clicked. There
 is always a way back: the breadcrumb, the × on every filter, "clear all, back
 to the start".
 
-![The page: four rails, the search line, the aircraft, the report that reads itself](screenshots/the-page.png)
-*The page: four rails, the search line, the aircraft, the report that reads itself*
+![The page: four rails, the aircraft shaded by where the trouble sits, and the leads beneath](screenshots/landing.png)
+*The page: four rails, the aircraft shaded by where the trouble sits, and the leads beneath*
 
 
 ## Beyond the numbers: the model reads the file
@@ -111,8 +108,8 @@ deleted before you ever see it, and the page prints the score: "32 quotes
 checked, 32 verified". Click any sentence and it opens the records that
 sentence stands on.
 
-![Click a sentence and the records it rests on open beneath it](screenshots/sentence-opens-its-records.png)
-*Click a sentence and the records it rests on open beneath it*
+![One zone chosen: the count, then the records behind it](screenshots/selection.png)
+*One zone chosen: the count, then the records behind it*
 
 When an answer ends, the model proposes three narrower
 slices worth opening; the server looks each one up first and prints the real
@@ -120,14 +117,12 @@ count, and a suggestion that matches zero reports is dropped. The model
 proposes. The file counts. That division of labour runs through everything
 here.
 
-![Three next clicks, each with its real count](screenshots/next-three-clicks.png)
-*Three next clicks, each with its real count*
+![Seventeen leads, each one a way into the file](screenshots/leads.png)
+*Seventeen leads, each one a way into the file*
 
 
-
-
-![What should we check next: every suggestion is a click](screenshots/what-to-check-next.png)
-*What should we check next: every suggestion is a click*
+![Reports where the box the mechanic ticked disagrees with the paragraph underneath it](screenshots/conflicts.png)
+*Reports where the box the mechanic ticked disagrees with the paragraph underneath it*
 
 ### How it was built, in one paragraph each
 
@@ -157,9 +152,8 @@ results. The good parts of this site were not designed in advance. They exist
 because I used the thing, found it irritating, and complained precisely.
 
 
-
-![419 reports on one Boeing 747 freighter, told as a story](screenshots/one-aircraft-end-to-end.png)
-*419 reports on one Boeing 747 freighter, told as a story*
+![One report on its own page, built for citing: the FAA's wording beside the plain English](screenshots/case.png)
+*One report on its own page, built for citing: the FAA's wording beside the plain English*
 
 ### Send out a team
 
@@ -175,10 +169,6 @@ also cut things, with reasons recorded in
 no damage map across aircraft types, no event detection by two model passes
 agreeing. I did not think of most of what shipped.
 
-
-
-![A question with no field: the model says what the file cannot tell you first](screenshots/most-dangerous-question.png)
-*A question with no field: the model says what the file cannot tell you first*
 
 ## What it refuses to say
 

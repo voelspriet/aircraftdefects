@@ -1,8 +1,13 @@
 # /z redesign, 30 August 2026: the panel of twenty, synthesised
 
 Twenty reviewers, one lens each, all reading the same brief (docs/MODEL-BRIEF
-in the scratchpad, copied below in essence), the live page, and the parent. This
-is what survived the red team. The parent at aircraftdefects.com is untouched.
+in the scratchpad, copied below in essence), the live page, and the tool this
+one was built from. This is what survived the red team.
+
+Written on 30 August, when aircraftdefects.com still served the original tool
+and the rebuild sat at /z. Since 31 August both addresses serve the page this
+session designed, and the original is kept in the repository rather than
+published. Where the text below says "the parent", it means that original.
 
 ## Scope that ships (40 hours to the deadline)
 

@@ -3,7 +3,7 @@
 Two pages are served from this repository, and the model's part in them is
 different, so this file says which is which before anything else.
 
-**aircraftdefects.com** , the page a visitor lands on, is a hand-written frame
+**aircraftdefects.com**, the page a visitor lands on, is a hand-written frame
 (`rebuild/z2.html`, 100,618 characters, written by Claude on 30 and 31 August 2026
 at Henk's decision, after two model rounds against the previous page did not
 land). On that page GLM-5.3-Flash is not the author of the code. It is the
@@ -11,9 +11,10 @@ reader of the file: every teal block is the model reading FAA write-ups live,
 and every one of those calls is listed below with its prompt, its cost and its
 guard.
 
-**The earlier page** (kept in the repository; not linked publicly) was written by the model from
-written specifications (`rebuild/specs/`), and left in place so the two can be
-compared. Its provenance is counted by `build/count_provenance.py` and recorded
+**The earlier page** was written by the model from written specifications
+(`rebuild/specs/`), and is left in place so the two can be compared side by
+side: it is served, unlinked, at
+[aircraftdefects.com/z/rebuilt](https://aircraftdefects.com/z/rebuilt). Its provenance is counted by `build/count_provenance.py` and recorded
 at the end of this file.
 
 **The service**, `app/app.py`, is 109,501 bytes, of which 59,833 (54.6%) sit in
@@ -27,7 +28,7 @@ blocks headed `# ---- hand-written` and the rest is the model's. Count it:
     print(len(s),h)
     EOF
 
-## What the model reads live on /z, call by call
+## What the model reads live on the page, call by call
 
 Every block streams (SSE), states what it read ("300 of 12,397 write-ups, newest
 first, not a sample of the rest"), how long it took and how many tokens, and

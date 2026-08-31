@@ -1,5 +1,12 @@
 # The method: instructions, not code
 
+**This describes how the model built a page on its own**, from written
+specifications, on 29 and 30 August. That page is kept in the repository and is
+not the one served. The page at aircraftdefects.com is a hand-written frame in
+which the model is the live reader; how that one is driven is in
+[`MODEL_USE.md`](MODEL_USE.md). The method below is recorded because it worked
+and because the failures in it are the useful part.
+
 The model is never handed an implementation to copy. It is handed a written
 specification of what a surface has to do, and it decides how.
 
@@ -25,8 +32,11 @@ decisions, with the reason attached:
 
 > A month is only called a month when the whole month is in the selection.
 
-Nine thousand five hundred and fifty-six words of that, across six files, one per
-surface.
+Twelve thousand two hundred and forty-three words of that, across eleven files.
+Six were written before the code, one per surface; the other five were added
+after a round was lost, and each of those five exists because the model had been
+left to infer something it could not see: the endpoints' real field names, the
+rebuild's own markup, the reference's computed type.
 
 ## Every brief carries evidence, not instructions
 
@@ -77,7 +87,7 @@ specification.
 
 ## Keep the thinking
 
-Every reasoning trace is committed, 1.59 million characters of it. The split
+Every reasoning trace is committed, 4.35 million characters of it. The split
 between what the model thought and what it wrote is then visible rather than
 inferred, and when it departs from the specification it is asked to say so. Its
 departures are in the repository next to the code, and several of them were

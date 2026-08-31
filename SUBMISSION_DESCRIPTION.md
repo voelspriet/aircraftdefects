@@ -1,7 +1,7 @@
 # Make it readable
 
 **Live: [aircraftdefects.com](https://aircraftdefects.com/)** · MIT · GLM-5.3-Flash reads the file live
-**Video (83 s):** https://www.youtube.com/watch?v=vDMEKsNj7ss · **full demo film (5:33):** https://aircraftdefects.com/z/img/film-v5.mp4
+**Video (83 s, my own voice):** https://www.youtube.com/watch?v=vDMEKsNj7ss
 **The build, written up:** https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with
 
 ## The problem

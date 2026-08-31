@@ -1,7 +1,7 @@
 # Make it readable
 
 **Live: [aircraftdefects.com](https://aircraftdefects.com/)** · GLM-5.3-Flash, reading the file live · MIT
-**Video (83 s):** https://www.youtube.com/watch?v=vDMEKsNj7ss · **full demo film (5:33):** https://aircraftdefects.com/z/img/film-v5.mp4 · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)
+**Video (83 s, my own voice):** https://www.youtube.com/watch?v=vDMEKsNj7ss · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)
 
 A government can publish everything it holds and still answer none of your
 questions.
@@ -243,7 +243,7 @@ you, with the reading verified line by line.
 | `docs/DESIGN-Z2.md` | the design panel and the red team's cuts |
 | `docs/FINDINGS.md`, `HACKATHON_LOG.md` | the working notebook, prompt by prompt |
 | `build/` | the browser harnesses and the provenance counter |
-| `video/` | the demo film pipeline: narration, captured states, frame-exact slides |
+| `video/` | the film pipeline: captured page states and frame-exact slides. The earlier cuts used a synthesised narration and are not published; the video linked above is narrated by me |
 
 MIT. The data is the FAA's, published under its own terms. Codes are decoded
 from the FAA's own lookup tables; airline names come from its December 2006

@@ -156,6 +156,6 @@ selection. aircraftdefects.com now serves the new page at the root.
 **The film** went through five versions to get sync right. Live screen
 recording drifted; the final method captures finished states as 2x screenshots
 plus the model's text, and composes each sentence as a frame-exact slide with
-a push-in and a paced reveal. The full film runs 5:33 at 2560x1440,
-https://aircraftdefects.com/z/img/film-v5.mp4, and the 83-second introduction
-is on YouTube: https://www.youtube.com/watch?v=vDMEKsNj7ss.
+a push-in and a paced reveal. Those cuts carried a synthesised narration and are
+not published. The 83-second introduction that is published is narrated by me:
+https://www.youtube.com/watch?v=vDMEKsNj7ss.

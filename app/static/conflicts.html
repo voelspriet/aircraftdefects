@@ -26,6 +26,8 @@ button{font:inherit;font-size:13px;font-family:Archivo,system-ui,sans-serif;padd
 button:hover{border-color:var(--rust);color:var(--rust)}
 a{color:var(--rust)}
 .small{font-size:13px;color:var(--mut)}
+.e a.rec{color:inherit;text-decoration:none;border-bottom:1px solid rgba(196,75,40,.5)}
+.e a.rec:hover,.e a.rec:focus-visible{color:#c44b28;border-bottom-color:#c44b28}
 </style></head><body><div class="wrap">
 
 <h1>Conflicting reports</h1>
@@ -45,9 +47,9 @@ when somebody looks.</p>
 
 <div id="list"></div>
 
-<p class="small" style="margin-top:30px">Every row carries the FAA's own record number.
-Open the original, decide for yourself, and press one of the two buttons.
-Back to <a href="/z/">the tool</a> · <a href="https://aircraftdefects.com">aircraftdefects.com</a></p>
+<p class="small" style="margin-top:30px">Every row carries the FAA's own record number,
+and it opens that report. Read it, decide for yourself, and press one of the two buttons.
+Back to <a href="/">the tool</a> · <a href="https://aircraftdefects.com">aircraftdefects.com</a></p>
 </div>
 <script>
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -55,10 +57,12 @@ async function load(){
   const d=await (await fetch("api/conflicts")).json();
   document.getElementById("n").innerHTML=d.total+"<span> found so far</span>";
   document.getElementById("not").innerHTML=d.what_this_is_not.map(x=>`<li>${esc(x)}</li>`).join("");
-  document.getElementById("list").innerHTML=d.entries.map(e=>`
+  const iso=e=>{const m=(e.date||"").match(/(\d\d)\/(\d\d)\/(\d{4})/);return m?m[3]+m[1]+m[2]:""};
+  document.getElementById("list").innerHTML=d.entries.slice().sort((a,b)=>iso(b).localeCompare(iso(a))).map(e=>`
     <div class="e">
       <div class="meta">${esc(e.date||"")} &nbsp;·&nbsp; ${esc(e.tail?"N"+e.tail:"")}
-        &nbsp;·&nbsp; ${esc(e.operator||"")} &nbsp;·&nbsp; record ${esc(e.id)}</div>
+        &nbsp;·&nbsp; ${esc(e.operator||"")} &nbsp;·&nbsp;
+        <a class="rec" href="/z/case/${encodeURIComponent(e.id)}">record ${esc(e.id)}</a></div>
       <div class="note-line">${esc(e.note||"")}</div>
       <div class="verb">${esc(e.discrepancy||"")}</div>
       <div class="acts">

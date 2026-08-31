@@ -725,6 +725,30 @@ def case_page(rid):
     return send_from_directory(app.static_folder, "case.html", max_age=0)
 
 
+# ---- hand-written, 31 August 2026: the three files a crawler and a language
+# model look for first. robots.txt keeps them out of /z/api/, where every request
+# costs a model call. llms.txt says in plain words what this data is and, more
+# importantly, what it is not, so a model quoting this site does not turn counts
+# of reports filed into a safety ranking.
+@app.get("/robots.txt")
+def robots():
+    return send_from_directory(app.static_folder, "robots.txt", max_age=3600,
+                               mimetype="text/plain")
+
+
+@app.get("/sitemap.xml")
+def sitemap():
+    return send_from_directory(app.static_folder, "sitemap.xml", max_age=3600,
+                               mimetype="application/xml")
+
+
+@app.get("/llms.txt")
+def llms():
+    return send_from_directory(app.static_folder, "llms.txt", max_age=3600,
+                               mimetype="text/plain")
+
+
+# ---- the model's, from here
 @app.get("/z/img/<name>")
 def z_img(name):
     """Hand-written, 31 August 2026: the few images the page carries."""

@@ -1,0 +1,12 @@
+# aircraftdefects.com
+# 1,757,827 FAA service difficulty reports, read in plain English.
+# Built by Henk van Ess, a Digital Digging site. https://www.digitaldigging.org
+# The underlying data is a work of the US government and is in the public domain.
+
+User-agent: *
+Allow: /
+
+# The model reads on demand, so these cost a call each. Crawl the pages, not the readings.
+Disallow: /z/api/
+
+Sitemap: https://aircraftdefects.com/sitemap.xml

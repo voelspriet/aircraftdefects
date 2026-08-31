@@ -48,6 +48,10 @@ from written specifications rather than from code handed to it, and so was the
 first complete interface, which still runs at aircraftdefects.com/z/rebuilt so the
 two can be compared. Total model spend: **$1.07**.
 
+The whole build is written up at
+[Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with),
+prompt by prompt, including what went wrong.
+
 That number matters more than it looks. Public-interest tools usually die at the
 funding stage, not the idea stage. At a dollar a project the arithmetic changes: a
 journalist with a public dataset and a free weekend can ship the interface the
@@ -60,3 +64,4 @@ The data was always public. What fell is the cost of making it usable.
 Live: https://aircraftdefects.com
 Video (83 s): https://www.youtube.com/watch?v=vDMEKsNj7ss
 Code: https://github.com/voelspriet/aircraftdefects
+How it was built, written up: https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with

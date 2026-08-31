@@ -1,0 +1,58 @@
+# aircraftdefects.com
+
+> 1,757,827 service difficulty reports filed with the US Federal Aviation
+> Administration between 1 January 1995 and 26 August 2026, on 54,634 aircraft,
+> made readable. Each report records a defect a mechanic found. The FAA publishes
+> them as coded rows; this site decodes the codes from the FAA's own lookup
+> tables and has GLM-5.3-Flash read the mechanic's free-text write-up and restate
+> it in plain English, with the original always shown alongside.
+
+Built by Henk van Ess, a Digital Digging site: https://www.digitaldigging.org
+Source and method: https://github.com/voelspriet/aircraftdefects
+
+## What this data is, and is not
+
+- A report is filed when a mechanic finds a failure, malfunction or defect. Filing
+  is the maintenance system working, not failing.
+- Counts here are counts of reports filed. They are not counts of incidents, and
+  they are not accidents. The file records no accidents.
+- The file records no causes. Nothing on this site says why anything happened.
+- The FAA file carries no fleet sizes and no flying hours, so no rate can be
+  computed from it. This site computes none and publishes no safety ranking of
+  airlines or aircraft types. A large airline files more reports because it flies
+  more aircraft more hours, and a rigorous maintenance department files more than
+  a careless one.
+- Airline names are decoded from the FAA's December 2006 designator
+  cross-reference and can be stale. Check current ownership before publishing.
+- Location is recorded as a numbered zone. ZONE 700 is the landing gear. About
+  85% of reports describe the location in words instead and carry no zone code;
+  the site says how many it cannot place rather than drawing only what it can.
+- Single letters are reused across the form. `A` in one column means the crew made
+  an unscheduled landing; `A` elsewhere means an airline filed the report.
+
+## How the model is used
+
+- Every quote the model makes is checked by the server against the record it
+  cites, as a literal substring, before it is shown. A sentence whose quote fails
+  is deleted and the page prints how many were checked and how many survived.
+- The model is asked to state what the file cannot answer before it answers.
+- The words because, caused, led to and due to are forbidden in its output,
+  because the file records no causes.
+- Nothing generated is shown without the filer's own words beside it and a record
+  number under it.
+
+## Pages
+
+- https://aircraftdefects.com/ : the tool
+- https://aircraftdefects.com/conflicts/ : reports where the coded box disagrees
+  with the sentence the same mechanic wrote underneath it
+- https://aircraftdefects.com/z/case/<control number> : one report on its own
+  page, every code spelled out, built for citing
+- https://aircraftdefects.com/z/rebuilt : the earlier interface, written whole by
+  GLM-5.3-Flash from written specifications, kept for comparison
+
+## Citing
+
+Cite the FAA record number, which every page carries, and the FAA's own system at
+https://sdrs.faa.gov as the source. The data is a work of the US government and is
+in the public domain. This site is MIT licensed.

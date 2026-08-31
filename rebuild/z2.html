@@ -1,8 +1,23 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Aircraft defects, read</title>
+<title>Aircraft defects, read · 1,757,827 FAA reports in plain English</title>
+<meta name="description" content="Search 1,757,827 FAA service difficulty reports from 1995 on. A model reads each mechanic's write-up and says in plain words what happened. Free, no login, no safety rankings.">
+<link rel="canonical" href="https://aircraftdefects.com/">
+<meta name="author" content="Henk van Ess">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="aircraftdefects.com">
+<meta property="og:title" content="Aircraft defects, read">
+<meta property="og:description" content="1,757,827 FAA service difficulty reports, on 54,634 aircraft, since 1995. A model reads the mechanic's own words and says in plain language what happened.">
+<meta property="og:url" content="https://aircraftdefects.com/">
+<meta property="og:image" content="https://aircraftdefects.com/z/img/why-a.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Aircraft defects, read">
+<meta name="twitter:description" content="1,757,827 FAA service difficulty reports, read out loud in plain English.">
+<meta name="twitter:image" content="https://aircraftdefects.com/z/img/why-a.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Dataset","@id":"https://aircraftdefects.com/#dataset","name":"FAA Service Difficulty Reports, read in plain English","description":"1,757,827 service difficulty reports filed with the US Federal Aviation Administration between 1 January 1995 and 26 August 2026, on 54,634 aircraft. Each report records a defect a mechanic found: a crack, corrosion, a failed component. Codes are decoded from the FAA's own lookup tables, and a language model reads the mechanic's free-text write-up and restates it in plain English with the original alongside.","url":"https://aircraftdefects.com/","license":"https://www.usa.gov/government-works","isAccessibleForFree":true,"creator":{"@type":"Person","name":"Henk van Ess","url":"https://www.digitaldigging.org"},"temporalCoverage":"1995-01-01/2026-08-26","measurementTechnique":"Counts of reports filed. No rate, no fleet size and no flying hours are available in the source, so no safety ranking is computed.","sourceOrganization":{"@type":"GovernmentOrganization","name":"Federal Aviation Administration","url":"https://sdrs.faa.gov"}},{"@type":"WebSite","@id":"https://aircraftdefects.com/#site","name":"aircraftdefects.com","url":"https://aircraftdefects.com/","inLanguage":"en","publisher":{"@type":"Organization","name":"Digital Digging","url":"https://www.digitaldigging.org"},"author":{"@type":"Person","name":"Henk van Ess","url":"https://www.digitaldigging.org"},"about":{"@id":"https://aircraftdefects.com/#dataset"},"potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://aircraftdefects.com/?q={search_term_string}"},"query-input":"required name=search_term_string"}},{"@type":"FAQPage","@id":"https://aircraftdefects.com/#faq","mainEntity":[{"@type":"Question","name":"What is a service difficulty report?","acceptedAnswer":{"@type":"Answer","text":"A report a mechanic or operator files with the FAA when they find a failure, malfunction or defect on an aircraft: a cracked bracket, corrosion, a failed sensor. Filing is the maintenance system working, not failing."}},{"@type":"Question","name":"Does a high report count mean an airline is unsafe?","acceptedAnswer":{"@type":"Answer","text":"No. A large airline files more reports because it has more aircraft flying more hours, and a rigorous maintenance department files more than a careless one. The FAA file carries no fleet sizes and no flying hours, so no rate can be computed and this site computes none."}},{"@type":"Question","name":"Why does a report say ZONE 700 instead of landing gear?","acceptedAnswer":{"@type":"Answer","text":"The FAA form records location as a numbered zone. ZONE 700 is the landing gear. Single letters carry meaning too: A in one column means the crew made an unscheduled landing, and A elsewhere on the same form means an airline filed the report."}},{"@type":"Question","name":"Can the site tell me why something happened?","acceptedAnswer":{"@type":"Answer","text":"No. The file records what was found and what was done about it. It records no causes and no accidents, and the model is forbidden from writing because, caused or led to."}}]}]}</script>
 <style>
 /* ---- hand-written, 30 August 2026, counted in MODEL_USE.md. The quiet /z,
    built from the approved mockup. One screen, one desk line, WHERE as the
@@ -172,6 +187,7 @@ a.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--
 
   <div class="rails" id="rails"></div>
   <div class="foot"><span id="footnote">counts are of reports filed, not of flights · no rate is claimed</span><span><a id="readAll" href="#">read all</a> · <a href="#leads">find leads</a> · <a href="https://github.com/voelspriet/aircraftdefects#readme">method</a></span></div>
+  <div class="foot credit"><span>Built by <a href="https://www.digitaldigging.org" rel="author">Henk van Ess</a> · a <a href="https://www.digitaldigging.org">Digital Digging</a> site · <a href="https://github.com/voelspriet/aircraftdefects">source</a> · data: FAA Service Difficulty Reports, public domain</span></div>
 </div>
 
 <div class="leads" id="sum"></div>

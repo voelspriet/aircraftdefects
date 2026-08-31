@@ -39,32 +39,49 @@ def main():
     z = zipfile.ZipFile(zpath)
     names = {n.upper().split("/")[-1]: n for n in z.namelist()}
 
+    import json
     ref = {}
     for row in rows_of(z, names["ACFTREF.TXT"]):
-        ref[row.get("CODE", "")] = (row.get("MFR", ""), row.get("MODEL", ""))
+        ref[row.get("CODE", "")] = row
+    eng = {}
+    for row in rows_of(z, names["ENGINE.TXT"]):
+        eng[row.get("CODE", "")] = row
 
     con = sqlite3.connect(DB + ".tmp")
+    # The summary columns feed the panel; doc is the FAA's whole row (MASTER
+    # joined with its ACFTREF aircraft sheet and ENGINE row) for Research deeper.
     con.execute("CREATE TABLE reg (n TEXT PRIMARY KEY, owner TEXT, city TEXT, state TEXT, "
-                "year TEXT, mfr TEXT, model TEXT, cert_issue TEXT, last_action TEXT)")
-    con.execute("CREATE TABLE dereg (n TEXT, owner TEXT, cancel_date TEXT)")
+                "year TEXT, mfr TEXT, model TEXT, cert_issue TEXT, last_action TEXT, doc TEXT)")
+    con.execute("CREATE TABLE dereg (n TEXT, owner TEXT, cancel_date TEXT, doc TEXT)")
     n_master = 0
     for row in rows_of(z, names["MASTER.TXT"]):
         n = row.get("N-NUMBER", "")
         if not n:
             continue
-        mfr, model = ref.get(row.get("MFR MDL CODE", ""), ("", ""))
-        con.execute("INSERT OR REPLACE INTO reg VALUES (?,?,?,?,?,?,?,?,?)",
+        r = ref.get(row.get("MFR MDL CODE", ""), {})
+        doc = {k: v for k, v in row.items() if v}
+        if r:
+            doc["_ref"] = {k: v for k, v in r.items() if v}
+        e = eng.get(row.get("ENG MFR MDL", ""), {})
+        if e:
+            doc["_eng"] = {k: v for k, v in e.items() if v}
+        con.execute("INSERT OR REPLACE INTO reg VALUES (?,?,?,?,?,?,?,?,?,?)",
                     (n, row.get("NAME", ""), row.get("CITY", ""), row.get("STATE", ""),
-                     row.get("YEAR MFR", ""), mfr, model,
-                     row.get("CERT ISSUE DATE", ""), row.get("LAST ACTION DATE", "")))
+                     row.get("YEAR MFR", ""), r.get("MFR", ""), r.get("MODEL", ""),
+                     row.get("CERT ISSUE DATE", ""), row.get("LAST ACTION DATE", ""),
+                     json.dumps(doc)))
         n_master += 1
     n_dereg = 0
     for row in rows_of(z, names["DEREG.TXT"]):
         n = row.get("N-NUMBER", "")
         if not n:
             continue
-        con.execute("INSERT INTO dereg VALUES (?,?,?)",
-                    (n, row.get("NAME", ""), row.get("CANCEL-DATE", "")))
+        doc = {k: v for k, v in row.items() if v}
+        r = ref.get(row.get("MFR-MDL-CODE", ""), {})
+        if r:
+            doc["_ref"] = {k: v for k, v in r.items() if v}
+        con.execute("INSERT INTO dereg VALUES (?,?,?,?)",
+                    (n, row.get("NAME", ""), row.get("CANCEL-DATE", ""), json.dumps(doc)))
         n_dereg += 1
     con.execute("CREATE INDEX dereg_n ON dereg(n)")
     con.commit()

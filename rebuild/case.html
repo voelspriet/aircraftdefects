@@ -47,6 +47,8 @@ table.sheet b{font-weight:600}.code{font:400 12px var(--mono);color:var(--ash);m
 .plane .credit{font:400 11px/1.5 var(--mono);color:var(--ash);margin:4px 0 10px}.plane .credit a{color:var(--ash)}
 .plane table.sheet td:first-child{width:150px}
 .plane a.q{color:inherit;text-decoration:none;border-bottom:1px dotted var(--ash)}.plane a.q:hover{color:var(--rust);border-bottom-color:var(--rust)}
+.plane .deeper{font:500 12.5px/1 var(--sans);padding:8px 12px;border:1px solid var(--ink);background:#fff;border-radius:3px;cursor:pointer;margin-top:10px}.plane .deeper:hover{border-color:var(--rust);color:var(--rust)}
+.plane .deeper b{display:block;font:400 11px/1.3 var(--mono);color:var(--ash);margin-top:2px;text-align:left}
 .foot{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);font:400 12px/1.6 var(--mono);color:var(--ash)}
 @media(max-width:900px){.wrap{padding:22px 18px 70px}.grid{grid-template-columns:1fr;gap:28px}h1{font-size:32px}table.sheet td:first-child{width:130px}}
 </style>
@@ -96,14 +98,14 @@ $("#back").href=ROOT+(sel?"?"+sel:"");
 var OPS={};
 function opName(c){return OPS[c]?OPS[c].replace(/\b(INC|LLC|CORP|CORPORATION|CO|COMPANY|LTD)\.?$/i,"").trim():""}
 /* the streaming block */
-function mc(label,sub,url){var box=D.createElement("section");box.className="mc";box.dataset.state="idle";
+function mc(label,sub,url,what){var box=D.createElement("section");what=what||"this report, all fields";box.className="mc";box.dataset.state="idle";
   box.innerHTML='<button type="button" class="mc__go">'+esc(label)+(sub?"<b>"+esc(sub)+"</b>":"")+'</button><div class="mc__meter"><span class="mc__spin"></span><span class="mc__count">reading</span><span class="mc__clock">0.0 s</span><button type="button" class="mc__stop">Stop</button></div><div class="mc__body"><div class="model"><p class="lab">Read by GLM-5.3-Flash</p><p class="out"></p><p class="prov"></p></div></div>';
   var go=box.querySelector(".mc__go"),out=box.querySelector(".out"),prov=box.querySelector(".prov"),es=null,t0=0,tick=null,got="",chk=null;
   function st(s){box.dataset.state=s}
   function fin(kind,d){if(tick)clearInterval(tick);if(es)es.close();go.disabled=false;var secs=d&&d.seconds!=null?d.seconds+" s":((Date.now()-t0)/1000).toFixed(1)+" s";
     if(kind==="done"){st("done");var body=got.replace(/\n?\s*(NEXT|CHECKS):[\s\S]*$/,"").trim();out.textContent=body;
       if(chk&&chk.length){var row=D.createElement("div");row.className="pick";chk.forEach(function(c){if(!c||!c.filters)return;var a=D.createElement("a");var p=new URLSearchParams();Object.keys(c.filters).forEach(function(k){var v=String(c.filters[k]);if(k==="tail")v=v.replace(/^N/i,"");p.set(k,v)});a.href=ROOT+"?"+p.toString();a.textContent=c.label||Object.values(c.filters).join(" ");row.appendChild(a)});out.appendChild(row)}
-      prov.textContent="read by GLM-5.3-Flash, this report, all fields, "+secs+(d&&d.tokens?", "+num(d.tokens)+" tokens":"")+". Its words, not the FAA’s."}
+      prov.textContent="read by GLM-5.3-Flash, "+what+", "+secs+(d&&d.tokens?", "+num(d.tokens)+" tokens":"")+". Its words, not the FAA’s."}
     else if(kind==="abstain"){st("abstain");prov.textContent="GLM-5.3-Flash would not answer."}
     else if(kind==="cancelled"){st("cancelled");prov.textContent="stopped by you at "+secs+". Partial."}
     else{st("error");out.textContent="The call to GLM-5.3-Flash failed"+(d&&d.message?" ("+d.message+")":"")+". Nothing has changed on this page."}}
@@ -163,7 +165,15 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
     if(rows.length)h+='<table class="sheet">'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td><b>'+r[1]+'</b></td></tr>'}).join("")+'</table>';
     if(!h)return;
     h+='<p class="note" style="margin-top:8px">Owner and photo show this aircraft as it is today, not necessarily as it was on '+esc(date)+'.</p>';
+    /* hand-written, 31 August 2026: the FAA's whole registry file, shown only on request */
+    var full=rg.full||[];
+    if(full.length){h+='<button type="button" class="deeper">Research deeper<b>the FAA registry file for N'+esc(tail)+', every field it holds</b></button>'
+      +'<div class="deepbox" hidden><table class="sheet">'+full.map(function(r){var v=/^\d{8}$/.test(r.v)?ymd(r.v):r.v;return '<tr><td>'+esc(r.f)+'</td><td><b>'+esc(v)+'</b></td></tr>'}).join("")
+      +'</table><p class="note" style="margin-top:8px">The FAA’s releasable registry file for this tail, every field the FAA publishes that is not empty. Codes are spelled out with the FAA’s own key (ardata); anything without a key is shown as filed.</p></div>'}
     $("#plane").innerHTML=h;$("#planebox").hidden=false;
+    var db=$("#plane").querySelector(".deeper");
+    if(db)db.onclick=function(){db.hidden=true;var bx=$("#plane").querySelector(".deepbox");bx.hidden=false;
+      bx.appendChild(mc("Make this file readable","what this registry file says, and does not say, in plain words",function(){return "/z/api/stream/registry?reg=N"+encodeURIComponent(tail)},"the FAA registry file for N"+tail))};
   }).catch(function(){});
   if(!tail){$("#plane").innerHTML='<p class="note">This report names no tail number: it was filed on a part, not on an identified aircraft. There is no aircraft to look up.</p>';$("#planebox").hidden=false}
   if(tail)fetch("/api/aircraft/N"+encodeURIComponent(tail)).then(function(r){return r.json()}).then(function(a){if(a&&a.count!=null)$("#more").insertAdjacentHTML("afterbegin",'<span style="font:400 13px/2.2 var(--sans);color:var(--ash);margin-right:6px">This airframe appears in '+num(a.count)+' report'+(a.count===1?"":"s")+'.</span>')}).catch(function(){});

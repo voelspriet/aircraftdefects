@@ -1878,6 +1878,67 @@ _AC_UA = {"User-Agent": "aircraftdefects.com/1.0 (+https://aircraftdefects.com; 
 _REG_DB = os.path.join(HERE, "faa_registry.sqlite")
 
 
+# The code keys below are the FAA's own, from ardata.pdf inside the releasable
+# zip. A code that is not in these keys is shown as filed, never guessed.
+_REG_TYPE = {"1": "Individual", "2": "Partnership", "3": "Corporation", "4": "Co-owned",
+             "5": "Government", "7": "LLC", "8": "Non-citizen corporation", "9": "Non-citizen co-owned"}
+_ACFT_TYPE = {"1": "Glider", "2": "Balloon", "3": "Blimp or dirigible", "4": "Fixed wing, single engine",
+              "5": "Fixed wing, multi engine", "6": "Rotorcraft", "7": "Weight-shift-control",
+              "8": "Powered parachute", "9": "Gyroplane", "H": "Hybrid lift", "O": "Other"}
+_ENG_TYPE = {"0": "None", "1": "Reciprocating", "2": "Turbo-prop", "3": "Turbo-shaft", "4": "Turbo-jet",
+             "5": "Turbo-fan", "6": "Ramjet", "7": "2-cycle", "8": "4-cycle", "9": "Unknown",
+             "10": "Electric", "11": "Rotary"}
+_AIRWORTH = {"1": "Standard", "2": "Limited", "3": "Restricted", "4": "Experimental", "5": "Provisional",
+             "6": "Multiple", "7": "Primary", "8": "Special flight permit", "9": "Light sport"}
+_WEIGHT = {"CLASS 1": "Class 1, up to 12,499 lb", "CLASS 2": "Class 2, 12,500 to 19,999 lb",
+           "CLASS 3": "Class 3, 20,000 lb and over", "CLASS 4": "Class 4, UAV"}
+
+
+def _reg_full(doc):
+    """The FAA's whole row as labeled rows, in reading order. Values are the
+    FAA's; only codes with a key in ardata.pdf are spelled out."""
+    ref = doc.get("_ref") or {}
+    eng = doc.get("_eng") or {}
+    g = doc.get
+    def cod(table, v):
+        return (table.get(str(v)) + " (" + str(v) + ")") if v and str(v) in table else (str(v) + " (code, as filed)" if v else None)
+    def numz(v, unit=""):
+        """The FAA pads with zeros: 03 engines, 047600 thrust. All-zero means not given."""
+        if not v or not str(v).isdigit() or int(v) == 0:
+            return None
+        return "{:,}".format(int(v)) + unit
+    cert = g("CERTIFICATION") or ""
+    rows = [
+        ("Serial number", g("SERIAL NUMBER") or g("SERIAL-NUMBER")),
+        ("Registrant type", cod(_REG_TYPE, g("TYPE REGISTRANT"))),
+        ("Street", ", ".join(x for x in (g("STREET") or g("STREET-MAIL"), g("STREET2") or g("STREET2-MAIL")) if x)),
+        ("City, state, zip", ", ".join(x for x in (g("CITY") or g("CITY-MAIL"), g("STATE") or g("STATE-ABBREV-MAIL"), g("ZIP CODE") or g("ZIP-CODE-MAIL")) if x)),
+        ("Country", g("COUNTRY") or g("COUNTRY-MAIL")),
+        ("Other names on the registration", ", ".join(x for x in (g("OTHER NAMES(%d)" % i) for i in range(1, 6)) if x) or None),
+        ("Fractional ownership", "Yes" if g("FRACT OWNER") == "Y" else None),
+        ("Airworthiness class", (_AIRWORTH.get(cert[:1], cert[:1]) + (" (certification code " + cert + ")" if len(cert) > 1 else "")) if cert else None),
+        ("Airworthiness date", g("AIR WORTH DATE") or g("AIR-WORTH-DATE")),
+        ("Certificate issued", g("CERT ISSUE DATE") or g("CERT-ISSUE-DATE")),
+        ("Registration expires", g("EXPIRATION DATE")),
+        ("Last action at the FAA", g("LAST ACTION DATE") or g("LAST-ACT-DATE")),
+        ("Registration status", ("Valid registration (V)" if g("STATUS CODE") == "V" else cod({}, g("STATUS CODE") or g("STATUS-CODE")))),
+        ("Mode S", ((g("MODE S CODE HEX") or g("MODE-S-CODE-HEX") or "").strip() or None)),
+        ("Aircraft type", cod(_ACFT_TYPE, ref.get("TYPE-ACFT"))),
+        ("Engines", numz(ref.get("NO-ENG"))),
+        ("Seats", numz(ref.get("NO-SEATS"))),
+        ("Weight class", _WEIGHT.get(ref.get("AC-WEIGHT"), ref.get("AC-WEIGHT"))),
+        ("Cruising speed", numz(ref.get("SPEED"), " mph")),
+        ("Engine", " ".join(x for x in (eng.get("MFR"), eng.get("MODEL")) if x) or None),
+        ("Engine type", cod(_ENG_TYPE, eng.get("TYPE"))),
+        ("Horsepower", numz(eng.get("HORSEPOWER"))),
+        ("Thrust", numz(eng.get("THRUST"), " lb")),
+        ("Kit", " ".join(x for x in (g("KIT MFR"), g("KIT MODEL")) if x) or None),
+        ("Exported to", g("EXP-COUNTRY")),
+        ("Registration cancelled", g("CANCEL-DATE")),
+    ]
+    return [{"f": f, "v": v} for f, v in rows if v]
+
+
 def _registry_of(n):
     """The FAA registry row for an N-number (stored without the leading N)."""
     if not os.path.exists(_REG_DB):
@@ -1886,16 +1947,26 @@ def _registry_of(n):
     con.row_factory = sqlite3.Row
     try:
         r = con.execute("SELECT * FROM reg WHERE n=?", (n,)).fetchone()
-        d = con.execute("SELECT owner, cancel_date FROM dereg WHERE n=? "
+        d = con.execute("SELECT owner, cancel_date, doc FROM dereg WHERE n=? "
                         "ORDER BY cancel_date DESC LIMIT 1", (n,)).fetchone()
     finally:
         con.close()
     if r:
-        return {"owner": r["owner"], "city": r["city"], "state": r["state"],
-                "year": r["year"], "mfr": r["mfr"], "model": r["model"],
-                "cert_issue": r["cert_issue"]}
+        out = {"owner": r["owner"], "city": r["city"], "state": r["state"],
+               "year": r["year"], "mfr": r["mfr"], "model": r["model"],
+               "cert_issue": r["cert_issue"]}
+        try:
+            out["full"] = _reg_full(json.loads(r["doc"]))
+        except Exception:
+            pass
+        return out
     if d:
-        return {"deregistered": {"owner": d["owner"], "date": d["cancel_date"]}}
+        out = {"deregistered": {"owner": d["owner"], "date": d["cancel_date"]}}
+        try:
+            out["full"] = _reg_full(json.loads(d["doc"]))
+        except Exception:
+            pass
+        return out
     return None
 
 
@@ -1951,3 +2022,40 @@ def plane(reg):
     if not (out["registry"] or out["aircraft"] or out["photo"]):
         return jsonify(error="nothing found for " + full), 404
     return jsonify(out)
+
+
+# ---- hand-written, 31 August 2026: the registry file, explained -------------
+# One button under Research deeper. The model gets the FAA's own rows for this
+# tail, decoded, plus adsbdb's operator, and says in plain words what the file
+# does and does not tell you: who holds the paper against who flies it, what a
+# trustee is, what airworthiness class means. Nothing else goes in.
+@app.get("/z/api/stream/registry")
+def stream_registry():
+    n = re.sub(r"[^A-Z0-9]", "", (request.args.get("reg") or "").upper())
+    if n.startswith("N"):
+        n = n[1:]
+    r = _registry_of(n) if n else None
+    if not r:
+        return jsonify(error="no registry file"), 404
+    ac = (_AC.get(n) or {}).get("aircraft") or {}
+    facts = {"registration": "N" + n}
+    for k in ("owner", "city", "state", "year", "mfr", "model"):
+        if r.get(k):
+            facts[k] = r[k]
+    if r.get("deregistered"):
+        facts["deregistered"] = r["deregistered"]
+    if ac.get("operator"):
+        facts["operator per adsbdb"] = ac["operator"]
+    lines = "\n".join("%s: %s" % (x["f"], x["v"]) for x in r.get("full") or [])
+    prompt = ("Below is the FAA aircraft registry file for one aircraft, field by field, with the FAA's "
+              "codes already spelled out. Explain to a general reader, in at most 140 words of plain prose, "
+              "no headings, no bullet points, no em dashes, what this file says about the aircraft. Make the distinctions a "
+              "reader would miss: the registered owner holds the paper and may be a bank or trustee rather "
+              "than whoever flies it; the airworthiness class says what the aircraft is certified to do, not "
+              "its condition; dates are registration paperwork, not the aircraft's history. Expand jargon in "
+              "everyday words. Use only the fields below; if something a reader would want is not in them, "
+              "say in one short sentence that this file does not record it. End with one sentence naming the "
+              "single most useful field for a researcher and why.\n\n"
+              + json.dumps(facts, ensure_ascii=False) + "\n\n" + lines)
+    return _stream_response({"read": 1, "of": 1, "what": "the FAA registry file for N" + n},
+                            prompt, "low", 1200)

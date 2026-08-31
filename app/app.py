@@ -2008,6 +2008,23 @@ _NTSB_DB = os.path.join(HERE, "ntsb.sqlite")
 # So this ranks by nothing. It lists, newest NTSB case first, and it says in the
 # response what the list does not mean.
 _BOTH = {"at": 0, "payload": None}
+# The in-memory cache above belongs to one gunicorn worker, and this service runs
+# two. A reader who warmed one worker had an even chance of landing on the cold
+# one and waiting the full sixteen seconds again, and every restart emptied both.
+# So the answer is also kept on disk, where both workers and every restart find it.
+_BOTH_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "both_cache.json")
+_BOTH_TTL = 6 * 3600
+
+
+def _both_disk():
+    """The cached answer if it is on disk and still fresh, else None."""
+    try:
+        if time.time() - os.path.getmtime(_BOTH_FILE) > _BOTH_TTL:
+            return None
+        with open(_BOTH_FILE) as fh:
+            return json.load(fh)
+    except Exception:
+        return None
 
 
 @app.get("/z/api/both")
@@ -2016,8 +2033,12 @@ def both_files():
     # seconds. Nobody waits sixteen seconds for a lead. Held for six hours: the
     # NTSB file changes monthly and the FAA file daily, so a stale count here is
     # never wrong by much and is never the point of the page.
-    if _BOTH["payload"] and time.time() - _BOTH["at"] < 6 * 3600:
+    if _BOTH["payload"] and time.time() - _BOTH["at"] < _BOTH_TTL:
         return jsonify(_BOTH["payload"])
+    ondisk = _both_disk()
+    if ondisk:
+        _BOTH["payload"], _BOTH["at"] = ondisk, time.time()
+        return jsonify(ondisk)
     if not os.path.exists(_NTSB_DB):
         return jsonify(rows=[], note="the NTSB file is not built on this server")
     con = sqlite3.connect(_NTSB_DB)
@@ -2067,6 +2088,15 @@ def both_files():
             "The NTSB file begins in January 2008; the FAA file begins in 1995.",
         ])
     _BOTH["payload"], _BOTH["at"] = payload, time.time()
+    # Written beside the file and moved into place, so a second worker building at
+    # the same moment never leaves half a file behind for the first one to read.
+    try:
+        tmp = _BOTH_FILE + ".%d" % os.getpid()
+        with open(tmp, "w") as fh:
+            json.dump(payload, fh)
+        os.replace(tmp, _BOTH_FILE)
+    except Exception:
+        pass
     return jsonify(payload)
 
 

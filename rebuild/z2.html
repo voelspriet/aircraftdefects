@@ -464,7 +464,7 @@ R.both=function(box){box.innerHTML=head("both")+'<div id="pb">'+wait()+'</div>';
           '<ul class="note" style="max-width:70ch;margin:6px 0 16px">'+(d.what_this_is_not||[]).map(function(x){return "<li>"+esc(x)+"</li>"}).join("")+'</ul>';
     h+='<div class="tblwrap"><table class="tbl"><tr><th>tail</th><th class="n">FAA reports</th><th>NTSB case</th><th>what the NTSB found</th></tr>';
     rows.forEach(function(r){
-      h+='<tr><td><button type="button" class="lk" data-take="tail|'+esc((r.tail||"").replace(/^N/,""))+'">'+esc(r.tail||"")+'</button>'+
+      h+='<tr><td><button type="button" data-k="tail" data-v="'+esc((r.tail||"").replace(/^N/,""))+'">'+esc(r.tail||"")+'</button>'+
          (r.aircraft?'<br><span class="note">'+esc(r.aircraft)+'</span>':'')+'</td>'+
          '<td class="n">'+num(r.faa_reports||0)+'</td>'+
          '<td>'+esc(r.case||"")+'<br><span class="note">'+esc(r.date||"")+(r.where?" · "+esc(r.where):"")+(r.fatalities?" · "+esc(r.fatalities)+" fatal":"")+'</span></td>'+
@@ -472,6 +472,13 @@ R.both=function(box){box.innerHTML=head("both")+'<div id="pb">'+wait()+'</div>';
     });
     pb.innerHTML=h+'</table></div>'+
       '<p class="note" style="margin-top:12px">The NTSB publishes its own file at <a href="https://data.ntsb.gov/avdata" target="_blank" rel="noopener">data.ntsb.gov/avdata</a>. Click a tail to read its maintenance record here.</p>';
+    /* hand-written, 31 August 2026: not wireBars. That helper hands off to go(),
+       which re-appends location.hash, so the reader would keep this view stacked
+       under the record it just asked for. The promise under the table is that a
+       tail opens its maintenance record, so drop the hash and set the filter. */
+    pb.querySelectorAll("button[data-k=tail]").forEach(function(b){
+      b.onclick=function(){var p=q();p.set("tail",b.dataset.v);
+        location.href=location.pathname+"?"+p.toString()}});
   }).catch(function(e){pb.innerHTML=fail(e)})};
 R.lag=function(box){box.innerHTML=head("lag")+'<div id="pb">'+wait()+'</div>';var pb=box.querySelector("#pb");var qs=selQS();
   api("/api/lag"+(qs?"?"+qs:"")).then(function(d){if(!d.total){pb.innerHTML='<p class="cannot">No report in this selection carries both dates, so no gap can be measured.</p>';return}

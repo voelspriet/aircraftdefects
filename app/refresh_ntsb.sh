@@ -21,6 +21,8 @@ if /usr/bin/python3 /opt/sdrz/build_ntsb.py >> "$LOG" 2>&1; then
     n=$(/usr/bin/curl -s --max-time 60 https://aircraftdefects.com/z/api/plane/N803NW \
         | /usr/bin/python3 -c 'import sys,json; print(len(json.load(sys.stdin).get("ntsb") or []))' 2>/dev/null)
     echo "restarted; N803NW returns ${n:-?} NTSB cases" >> "$LOG"
+    /usr/bin/curl -s -o /dev/null --max-time 120 https://aircraftdefects.com/z/api/both
+    echo "both-files cache rebuilt" >> "$LOG"
 else
     echo "FAILED, kept the previous database" >> "$LOG"
 fi

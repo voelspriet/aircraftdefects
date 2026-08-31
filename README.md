@@ -9,9 +9,42 @@
 > furious at the same time, because the landing gear is suddenly `ZONE 700`, and
 > an emergency landing is just a letter `A`. This is impossible for humans to
 > understand, let alone families of victims. So I decided to make it completely
-> transparent.
+> transparent. I used for that GLM-5.3-Flash. A user can now click on any part of
+> the plane to see what is wrong. Which is amazing, but I thought: how do I show
+> the full story? So the file counts, but the model proposes. Every figure on
+> screen is arithmetic over the records.
 >
 > — [the 83-second introduction](https://www.youtube.com/watch?v=vDMEKsNj7ss)
+
+## The model is inside the page
+
+Not a counter with a chatbot bolted on. **Fifteen endpoints in this service call
+GLM-5.3-Flash to read the FAA's raw write-ups at the moment you click**, on
+whatever slice of the file you have in front of you. Count them yourself: every
+route in `app/app.py` whose body reaches the model. Ten of them stream, so the
+reading appears a sentence at a time. The panels that do it carry a
+`model reads` badge, so you always know which words are the file's and which are
+the model's.
+
+| | what the model does, live |
+|---|---|
+| **the front page** | the newest report where the crew had to act, already read: the whole record decoded, told in about a hundred words, ending with what the report does not say. Pre-read the moment it arrived, on screen in under a second |
+| **any report** | five questions on its own page: what actually happened, was anyone in danger, what did the mechanics do, does it say why, and what to check next, which comes back as searches you can click |
+| **what recurs here** | reads up to 300 write-ups on your selection and names what keeps coming back that no coded field was built to hold |
+| **code vs words** | finds reports where the box a filer ticked disagrees with the sentence they wrote underneath it. Two passes must agree before it is shown |
+| **where the words say it happened** | many reports describe a location in prose and carry no zone code. The model places them, and keeps a location only when it can quote the words back verbatim |
+| **any word in a write-up** | what mechanics mean by it, drawn from the write-ups that carry it |
+| **one aircraft, end to end** | its life oldest first, one turning point at a time, each pinned to its record |
+| **compare** | the newest 150 write-ups from each of two airlines: shared, only here, only there |
+| **the Freefall page** | the file's own reports on the door-plug fleet, and beneath them, labelled the web and not the file, what the NTSB found |
+
+![Seventeen leads, and the panels the model reads live](screenshots/leads.png)
+*Seventeen ways into the file. The two marked `model reads` are the model's own*
+
+Every quote it makes is checked against the record it cites before you see it,
+by a substring test rather than by another model, and the page prints the score.
+That check is in [Prove it](#prove-it) below, and it is the reason any of this
+is usable rather than dangerous.
 
 ## The file
 
@@ -69,7 +102,7 @@ to the start".
 *The page: four rails, the aircraft shaded by where the trouble sits, and the leads beneath*
 
 
-## Beyond the numbers: the model reads the file
+## Why the reading matters more than the counting
 
 A counter can tell you how much. It cannot tell you what happened. The story
 of every report sits in a single free-text field, the mechanic's own write-up,
@@ -116,9 +149,6 @@ slices worth opening; the server looks each one up first and prints the real
 count, and a suggestion that matches zero reports is dropped. The model
 proposes. The file counts. That division of labour runs through everything
 here.
-
-![Seventeen leads, each one a way into the file](screenshots/leads.png)
-*Seventeen leads, each one a way into the file*
 
 
 ![Reports where the box the mechanic ticked disagrees with the paragraph underneath it](screenshots/conflicts.png)

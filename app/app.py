@@ -1848,3 +1848,106 @@ def stream_case():
         if op and iso: fb.append({"label": "same airline, same day", "filters": {"operator": op, "from": iso, "to": iso}})
         if part and part.upper() != "UNKNOWN": fb.append({"label": "this part, every airline", "filters": {"part": part}})
     return _stream_response({"read": 1, "of": 1, "what": "this report, all fields"}, prompt, "low", 1500, recs={rid: text}, meta_of={}, fallback_checks=fb)
+
+
+# ---- hand-written, 31 August 2026: the aircraft itself ----------------------
+# The case sheet shows the aircraft behind the tail number. Three sources, each
+# named on the page: the FAA's own releasable registry (built into
+# faa_registry.sqlite by build_registry.py, refreshed from the daily zip),
+# adsbdb.com for the airframe and its operator, and one photo from
+# Planespotters.net, credited and linked as their API terms ask. The external
+# calls are cached on disk for a week; a source that fails is simply absent,
+# and nothing is guessed in its place.
+import sqlite3
+
+_AC_PATH = os.path.join(HERE, "aircraft_cache.json")
+try:
+    _AC = json.load(open(_AC_PATH))
+except Exception:
+    _AC = {}
+
+
+def _ac_save():
+    try:
+        json.dump(_AC, open(_AC_PATH + ".tmp", "w")); os.replace(_AC_PATH + ".tmp", _AC_PATH)
+    except Exception:
+        pass
+
+
+_AC_UA = {"User-Agent": "aircraftdefects.com/1.0 (+https://aircraftdefects.com; admin@imagewhisperer.org)"}
+_REG_DB = os.path.join(HERE, "faa_registry.sqlite")
+
+
+def _registry_of(n):
+    """The FAA registry row for an N-number (stored without the leading N)."""
+    if not os.path.exists(_REG_DB):
+        return None
+    con = sqlite3.connect(_REG_DB)
+    con.row_factory = sqlite3.Row
+    try:
+        r = con.execute("SELECT * FROM reg WHERE n=?", (n,)).fetchone()
+        d = con.execute("SELECT owner, cancel_date FROM dereg WHERE n=? "
+                        "ORDER BY cancel_date DESC LIMIT 1", (n,)).fetchone()
+    finally:
+        con.close()
+    if r:
+        return {"owner": r["owner"], "city": r["city"], "state": r["state"],
+                "year": r["year"], "mfr": r["mfr"], "model": r["model"],
+                "cert_issue": r["cert_issue"]}
+    if d:
+        return {"deregistered": {"owner": d["owner"], "date": d["cancel_date"]}}
+    return None
+
+
+def _adsbdb_of(full):
+    r = requests.get("https://api.adsbdb.com/v0/aircraft/" + full, headers=_AC_UA, timeout=8)
+    a = ((r.json().get("response") or {}).get("aircraft") or {}) if r.status_code == 200 else {}
+    if not a:
+        return None
+    return {"type": a.get("type"), "manufacturer": a.get("manufacturer"),
+            "operator": a.get("registered_owner"), "mode_s": a.get("mode_s")}
+
+
+def _photo_of(full):
+    r = requests.get("https://api.planespotters.net/pub/photos/reg/" + full, headers=_AC_UA, timeout=8)
+    ph = (r.json().get("photos") or []) if r.status_code == 200 else []
+    if not ph:
+        return None
+    p = ph[0]
+    src = ((p.get("thumbnail_large") or p.get("thumbnail") or {}).get("src"))
+    if not src:
+        return None
+    return {"src": src, "link": p.get("link"), "photographer": p.get("photographer"),
+            "source": "Planespotters.net"}
+
+
+@app.get("/z/api/plane/<reg>")
+def plane(reg):
+    n = re.sub(r"[^A-Z0-9]", "", (reg or "").upper())
+    if n.startswith("N"):
+        n = n[1:]
+    if not n or len(n) > 5:
+        return jsonify(error="no such registration"), 404
+    full = "N" + n
+    out = {"reg": full, "registry": _registry_of(n)}
+    hit = _AC.get(n)
+    if hit and time.time() - hit["at"] < 7 * 24 * 3600:
+        out["aircraft"], out["photo"] = hit["aircraft"], hit["photo"]
+    else:
+        ac = photo = None
+        try:
+            ac = _adsbdb_of(full)
+        except Exception:
+            pass
+        try:
+            photo = _photo_of(full)
+        except Exception:
+            pass
+        # A miss with both sources down should not be remembered for a week.
+        if ac is not None or photo is not None:
+            _AC[n] = {"at": time.time(), "aircraft": ac, "photo": photo}
+            _ac_save()
+        out["aircraft"], out["photo"] = ac, photo
+    if not (out["registry"] or out["aircraft"] or out["photo"]):
+        return jsonify(error="nothing found for " + full), 404
+    return jsonify(out)

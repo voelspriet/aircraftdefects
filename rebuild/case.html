@@ -43,6 +43,9 @@ table.sheet b{font-weight:600}.code{font:400 12px var(--mono);color:var(--ash);m
 .model{padding:14px 18px;border-left:2px solid var(--model);background:var(--model-bg)}.model .lab{font:600 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--model);margin:0 0 8px}
 .model p.out{font:400 17px/1.55 var(--serif);margin:0;white-space:pre-wrap}.model .prov{font:400 11.5px/1.5 var(--mono);color:var(--ash);margin:8px 0 0}
 .mc[data-state="abstain"] .out{color:#6d8f8c}.mc[data-state="error"] .model{border-left-color:var(--void);background:var(--void-bg)}
+.plane img{width:100%;display:block;border:1px solid var(--line);background:#fff}
+.plane .credit{font:400 11px/1.5 var(--mono);color:var(--ash);margin:4px 0 10px}.plane .credit a{color:var(--ash)}
+.plane table.sheet td:first-child{width:150px}
 .foot{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);font:400 12px/1.6 var(--mono);color:var(--ash)}
 @media(max-width:900px){.wrap{padding:22px 18px 70px}.grid{grid-template-columns:1fr;gap:28px}h1{font-size:32px}table.sheet td:first-child{width:130px}}
 </style>
@@ -65,6 +68,10 @@ table.sheet b{font-weight:600}.code{font:400 12px var(--mono);color:var(--ash);m
       <table class="sheet" id="sheet"></table>
     </div>
     <div>
+      <div id="planebox" hidden>
+        <p class="eyebrow">The aircraft, today</p>
+        <div class="plane" id="plane"></div>
+      </div>
       <p class="eyebrow">Before you publish this</p>
       <div class="warn" id="warn"></div>
       <p class="eyebrow">Check it against the source</p>
@@ -135,6 +142,26 @@ fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OP
   var more=[];if(tail)more.push([ROOT+"?tail="+encodeURIComponent(tail),"every report on N"+tail]);if(op)more.push([ROOT+"?operator="+encodeURIComponent(op),"every report by "+(opn||op)]);if(raw.PartName&&raw.PartName!=="UNKNOWN")more.push([ROOT+"?part="+encodeURIComponent(raw.PartName),"this part, every airline"]);
   var iso=(raw.DifficultyDate||"").match(/(\d\d)\/(\d\d)\/(\d{4})/);if(iso)more.push([ROOT+"?from="+iso[3]+"-"+iso[1]+"-"+iso[2]+"&to="+iso[3]+"-"+iso[1]+"-"+iso[2],"everything filed that day"]);
   $("#more").innerHTML=more.map(function(x){return '<a href="'+esc(x[0])+'">'+esc(x[1])+'</a>'}).join("");
+  /* hand-written, 31 August 2026: the aircraft behind the tail number. Sources named on the page:
+     the FAA's releasable registry (local copy), adsbdb.com, and one credited Planespotters photo. */
+  function ymd(s){var m=String(s||"").match(/^(\d{4})(\d\d)(\d\d)$/);if(!m)return s||"";return new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})}
+  if(tail)fetch("/z/api/plane/N"+encodeURIComponent(tail)).then(function(r){return r.ok?r.json():null}).then(function(a){
+    if(!a||a.error)return;var h="",ac=a.aircraft||{},rg=a.registry||{};
+    if(a.photo&&a.photo.src){h+='<a href="'+esc(a.photo.link||"#")+'" target="_blank" rel="noopener"><img src="'+esc(a.photo.src)+'" alt="N'+esc(tail)+'"></a>';
+      h+='<p class="credit">Photo © '+esc(a.photo.photographer||"unknown")+' · <a href="'+esc(a.photo.link||"#")+'" target="_blank" rel="noopener">Planespotters.net</a></p>'}
+    var rows=[];
+    if(ac.manufacturer||ac.type)rows.push(["Airframe",esc(((ac.manufacturer||"")+" "+(ac.type||"")).trim())+" <span class='code'>adsbdb</span>"]);
+    if(ac.operator)rows.push(["Operated by",esc(ac.operator)+" <span class='code'>adsbdb</span>"]);
+    if(rg.owner)rows.push(["Registered owner",esc(rg.owner)+(rg.city?", "+esc(rg.city)+(rg.state?" ("+esc(rg.state)+")":""):"")+" <span class='code'>FAA registry</span>"]);
+    if(rg.year)rows.push(["Built",esc(rg.year)]);
+    if(rg.cert_issue)rows.push(["Registered since",esc(ymd(rg.cert_issue))]);
+    if(rg.deregistered)rows.push(["Deregistered",(rg.deregistered.date?esc(ymd(rg.deregistered.date))+", ":"")+"last owner "+esc(rg.deregistered.owner||"not recorded")+" <span class='code'>FAA registry</span>"]);
+    if(ac.mode_s)rows.push(["Mode S",esc(ac.mode_s)]);
+    if(rows.length)h+='<table class="sheet">'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td><b>'+r[1]+'</b></td></tr>'}).join("")+'</table>';
+    if(!h)return;
+    h+='<p class="note" style="margin-top:8px">Owner and photo show this aircraft as it is today, not necessarily as it was on '+esc(date)+'.</p>';
+    $("#plane").innerHTML=h;$("#planebox").hidden=false;
+  }).catch(function(){});
   if(tail)fetch("/api/aircraft/N"+encodeURIComponent(tail)).then(function(r){return r.json()}).then(function(a){if(a&&a.count!=null)$("#more").insertAdjacentHTML("afterbegin",'<span style="font:400 13px/2.2 var(--sans);color:var(--ash);margin-right:6px">This airframe appears in '+num(a.count)+' report'+(a.count===1?"":"s")+'.</span>')}).catch(function(){});
   var slim={};Object.keys(raw).forEach(function(k){if(k!=="Discrepancy"&&raw[k]!=null&&raw[k]!=="")slim[k]=raw[k]});var recq="rec="+encodeURIComponent(JSON.stringify(slim))+"&text="+encodeURIComponent((raw.Discrepancy||"").slice(0,4000));
   [["explain","What actually happened?","the whole report, explained for a first-time reader"],["danger","Was anyone in danger?","only what the report states, and what it does not"],["repair","What did the mechanics do?","step by step, and what was left unsaid"],["why","Does it say why?","quoted if it does; said plainly if it does not"],["checks","What should we check next?","same aircraft, part, airline or day: each one a click"]].forEach(function(x){$("#mc").appendChild(mc(x[1],x[2],function(){return "/z/api/stream/case?q="+x[0]+"&"+recq}))});

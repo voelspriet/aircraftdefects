@@ -18,7 +18,7 @@ def still(png,d,out,fade=0.0,zoom=False):
     vf=VF+(',fade=t=in:st=0:d=%.2f'%fade if fade else '')
     run(['-loop','1','-t','%.3f'%d,'-i',png,'-vf',vf,'-an']+ENC[:8]+[out]); return out
 g=0.25
-L={k:D[k] for k in ['p1','p2','p3','p4','p5','p6','p7']}
+L={k:D[k] for k in ['p1','p2','p3','p4b','p5','p5b','p6','p7']}
 S={k:L[k]+g for k in L}
 plan=[]  # (name, maker) in order; section lengths enforced
 def sec(voice, pieces):
@@ -28,8 +28,9 @@ A=os.path.join(CL,'A.mp4');B=os.path.join(CL,'B.mp4');C=os.path.join(CL,'C.mp4')
 s=S['p1']; sec('p1',[(('clip',B,0.0),2.3),(('clip',B,2.15),2.1),(('clip',C,0.0),2.2),(('clip',A,0.0),s-6.6)])
 s=S['p2']; sec('p2',[(('cap',os.path.join(C4,'faa2.mp4'),1.0),3.0),(('cap',os.path.join(C4,'faa2.mp4'),9.5),4.5),(('cap',os.path.join(C4,'faa2.mp4'),25.0),3.4),(('still',os.path.join(K,'a.png'),0.2),s-10.9)])
 s=S['p3']; sec('p3',[(('cap',os.path.join(K,'counter.webm'),0.5),5.0),(('cap',os.path.join(K,'photo_push.mp4'),0.0),3.4),(('still',os.path.join(ST,'front.png'),0.0),s-8.4)])
-s=S['p4']; t=s/3; sec('p4',[(('cap',os.path.join(OUT,'z_k_upper_fuselage.mp4'),0.6),t),(('cap',os.path.join(OUT,'z_k_doors.mp4'),0.6),t),(('cap',os.path.join(OUT,'z_k_wing.mp4'),0.6),s-2*t)])
+s=S['p4b']; t=s/3; sec('p4b',[(('cap',os.path.join(OUT,'z_k_upper_fuselage.mp4'),0.6),t),(('cap',os.path.join(OUT,'z_k_doors.mp4'),0.6),t),(('cap',os.path.join(OUT,'z_k_wing.mp4'),0.6),s-2*t)])
 s=S['p5']; sec('p5',[(('cap',os.path.join(SL,'s_c1a.mp4'),0.0),7.0),(('cap',os.path.join(SL,'s_c2a.mp4'),0.0),s-7.0)])
+s=S['p5b']; sec('p5b',[(('still',os.path.join(ST,'leads_grid.png'),0.2),s)])
 s=S['p6']; sec('p6',[(('cap',os.path.join(SL,'s_c3b.mp4'),0.0),s)])
 s=S['p7']; sec('p7',[(('still',os.path.join(ST,'freefall_rows.png'),0.0),3.4),(('still',os.path.join(K,'end.png'),0.3),s-3.4)])
 vids=[];i=0
@@ -52,7 +53,7 @@ for j,(voice,pieces) in enumerate(plan):
     t+=S[voice]
 fc+='[0]'+lab+'amix=inputs=%d:duration=first:normalize=0[a]'%(len(plan)+2)
 run(ins+['-filter_complex',fc,'-map','[a]',os.path.join(OUT,'tz_a.wav')])
-run(['-i',seg('tz_v'),'-i',os.path.join(OUT,'tz_a.wav'),'-map','0:v','-map','1:a','-c:v','copy']+ENC[6:]+[seg('tz_raw')])
+run(['-i',seg('tz_v'),'-loop','1','-t','7.0','-i',os.path.join(K,'title.png'),'-i',os.path.join(OUT,'tz_a.wav'),'-filter_complex','[1:v]format=rgba,fade=t=in:st=0.4:d=0.5:alpha=1,fade=t=out:st=6.0:d=0.6:alpha=1[o];[0:v][o]overlay=0:0:enable=lte(t\,6.8)[v]','-map','[v]','-map','2:a']+ENC+[seg('tz_raw')])
 final=os.path.join(HERE,'aircraftdefects-60.mp4')
 run(['-i',seg('tz_raw'),'-af','loudnorm=I=-17:TP=-1.5:LRA=9','-c:v','copy']+ENC[6:]+[final])
 print('teaser v2',probe(final),'s,',len(vids),'scenes')

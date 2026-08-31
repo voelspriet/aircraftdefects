@@ -51,6 +51,15 @@ Source and method: https://github.com/voelspriet/aircraftdefects
 - https://aircraftdefects.com/z/rebuilt : the earlier interface, written whole by
   GLM-5.3-Flash from written specifications, kept for comparison
 
+## Where the data comes from
+
+The FAA publishes one CSV per year at
+https://external.apic4e.faa.gov/sdrs/retrieve/SDR-<year>.csv, 1995 to the present.
+There is no API; the files are downloaded whole and rebuilt here. The FAA's own
+search over the same data is at https://sdrs.faa.gov and its code tables are at
+https://sdrs.faa.gov/References.aspx. The aircraft registry is a separate daily
+file at https://registry.faa.gov/database/ReleasableAircraft.zip.
+
 ## Citing
 
 Cite the FAA record number, which every page carries, and the FAA's own system at

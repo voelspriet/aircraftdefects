@@ -71,10 +71,16 @@ find leads, not to rank airlines.
 
 ## The build
 
-The scraper, the database, the search layer and the interpretation were written
-with GLM-5.3-Flash over two days, from written specifications rather than from
-code handed to it, and so was the first complete interface, which still runs at
-aircraftdefects.com/z/rebuilt so the two can be compared.
+Over two days, GLM-5.3-Flash wrote a complete interface to this file on its own,
+from written specifications rather than from code handed to it. It still runs at
+aircraftdefects.com/z/rebuilt, so it can be used rather than described. It also
+designed the nine research features itself, wrote them, and now does every live
+reading on the page. That is 74.3% of the code this repository serves, counted by
+a script rather than claimed.
+
+The corpus behind it is one CSV per year from
+https://external.apic4e.faa.gov/sdrs/retrieve/, 1995 to now, downloaded whole
+because the FAA publishes no API.
 
 **Total model spend: $1.07.**
 

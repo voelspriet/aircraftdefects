@@ -32,11 +32,12 @@ It is free and needs no login. Counts reflect reports filed, not incidents, and
 the site calculates no safety rates: the point is to find leads, not to rank
 airlines.
 
-**The build is the second half of the story.** The scraper, the database, the
-search layer and the interpretation were written with GLM-5.3-Flash over two
-days, and so was the first complete interface, which still runs at
-[/z/rebuilt](https://aircraftdefects.com/z/rebuilt). Total model spend, from the
-z.ai console: **$1.07**.
+**The build is the second half of the story.** Over two days GLM-5.3-Flash wrote
+a complete interface to this file on its own, from written specifications rather
+than from code handed to it. It still runs at
+[/z/rebuilt](https://aircraftdefects.com/z/rebuilt). It also designed the nine
+research features itself and now does every live reading on the page. Total model
+spend, from the z.ai console: **$1.07**.
 
 That number matters more than it looks. Public-interest tools usually die at the
 funding stage, not the idea stage. At a dollar a project the arithmetic changes:
@@ -89,6 +90,7 @@ Administration, and it is published here:
 | its query form, the one a family is sent to | https://sdrs.faa.gov/Query.aspx |
 | the code tables this site decodes from | https://sdrs.faa.gov/References.aspx |
 | what the FAA says the file is | https://sdrs.faa.gov/FAQ.aspx |
+| the bulk files this corpus is built from, one CSV a year | https://external.apic4e.faa.gov/sdrs/retrieve/SDR-2025.csv |
 
 Nothing here replaces that. Every record on this site carries its FAA control
 number so you can look it up at the source and check it.

@@ -65,6 +65,7 @@ def run(url, is_parent=False):
         pg.on("pageerror", lambda e: errs.append(str(e)[:160]))
         pg.on("console", lambda m: errs.append("console: " + m.text[:140])
               if m.type == "error" else None)
+        site = url.split("/z/")[0].rstrip("/")
         pg.goto(url, wait_until="networkidle", timeout=90000)
         pg.wait_for_timeout(3000)
 
@@ -78,14 +79,23 @@ def run(url, is_parent=False):
               "" if not ell else "; ".join(f"{e['t']!r} {e['c']}px box / {e['s']}px text" for e in ell[:3]))
 
         # ---- 43: no text overlaps a button ---------------------------------
+        # getBoundingClientRect() on an inline element that wraps returns the
+        # union of its line boxes. A link running over three lines therefore
+        # reports a rectangle spanning the whole column, and every neighbour on
+        # those lines reads as an overlap. That is what failed here on 31 August:
+        # "hover flight over attitude and heading reference", two links in one
+        # paragraph that do not touch. getClientRects() returns one box per line,
+        # which is what a reader actually sees.
         ov = pg.evaluate("""()=>{const t=[...document.querySelectorAll('body *')]
             .filter(e=>e.children.length===0&&(e.innerText||'').trim());
+          const boxes=t.map(e=>[...e.getClientRects()].filter(r=>r.width>0&&r.height>0));
           const out=[];
           for(let i=0;i<t.length;i++)for(let j=i+1;j<t.length;j++){
-            const a=t[i].getBoundingClientRect(),b=t[j].getBoundingClientRect();
-            if(!a.width||!b.width)continue;
-            if(a.left<b.right-2&&b.left<a.right-2&&a.top<b.bottom-2&&b.top<a.bottom-2)
-              out.push(((t[i].innerText||'').trim().slice(0,24))+' over '+((t[j].innerText||'').trim().slice(0,24)));}
+            let hit=false;
+            for(const a of boxes[i]){for(const b of boxes[j]){
+              if(a.left<b.right-2&&b.left<a.right-2&&a.top<b.bottom-2&&b.top<a.bottom-2){hit=true;break}}
+              if(hit)break}
+            if(hit)out.push(((t[i].innerText||'').trim().slice(0,24))+' over '+((t[j].innerText||'').trim().slice(0,24)));}
           return out.slice(0,4);}""")
         c.add("no text overlaps another element", not ov, "; ".join(ov))
 
@@ -138,92 +148,60 @@ def run(url, is_parent=False):
         c.add("hovering shifts no layout", shifted == 0,
               f"{shifted} of {len(targets)} controls shift the page, worst {worst:.1f}px")
 
-        # ---- 42: the case sheet ---------------------------------------------
-        link = pg.locator("text=Click to open the full report").first
-        if link.count() == 0:
-            c.add("case sheet reachable", False, "no 'open the full report' link found")
+        # ---- 42: the report a record opens ----------------------------------
+        # This block used to click "Click to open the full report" and then test
+        # inert, aria-hidden, focus, wheel and Escape on an in-page #case-box.
+        # The sheet became a page of its own at /case/<control number>, so from
+        # then on every one of those checks was testing markup the site no longer
+        # has: eight sub-checks that could only fail, on a site that worked. The
+        # promise is unchanged and is tested where it now lives. A record in a
+        # selection opens its own report, the report names the record it came
+        # from, and it offers the way back.
+        sheet_faults = []
+        pg.goto(f"{site}/z/?tail=617FE", wait_until="networkidle", timeout=60000)
+        pg.wait_for_timeout(5000)
+        rec = pg.locator("tr.rec[data-case]").first
+        if rec.count() == 0:
+            sheet_faults.append("a tail selection lists no records to open")
         else:
-            link.click()
-            pg.wait_for_timeout(3000)
-            inert = pg.evaluate("""()=>[...document.querySelectorAll('[inert]')]
-                .map(e=>e.tagName+(e.id?'#'+e.id:''))""")
-            sheet_inert = pg.evaluate("""()=>{const b=document.getElementById('case-box');
-                if(!b)return 'no #case-box';let e=b;
-                while(e){if(e.inert)return e.tagName+(e.id?'#'+e.id:'');e=e.parentElement}
-                return null;}""")
-            c.add("the sheet itself is not inert", sheet_inert is None,
-                  f"inert ancestor: {sheet_inert}" if sheet_inert else f"[inert]={len(inert)} elements, none containing the sheet")
-            c.add("the page behind IS inert", any("MAIN" in i for i in inert),
-                  "MAIN.wrap must be inert while the sheet is open")
-
-            # inert was only half of what the page sets. setSiblings also writes
-            # aria-hidden="true", and a repair that clears one and not the other
-            # leaves a sheet that is fully operable by mouse and invisible to
-            # every screen reader, with role="dialog" aria-modal="true" inside it.
-            # Every visual check on this page would pass. This one would not.
-            aria = pg.evaluate("""()=>{const w=document.getElementById('case-wrap'),
-                  b=document.getElementById('case-box'),m=document.querySelector('main');
-                return {wrap:w&&w.getAttribute('aria-hidden'), box:b&&b.getAttribute('aria-hidden'),
-                        main:m&&m.getAttribute('aria-hidden')};}""")
-            c.add("the sheet is not aria-hidden",
-                  aria.get("wrap") is None and aria.get("box") is None,
-                  f"case-wrap aria-hidden={aria.get('wrap')}, case-box aria-hidden={aria.get('box')}")
-            c.add("the page behind IS aria-hidden", aria.get("main") == "true",
-                  f"main aria-hidden={aria.get('main')}")
-
-            hit = pg.evaluate("""()=>{const b=[...document.querySelectorAll('#case-box button')]
-                  .find(x=>/close/i.test(x.innerText));
-                if(!b)return 'no Close button';
-                const r=b.getBoundingClientRect();
-                const h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
-                return h===b?null:(h?h.tagName:'null');}""")
-            c.add("Close is the topmost element at its own centre", hit is None,
-                  f"elementFromPoint returns {hit}" if hit else "")
-
-            focus_in = pg.evaluate("""()=>{const b=document.getElementById('case-box');
-                return !!(b&&b.contains(document.activeElement));}""")
-            c.add("opening moves focus into the sheet", focus_in)
-
-            wrap = pg.evaluate("""()=>{const w=document.getElementById('case-wrap');
-                return w?{sh:w.scrollHeight,ch:w.clientHeight,st:w.scrollTop}:null}""")
-            if wrap and wrap["sh"] > wrap["ch"] + 2:
-                y0 = pg.evaluate("window.scrollY")
-                pg.mouse.move(720, 450)
-                pg.mouse.wheel(0, 500)
-                pg.wait_for_timeout(900)
-                st = pg.evaluate("()=>document.getElementById('case-wrap').scrollTop")
-                y1 = pg.evaluate("window.scrollY")
-                c.add("the wheel scrolls the sheet, not the page", st > 0 and y1 == y0,
-                      f"case-wrap.scrollTop {st}, window.scrollY {y0}->{y1}")
-            else:
-                c.add("the wheel scrolls the sheet, not the page", True, "sheet fits, nothing to scroll")
-
-            pg.keyboard.press("Escape")
-            pg.wait_for_timeout(1200)
-            closed = pg.evaluate("""()=>{const b=document.getElementById('case-box');
-                return !b||getComputedStyle(b).display==='none'||!b.classList.contains('open');}""")
-            c.add("Escape closes the sheet", closed)
-            if not closed:
-                pg.evaluate("""()=>{const b=[...document.querySelectorAll('#case-box button')]
-                    .find(x=>/close/i.test(x.innerText));if(b)b.click()}""")
-                pg.wait_for_timeout(1000)
-            left = pg.evaluate("()=>document.querySelectorAll('[inert]').length")
-            c.add("closing clears every inert flag", left == 0, f"{left} still inert")
+            cid = rec.get_attribute("data-case")
+            rec.click()
+            pg.wait_for_timeout(5000)
+            if "/case/" not in pg.url:
+                sheet_faults.append("clicking a record opened nothing")
+            body = pg.evaluate("()=>document.body.innerText||''")
+            if cid and cid not in body:
+                sheet_faults.append(f"the report does not name {cid}")
+            if not pg.evaluate("""()=>[...document.querySelectorAll('a')]
+                  .some(a=>/back to your selection/i.test(a.innerText||''))"""):
+                sheet_faults.append("no way back to the selection")
+        c.add("a record opens its own report", not sheet_faults,
+              "; ".join(sheet_faults) if sheet_faults
+              else "a record on N617FE opened, named itself and offered the way back")
 
         # ---- 43: focus ring, duplicate ids, backgrounds ---------------------
         pg.goto(url, wait_until="networkidle", timeout=60000)
         pg.wait_for_timeout(2500)
-        ring = pg.evaluate("""()=>{const m=document.querySelector('.mo');if(!m)return 'no .mo';
-            m.classList.add('__probe');const s=getComputedStyle(m);m.classList.remove('__probe');
-            return null;}""")
-        outline = pg.evaluate("""()=>{const s=[...document.styleSheets];let found=null;
-            for(const sh of s){let rs;try{rs=sh.cssRules}catch(e){continue}
-              for(const r of rs||[]){if(r.selectorText&&/\\.mo:focus-visible/.test(r.selectorText))
-                found=r.style.outline||r.style.outlineWidth||found;}}
-            return found;}""")
-        c.add(".mo:focus-visible keeps a ring",
-              bool(outline) and outline not in ("none", "0", "0px"),
-              f"outline: {outline!r}")
+        # This read .mo:focus-visible out of the stylesheet. There is no .mo on
+        # the page any more, so the rule was absent and the check failed while
+        # every control on the page was in fact keeping its ring. Tab through the
+        # first controls and measure what the browser actually paints: an outline
+        # of style auto, or any outline with width, or a focus shadow.
+        no_ring = []
+        for _ in range(10):
+            pg.keyboard.press("Tab")
+            st = pg.evaluate("""()=>{const a=document.activeElement;
+                if(!a||a===document.body)return null;const s=getComputedStyle(a);
+                return {who:(a.innerText||a.getAttribute('aria-label')||a.tagName).trim().slice(0,20),
+                        style:s.outlineStyle, width:parseFloat(s.outlineWidth)||0, shadow:s.boxShadow};}""")
+            if not st:
+                continue
+            visible = (st["style"] == "auto" or (st["style"] != "none" and st["width"] >= 1)
+                       or (st["shadow"] and st["shadow"] != "none"))
+            if not visible:
+                no_ring.append(st["who"])
+        c.add("focused controls keep a visible ring", not no_ring,
+              "no ring on: " + ", ".join(no_ring[:3]) if no_ring else "10 controls tabbed")
 
         dupes = pg.evaluate("""()=>{const seen={},d=[];
             document.querySelectorAll('[id]').forEach(e=>{seen[e.id]=(seen[e.id]||0)+1});
@@ -260,9 +238,16 @@ def run(url, is_parent=False):
         # Measured on a freshly loaded page. Run after the hover sweep this
         # reported 19, then 3, then 0 on a page that changed once: the sweep
         # leaves state behind and the check was reading it.
-        pg.goto(url, wait_until="networkidle", timeout=60000)
-        pg.wait_for_timeout(2500)
-        tiny = pg.evaluate("""()=>[...document.querySelectorAll('a[href],button,[role=tab]')]
+        # Run on three pages, not one. Landing-page-only was how "×", "clear all,
+        # back to the start" and "Show 25 more" stayed 14 to 20px unnoticed: they
+        # exist only once a selection does. The back link on a view was worse, at
+        # 16px with no styling at all, because its rule read ".view .back" and the
+        # link is appended beside div.view, not inside it.
+        tiny = []
+        for _page in ("/z/", "/z/?tail=617FE", "/z/#view=both"):
+            pg.goto(f"{site}{_page}", wait_until="networkidle", timeout=60000)
+            pg.wait_for_timeout(3500)
+            tiny += pg.evaluate("""()=>[...document.querySelectorAll('a[href],button,[role=tab]')]
             .filter(e=>{
               const p=e.parentElement; if(!p)return true;
               const inSentence = /^(P|LI|SPAN|SMALL|EM|STRONG|LABEL)$/.test(p.tagName)
@@ -313,11 +298,10 @@ def run(url, is_parent=False):
         import json as _json, datetime as _dt, urllib.request as _rq
         import ssl as _ssl, certifi as _certifi
         _ctx = _ssl.create_default_context(cafile=_certifi.where())
-        base = url.split("/z/")[0]
         backwards, wrong, checked = [], [], 0
         for tail in ("N617FE", "N373UP", "N842FD", "N947FD", "N360FE"):
             try:
-                with _rq.urlopen(f"{base}/z/api/airframe/{tail}", timeout=30, context=_ctx) as r:
+                with _rq.urlopen(f"{site}/z/api/airframe/{tail}", timeout=30, context=_ctx) as r:
                     d = _json.load(r)
             except Exception:
                 continue
@@ -343,36 +327,29 @@ def run(url, is_parent=False):
               "; ".join(wrong[:2]) if wrong
               else (f"{checked} airframes checked" if checked else "EXAMINED NOTHING"))
 
-        # Negative AND blank. The 44-dates fix turned 16 negative durations into
-        # 11 correct ones and 5 that print no number at all: "· hours between
-        # first and last" with nothing in front of it. A check that only hunts
-        # the minus sign passes that, and a missing number is still broken output.
-        # Repeat rows only exist on an airframe page. Run against the landing
-        # page this examined nothing and passed - the third vacuous pass in this
-        # file today, after the date checks and the tap targets. Any check that
-        # inspected zero things must fail, not pass.
-        durneg, durblank, durtotal = [], [], 0
-        for _tail in ("617FE", "373UP", "947FD"):
+        # "· hours between first and last" was on the airframe page when this
+        # check was written and is not printed anywhere now, so from then on the
+        # check examined nothing and failed itself by its own rule, which was the
+        # right behaviour: a check with no subject must not pass quietly. The
+        # fault it guarded, a number that does not print, is guarded here instead
+        # across the pages that publish numbers. NaN, undefined, null and a bare
+        # ellipsis where a figure belongs are all the same bug to a reader.
+        blank_numbers = []
+        for _page in ("/z/", "/z/?tail=617FE", "/z/?operator=SWAA", "/z/#view=both"):
             try:
-                pg.goto(f"{base}/z/?tail={_tail}", wait_until="networkidle", timeout=60000)
-                pg.wait_for_timeout(3000)
+                pg.goto(f"{site}{_page}", wait_until="networkidle", timeout=60000)
+                pg.wait_for_timeout(4000)
             except Exception:
-                continue
-            d = pg.evaluate("""()=>{const t=document.body.innerText||'';
-                const neg=(t.match(/-\\d[\\d,]*\\s*hours between first and last/g)||[]);
-                const all=[...t.matchAll(/·\\s*([^·\\n]*?)hours between first and last/g)];
-                // Dangling, not merely numberless: "· an unknown number of hours"
-                // reads fine and has no digit; "· hours between first and last"
-                // with nothing before it reads as a bug whatever the intent.
-                const blank=all.filter(m=>!/\\S/.test(m[1])).map(m=>m[0].trim().slice(0,60));
-                return {neg, blank, total:all.length};}""")
-            durneg += d["neg"]; durblank += d["blank"]; durtotal += d["total"]
-        c.add("no duration is negative or left dangling",
-              durtotal > 0 and not durneg and not durblank,
-              "EXAMINED NOTHING" if durtotal == 0
-              else (f"{len(durneg)} negative, {len(durblank)} dangling of {durtotal} rows"
-                    + ("; e.g. " + durblank[0] if durblank else "")
-                    if (durneg or durblank) else f"{durtotal} rows over 3 airframes"))
+                blank_numbers.append(f"{_page}: would not load"); continue
+            bad = pg.evaluate("""()=>{const t=document.body.innerText||'';
+                const out=[];
+                (t.match(/[^\\n]{0,30}\\b(NaN|undefined|null)\\b[^\\n]{0,20}/g)||[]).forEach(m=>out.push(m.trim()));
+                (t.match(/(…|\\.\\.\\.)\\s*(reports|aircraft|records)\\b/g)||[]).forEach(m=>out.push(m.trim()));
+                return [...new Set(out)].slice(0,3);}""")
+            blank_numbers += [f"{_page}: {b}" for b in bad]
+        c.add("no number prints as NaN, undefined or an ellipsis",
+              not blank_numbers, "; ".join(blank_numbers[:3]) if blank_numbers
+              else "4 pages read")
 
         # --- filtered pages -------------------------------------------------
         # Everything above this ran on the landing page, where the group label is
@@ -381,33 +358,36 @@ def run(url, is_parent=False):
         # total, inside a sentence promising it ignores the selection. With a zone
         # filter the number was a literal ellipsis. A harness that only ever loads
         # one URL cannot see either.
-        CORPUS = "1,757,827"
-        label_faults = []
-        # Only URLs the app itself produces. "?take=zone|ZONE 700" is a
-        # data-take ATTRIBUTE value, not a query parameter: loading it returns
-        # 400 from two endpoints and renders "No search was run". Testing an
-        # invented URL invents a bug - it cost a false report on 30 August.
-        # A click on the Landing gear legend row produces "?zone=ZONE+700".
-        for _q, _name in (("?operator=SWAA", "operator"), ("?zone=ZONE+700", "zone")):
+        # The page carried a label reading "EACH ANSWERS FROM ALL n REPORTS", and
+        # under a filter it printed the filtered total inside a sentence promising
+        # it ignored the filter. That label and its .vglab class are gone. The
+        # sentence that replaced it makes the same promise in a form that can be
+        # checked by arithmetic: "n reports, where on the aircraft they were
+        # found. m set aside." Those two numbers must always sum to the whole
+        # file, whatever is selected. If a filtered total ever leaks into the
+        # second half, the sum stops matching and this says so.
+        CORPUS_N = 1757827
+        import re as _re
+        sum_faults = []
+        for _q, _name in (("?operator=SWAA", "airline"), ("?zone=ZONE+700", "zone"),
+                          ("?tail=617FE", "tail")):
             try:
-                pg.goto(f"{base}/z/{_q}", wait_until="networkidle", timeout=60000)
-                pg.wait_for_timeout(4000)
+                pg.goto(f"{site}/z/{_q}", wait_until="networkidle", timeout=60000)
+                pg.wait_for_timeout(4500)
             except Exception:
-                label_faults.append(f"{_name}: page would not load"); continue
-            lab = pg.evaluate("""()=>{const l=[...document.querySelectorAll('.vglab')]
-                .find(e=>/IGNORE YOUR SELECTION/i.test(e.innerText||''));
-              return l?(l.innerText||'').trim():null;}""")
-            if not lab:
-                label_faults.append(f"{_name}: label not found"); continue
-            if "…" in lab or "..." in lab:
-                label_faults.append(f"{_name}: number missing, reads '… REPORTS'")
-            elif CORPUS not in lab:
-                import re as _re
-                got = _re.search(r"FROM ALL ([\d,]+) REPORTS", lab)
-                label_faults.append(
-                    f"{_name}: says {got.group(1) if got else '?'} where the sentence promises {CORPUS}")
-        c.add("the ignores-your-selection label keeps the whole-corpus number",
-              not label_faults, "; ".join(label_faults) if label_faults else "operator and zone filters checked")
+                sum_faults.append(f"{_name}: page would not load"); continue
+            h1 = pg.evaluate("()=>{const h=document.querySelector('h1');return h?(h.innerText||''):''}")
+            sel_m = _re.search(r"([\d,]+) reports", h1)
+            set_m = _re.search(r"([\d,]+) set aside", h1)
+            if not (sel_m and set_m):
+                sum_faults.append(f"{_name}: the standing sentence is missing a number")
+                continue
+            a = int(sel_m.group(1).replace(",", "")); b = int(set_m.group(1).replace(",", ""))
+            if a + b != CORPUS_N:
+                sum_faults.append(f"{_name}: {a:,} + {b:,} = {a + b:,}, not {CORPUS_N:,}")
+        c.add("the standing sentence still adds up to the whole file",
+              not sum_faults, "; ".join(sum_faults) if sum_faults
+              else "airline, zone and tail selections add up")
 
         # --- the state a CLICK produces ---------------------------------------
         # Every check above loads a URL and inspects the result. None of them
@@ -417,29 +397,42 @@ def run(url, is_parent=False):
         # working features read as dead. Loading the same URL fresh is clean, so
         # only a click can find it.
         click_faults = []
-        for _zone in ("Upper fuselage", "Landing gear", "Lavatories and galleys"):
+        # The legend rows this clicked, class .lrow, named zones in words. The
+        # page groups by ATA system now and the rows are bars carrying data-k=ata,
+        # so the old selector matched nothing and reported three missing rows on a
+        # page where all three work. Same test, current markup: click a bar and a
+        # reader must end up with a smaller selection that says so, never an empty
+        # state sitting over results that did load.
+        pg.goto(f"{site}/z/", wait_until="networkidle", timeout=60000)
+        pg.wait_for_timeout(3500)
+        bars = pg.evaluate("""()=>[...document.querySelectorAll('[data-k=ata][data-v]')]
+            .slice(0,3).map(e=>[e.dataset.v,(e.innerText||'').replace(/\\s+/g,' ').trim().slice(0,24)])""")
+        if len(bars) < 3:
+            click_faults.append(f"only {len(bars)} system bars on the page")
+        for _v, _label in bars:
             try:
-                pg.goto(f"{base}/z/", wait_until="networkidle", timeout=60000)
+                pg.goto(f"{site}/z/", wait_until="networkidle", timeout=60000)
                 pg.wait_for_timeout(3000)
-                row = pg.locator(f".lrow:has-text('{_zone}')").first
-                if row.count() == 0:
-                    click_faults.append(f"{_zone}: legend row missing"); continue
-                row.scroll_into_view_if_needed(timeout=5000)
-                row.click(timeout=6000)
-                pg.wait_for_timeout(3500)
-            except Exception as e:
-                click_faults.append(f"{_zone}: click failed"); continue
-            st = pg.evaluate("""()=>{const t=document.body.innerText||'';
-                const nr=document.querySelector('.norows');
-                const m=t.match(/([\\d,]+) reports match your selection/);
-                return {emptyShown: !!(nr && getComputedStyle(nr).display!=='none'),
-                        results: m?m[1]:null};}""")
-            if st["emptyShown"] and st["results"]:
-                click_faults.append(f"{_zone}: says 'No rows yet' while showing {st['results']} results")
-            elif not st["results"]:
-                click_faults.append(f"{_zone}: click produced no result count")
-        c.add("clicking a zone does not show a false empty state",
-              not click_faults, "; ".join(click_faults[:3]) if click_faults else "3 zones clicked")
+                bar = pg.locator(f"[data-k=ata][data-v='{_v}']").first
+                bar.scroll_into_view_if_needed(timeout=5000)
+                bar.click(timeout=6000)
+                pg.wait_for_timeout(4000)
+            except Exception:
+                click_faults.append(f"{_label}: click failed"); continue
+            st = pg.evaluate("""()=>{const h=document.querySelector('h1');
+                const t=(h&&h.innerText)||'';const m=t.match(/([\\d,]+) reports/);
+                const empty=[...document.querySelectorAll('p,div')].find(e=>
+                  /no rows yet|nothing chosen yet/i.test(e.innerText||'')
+                  && e.getClientRects().length);
+                return {n:m?m[1]:null, rows:document.querySelectorAll('tr.rec').length,
+                        empty:empty?(empty.innerText||'').trim().slice(0,40):null};}""")
+            if not st["n"]:
+                click_faults.append(f"{_label}: click produced no count")
+            elif st["empty"] and st["rows"]:
+                click_faults.append(f"{_label}: says '{st['empty']}' while showing {st['rows']} records")
+        c.add("clicking a system does not show a false empty state",
+              not click_faults, "; ".join(click_faults[:3]) if click_faults
+              else f"{len(bars)} systems clicked")
 
         # A sticky bar must not lie across a control the reader can press.
         over = pg.evaluate("""()=>{const out=[];

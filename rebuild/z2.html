@@ -39,6 +39,11 @@ a.watch:hover,a.watch:focus-visible{background:var(--rust);color:#fff}
 a{color:inherit}
 .wrap{max-width:1180px;margin:0 auto;padding:36px 44px 40px}
 .mast{display:flex;justify-content:space-between;gap:20px;font:500 11px/1 var(--mono);letter-spacing:.12em;color:var(--ash);text-transform:uppercase}
+/* WCAG 2.5.8 asks 24px of any control that is not a link inside a running
+   sentence. These two are navigation, not prose, so the exemption does not
+   cover them. The padding buys the height without moving the text: the
+   masthead is a flex row and the crumb sits on its own line. */
+.mast a{display:inline-block;padding:7px 0}
 h1{font:400 40px/1.15 var(--serif);margin:34px 0 6px;letter-spacing:-.01em;text-wrap:balance}
 h1 b{font:500 34px var(--mono);font-weight:500}
 h1 .here{color:var(--rust)}
@@ -63,7 +68,10 @@ h1 .here{color:var(--rust)}
 .draft .mut{display:block;margin-top:6px;color:var(--ash)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
 .chips span{font:500 12px var(--sans);padding:4px 10px;border:1px solid var(--rust);color:var(--rust);border-radius:100px}
-.chips span button{border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:0 0 0 6px}.chips span.clear{border-color:var(--ink);color:var(--ink);background:var(--ink);color:var(--paper)}
+/* 24px on the chip's remove button and on the clear-all chip. Both sit on
+   their own, so WCAG's in-sentence exemption does not cover either. */
+.chips span button{border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:5px 0 5px 6px;min-height:24px}
+.chips span.clear button{min-height:24px;padding:5px 0}.chips span.clear{border-color:var(--ink);color:var(--ink);background:var(--ink);color:var(--paper)}
 .when-big{font:400 30px/1.15 var(--serif);color:var(--rust);margin:26px 0 0;letter-spacing:-.01em}
 .body{display:grid;grid-template-columns:1.15fr 1fr;gap:56px;margin-top:40px;align-items:start}
 .hero{min-width:0}
@@ -93,7 +101,7 @@ h1 .here{color:var(--rust)}
 @keyframes sw{to{background-position:-200% 0}}@media(prefers-reduced-motion:reduce){.mc__spin{animation:none;background:var(--model)}}
 .mc__stop{font:500 11px/1 var(--mono);border:1px solid var(--model);background:none;color:var(--model);padding:4px 8px;min-height:24px;border-radius:3px;cursor:pointer}
 .mc__body{display:none;margin-top:8px}.mc[data-state=streaming] .mc__body,.mc[data-state=done] .mc__body,.mc[data-state=abstain] .mc__body,.mc[data-state=error] .mc__body,.mc[data-state=cancelled] .mc__body{display:block}
-.crumb{font:400 12px/1.6 var(--mono);color:var(--ash);margin:10px 0 0}.crumb a{color:var(--ash);text-decoration:none;border-bottom:1px dotted var(--ash)}.crumb b{color:var(--ink);font-weight:500}
+.crumb{font:400 12px/1.6 var(--mono);color:var(--ash);margin:10px 0 0}.crumb a{display:inline-block;padding:4px 0;color:var(--ash);text-decoration:none;border-bottom:1px dotted var(--ash)}.crumb b{color:var(--ink);font-weight:500}
 .rails.top{grid-template-columns:repeat(5,1fr);margin-top:18px;border-top:0;border-bottom:1px solid var(--line)}.rails.top .rail{padding-top:8px;padding-bottom:12px;min-height:70px}.rails.top .n{font-size:18px}
 /* hand-written, 31 August 2026: the rails are the navigation, and should look it */
 .navhint{font:500 10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ash);margin:16px 0 -12px}
@@ -122,7 +130,10 @@ h1 .here{color:var(--rust)}
 .ladder button:hover span{color:var(--rust)}
 .leads{margin:0 auto;max-width:1180px;padding:0 44px 60px}
 .view h2{font:400 26px/1.2 var(--serif);margin:0 0 4px}.view .sub{font:400 13px/1.5 var(--sans);color:var(--ash);margin:0 0 16px;max-width:70ch}
-.view .back{display:inline-block;font:500 12px var(--mono);color:var(--rust);margin:0 0 12px;text-decoration:none;border-bottom:1px solid currentColor;min-height:24px}
+/* .back sits beside div.view inside #hero, not within it, so the old
+   '.view .back' never matched and the link rendered as a bare default
+   anchor: wrong font, wrong colour, 16px tall. */
+.back{display:inline-block;font:500 12px var(--mono);color:var(--rust);margin:0 0 12px;text-decoration:none;border-bottom:1px solid currentColor;min-height:24px}
 .bars{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 12px;font:400 13px/1.5 var(--sans);margin:0 0 18px}
 .bars button{display:contents;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
 .bars .bar{position:relative;padding:2px 0 2px 8px;min-height:24px;z-index:0}.bars .bar i{position:absolute;left:0;top:3px;bottom:3px;width:var(--w);background:var(--zone-lo);z-index:-1}
@@ -548,7 +559,7 @@ function summary(h){var box=$("#sum");var s=sel().toString();if(!s){box.innerHTM
     function rowHTML(a){return '<tr class="rec" data-case="'+esc(a.id)+'"><td>'+esc(a.date)+'</td><td>'+(a.tail?"N"+esc(a.tail):"")+'</td><td title="'+esc(a.op)+'">'+esc(opName(a.op))+'</td><td>'+esc(a.model)+'</td><td>'+esc(a.found)+'</td><td>'+esc(crewWords(a.crew))+'</td></tr>'}
     function paint(){var rows=raws.map(decorateRow);if(sort!=="date")rows.sort(function(a,b){var x=key(a),y=key(b);return x>y?1:x<y?-1:0});shown=Math.min(shown+25,rows.length);
       var hh='<div class="tblwrap"><table class="tbl"><tr><th>date</th><th>tail</th><th>airline</th><th>aircraft</th><th>what was found</th><th>crew did</th></tr>';rows.slice(0,shown).forEach(function(a){hh+=rowHTML(a)});
-      r.innerHTML=hh+'</table></div><p class="cannot" id="recsFoot">'+num(shown)+' of '+num(total)+'.'+(shown<total?' <button type="button" id="recsMore" class="mc__again" style="font:inherit">Show 25 more</button>':' That is all of them.')+'</p>';
+      r.innerHTML=hh+'</table></div><p class="cannot" id="recsFoot">'+num(shown)+' of '+num(total)+'.'+(shown<total?' <button type="button" id="recsMore" class="mc__again" style="font:inherit;min-height:24px;padding:3px 8px">Show 25 more</button>':' That is all of them.')+'</p>';
       r.querySelectorAll("tr.rec").forEach(function(tr){tr.onclick=function(){openCase(tr.dataset.case,rows.find(function(a){return a.id===tr.dataset.case}),raws.find(function(x){return x.OperatorControlNumber===tr.dataset.case}))}});
       var mb=r.querySelector("#recsMore");if(mb)mb.onclick=function(){if(shown<raws.length||done){paint()}else{mb.disabled=true;mb.textContent="Reading…";load()}}}
     function load(){return fetch("/api/search?limit=100&offset="+fetched+"&"+s).then(function(x){return x.json()}).then(function(d){var got=d.rows||[];fetched+=got.length;total=d.total||total;if(!got.length)done=true;raws=raws.concat(got);paint()}).catch(function(e){r.innerHTML=fail(e)})}

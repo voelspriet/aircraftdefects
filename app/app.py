@@ -1683,10 +1683,25 @@ def sheet(rid):
             elif isinstance(e, str):
                 row["value"] = e
             else:
-                # Not an explanation of the code. A statement about this site's
-                # tables, and it must not be dressed as meaning: the row still
-                # shows exactly what the file holds, and that stands on its own.
-                row["undecoded"] = "No entry for this code in the FAA tables used here."
+                # Only when the value is shaped like a code that table decodes.
+                # "Where on the aircraft" also takes plain words when no numbered
+                # zone fits, and FUSELAGE, CABIN and APU DUCT were being labelled
+                # as codes this site could not decode. They are not codes. The
+                # district office is filed as a bare number where the site's
+                # table lists offices by letter code, and saying so on nearly
+                # every page told a reader nothing.
+                shaped = {"part_location": lambda v: v.upper().startswith("ZONE"),
+                          "district": lambda v: len(v) > 2 and v[:2].isalpha()}
+                looks = shaped.get(table, lambda v: True)(str(v).strip())
+                if looks:
+                    # Not an explanation of the code. A statement about this
+                    # site's tables, and it must not be dressed as meaning: the
+                    # row still shows exactly what the file holds.
+                    row["undecoded"] = "No entry for this code in the FAA tables used here."
+                elif table == "part_location":
+                    row["note"] = ("The FAA's form takes a numbered zone here, or "
+                                   "a place in words when no zone fits. This is "
+                                   "what the filer wrote.")
             # The FAA's tables carry a note on a handful of codes; the model's
             # explanation fills the rest. The FAA's own wins where both exist.
             if not row["note"]:
@@ -2017,7 +2032,13 @@ def _reg_full(doc):
         ("Certificate issued", g("CERT ISSUE DATE") or g("CERT-ISSUE-DATE")),
         ("Registration expires", g("EXPIRATION DATE")),
         ("Last action at the FAA", g("LAST ACTION DATE") or g("LAST-ACT-DATE")),
-        ("Registration status", ("Valid registration (V)" if g("STATUS CODE") == "V" else cod({}, g("STATUS CODE") or g("STATUS-CODE")))),
+        # The live registry file spells it STATUS CODE and the deregistered file
+        # spells it STATUS-CODE, so a deregistered airframe printed "V (code, as
+        # filed)" where a current one printed "Valid registration (V)". Same
+        # aircraft, same letter, two different sentences depending on which file
+        # it came from. Read both spellings, and strip: the FAA pads its columns.
+        ("Registration status", (lambda v: "Valid registration (V)" if v == "V" else cod({}, v))(
+            str(g("STATUS CODE") or g("STATUS-CODE") or "").strip().upper() or None)),
         ("Mode S", ((g("MODE S CODE HEX") or g("MODE-S-CODE-HEX") or "").strip() or None)),
         ("Aircraft type", cod(_ACFT_TYPE, ref.get("TYPE-ACFT"))),
         ("Engines", numz(ref.get("NO-ENG"))),

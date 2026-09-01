@@ -59,7 +59,14 @@ def run(url, is_parent=False):
     c = Checks()
     with sync_playwright() as p:
         br = p.chromium.launch()
+        # The introduction covers the whole viewport on a first visit, which is
+        # what it is for, and every check below is about the desk behind it. So
+        # every context here arrives as a reader who has been before. The
+        # introduction itself is checked on its own further down, in a context
+        # that has not.
+        SEEN = "try{localStorage.setItem('z-seen','1')}catch(e){}"
         ctx = br.new_context(viewport={"width": 1440, "height": 900})
+        ctx.add_init_script(SEEN)
         pg = ctx.new_page()
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)[:160]))
@@ -222,6 +229,7 @@ def run(url, is_parent=False):
         # ---- widths ---------------------------------------------------------
         for w in (1440, 1024, 768, 390):
             ctx2 = br.new_context(viewport={"width": w, "height": 900})
+            ctx2.add_init_script(SEEN)
             p2 = ctx2.new_page()
             p2.goto(url, wait_until="networkidle", timeout=60000)
             p2.wait_for_timeout(2000)
@@ -464,8 +472,16 @@ def run(url, is_parent=False):
         # the load: every shift the browser records, with the elements that moved.
         # Google calls 0.1 good and 0.25 poor; this fails above 0.1 and prints the
         # three worst culprits, because a number alone does not say what to fix.
-        for _w, _limit in ((1440, 0.1), (390, 0.1)):
+        # The third and fourth runs are throttled. Everything here answers in
+        # under a second from this machine, so content lands before the first
+        # paint and nothing has time to move; on 1 September a mobile shift of
+        # 0.22 was invisible at full speed and reproduced every time at 400kbit.
+        # A reader on a train is the case this page has to survive, and it is the
+        # only case where a missing height reservation shows itself.
+        for _w, _limit, _slow in ((1440, 0.1, False), (390, 0.1, False),
+                                  (1440, 0.1, True), (390, 0.1, True)):
             ctx3 = br.new_context(viewport={"width": _w, "height": 900})
+            ctx3.add_init_script(SEEN)
             p3 = ctx3.new_page()
             p3.add_init_script("""window.__cls=0;window.__shifts=[];
                 new PerformanceObserver(l=>{for(const e of l.getEntries()){
@@ -474,14 +490,63 @@ def run(url, is_parent=False):
                     n:(e.sources||[]).map(s=>s.node?((s.node.tagName||'')+'.'+
                       ((s.node.className||'')+'').split(' ')[0]):'?').slice(0,3)})}})
                   .observe({type:'layout-shift',buffered:true});""")
-            p3.goto(url, wait_until="networkidle", timeout=90000)
-            p3.wait_for_timeout(6000)
+            if _slow:
+                cdp = ctx3.new_cdp_session(p3)
+                cdp.send("Network.enable")
+                cdp.send("Network.emulateNetworkConditions",
+                         {"offline": False, "latency": 300,
+                          "downloadThroughput": 51200, "uploadThroughput": 51200})
+            p3.goto(url, wait_until="networkidle", timeout=180000)
+            p3.wait_for_timeout(7000)
             cls = p3.evaluate("()=>window.__cls") or 0
             worst = p3.evaluate("()=>window.__shifts.sort((a,b)=>b.v-a.v).slice(0,3)")
             ctx3.close()
-            c.add("the page settles as it loads, at %dpx" % _w, cls <= _limit,
+            c.add("the page settles as it loads, at %dpx%s"
+                  % (_w, " on a slow connection" if _slow else ""), cls <= _limit,
                   "CLS %.3f%s" % (cls, ("; worst: " + ", ".join(
                       "%.3f %s" % (x["v"], "/".join(x["n"])) for x in worst)) if cls > _limit else ""))
+
+        # ---- the introduction, in a browser that has never been here ---------
+        # Shown once, over the page, and gone for good after the button. If it
+        # ever failed to close, or came back on a second visit, the site would be
+        # unusable and every other check here would still pass, because they all
+        # arrive as a returning reader.
+        intro = []
+        ictx = br.new_context(viewport={"width": 1440, "height": 900})
+        ip = ictx.new_page()
+        ip.goto(url, wait_until="networkidle", timeout=90000)
+        ip.wait_for_timeout(3000)
+        if not ip.evaluate("()=>!!document.querySelector('#intro')"):
+            intro.append("a first visit does not show it")
+        else:
+            covers = ip.evaluate("""()=>{const r=document.querySelector('#intro')
+                .getBoundingClientRect();
+                return r.width>=innerWidth-2 && r.height>=innerHeight-2}""")
+            if not covers:
+                intro.append("it does not cover the screen")
+            btn = ip.evaluate("""()=>{const b=document.getElementById('introGo');
+                if(!b)return null;const r=b.getBoundingClientRect();
+                return {h:Math.round(r.height),
+                        top:document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)===b}}""")
+            if not btn:
+                intro.append("no way to close it")
+            else:
+                if btn["h"] < 24:
+                    intro.append("its button is %dpx tall" % btn["h"])
+                if not btn["top"]:
+                    intro.append("something covers its button")
+                ip.click("#introGo")
+                ip.wait_for_timeout(1200)
+                if ip.evaluate("()=>!!document.querySelector('#intro')"):
+                    intro.append("the button does not close it")
+        ip.goto(url, wait_until="networkidle", timeout=90000)
+        ip.wait_for_timeout(2500)
+        if ip.evaluate("""()=>{const e=document.querySelector('#intro');
+                return e?!!e.getClientRects().length:false}"""):
+            intro.append("it comes back on a second visit")
+        ictx.close()
+        c.add("the introduction shows once and closes", not intro,
+              "; ".join(intro) if intro else "shown, closed, and gone on the next visit")
 
         c.add("no runtime errors", not errs, "; ".join(errs[:2]))
         br.close()

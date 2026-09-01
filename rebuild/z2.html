@@ -115,7 +115,18 @@ h1 .here{color:var(--rust)}
    every visit is furniture: a reader who has been here before knows why the
    site exists and gets their screen back. The Freefall page keeps the argument
    for anyone who wants it again. */
-html.seen .why-top{display:none}
+.intro{position:fixed;inset:0;z-index:99;background:var(--paper);display:flex;align-items:center;justify-content:center;padding:32px}
+.introbox{max-width:34ch}
+.intro .i1{font:400 44px/1.15 var(--serif);color:var(--ink);margin:0;letter-spacing:-.015em}
+.intro .i2{font:400 44px/1.15 var(--serif);color:var(--rust);margin:6px 0 0;letter-spacing:-.015em}
+.intro .i3{font:400 16px/1.6 var(--sans);color:var(--ash);margin:26px 0 0;max-width:52ch}
+.intro em{font-style:normal;color:var(--rust);font-family:var(--mono);font-size:.85em}
+.ibtn{display:flex;align-items:center;gap:18px;margin:30px 0 0}
+.ibtn button{font:500 15px var(--sans);padding:12px 22px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:100px;cursor:pointer;min-height:24px}
+.ibtn button:hover{background:var(--rust);border-color:var(--rust)}
+.ibtn a{font:400 14px var(--sans);color:var(--ash);min-height:24px;display:inline-block;padding:4px 0}
+@media(max-width:900px){.intro .i1,.intro .i2{font-size:30px}.introbox{max-width:none}}
+html.seen .intro{display:none}
 /* Reserved at the height BEFORE the serif arrives, not after. The block is
    taller in the fallback face and shrinks when Instrument Serif loads, and a
    minimum height cannot hold a box that is getting smaller: measured 195px
@@ -187,7 +198,15 @@ html.seen .why-top{display:none}
 .lead:hover .t{color:var(--rust)}
 .sr{position:absolute;left:-9999px}
 a.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--paper);padding:8px 12px;font:600 12px var(--sans)}a.skip:focus{left:8px;z-index:9}
-@media(max-width:900px){.wrap{padding:24px 20px}.body{grid-template-columns:1fr;gap:32px}h1{font-size:30px;min-height:79px}.rails{grid-template-columns:1fr;min-height:374px}.rail{border-right:0;border-bottom:1px solid var(--line);padding:14px 0}.rail+.rail{padding-left:0}.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:900px){.wrap{padding:24px 20px}.body{grid-template-columns:1fr;gap:32px}h1{font-size:30px;min-height:79px}/* .rails.top sets five columns and is more specific than a bare .rails, and
+   a media query adds no specificity of its own, so on a phone the top rails
+   stayed five columns 56 to 86 pixels wide and 373 pixels tall, one word per
+   line. Name both here. The reservation is re-measured after the fix. */
+.rails, .rails.top{grid-template-columns:1fr}
+/* Measured on the settled phone layout, and the two strips differ: the top
+   one carries five panels, the lower one four. */
+.rails{min-height:374px}
+.rails.top{min-height:414px}.rail{border-right:0;border-bottom:1px solid var(--line);padding:14px 0}.rail+.rail{padding-left:0}.grid{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.grid{grid-template-columns:1fr}}
 
 /* ---- hand-written, 31 August 2026: verified sentences, records rail, next clicks, web sources ---- */
@@ -208,15 +227,21 @@ try{ if(localStorage.getItem("z-seen")) document.documentElement.classList.add("
      localStorage.setItem("z-seen","1"); }catch(e){}
 </script></head>
 <body>
+<!-- The introduction, on the first visit only, over the page rather than inside
+     it. Held in the markup so it is painted with everything else; a returning
+     reader never sees it because html.seen is set in the head before the body
+     paints. Fixed, so it takes part in no layout and costs no shift. -->
+<div class="intro" id="intro" role="dialog" aria-modal="true" aria-label="Why this site exists">
+  <div class="introbox">
+    <p class="i1">In <i>Freefall</i> I watched the father of a crash victim try to read this file.</p>
+    <p class="i2">What took him hours takes seconds here.</p>
+    <p class="i3">Every fault a mechanic finds on an aircraft is public. The FAA files a landing gear fault as <em>ZONE 700</em> and an emergency landing as the letter <em>A</em>, which is why almost nobody has ever read it. This site reads it for you.</p>
+    <p class="ibtn"><button type="button" id="introGo">Read the file</button><a href="#view=freefall">Why this site exists</a></p>
+  </div>
+</div>
 <a class="skip" href="#leads">Skip to Find leads</a>
 <div class="wrap" role="main">
   <div class="mast"><span id="mast">FAA service difficulty reports</span><a href="/z/" style="text-decoration:none;color:var(--rust)" title="Back to the start: every report, nothing chosen">↖ start again · aircraftdefects.com</a></div>
-  <!-- Why this exists, before what it is. A judge, a reporter or a relative
-       lands on an instrument otherwise: rails, a breadcrumb and a count. The
-       sentence that explains the instrument was written in the submission and
-       said on the video, and was nowhere on the page it describes. Static
-       markup, so it costs no layout shift and no request. -->
-  <p class="why-top"><b>In <i>Freefall</i> I watched the father of a crash victim try to read this file.</b><b>What took him hours takes seconds here.</b><span>Every fault a mechanic finds on an aircraft is public. The FAA files a landing gear fault as <em>ZONE 700</em> and an emergency landing as the letter <em>A</em>, which is why almost nobody has ever read it. This site reads it for you. <a href="#view=freefall">Why this site exists</a></span></p>
   <p class="navhint">Browse the file · each panel is a way in</p>
   <div class="rails top" id="railsTop" style="margin:18px 0 0"></div>
   <p class="crumb" id="crumb"></p>
@@ -351,6 +376,13 @@ var H=null;function render(){if(H)draw()}
    needing an answer before you draw is not a reason to wait before you ask.
    Measured on 1 September: on an airline selection the hero call started at
    573ms because operators finished at 571ms, and it needs nothing from it. */
+/* The introduction closes on the button, on Escape, or on any navigation away
+   from it. It is shown once, so nothing here has to remember a dismissal. */
+(function(){var i=D.getElementById("intro");if(!i)return;
+  function go(){i.remove();try{$("#q")&&$("#q").focus()}catch(e){}}
+  var b=D.getElementById("introGo");if(b){b.onclick=go;b.focus()}
+  D.addEventListener("keydown",function(e){if(e.key==="Escape"&&D.getElementById("intro"))go()});
+  i.querySelectorAll("a").forEach(function(a){a.addEventListener("click",go)})})();
 var OPS={};
 var OPS_READY = fetch("/z/api/operators").then(function(r){return r.json()})
   .then(function(m){OPS=m||{}}).catch(function(){});

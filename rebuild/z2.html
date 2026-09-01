@@ -105,6 +105,25 @@ h1 .here{color:var(--rust)}
 .rails.top{grid-template-columns:repeat(5,1fr);margin-top:18px;border-top:0;border-bottom:1px solid var(--line)}.rails.top .rail{padding-top:8px;padding-bottom:12px;min-height:70px}.rails.top .n{font-size:18px}
 /* hand-written, 31 August 2026: the rails are the navigation, and should look it */
 .why-top{font:400 26px/1.25 var(--serif);color:var(--ink);margin:18px 0 22px;max-width:44ch;letter-spacing:-.01em}
+/* Two sentences, two lines. On one line the second half reads as a clause;
+   on its own it is the point. */
+.why-top b{display:block;font-weight:400}
+/* The two codes are the whole argument, so they are the only thing here
+   that carries colour. */
+.why-top em{font-style:normal;color:var(--rust);font-family:var(--mono);font-size:.82em;letter-spacing:.02em}
+/* First visit only. It is an introduction, and an introduction repeated on
+   every visit is furniture: a reader who has been here before knows why the
+   site exists and gets their screen back. The Freefall page keeps the argument
+   for anyone who wants it again. */
+html.seen .why-top{display:none}
+/* Reserved at the height BEFORE the serif arrives, not after. The block is
+   taller in the fallback face and shrinks when Instrument Serif loads, and a
+   minimum height cannot hold a box that is getting smaller: measured 195px
+   falling to 169px on a phone, which pulled the whole page up under the reader
+   and put mobile CLS at 0.29. Reserving the larger figure costs a little white
+   space and nothing moves. */
+.why-top{min-height:113px}
+@media(max-width:900px){.why-top{min-height:195px}}
 .why-top span{display:block;font:400 14px/1.55 var(--sans);color:var(--ash);margin-top:8px;max-width:52ch}
 .why-top a{color:var(--rust)}
 @media(max-width:900px){.why-top{font-size:21px;margin:14px 0 18px}}
@@ -178,7 +197,16 @@ a.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--
 .model .next{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.model .next button{border:1px solid var(--line);background:#fff;padding:8px 12px;text-align:left;font:400 13px/1.4 var(--sans);color:var(--ink);cursor:pointer;flex:1;min-width:200px}.model .next button b{display:block;font:500 12px/1 var(--mono);color:var(--rust);margin-bottom:4px}.model .nb{font:400 11px/1.4 var(--mono);color:var(--ash);margin-top:6px;display:block;white-space:normal}
 .model p .cite{font:400 10.5px/1 var(--mono);color:var(--model);white-space:nowrap;margin-left:3px;vertical-align:super}.model p .cite a{color:var(--model);text-decoration:none;border-bottom:1px dotted var(--model)}.model p .cite a+a{margin-left:5px}
 .model .srcs{display:block;margin-top:14px;white-space:normal}.model .srcs a{display:block;font:400 13px/1.5 var(--sans);color:var(--ink);text-decoration:none;padding:4px 0;border-top:1px solid #c6dbd8}.model .srcs a b{font:500 11.5px var(--mono);color:var(--model);margin-right:8px}.model .srcs a:hover{color:var(--model)}
-</style></head>
+</style>
+<script>
+/* Set on <html> before the body paints, so a returning reader gets the short
+   version drawn from the start rather than the long one replaced a moment
+   later, which would be a layout shift and the thing this page is measured on.
+   Wrapped: a private window or blocked storage throws on both calls, and the
+   honest default there is to treat the reader as new. */
+try{ if(localStorage.getItem("z-seen")) document.documentElement.classList.add("seen");
+     localStorage.setItem("z-seen","1"); }catch(e){}
+</script></head>
 <body>
 <a class="skip" href="#leads">Skip to Find leads</a>
 <div class="wrap" role="main">
@@ -188,7 +216,7 @@ a.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--
        sentence that explains the instrument was written in the submission and
        said on the video, and was nowhere on the page it describes. Static
        markup, so it costs no layout shift and no request. -->
-  <p class="why-top">The FAA’s own site can search the characters. It cannot read the words.<span>I saw the father of one of the victims trying to anyway, in <i>Freefall</i>. So this reads them for you. <a href="#view=freefall">Why this site exists</a></span></p>
+  <p class="why-top"><b>In <i>Freefall</i> I watched the father of a crash victim try to read this file.</b><b>What took him hours takes seconds here.</b><span>Every fault a mechanic finds on an aircraft is public. The FAA files a landing gear fault as <em>ZONE 700</em> and an emergency landing as the letter <em>A</em>, which is why almost nobody has ever read it. This site reads it for you. <a href="#view=freefall">Why this site exists</a></span></p>
   <p class="navhint">Browse the file · each panel is a way in</p>
   <div class="rails top" id="railsTop" style="margin:18px 0 0"></div>
   <p class="crumb" id="crumb"></p>

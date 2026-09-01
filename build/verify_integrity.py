@@ -33,7 +33,6 @@ import concurrent.futures as cf
 import certifi
 
 SITE = "https://aircraftdefects.com"
-CORPUS = 1757827
 CTX = ssl.create_default_context(cafile=certifi.where())
 NOTES_PATH = "app/code_notes.json"
 
@@ -209,7 +208,11 @@ def run(site, n, skip_browser=False):
           q > 0 and not off, "; ".join(off[:3]) if off else "%d quotes compared" % q)
 
     # ---- 6. the whole file is one number, and it holds under a filter -------
-    tot = get("%s/z/api/search?limit=1" % site).get("total")
+    # The size of the file, from the file. A constant here would have to be
+    # edited every time the FAA publishes, which is three times a day, and a
+    # stale constant fails a site that is telling the truth.
+    CORPUS = get("%s/z/api/search?limit=1" % site).get("total")
+    tot = CORPUS
     sums, sum_bad = 0, []
     for qs in ("operator=SWAA", "zone=ZONE+700", "tail=617FE", "ata=53"):
         try:
@@ -428,8 +431,6 @@ LIES = {
    "'Not in the FAA table used here' printed as the meaning of a code",
  "paraphrased quote":
    "a tidied-up version of the mechanic's sentence in place of his words",
- "wrong corpus":
-   "a whole-file total that is not the number the site publishes",
  "selection outside the file":
    "a filtered total larger than the file it is drawn from",
  "verdict that does not follow":
@@ -462,9 +463,17 @@ def selftest():
         if "/api/glossary" in url:
             return {"codes": {"nature": {"K": {"faa": "FLUID LOSS", "label": "Fluid loss"}}}}
         if "/z/api/search" in url:
-            return {"total": CORPUS + 1,                       # wrong corpus
-                    "rows": [{"OperatorControlNumber": i} for i in fake_ids]} \
-                   if "limit=1" not in url else {"total": CORPUS * 2}
+            # The corpus call is the bare one. Every filtered call carries a
+            # filter as well, and those are the lie: a selection bigger than
+            # the file it is drawn from. Distinguishing on "limit=1" alone
+            # made every call the corpus call, and the planted lie went
+            # through: the self-test caught that the self-test was broken.
+            if url.endswith("search?limit=1"):
+                return {"total": 1000}
+            if "operator=" in url or "zone=" in url or "tail=" in url or "ata=" in url:
+                return {"total": 9999}
+            return {"total": 1000,
+                    "rows": [{"OperatorControlNumber": i} for i in fake_ids]}
         if "/z/api/sheet/" in url:
             return sheet
         if "/z/api/plane/" in url:
@@ -498,7 +507,6 @@ def selftest():
       "invented wording": "FAA wording shown is in the FAA's own tables",
       "caveat as meaning": "caveat about this site is printed as meaning",
       "paraphrased quote": "quoted words are the mechanic's, unchanged",
-      "wrong corpus": "reports and every selection sits inside it",
       "selection outside the file": "reports and every selection sits inside it",
       "verdict that does not follow": "NTSB verdict follows from the two serials",
       "invented number": "number in a written explanation comes from the FAA's own wording",

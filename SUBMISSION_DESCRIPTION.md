@@ -10,7 +10,7 @@ I was watching *Freefall: A Reckoning for Boeing* on Netflix and saw relatives
 of victims trying to read a government website. Row after row of capital
 letters. Zone numbers. Single character codes.
 
-The database is the FAA's Service Difficulty Reporting System: 1,757,827
+The database is the FAA's Service Difficulty Reporting System: 1,758,134
 reports since 1995, on 54,634 aircraft, filed by mechanics every time
 something is found wrong with a plane, and free for anyone to read. Almost
 nobody ever has, because nine of the ten boxes on the form are codes and they

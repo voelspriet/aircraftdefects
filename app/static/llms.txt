@@ -1,7 +1,7 @@
 # aircraftdefects.com
 
-> 1,757,827 service difficulty reports filed with the US Federal Aviation
-> Administration between 1 January 1995 and 26 August 2026, on 54,634 aircraft,
+> 1,758,134 service difficulty reports filed with the US Federal Aviation
+> Administration between 1 January 1995 and 31 August 2026, on 54,634 aircraft,
 > made readable. Each report records a defect a mechanic found. The FAA publishes
 > them as coded rows; this site decodes the codes from the FAA's own lookup
 > tables and has GLM-5.3-Flash read the mechanic's free-text write-up and restate

@@ -20,7 +20,7 @@ the letter `A`. That is impossible for a person to understand, let alone a
 grieving family.
 
 Every day mechanics file service difficulty reports with the FAA: a cracked
-bracket, a failed sensor, corrosion found on inspection. There are 1,757,827 of
+bracket, a failed sensor, corrosion found on inspection. There are 1,758,134 of
 them, on 54,634 aircraft, going back to 1995. They are public, free, and need no
 records request. They are also close to unreadable: buried behind a government
 query form, written in trade shorthand, returned as raw rows with no context.
@@ -90,6 +90,11 @@ That number matters more than it looks. Public-interest tools usually die at the
 funding stage, not the idea stage. At a dollar a project the arithmetic changes: a
 researcher with a public dataset and a free weekend can ship the interface the
 agency never built.
+
+A day after it was built, the [Foundation for Aviation
+Safety](https://www.foundationforaviationsafety.org/) got in touch. That is the
+test of whether a tool like this is worth anything: not the score, but whether
+the people who work on the problem every day find it useful.
 
 By breaking the language barrier between government aviation data and the people
 who paid for it, aircraftdefects.com gives journalists, researchers and families

@@ -39,6 +39,11 @@ than from code handed to it. It still runs at
 research features itself and now does every live reading on the page. Total model
 spend, from the z.ai console: **$1.07**.
 
+A day after it was built, the [Foundation for Aviation
+Safety](https://www.foundationforaviationsafety.org/) got in touch. That is the
+test of whether a tool like this is worth anything: not the score, but whether
+the people who work on the problem every day find it useful.
+
 That number matters more than it looks. Public-interest tools usually die at the
 funding stage, not the idea stage. At a dollar a project the arithmetic changes:
 a researcher with a public dataset and a free weekend can ship the interface the
@@ -99,7 +104,7 @@ number so you can look it up at the source and check it.
 When a technician in the United States finds something wrong
 with an aircraft, a crack in a component, rust under a fitting, a failed seal,
 they file it. Those reports are public: no sign-in, no fee, no records request.
-There are **1,757,827** of them since 1995, on **54,634** aircraft.
+There are **1,758,134** of them since 1995, on **54,634** aircraft.
 
 They are also close to unreadable. Almost every answer is a code, and the codes
 collide: `A` in one column means the crew made an emergency landing, and `A`

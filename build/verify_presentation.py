@@ -366,7 +366,13 @@ def run(url, is_parent=False):
         # found. m set aside." Those two numbers must always sum to the whole
         # file, whatever is selected. If a filtered total ever leaks into the
         # second half, the sum stops matching and this says so.
-        CORPUS_N = 1757827
+        # Read the file's size from the file, never from a constant here. This was
+        # 1,757,827 in the source and the FAA refresh added 307 reports overnight,
+        # so the gate failed a page that was adding up perfectly. The invariant is
+        # that the two halves of the sentence agree with the file, not that they
+        # agree with a number a developer typed last week.
+        CORPUS_N = int(pg.evaluate("()=>fetch('api/search?limit=1')"
+                                   ".then(r=>r.json()).then(d=>d.total)"))
         import re as _re
         sum_faults = []
         for _q, _name in (("?operator=SWAA", "airline"), ("?zone=ZONE+700", "zone"),
@@ -450,6 +456,32 @@ def run(url, is_parent=False):
                            +' lies across "'+((c.innerText||c.value||'').trim().slice(0,26))+'"');});});
             return [...new Set(out)].slice(0,4);}""")
         c.add("no sticky bar lies across a control", not over, "; ".join(over))
+
+        # ---- what moves while the page loads ---------------------------------
+        # "hovering shifts no layout" passed all week while the page scored 0.504
+        # on Cumulative Layout Shift, because hovering and loading are different
+        # kinds of movement and only one of them was being measured. This watches
+        # the load: every shift the browser records, with the elements that moved.
+        # Google calls 0.1 good and 0.25 poor; this fails above 0.1 and prints the
+        # three worst culprits, because a number alone does not say what to fix.
+        for _w, _limit in ((1440, 0.1), (390, 0.1)):
+            ctx3 = br.new_context(viewport={"width": _w, "height": 900})
+            p3 = ctx3.new_page()
+            p3.add_init_script("""window.__cls=0;window.__shifts=[];
+                new PerformanceObserver(l=>{for(const e of l.getEntries()){
+                  if(e.hadRecentInput)continue; window.__cls+=e.value;
+                  window.__shifts.push({v:+e.value.toFixed(4),
+                    n:(e.sources||[]).map(s=>s.node?((s.node.tagName||'')+'.'+
+                      ((s.node.className||'')+'').split(' ')[0]):'?').slice(0,3)})}})
+                  .observe({type:'layout-shift',buffered:true});""")
+            p3.goto(url, wait_until="networkidle", timeout=90000)
+            p3.wait_for_timeout(6000)
+            cls = p3.evaluate("()=>window.__cls") or 0
+            worst = p3.evaluate("()=>window.__shifts.sort((a,b)=>b.v-a.v).slice(0,3)")
+            ctx3.close()
+            c.add("the page settles as it loads, at %dpx" % _w, cls <= _limit,
+                  "CLS %.3f%s" % (cls, ("; worst: " + ", ".join(
+                      "%.3f %s" % (x["v"], "/".join(x["n"])) for x in worst)) if cls > _limit else ""))
 
         c.add("no runtime errors", not errs, "; ".join(errs[:2]))
         br.close()

@@ -104,6 +104,10 @@ h1 .here{color:var(--rust)}
 .crumb{font:400 12px/1.6 var(--mono);color:var(--ash);margin:10px 0 0;min-height:28px}.crumb a{display:inline-block;padding:4px 0;color:var(--ash);text-decoration:none;border-bottom:1px dotted var(--ash)}.crumb b{color:var(--ink);font-weight:500}
 .rails.top{grid-template-columns:repeat(5,1fr);margin-top:18px;border-top:0;border-bottom:1px solid var(--line)}.rails.top .rail{padding-top:8px;padding-bottom:12px;min-height:70px}.rails.top .n{font-size:18px}
 /* hand-written, 31 August 2026: the rails are the navigation, and should look it */
+.why-top{font:400 26px/1.25 var(--serif);color:var(--ink);margin:18px 0 22px;max-width:44ch;letter-spacing:-.01em}
+.why-top span{display:block;font:400 14px/1.55 var(--sans);color:var(--ash);margin-top:8px;max-width:52ch}
+.why-top a{color:var(--rust)}
+@media(max-width:900px){.why-top{font-size:21px;margin:14px 0 18px}}
 .navhint{font:500 10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ash);margin:16px 0 -12px}
 .rail .q:after{content:" ›";color:var(--ash);font-weight:400}
 .rail:hover{background:#fbf8f0}.rail:hover .q{color:var(--rust)}.rail:hover .q:after{color:var(--rust)}
@@ -179,6 +183,12 @@ a.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--
 <a class="skip" href="#leads">Skip to Find leads</a>
 <div class="wrap" role="main">
   <div class="mast"><span id="mast">FAA service difficulty reports</span><a href="/z/" style="text-decoration:none;color:var(--rust)" title="Back to the start: every report, nothing chosen">↖ start again · aircraftdefects.com</a></div>
+  <!-- Why this exists, before what it is. A judge, a reporter or a relative
+       lands on an instrument otherwise: rails, a breadcrumb and a count. The
+       sentence that explains the instrument was written in the submission and
+       said on the video, and was nowhere on the page it describes. Static
+       markup, so it costs no layout shift and no request. -->
+  <p class="why-top">The FAA’s own site can search the characters. It cannot read the words.<span>I saw the father of one of the victims trying to anyway, in <i>Freefall</i>. So this reads them for you. <a href="#view=freefall">Why this site exists</a></span></p>
   <p class="navhint">Browse the file · each panel is a way in</p>
   <div class="rails top" id="railsTop" style="margin:18px 0 0"></div>
   <p class="crumb" id="crumb"></p>

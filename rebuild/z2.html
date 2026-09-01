@@ -308,7 +308,17 @@ D.addEventListener("click",function(e){var u=e.target.closest&&e.target.closest(
 
 /* ---- data ---- */
 var H=null;function render(){if(H)draw()}
-var OPS={};fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OPS=m||{}}).catch(function(){}).then(function(){return fetch("/z/api/hero?"+sel().toString())}).then(function(r){return r.json()}).then(function(h){H=h;draw()}).catch(function(){$("#hero").innerHTML='<p class="cannot">The file did not answer. Reload.</p>'});
+/* Both at once, not one after the other. The page needs the airline-name map
+   before it draws, which is why the hero call used to be chained onto it, but
+   needing an answer before you draw is not a reason to wait before you ask.
+   Measured on 1 September: on an airline selection the hero call started at
+   573ms because operators finished at 571ms, and it needs nothing from it. */
+var OPS={};
+var OPS_READY = fetch("/z/api/operators").then(function(r){return r.json()})
+  .then(function(m){OPS=m||{}}).catch(function(){});
+var HERO_READY = fetch("/z/api/hero?"+sel().toString()).then(function(r){return r.json()});
+Promise.all([OPS_READY, HERO_READY]).then(function(a){H=a[1];draw()})
+  .catch(function(){$("#hero").innerHTML='<p class="cannot">The file did not answer. Reload.</p>'});
 fetch("/z/api/specimen?"+(/view=freefall/.test(location.hash)?"tail=704AL&crew=A":sel().toString())).then(function(r){return r.json()}).then(spec).catch(function(){});
 addEventListener("hashchange",function(){if(view()==="freefall")fetch("/z/api/specimen?tail=704AL&crew=A").then(function(r){return r.json()}).then(spec).catch(function(){})});
 
@@ -360,7 +370,7 @@ function plane(h){var w=D.createElement("div");var zones={};(h.zones||[]).forEac
      which is what the loop did in effect and is right for a chooser: you want to
      see the chapters you could switch to, not only the one you are in. */
   var got=[];var lab={};SYS.forEach(function(x){lab[x[0]]=x[1]});
-  fetch("/api/breakdown?by=ata"+(selQS(["ata"])?"&"+selQS(["ata"]):"")).then(function(r){return r.json()}).then(function(d){
+  ATA_COUNTS.then(function(d){
     got=(d.rows||[]).filter(function(r){return lab[r.key]&&r.n}).map(function(r){return {key:r.key,label:lab[r.key],n:r.n}});
     if(!got.length)return;
     got.sort(function(a,b){return b.n-a.n});var mx=got[0].n;
@@ -406,8 +416,52 @@ var VIEWS={
 function view(){var m=location.hash.match(/view=([a-z]+)/);return m&&typeof VIEWS!=="undefined"&&VIEWS[m[1]]?m[1]:null}
 function setView(v){location.hash=v?"view="+v:"";render()}
 addEventListener("hashchange",render);
-function api(path){return fetch(path).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})}
+/* A view's own data was asked for only after the hero call came back, because
+   the view is rendered inside draw() and draw() waits for hero. It needs nothing
+   from it. Measured: on the story-leads page /api/leads started at 660ms, four
+   milliseconds after hero finished, and took 93ms. Asked at the same time as
+   everything else it is there before the page is ready to draw it.
+
+   Warmed here rather than inside each view, so the views themselves are
+   unchanged: api() hands back the warm answer the first time it is asked for. */
+var WARM = {};
+function api(path){
+  if (WARM[path]) { var w = WARM[path]; delete WARM[path]; return w; }
+  return fetch(path).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})}
+(function(){
+  var FIRST_CALL = {leads:"/api/leads", both:"/z/api/both", defect:"/api/same-defect",
+                    clusters:"/api/clusters?min=3", corrosion:"/api/corrosion"};
+  var v = view(), u = v && FIRST_CALL[v];
+  if (u) {
+    var pr = fetch(u).then(function(r){
+      if(!r.ok)throw new Error("HTTP "+r.status);return r.json()});
+    // The view attaches its own catch when it takes this. Until then a failure
+    // would be an unhandled rejection, which the presentation gate reads as a
+    // runtime error on a page that is merely offline. Mark it handled here
+    // without swallowing it: the stored promise still rejects for the view.
+    pr.catch(function(){});
+    WARM[u] = pr;
+  }
+})();
 function selQS(extra){var p=sel();(extra||[]).forEach(function(k){p.delete(k)});return p.toString()}
+/* Asked for the moment the script is read, not when the drawing wants it. The
+   system counts do not depend on anything the hero call returns, but they were
+   requested from inside the drawing, which the page only builds once hero has
+   answered. Measured: hero finished at 728ms and this started at 732ms, so the
+   counts were queued behind 211ms of waiting for an answer they never used. */
+var ATA_COUNTS = fetch("/api/breakdown?by=ata" + (selQS(["ata"]) ? "&" + selQS(["ata"]) : ""))
+  .then(function(r){return r.json()}).catch(function(){return {rows:[]}});
+/* The same for the first page of records. The table needs the hero call for the
+   "25 of 1,758,134" line under it, but not for the rows themselves, and it was
+   waiting for the whole thing before it started asking. Requested now, read when
+   the table is built. Later pages are fetched normally, as the reader asks. */
+/* Only when there is a selection. summary() returns early without one, so the
+   landing page never lists records, and pre-fetching them there would be a
+   request nobody reads. */
+var FIRST_RECS = sel().toString()
+  ? fetch("/api/search?limit=100&offset=0&" + sel().toString())
+      .then(function(r){return r.json()}).catch(function(){return null})
+  : null;
 function barsHTML(rows,key,head,labelOf,keyOf){var mx=Math.max.apply(null,rows.map(function(r){return r.n||r.reports||0}).concat([1]));var cur=q().get(key);
   var h=head?'<div class="h">'+esc(head)+'</div>':'';rows.forEach(function(r){var n=r.n||r.reports||0,k=keyOf?keyOf(r):(r.key||r.code);
     h+='<button type="button" data-k="'+esc(key)+'" data-v="'+esc(k)+'" class="'+(cur===String(k)?"on":"")+'"><span class="bar" style="--w:'+Math.round(n/mx*100)+'%"><i></i>'+esc(labelOf?labelOf(r):(r.label||r.key))+'</span><b>'+num(n)+'</b></button>'});return h}
@@ -472,7 +526,11 @@ R.clusters=function(box){box.innerHTML=head("clusters")+'<div id="pb">'+wait()+'
     var fellBack=false;if(!rows.length&&all.length){rows=all;fellBack=true}
     var h='<p class="sub">'+(fellBack?'None of the '+num(all.length)+' clusters falls inside your selection, so here they all are, whole file, newest first. A click on a date takes you to that day.':(f||t||op?num(rows.length)+' clusters inside your selection, out of '+num(all.length)+' in the whole file.':num(rows.length)+' clusters in the whole file.'))+'</p><div class="tblwrap"><table class="tbl"><tr><th>date</th><th>airline</th><th>system</th><th class="n">reports</th><th class="n">aircraft</th><th>example part</th></tr>';rows=rows.slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"")});rows.slice(0,40).forEach(function(r){var j=r.jasc||{};h+='<tr><td><button type="button" data-k="from" data-v="'+esc(r.date)+'">'+esc(r.date)+'</button></td><td><button type="button" data-k="operator" data-v="'+esc(r.operator)+'">'+esc(opName(r.operator))+'</button></td><td><button type="button" data-k="ata" data-v="'+esc(j.chapter)+'">'+esc(j.label||j.chapter_label||j.code)+'</button></td><td class="n">'+num(r.reports)+'</td><td class="n">'+num(r.aircraft)+'</td><td>'+esc(r.example_part||"")+(r.looks_routine?' <span style="color:var(--ash)">looks routine</span>':'')+'</td></tr>'});pb.innerHTML=h+'</table></div><p class="cannot">'+esc(d.caveat||"")+'</p>';wireBars(pb);pb.querySelectorAll('[data-k="from"]').forEach(function(b){b.onclick=function(){var p=q();p.set("from",b.dataset.v);p.set("to",b.dataset.v);go(p)}})}).catch(function(e){pb.innerHTML=fail(e)})};
 R.defect=function(box){box.innerHTML=head("defect")+'<div id="pb">'+wait()+'</div>';var pb=box.querySelector("#pb");api("/api/same-defect").then(function(d){var rows=Array.isArray(d)?d:(d.rows||[]);/* hand-written, 31 August: the upstream list arrives ordered by how many aircraft carry the part, and the table leads with reports under a heading that says most written-up. Read down the reports column and it looks unsorted. Order by what the column and the caption both promise. */rows=rows.slice().sort(function(a,b){return (+b.reports||0)-(+a.reports||0)});var h='<div class="tblwrap"><table class="tbl"><tr><th>part</th><th>condition</th><th class="n">reports</th><th class="n">aircraft</th><th class="n">airlines</th></tr>';rows.forEach(function(r){h+='<tr><td><button type="button" data-k="part" data-v="'+esc(r.part_name)+'">'+esc(r.part_name)+'</button> <span style="color:var(--ash)">'+esc(r.part_number||"")+'</span></td><td>'+esc(r.condition||"")+'</td><td class="n">'+num(r.reports)+'</td><td class="n">'+num(r.aircraft)+'</td><td class="n">'+num(r.operators)+'</td></tr>'});pb.innerHTML=h+'</table></div>';wireBars(pb)}).catch(function(e){pb.innerHTML=fail(e)})};
-R.corrosion=function(box){box.innerHTML=head("corrosion")+'<div id="pb">'+wait()+'</div>';var pb=box.querySelector("#pb");api("/api/corrosion").then(function(d){var h='<div class="grid2" style="overflow-x:auto"><div class="bars">'+barsHTML((d.levels||[]),"corrosion","By corrosion level",function(r){return "level "+r.level+(r.meaning?" · "+r.meaning:"")},function(r){return r.level})+'</div><div class="bars">'+barsHTML((d.by_model||[]).slice(0,12),"model","By type",function(r){return r.model},function(r){return r.model})+'</div></div><div class="bars">'+barsHTML((d.by_operator||[]).slice(0,12),"operator","By airline",function(r){return r.operator},function(r){return r.operator})+'</div>';pb.innerHTML=h;wireBars(pb)}).catch(function(e){pb.innerHTML=fail(e)})};
+R.corrosion=function(box){box.innerHTML=head("corrosion")+'<div id="pb">'+wait()+'</div>';var pb=box.querySelector("#pb");api("/api/corrosion").then(function(d){var h='<div class="grid2" style="overflow-x:auto"><div class="bars">'+barsHTML((d.levels||[]),"corrosion","By corrosion level",function(r){/* meaning is the FAA's glossary entry, an object with label, short,
+    faa and note. Concatenated straight into a string it printed "[object
+    Object]" on the page next to every level that has one. */
+    var m=r.meaning&&(r.meaning.short||r.meaning.label||(typeof r.meaning==="string"?r.meaning:""));
+    return "level "+r.level+(m?" · "+m:"")},function(r){return r.level})+'</div><div class="bars">'+barsHTML((d.by_model||[]).slice(0,12),"model","By type",function(r){return r.model},function(r){return r.model})+'</div></div><div class="bars">'+barsHTML((d.by_operator||[]).slice(0,12),"operator","By airline",function(r){return r.operator},function(r){return r.operator})+'</div>';pb.innerHTML=h;wireBars(pb)}).catch(function(e){pb.innerHTML=fail(e)})};
 R.age=function(box){box.innerHTML=head("age")+'<div id="pb">'+wait()+'</div>';var pb=box.querySelector("#pb");api("/api/ageing?by=hours").then(function(d){var h='<div class="tblwrap"><table class="tbl"><tr><th>airframe hours</th><th class="n">reports</th><th class="n">aircraft</th><th class="n">corrosion share</th><th>top systems</th></tr>';(d.bands||[]).forEach(function(b){h+='<tr><td><button type="button" data-k="minhours" data-v="'+esc(b.from)+'">'+num(b.from)+' to '+(b.to?num(b.to):"more")+'</button></td><td class="n">'+num(b.reports)+'</td><td class="n">'+num(b.aircraft)+'</td><td class="n">'+(b.corrosion_share!=null?b.corrosion_share+"%":"")+'</td><td>'+(b.top_systems||[]).slice(0,3).map(function(t){return esc((t.jasc||{}).chapter_label||(t.jasc||{}).label||"")}).join(", ")+'</td></tr>'});pb.innerHTML=h+'</table></div><p class="cannot">Hours are the airframe\'s own total at the moment of a report, recorded in 79% of records.</p>';wireBars(pb)}).catch(function(e){pb.innerHTML=fail(e)})};
 R.engines=function(box){box.innerHTML=head("engines")+'<div id="pb">'+wait()+'</div>';var pb=box.querySelector("#pb");api("/api/engines").then(function(d){var h='<p class="sub"><b>'+num(d.reports_naming_an_engine)+'</b> reports name an engine.</p><table class="tbl"><tr><th>type</th><th class="n">reports</th><th class="n">aircraft</th><th class="n">in-flight shutdowns</th><th class="n">flameout or stoppage</th></tr>';(d.rows||[]).slice(0,30).forEach(function(r){ZLABEL[r.model]=(r.make_name||r.make)+" "+r.model;h+='<tr><td><button type="button" data-k="enginemodel" data-v="'+esc(r.model)+'">'+esc((r.make_name||r.make)+" "+r.model)+'</button></td><td class="n">'+num(r.reports)+'</td><td class="n">'+num(r.aircraft)+'</td><td class="n">'+num(r.inflight_shutdowns)+'</td><td class="n">'+num(r.flameout_or_stoppage)+'</td></tr>'});pb.innerHTML=h+'</table></div><p class="cannot">'+esc(d.caveat||"")+'</p>';wireBars(pb)}).catch(function(e){pb.innerHTML=fail(e)})};
 R.crew=function(box){box.innerHTML=head("crew")+'<div id="pb">'+wait()+'</div>';var pb=box.querySelector("#pb");api("/api/consequences?by=operator").then(function(d){var h='<div class="tblwrap"><table class="tbl"><tr><th>airline</th><th class="n">reports</th><th class="n">with a crew action</th><th class="n">share</th><th>what they were</th></tr>';(d.rows||[]).slice(0,30).forEach(function(r){h+='<tr><td><button type="button" data-k="operator" data-v="'+esc(r.key)+'">'+esc(r.key)+'</button></td><td class="n">'+num(r.reports)+'</td><td class="n">'+num(r.with_crew_action)+'</td><td class="n">'+Math.round(r.share*100)+'%</td><td>'+(r.actions||[]).slice(0,3).map(function(a){return '<button type="button" data-k="crew" data-v="'+esc(a.code)+'">'+esc(a.label)+' '+num(a.n)+'</button>'}).join(" · ")+'</td></tr>'});pb.innerHTML=h+'</table></div><p class="cannot">'+esc(d.note||"A share is per report filed, not per flight.")+'</p>';wireBars(pb)}).catch(function(e){pb.innerHTML=fail(e)})};
@@ -575,7 +633,9 @@ function summary(h){var box=$("#sum");var s=sel().toString();if(!s){box.innerHTM
       r.innerHTML=hh+'</table></div><p class="cannot" id="recsFoot">'+num(shown)+' of '+num(total)+'.'+(shown<total?' <button type="button" id="recsMore" class="mc__again" style="font:inherit;min-height:24px;padding:3px 8px">Show 25 more</button>':' That is all of them.')+'</p>';
       r.querySelectorAll("tr.rec").forEach(function(tr){tr.onclick=function(){openCase(tr.dataset.case,rows.find(function(a){return a.id===tr.dataset.case}),raws.find(function(x){return x.OperatorControlNumber===tr.dataset.case}))}});
       var mb=r.querySelector("#recsMore");if(mb)mb.onclick=function(){if(shown<raws.length||done){paint()}else{mb.disabled=true;mb.textContent="Reading…";load()}}}
-    function load(){return fetch("/api/search?limit=100&offset="+fetched+"&"+s).then(function(x){return x.json()}).then(function(d){var got=d.rows||[];fetched+=got.length;total=d.total||total;if(!got.length)done=true;raws=raws.concat(got);paint()}).catch(function(e){r.innerHTML=fail(e)})}
+    function load(){var first=(fetched===0&&FIRST_RECS);var got0=first?FIRST_RECS:fetch("/api/search?limit=100&offset="+fetched+"&"+s).then(function(x){return x.json()});
+      if(first)FIRST_RECS=null;
+      return Promise.resolve(got0).then(function(d){if(!d)return fetch("/api/search?limit=100&offset="+fetched+"&"+s).then(function(x){return x.json()});return d}).then(function(d){var got=d.rows||[];fetched+=got.length;total=d.total||total;if(!got.length)done=true;raws=raws.concat(got);paint()}).catch(function(e){r.innerHTML=fail(e)})}
     load()}
   box.querySelectorAll("[data-s]").forEach(function(b){b.onclick=function(){box.querySelectorAll("[data-s]").forEach(function(x){x.classList.toggle("on",x===b)});recs(b.dataset.s)}});recs("date");
   var dp=box.querySelector("#dropPeriod");if(dp)dp.onclick=function(){var p=q();p.delete("from");p.delete("to");go(p)};

@@ -147,7 +147,13 @@ function mc(label,sub,url,what){var box=D.createElement("section");what=what||"t
   go.onclick=start;return box}
 function dateWords(d){var m=(d||"").match(/(\d\d)\/(\d\d)\/(\d{4})/);if(!m)return d||"";return new Date(+m[3],+m[1]-1,+m[2]).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})}
 function copy(text,btn){navigator.clipboard.writeText(text).then(function(){btn.classList.add("done");var t=btn.textContent;btn.textContent="Copied";setTimeout(function(){btn.textContent=t;btn.classList.remove("done")},1600)})}
-fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OPS=m||{}}).catch(function(){}).then(function(){return fetch("/z/api/sheet/"+encodeURIComponent(id))}).then(function(r){return r.json()}).then(function(d){
+/* The report and the airline-name map at the same time. The report was chained
+   onto the map, which it needs to print an airline in full but not to be asked
+   for: measured at 491ms, 53ms after operators returned, on a page whose whole
+   job is that one record. */
+var OPS_READY=fetch("/z/api/operators").then(function(r){return r.json()}).then(function(m){OPS=m||{}}).catch(function(){});
+var SHEET_READY=fetch("/z/api/sheet/"+encodeURIComponent(id)).then(function(r){return r.json()});
+Promise.all([OPS_READY, SHEET_READY]).then(function(a){return a[1]}).then(function(d){
   if(d.error){$("#h1").textContent="No report with control number "+id;return}
   var raw=d.raw||{},tail=(raw.RegistryNNumber||"").trim(),op=(raw.OperatorDesignator||"").trim(),opn=opName(op),model=((raw.AircraftMake||"")+" "+(raw.AircraftModel||"")).trim(),date=dateWords(raw.DifficultyDate);
   var found=((raw.PartName||"")+" "+(raw.PartCondition||"")).replace(/UNKNOWN/g,"").trim().toLowerCase();

@@ -352,8 +352,21 @@ function plane(h){var w=D.createElement("div");var zones={};(h.zones||[]).forEac
   w.querySelectorAll("[data-z]").forEach(function(el){el.style.cursor="pointer";el.onclick=function(){var p=q();if(p.get("zone")===el.dataset.z)p.delete("zone");else p.set("zone",el.dataset.z);go(p)};el.onkeydown=function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();el.onclick()}}});
   /* systems: a ranked list under the drawing, never labels on it (they collided) */
   var base=sel().toString(),curA=q().get("ata");var list=D.createElement("div");list.className="bars";list.innerHTML='<div class="h">Systems written up, placed by the FAA\'s own chapter · click to keep one</div>';w.appendChild(list);
-  var got=[];SYS.forEach(function(x){fetch("/api/search?ata="+x[0]+"&limit=1"+(base?"&"+base:"")).then(function(r){return r.json()}).then(function(d){var n=d.total||0;if(!n)return;got.push({key:x[0],label:x[1],n:n});
-    got.sort(function(a,b){return b.n-a.n});var mx=got[0].n;list.innerHTML='<div class="h">Systems written up · click to keep one</div>'+got.slice(0,14).map(function(r){return '<button type="button" data-k="ata" data-v="'+r.key+'" class="'+(curA===r.key?"on":"")+'"><span class="bar" style="--w:'+Math.round(r.n/mx*100)+'%"><i></i>'+esc(r.label)+'</span><b>'+num(r.n)+'</b></button>'}).join("");wireBars(list)}).catch(function(){})});
+  /* One call, not twenty-one. This asked the file for a count per ATA chapter
+     one chapter at a time: 21 requests of about 0.38s each, and the browser
+     allows six at a time, so the bars took 1.2s to appear on every page load.
+     /api/breakdown?by=ata answers the same question in a single DuckDB GROUP BY
+     and returns every chapter at once. The selection is passed minus its own ata,
+     which is what the loop did in effect and is right for a chooser: you want to
+     see the chapters you could switch to, not only the one you are in. */
+  var got=[];var lab={};SYS.forEach(function(x){lab[x[0]]=x[1]});
+  fetch("/api/breakdown?by=ata"+(selQS(["ata"])?"&"+selQS(["ata"]):"")).then(function(r){return r.json()}).then(function(d){
+    got=(d.rows||[]).filter(function(r){return lab[r.key]&&r.n}).map(function(r){return {key:r.key,label:lab[r.key],n:r.n}});
+    if(!got.length)return;
+    got.sort(function(a,b){return b.n-a.n});var mx=got[0].n;
+    list.innerHTML='<div class="h">Systems written up · click to keep one</div>'+got.slice(0,14).map(function(r){return '<button type="button" data-k="ata" data-v="'+r.key+'" class="'+(curA===r.key?"on":"")+'"><span class="bar" style="--w:'+Math.round(r.n/mx*100)+'%"><i></i>'+esc(r.label)+'</span><b>'+num(r.n)+'</b></button>'}).join("");
+    wireBars(list);
+  }).catch(function(){});
   var placed=(h.zones||[]).reduce(function(a,z){return a+z.n},0);
   var c=D.createElement("p");c.className="cannot";c.innerHTML="Nine FAA zones, shaded by count, and the systems written up, placed where they sit; every one is a filter. The zones place <b>"+num(placed)+"</b> reports; another <b>"+num(h.other_location||0)+"</b> name a place in words the FAA never coded, and <b>"+num(h.no_location||0)+"</b> give none: <button type=button data-f='other'>read the ones in words</button> · <button type=button data-f='none'>the ones with none</button>.";
   c.querySelectorAll("button").forEach(function(b){var sp=document.createElement("span");sp.textContent=b.textContent;b.replaceWith(sp)});w.appendChild(c);return w}

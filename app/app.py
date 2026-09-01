@@ -24,6 +24,31 @@ MODEL = "glm-5.3-flash"
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(__name__, static_folder="static")
+
+
+@app.after_request
+def _cache(resp):
+    """Let a browser keep a read for five minutes.
+
+    Measured on 1 September: the database is not the slow part. A grouped count
+    over the whole file takes 16ms on the server; the same call from a browser
+    takes about 80ms on a warm connection, so roughly four fifths of it is the
+    round trip to Falkenstein. The lever is therefore how many round trips a page
+    makes, not how fast the query is. The systems bars alone were 21 of them and
+    are now one. This is the other half: moving between views refetched the same
+    unchanged answers every time.
+
+    Five minutes is safe against the data. The FAA file is rebuilt three times a
+    day, the NTSB file monthly, so nothing here changes faster than that. Streams
+    are excluded: an SSE response is a live reading and must never be replayed
+    from a cache. So is anything that is not a plain successful GET.
+    """
+    if (request.method == "GET" and resp.status_code == 200
+            and request.path.startswith("/z/api/")
+            and "/stream/" not in request.path
+            and "text/event-stream" not in (resp.mimetype or "")):
+        resp.headers.setdefault("Cache-Control", "public, max-age=300")
+    return resp
 _G = {}
 
 

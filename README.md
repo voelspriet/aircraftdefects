@@ -292,8 +292,8 @@ inside the page: fifteen endpoints where it reads the FAA's own words live, each
 one listed in [`MODEL_USE.md`](MODEL_USE.md) with its guard and its measured
 cost. The frame around those readings, the page at the root, is hand-written.
 
-By character count of everything this repository serves, **70.7% is the model's
-and 29.3% is not**, counted by
+By character count of everything this repository serves, **70.6% is the model's
+and 29.4% is not**, counted by
 [`build/count_provenance.py`](build/count_provenance.py) rather than claimed.
 Run it with `--check` and it fails if the table has drifted.
 
@@ -304,11 +304,11 @@ guess.
 
 GLM-5.3-Flash is the subject of this project. It wrote a whole working tool on
 its own from written specifications, it does every live reading on the page now,
-and it designed the nine research features itself. That is 70.7% of the code this
+and it designed the nine research features itself. That is 70.6% of the code this
 repository serves, counted by
 [`build/count_provenance.py`](build/count_provenance.py).
 
-A coding assistant, Claude Code, was used for the other 29.3%: the frame at the
+A coding assistant, Claude Code, was used for the other 29.4%: the frame at the
 root that holds the model's readings, the build and splice scripts, the browser
 harnesses that measure the page, the deployment plumbing, and this documentation.
 It also wrote the guards around the model, the substring check that verifies every

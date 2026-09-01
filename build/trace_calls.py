@@ -25,7 +25,7 @@ Two were found this way on 1 September:
 
 Both are now requested the moment the script is read.
 """
-import sys, time, json
+import sys, time, json, urllib.parse
 
 BASE = "https://aircraftdefects.com"
 
@@ -59,7 +59,11 @@ NEEDS = {
 
 
 def kind(url):
-    path = url.split("?")[0].split(".com")[-1]
+    # urlparse, not a split on ".com". The local mode this file documents uses
+    # http://127.0.0.1:8211, which contains no ".com", so every path stayed a
+    # full absolute URL, matched no entry below, and printed as "unknown" in the
+    # one column the tool exists for.
+    path = urllib.parse.urlparse(url).path
     for k in NEEDS:
         if path.startswith(k):
             return k
@@ -98,8 +102,14 @@ def run(base):
                 k = kind(c["u"])
                 # Anything that started within 30ms of an earlier call finishing,
                 # and after it, was plausibly waiting for it.
-                waited = [o for o in calls
-                          if o is not c and 0 <= c["s"] - (o["s"] + o["d"]) < 30]
+                # Sorted by when each FINISHED, not when it started. calls is
+                # in start order, so taking the last of these picked whichever
+                # candidate began latest, which is not the one this call was
+                # waiting on: a long call starting early can finish after a
+                # short one that started later.
+                waited = sorted([o for o in calls
+                                 if o is not c and 0 <= c["s"] - (o["s"] + o["d"]) < 30],
+                                key=lambda o: o["s"] + o["d"])
                 mark = ""
                 if waited:
                     on = kind(waited[-1]["u"])

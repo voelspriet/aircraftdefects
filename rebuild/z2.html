@@ -370,7 +370,7 @@ function plane(h){var w=D.createElement("div");var zones={};(h.zones||[]).forEac
      which is what the loop did in effect and is right for a chooser: you want to
      see the chapters you could switch to, not only the one you are in. */
   var got=[];var lab={};SYS.forEach(function(x){lab[x[0]]=x[1]});
-  ATA_COUNTS.then(function(d){
+  (ATA_COUNTS || fetch("/api/breakdown?by=ata"+(selQS(["ata"])?"&"+selQS(["ata"]):"")).then(function(r){return r.json()})).then(function(d){
     got=(d.rows||[]).filter(function(r){return lab[r.key]&&r.n}).map(function(r){return {key:r.key,label:lab[r.key],n:r.n}});
     if(!got.length)return;
     got.sort(function(a,b){return b.n-a.n});var mx=got[0].n;
@@ -425,16 +425,23 @@ addEventListener("hashchange",render);
    Warmed here rather than inside each view, so the views themselves are
    unchanged: api() hands back the warm answer the first time it is asked for. */
 var WARM = {};
+function fetchJSON(path){return fetch(path).then(function(r){
+  if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})}
 function api(path){
-  if (WARM[path]) { var w = WARM[path]; delete WARM[path]; return w; }
-  return fetch(path).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()})}
+  var w = WARM[path];
+  if (w) { delete WARM[path];
+    /* A warm answer is only a head start, never a verdict. If it failed while
+       the page was still booting, the network may well have recovered by the
+       time the view asks, and the old code would have issued its own fetch at
+       this later, healthier moment. So on a failed warm answer, ask again. */
+    return w.catch(function(){return fetchJSON(path)}); }
+  return fetchJSON(path)}
 (function(){
   var FIRST_CALL = {leads:"/api/leads", both:"/z/api/both", defect:"/api/same-defect",
                     clusters:"/api/clusters?min=3", corrosion:"/api/corrosion"};
   var v = view(), u = v && FIRST_CALL[v];
   if (u) {
-    var pr = fetch(u).then(function(r){
-      if(!r.ok)throw new Error("HTTP "+r.status);return r.json()});
+    var pr = fetchJSON(u);
     // The view attaches its own catch when it takes this. Until then a failure
     // would be an unhandled rejection, which the presentation gate reads as a
     // runtime error on a page that is merely offline. Mark it handled here
@@ -449,8 +456,16 @@ function selQS(extra){var p=sel();(extra||[]).forEach(function(k){p.delete(k)});
    requested from inside the drawing, which the page only builds once hero has
    answered. Measured: hero finished at 728ms and this started at 732ms, so the
    counts were queued behind 211ms of waiting for an answer they never used. */
-var ATA_COUNTS = fetch("/api/breakdown?by=ata" + (selQS(["ata"]) ? "&" + selQS(["ata"]) : ""))
-  .then(function(r){return r.json()}).catch(function(){return {rows:[]}});
+/* Only on the page that draws them. plane() is the sole consumer and draw()
+   reaches it only with no view open and the where rail showing, so on
+   /#view=leads or /?hero=who this was a request whose answer nothing read, and
+   on a view page it competed for the browser's six connections with the calls
+   that page does need. Asking early is only worth anything if the answer is
+   used. */
+var ATA_COUNTS = (!view() && RAIL === "where")
+  ? fetch("/api/breakdown?by=ata" + (selQS(["ata"]) ? "&" + selQS(["ata"]) : ""))
+      .then(function(r){return r.json()}).catch(function(){return {rows:[]}})
+  : null;
 /* The same for the first page of records. The table needs the hero call for the
    "25 of 1,758,134" line under it, but not for the rows themselves, and it was
    waiting for the whole thing before it started asking. Requested now, read when

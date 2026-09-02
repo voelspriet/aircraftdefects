@@ -25,6 +25,15 @@ disagrees with the sentence beneath it. Ask in plain words and it maps the
 question to the file. Fifteen endpoints do this live, on the slice you have in
 front of you, and every quote is checked against the record before you see it.
 
+**Before it read a single report, GLM-5.3-Flash built the tool.** From 12,000
+words of written specifications and 52 briefs, with no code handed to it, it
+wrote a working page of 594,000 characters in two days: four rails, an aircraft
+shaded by where the trouble sits, nineteen filters, a case sheet, and nine
+research features it chose itself. That page still runs at
+[aircraftdefects.com/z/rebuilt](https://aircraftdefects.com/z/rebuilt). Its
+reasoning, four million characters of it, is committed beside the code. By
+character count, 68.9% of everything this repository serves is the model's.
+
 Nobody has swept the file for any of this, so the ledger grows when somebody
 looks: [the conflicts found so far](https://aircraftdefects.com/conflicts/).
 Building the whole thing cost $1.07 in model calls.
@@ -333,7 +342,7 @@ by where the trouble sits, nineteen filters, the record table, a case sheet, a
 phone layout and nine research features it chose itself. The specifications are
 in [`rebuild/specs/`](rebuild/specs/), 12,243 words. Every brief it was given is
 in [`rebuild/*.prompt.txt`](rebuild/), verbatim. Its own reasoning is committed
-too, 4.35 million characters of it. That page is still running, at
+too, 4.1 million characters of it. That page is still running, at
 [aircraftdefects.com/z/rebuilt](https://aircraftdefects.com/z/rebuilt), so it can
 be used rather than described.
 
@@ -343,8 +352,8 @@ inside the page: fifteen endpoints where it reads the FAA's own words live, each
 one listed in [`MODEL_USE.md`](MODEL_USE.md) with its guard and its measured
 cost. The frame around those readings, the page at the root, is hand-written.
 
-By character count of everything this repository serves, **69.7% is the model's
-and 30.3% is not**, counted by
+By character count of everything this repository serves, **68.9% is the model's
+and 31.1% is not**, counted by
 [`build/count_provenance.py`](build/count_provenance.py) rather than claimed.
 Run it with `--check` and it fails if the table has drifted.
 
@@ -355,11 +364,11 @@ guess.
 
 GLM-5.3-Flash is the subject of this project. It wrote a whole working tool on
 its own from written specifications, it does every live reading on the page now,
-and it designed the nine research features itself. That is 69.7% of the code this
+and it designed the nine research features itself. That is 68.9% of the code this
 repository serves, counted by
 [`build/count_provenance.py`](build/count_provenance.py).
 
-A coding assistant, Claude Code, was used for the other 30.3%: the frame at the
+A coding assistant, Claude Code, was used for the other 31.1%: the frame at the
 root that holds the model's readings, the build and splice scripts, the browser
 harnesses that measure the page, the deployment plumbing, and this documentation.
 It also wrote the guards around the model, the substring check that verifies every

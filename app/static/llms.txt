@@ -17,8 +17,9 @@ Source and method: https://github.com/voelspriet/aircraftdefects
 - Counts here are counts of reports filed. They are not counts of incidents, and
   they are not accidents. The file records no accidents.
 - The file records no causes. Nothing on this site says why anything happened.
-- The FAA file carries no fleet sizes and no flying hours, so no rate can be
-  computed from it. This site computes none and publishes no safety ranking of
+- The FAA file carries no fleet sizes and no fleet flying hours, so no rate can
+  be computed from it. It does carry the airframe's own hours on most records,
+  but only for aircraft that had something filed. This site computes none and publishes no safety ranking of
   airlines or aircraft types. A large airline files more reports because it flies
   more aircraft more hours, and a rigorous maintenance department files more than
   a careless one.

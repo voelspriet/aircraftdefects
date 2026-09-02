@@ -25,8 +25,8 @@ written in trade shorthand, returned as raw rows with no context.
 
 **aircraftdefects.com opens that archive.** You can search thirty years of FAA
 service difficulty reports, 1995 to last week, by airline, tail number, aircraft
-type, part, system code or keyword. A model reads each mechanic's write-up and
-says in plain language what actually happened, so a reporter, a pilot or a
+type, part, system code or keyword. The model reads each mechanic's write-up. It find contradictions.
+It says in plain language what actually happened, so a reporter, a pilot or a
 passenger can follow a maintenance trail without holding a maintenance licence.
 It is free and needs no login. Counts reflect reports filed, not incidents, and
 the site calculates no safety rates: the point is to find leads, not to rank

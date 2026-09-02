@@ -19,6 +19,13 @@ several aircraft of one airline on one day, or a box ticked that contradicts
 the write-up under it. A researcher gets 1.76 million reports readable at once,
 and can ask them questions in plain words.
 
+**The model story, in four lines.** GLM-5.3-Flash built the first version of
+this site from written specifications alone, with no code handed to it. Then it
+moved inside the page, where it reads the reports live on every click. A
+substring check on the server makes every quote it produces verifiable against
+the record. Total model spend: $1.07. The specifications, the briefs, its
+reasoning and the count of who wrote what are all in this repository.
+
 ## Try it in 30 seconds
 
 1. Open [aircraftdefects.com](https://aircraftdefects.com/). The aircraft at the top is shaded by where the trouble sits: the parts written up most are darker.

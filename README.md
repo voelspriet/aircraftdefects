@@ -6,7 +6,7 @@
 In the Netflix documentary [*Freefall*](https://www.netflix.com/title/81780118) I watched the father of a crash victim try to read the database of aircraft defect reports kept by the FAA, the US aviation regulator.
 It took him hours. With this tool it takes seconds.
 
-Moments after I entered the tool in Z.ai's GLM-5.3 Flash hackathon, the [Foundation for Aviation
+Moments after I entered the tool in Cerebral Valley's GLM-5.3 Flash hackathon, the [Foundation for Aviation
 Safety](https://www.foundationforaviationsafety.org/) wrote to me. Ed, from the
 Foundation, after a first look: "It looks impressive. I'm hoping to dig into it
 further." They asked for a walkthrough. That is the test of a tool like this:

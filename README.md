@@ -12,6 +12,13 @@ Foundation, after a first look: "It looks impressive. I'm hoping to dig into it
 further." They asked for a walkthrough. That is the test of a tool like this:
 whether the people who work on the problem every day want to use it.
 
+It is not only for them. Anyone about to board can type a flight number and a
+date and read what mechanics wrote about that aircraft, and how often it came
+back for the same thing. A journalist gets leads: the same part written up on
+several aircraft of one airline on one day, or a box ticked that contradicts
+the write-up under it. A researcher gets 1.76 million reports readable at once,
+and can ask them questions in plain words.
+
 Every day, mechanics file what they found wrong on an aircraft with the FAA:
 a cracked bracket, a failed sensor, a door that would not open. The reports are
 public, 1.76 million of them since 1995, and the aircraft from the documentary is in

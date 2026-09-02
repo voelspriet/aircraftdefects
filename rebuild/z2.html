@@ -121,8 +121,8 @@ h1 .here{color:var(--rust)}
    the two-column version left half the screen empty under the button. */
 .introbox{max-width:960px;width:100%;margin:auto}
 .intro .imast{display:flex;justify-content:space-between;gap:20px;font:500 11px/1 var(--mono);letter-spacing:.12em;color:var(--ash);text-transform:uppercase;padding-bottom:14px;border-bottom:1px solid var(--line)}
-.intro h1{font:400 54px/1.05 var(--serif);margin:40px 0 0;letter-spacing:-.02em;color:var(--ink);text-wrap:balance;max-width:24ch}
-.intro h1 b{font:400 1em/1.05 var(--serif);letter-spacing:inherit;color:var(--rust)}
+.intro .ih1{font:400 54px/1.05 var(--serif);margin:40px 0 0;letter-spacing:-.02em;color:var(--ink);text-wrap:balance;max-width:24ch}
+.intro .ih1 b{font:400 1em/1.05 var(--serif);letter-spacing:inherit;color:var(--rust)}
 .intro .isub{font:400 22px/1.35 var(--serif);color:var(--ash);margin:16px 0 0;max-width:40ch}
 .intro .iwhy{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;margin:34px 0 0;padding-top:22px;border-top:1px solid var(--line)}
 .intro .iwhy p{font:400 17px/1.55 var(--sans);color:var(--ink);margin:0 0 12px}
@@ -141,7 +141,7 @@ h1 .here{color:var(--rust)}
 .intro .irail p{font:400 14.5px/1.55 var(--sans);color:var(--ink);margin:0 0 8px}
 .intro .irail.imodel .q,.intro .irail.imodel p{color:var(--model)}.intro .irail.imodel b{font-weight:600}
 .intro .irail a{color:inherit}
-@media(max-width:900px){.intro{padding:20px 18px 40px}.intro h1{font-size:34px;margin-top:22px}.intro .isub{font-size:18px}.intro .iwhy{grid-template-columns:1fr;gap:18px}.intro .irails{grid-template-columns:1fr}.intro .irail{border-right:0;border-bottom:1px solid var(--line);padding:14px 0}.intro .irail+.irail{padding-left:0}.intro .irail:last-child{border-bottom:0}}
+@media(max-width:900px){.intro{padding:20px 18px 40px}.intro .ih1{font-size:34px;margin-top:22px}.intro .isub{font-size:18px}.intro .iwhy{grid-template-columns:1fr;gap:18px}.intro .irails{grid-template-columns:1fr}.intro .irail{border-right:0;border-bottom:1px solid var(--line);padding:14px 0}.intro .irail+.irail{padding-left:0}.intro .irail:last-child{border-bottom:0}}
 html.seen .intro{display:none}
 /* Reserved at the height BEFORE the serif arrives, not after. The block is
    taller in the fallback face and shrinks when Instrument Serif loads, and a
@@ -251,19 +251,19 @@ try{ if(!WELCOME){ if(localStorage.getItem("z-seen")) document.documentElement.c
 <div class="intro" id="intro" role="dialog" aria-modal="true" aria-label="What this site is">
   <div class="introbox">
     <div class="imast"><span>FAA service difficulty reports · 1995 to today</span><span>aircraftdefects.com</span></div>
-    <h1>The mechanics wrote it down. <b>Almost nobody read it.</b></h1>
+    <p class="ih1">The mechanics wrote it down. <b>Almost nobody read it.</b></p>
     <p class="isub">1.76 million aircraft defect reports, filed with the FAA since 1995, now in plain English.</p>
     <div class="iwhy">
       <div>
         <p class="eyebrow">What this is</p>
         <p>Every day, mechanics in the United States write up what they found wrong on a plane and file it with the FAA. The FAA publishes it, for inspectors: landing gear is <em>ZONE 700</em>, an emergency landing is the letter <em>A</em>, and the mechanic’s own words sit underneath in trade shorthand.</p>
-        <p class="mute">This site reads all of it for you, and answers in ordinary language.</p>
+        <p class="mute">This site reads all of it for you, answers in ordinary language, and finds the patterns hidden in the file: the same part on several aircraft, the same fault returning to one tail, the tick box that contradicts the sentence under it.</p>
       </div>
       <div>
         <p class="eyebrow hot">Why you should read it</p>
         <p>Because the warning is often already in the file. The aircraft from the Netflix documentary <a href="https://www.netflix.com/title/81780118" target="_blank" rel="noopener"><i>Freefall</i></a> was written up five days before its door plug blew out: a different door, hard to open, aircraft grounded. Airlines write up the same part on several aircraft on the same day. Boxes get ticked that contradict the sentence beneath them.</p>
         <p>If you fly, report, investigate, or lost someone: it is your file too.</p>
-        <p class="ibtn"><button type="button" id="introGo">Read what the mechanics found</button><a href="#view=freefall">Start with the <i>Freefall</i> aircraft</a></p>
+        <p class="ibtn"><button type="button" id="introGo">Read what the mechanics found</button><a href="/#view=freefall">Start with the <i>Freefall</i> aircraft</a></p>
       </div>
     </div>
     <div class="irails">
@@ -273,11 +273,12 @@ try{ if(!WELCOME){ if(localStorage.getItem("z-seen")) document.documentElement.c
       </div>
       <div class="irail imodel">
         <p class="q">What it does</p>
-        <p>Open any report and <b>GLM-5.3-Flash</b> reads the mechanic’s own words instead of the codes: what happened, whether anyone was in danger, what to check next. Pick an airline, a zone, a month or a tail and it reads up to 300 reports at once: what recurs, one aircraft’s whole life, two airlines side by side. Every quote is checked against the record before you see it.</p>
+        <p>Open any report and <b>GLM-5.3-Flash</b> reads the mechanic’s own words, live, instead of the codes: what happened, whether anyone was in danger, what to check next. Pick an airline, a zone, a month or a tail and it reads up to 300 reports at once: what recurs, one aircraft’s whole life, two airlines side by side. Every quote is checked against the record before you see it.</p>
       </div>
       <div class="irail">
         <p class="q">Worth knowing</p>
         <p>Few have swept this archive for these patterns, so the findings grow as people look: <a href="/conflicts/">the contradictions found so far</a>.</p>
+        <p>A day after the site went up, the <a href="https://www.foundationforaviationsafety.org/" target="_blank" rel="noopener">Foundation for Aviation Safety</a> wrote in. Ed, from the Foundation: “It looks impressive. I’m hoping to dig into it further.” They asked for a walkthrough. That is the test of a tool like this: not a score, but whether the people who work on the problem every day want to use it.</p>
         <p>The same model built a complete working version of this site on its own, from 12,000 words of written instructions. All of it cost $1.07 in model calls.</p>
       </div>
     </div>

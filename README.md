@@ -210,10 +210,9 @@ A counter can tell you how much. It cannot tell you what happened. The story
 of every report sits in a single free-text field, the mechanic's own write-up,
 in trade shorthand, in capitals: `R & R NLG UPLOCK BOX IAW AMM 32-33-07`,
 which is "removed and replaced the nose landing gear uplock box in accordance
-with the maintenance manual". Reading those is the point, so the model's job
-changed. Until then GLM-5.3-Flash had been the builder: describe a page, it
-writes the code. Now it is inside the page. Every `model reads` panel is the
-model reading write-ups at the moment you click.
+with the maintenance manual". Reading those is the point. So the model sits
+inside the page: every `model reads` panel is GLM-5.3-Flash reading the
+write-ups at the moment you click.
 
 ![The newest crew-action report, told in plain English, with the mechanic's words beneath it](screenshots/plain-english.png)
 *The newest crew-action report, told in plain English, with the mechanic's words beneath it*

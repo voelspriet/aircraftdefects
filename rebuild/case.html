@@ -78,6 +78,10 @@ table.sheet .note i{display:block;font:600 10px/1.5 var(--mono);letter-spacing:.
 .ntlab{display:block;font:600 10.5px/1.4 var(--sans,system-ui);letter-spacing:.07em;text-transform:uppercase;color:#8a6a2a;margin-top:6px}
 .ntcause{margin:4px 0 0;font:400 14.5px/1.55 var(--serif,Georgia,serif);color:var(--ink)}
 .ntnarr{margin:4px 0 0;font:400 13.5px/1.55 var(--serif,Georgia,serif);color:var(--ash)}
+.ntmore{background:none;border:0;padding:0;cursor:pointer;font:inherit;color:#8a6a2a;
+  text-decoration:underline;text-underline-offset:2px}
+.ntmore:hover{color:var(--ink)}
+.ntrest[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -98,6 +102,8 @@ table.sheet .note i{display:block;font:600 10px/1.5 var(--mono);letter-spacing:.
       <table class="sheet" id="sheet"></table>
     </div>
     <div>
+      <p class="eyebrow">How to cite it</p>
+      <div class="cite" id="cite"></div>
       <div id="planebox" hidden>
         <p class="eyebrow">The aircraft</p>
         <div class="plane" id="plane"></div>
@@ -108,8 +114,6 @@ table.sheet .note i{display:block;font:600 10px/1.5 var(--mono);letter-spacing:.
       <div class="links" id="links"></div>
       <p class="eyebrow">This aircraft</p>
       <div class="pick" id="more"></div>
-      <p class="eyebrow">How to cite it</p>
-      <div class="cite" id="cite"></div>
     </div>
   </div>
   <div class="foot" id="foot"></div>
@@ -198,6 +202,14 @@ Promise.all([OPS_READY, SHEET_READY]).then(function(a){return a[1]}).then(functi
   /* hand-written, 31 August 2026: the aircraft behind the tail number. Sources named on the page:
      the FAA's releasable registry (local copy), adsbdb.com, and one credited Planespotters photo. */
   function ymd(s){var m=String(s||"").match(/^(\d{4})(\d\d)(\d\d)$/);if(!m)return s||"";return new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})}
+  /* The NTSB writes MM/DD/YY and the registry writes YYYYMMDD. Its file starts in
+     2008, so a two-digit year is always 20xx here. Both are turned into a number
+     so the accident can be placed before or after the registration was reissued. */
+  function ntsbTs(v){var m=String(v||"").match(/^(\d\d)\/(\d\d)\/(\d\d)$/);
+    return m?Date.UTC(2000+ +m[3],+m[1]-1,+m[2]):null}
+  function certTs(v){var m=String(v||"").match(/^(\d{4})(\d\d)(\d\d)$/);
+    return m?Date.UTC(+m[1],+m[2]-1,+m[3]):null}
+
   /* Send the serial the mechanic filed on this very report. The server checks the
      NTSB's serial against it, so the question answered is whether the accident is
      about the aircraft in this report, not about whoever holds the tail today. */
@@ -250,8 +262,20 @@ Promise.all([OPS_READY, SHEET_READY]).then(function(a){return a[1]}).then(functi
       var prov;
       if(conf===nt.length&&sn)
         prov='Same aircraft, not merely the same tail number: this report and the NTSB both give serial '+esc(sn)+'.';
-      else if(off===nt.length)
-        prov='Read these with care. The serial number on the NTSB case does not match the one on this report, which usually means the registration was released after the accident and later reissued to the aircraft above. Different airframe, same tail.';
+      else if(off===nt.length){
+        /* Which way round the reissue went decides what the reader is looking at,
+           and the old wording asserted one direction without checking. Compare the
+           accident date with the date this registration was issued. */
+        var ct=certTs(rg.cert_issue),
+            later=nt.filter(function(x){var t=ntsbTs(x.date);return ct&&t&&t>ct}).length,
+            plural=nt.length===1?'':'s';
+        if(ct&&later===nt.length)
+          prov='Read these with care. The serial number does not match. The accident'+plural+' below happened after this registration was issued to its present holder, so '+(nt.length===1?'it belongs':'they belong')+' to the aircraft that carries the tail now. The report above belongs to a different aircraft that carried it earlier. Same tail, two airframes.';
+        else if(ct&&later===0)
+          prov='Read these with care. The serial number does not match. The accident'+plural+' below predate'+(nt.length===1?'s':'')+' the issue of this registration, so the tail was released afterwards and reissued to the aircraft above. Different airframe, same tail.';
+        else
+          prov='Read these with care. The serial number on the NTSB case does not match the one on this report, so the tail has been carried by more than one aircraft. The dates are not complete enough here to say which held it when. Different airframe, same tail.';
+      }
       else
         prov='Joined on the registration. '+(conf?conf+' of '+nt.length+' confirmed by serial number. ':'')+(off?off+' carr'+(off===1?'ies':'y')+' a different serial from this report, which points to a reissued registration and a different airframe. ':'')+(conf+off<nt.length?'The rest publish no serial in one file or the other. ':'');
       h+='<div class="ntsb"><h3>'+head+'</h3>'+
@@ -270,13 +294,33 @@ Promise.all([OPS_READY, SHEET_READY]).then(function(a){return a[1]}).then(functi
              (x.airframe==="differs"?' <span class="ntoff">serial '+esc(x.serial||"")+', not this airframe</span>':'')+'</p>';
            if(bits)h2+='<p class="note">'+esc(bits)+'</p>';
            if(x.cause)h2+='<p class="ntcause"><span class="ntlab">The NTSB found the probable cause to be</span> '+esc(x.cause)+'</p>';
-           if(x.narrative){var n=x.narrative, short=n.length>600;
-             h2+='<p class="ntnarr"><span class="ntlab">What the NTSB recorded</span> '+esc(short?n.slice(0,600).replace(/\s+\S*$/,"")+"\u2026":n)+
-                 (short?' <a href="https://data.ntsb.gov/carol-main-public/basic-search" target="_blank" rel="noopener">read the full case</a>':'')+'</p>';}
+           /* The whole narrative is already here. It used to be cut at 600
+              characters with a link to the NTSB's search, which sends a reader
+              away mid-sentence to re-find the case by hand. Open it in place
+              instead, and leave the link to the source further down the block. */
+           if(x.narrative){var n=x.narrative, cut=n.length>600;
+             if(!cut) h2+='<p class="ntnarr"><span class="ntlab">What the NTSB recorded</span> '+esc(n)+'</p>';
+             else{
+               /* Cut on the RAW string, then escape both halves. Escaping first
+                  and slicing on the escaped length loses text wherever the
+                  narrative contains & or <. */
+               var rawHead=n.slice(0,600).replace(/\s+\S*$/,""),
+                   head=esc(rawHead), rest=esc(n.slice(rawHead.length));
+               h2+='<p class="ntnarr"><span class="ntlab">What the NTSB recorded</span> '+
+                   head+'<span class="ntrest" hidden>'+rest+'</span>'+
+                   '<span class="ntdots">\u2026</span> '+
+                   '<button type="button" class="ntmore">read the whole report</button></p>';}}
            return h2+'</div>';
          }).join("")+
          '<p class="note">Look the case number up at <a href="https://data.ntsb.gov/carol-main-public/basic-search" target="_blank" rel="noopener">the NTSB\'s own search</a>. Its file begins in January 2008; the FAA file above begins in 1995.</p></div>';
     }
+    /* One listener for every case on the page, added once. */
+    D.addEventListener("click",function(e){
+      var b=e.target.closest&&e.target.closest(".ntmore");if(!b)return;
+      var p=b.parentNode, rest=p.querySelector(".ntrest"), dots=p.querySelector(".ntdots");
+      if(!rest)return;
+      rest.hidden=false; if(dots)dots.remove(); b.remove();
+    });
     if(!h)return;
     /* hand-written, 31 August 2026: the FAA's whole registry file */
     var full=rg.full||[];

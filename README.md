@@ -3,7 +3,31 @@
 **Live: [aircraftdefects.com](https://aircraftdefects.com/)** · GLM-5.3-Flash, reading the file live · MIT
 **Video (83 s, my own voice):** https://www.youtube.com/watch?v=vDMEKsNj7ss · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)
 
-Every day, mechanics file what they found wrong on US aircraft. The plane from Freefall is in the file, written up five days before its door plug blew out. Almost nobody reads it: landing gear is ZONE 700, an emergency landing is the letter A. GLM-5.3-Flash reads 1.76M reports in the mechanics' own words, live, per report or fleet. Quotes checked.
+In [*Freefall*](https://www.netflix.com/title/81780118) I watched the father of a crash victim try to read this file.
+What took him hours takes seconds here.
+
+Every day, mechanics file what they found wrong on an aircraft with the FAA:
+a cracked bracket, a failed sensor, a door that would not open. The reports are
+public, 1,758,134 of them since 1995, and the aircraft from the film is in
+there: its forward passenger door hard to open, aircraft grounded, written up
+five days before the door plug blew out. A different door, and the file does
+not connect the two. Almost nobody has
+read any of it, because the FAA files a landing gear fault as `ZONE 700` and an
+emergency landing as the letter `A`. This site reads it for you.
+
+**GLM-5.3-Flash reads the mechanic's own words, not the codes.** Click one
+report and it says in plain English what happened, whether anyone was in
+danger, what the mechanics did and what to check next. Pick an airline, a
+zone, a month or a tail and it reads up to 300 write-ups at once and names what
+no code captures: what recurs in that slice, what the crew did, one aircraft's
+life end to end, two airlines side by side, and where the box a filer ticked
+disagrees with the sentence beneath it. Ask in plain words and it maps the
+question to the file. Fifteen endpoints do this live, on the slice you have in
+front of you, and every quote is checked against the record before you see it.
+
+Nobody has swept the file for any of this, so the ledger grows when somebody
+looks: [the conflicts found so far](https://aircraftdefects.com/conflicts/).
+Building the whole thing cost $1.07 in model calls.
 
 > I was watching *Freefall* on Netflix, and I saw families of the victims trying
 > to read what mechanics had written about the planes. They were sent to a very
@@ -27,7 +51,7 @@ written in trade shorthand, returned as raw rows with no context.
 
 **aircraftdefects.com opens that archive.** You can search thirty years of FAA
 service difficulty reports, 1995 to last week, by airline, tail number, aircraft
-type, part, system code or keyword. The model reads each mechanic's write-up. It find contradictions.
+type, part, system code or keyword. The model reads each mechanic's write-up. It finds contradictions.
 It says in plain language what actually happened, so a reporter, a pilot or a
 passenger can follow a maintenance trail without holding a maintenance licence.
 It is free and needs no login. Counts reflect reports filed, not incidents, and
@@ -137,8 +161,9 @@ collide: `A` in one column means the crew made an emergency landing, and `A`
 elsewhere on the same form means an airline filed the report.
 
 The aircraft from the film is in the file. Two reports on N704AL, an Alaska
-Airlines 737-9: one filed five days before the door plug blew out, a door hard
-to open, aircraft grounded, and the blow-out itself in the mechanic's own words,
+Airlines 737-9: one filed five days before the door plug blew out, the forward
+passenger door hard to open, aircraft grounded (a different door; the file
+draws no link between the two), and the blow-out itself in the mechanic's own words,
 filed on 5 January 2024. Both open from the red Freefall cell among the leads,
 at [#view=freefall](https://aircraftdefects.com/#view=freefall).
 
@@ -318,8 +343,8 @@ inside the page: fifteen endpoints where it reads the FAA's own words live, each
 one listed in [`MODEL_USE.md`](MODEL_USE.md) with its guard and its measured
 cost. The frame around those readings, the page at the root, is hand-written.
 
-By character count of everything this repository serves, **69.8% is the model's
-and 30.2% is not**, counted by
+By character count of everything this repository serves, **69.7% is the model's
+and 30.3% is not**, counted by
 [`build/count_provenance.py`](build/count_provenance.py) rather than claimed.
 Run it with `--check` and it fails if the table has drifted.
 
@@ -330,11 +355,11 @@ guess.
 
 GLM-5.3-Flash is the subject of this project. It wrote a whole working tool on
 its own from written specifications, it does every live reading on the page now,
-and it designed the nine research features itself. That is 69.8% of the code this
+and it designed the nine research features itself. That is 69.7% of the code this
 repository serves, counted by
 [`build/count_provenance.py`](build/count_provenance.py).
 
-A coding assistant, Claude Code, was used for the other 30.2%: the frame at the
+A coding assistant, Claude Code, was used for the other 30.3%: the frame at the
 root that holds the model's readings, the build and splice scripts, the browser
 harnesses that measure the page, the deployment plumbing, and this documentation.
 It also wrote the guards around the model, the substring check that verifies every
@@ -382,7 +407,7 @@ from the FAA's own lookup tables; airline names come from its December 2006
 cross-reference and can be stale, so check current ownership before
 publishing.
 
-Inspired by Rory Kennedy's *Freefall: A Reckoning for Boeing*. Built by Henk
+Inspired by Rory Kennedy's [*Freefall: A Reckoning for Boeing*](https://www.netflix.com/title/81780118). Built by Henk
 van Ess, 2026. GLM-5.3-Flash wrote the tool at
 [/z/rebuilt](https://aircraftdefects.com/z/rebuilt) from written specifications,
 and does all the live reading on the page you land on. The split is counted in

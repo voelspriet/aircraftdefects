@@ -51,6 +51,30 @@ agency never built.
 
 The data was always public. What fell is the cost of making it usable.
 
+## Why it costs almost nothing to run
+
+The dollar is not only because the model is cheap, though it is. It is because
+the site pays for a piece of work once and then never pays for it again.
+
+Everything a reader lands on has already been computed. The front page specimen
+is cached by record id and kept. The news readings hold for a day and are
+refreshed by a warm job rather than by whoever arrives first. The compare answer
+is rebuilt on a timer before its six-hour cache expires, so no reader ever waits
+for the build. Aircraft panels hold for a week. Each code explanation is written
+once and then it is written.
+
+The whole public site currently runs on 152 stored readings: 62 specimens, 77
+aircraft, 8 code explanations, 3 comparisons, 2 news topics. That is the entire
+model output behind every page anyone has looked at.
+
+The model is called when somebody asks for something genuinely new. A question
+the form cannot hold. A case sheet nobody has opened. Two airlines nobody has
+put side by side. Those cost. Reading the site does not.
+
+That is the part worth copying, more than the price. A public archive has a
+fixed number of things worth saying about it, and that number is much smaller
+than the number of times people will come to read them.
+
 ## The model is inside the page
 
 Not a counter with a chatbot bolted on. **Fifteen endpoints in this service call
@@ -292,8 +316,8 @@ inside the page: fifteen endpoints where it reads the FAA's own words live, each
 one listed in [`MODEL_USE.md`](MODEL_USE.md) with its guard and its measured
 cost. The frame around those readings, the page at the root, is hand-written.
 
-By character count of everything this repository serves, **70.1% is the model's
-and 29.9% is not**, counted by
+By character count of everything this repository serves, **69.8% is the model's
+and 30.2% is not**, counted by
 [`build/count_provenance.py`](build/count_provenance.py) rather than claimed.
 Run it with `--check` and it fails if the table has drifted.
 
@@ -304,11 +328,11 @@ guess.
 
 GLM-5.3-Flash is the subject of this project. It wrote a whole working tool on
 its own from written specifications, it does every live reading on the page now,
-and it designed the nine research features itself. That is 70.1% of the code this
+and it designed the nine research features itself. That is 69.8% of the code this
 repository serves, counted by
 [`build/count_provenance.py`](build/count_provenance.py).
 
-A coding assistant, Claude Code, was used for the other 29.9%: the frame at the
+A coding assistant, Claude Code, was used for the other 30.2%: the frame at the
 root that holds the model's readings, the build and splice scripts, the browser
 harnesses that measure the page, the deployment plumbing, and this documentation.
 It also wrote the guards around the model, the substring check that verifies every

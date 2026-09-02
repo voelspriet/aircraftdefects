@@ -1,4 +1,4 @@
-# Five days before the door blew out, a mechanic wrote it down. Nobody read it.
+# Five days before the door blew out, a mechanic wrote it down. Nobody could read it. Now anyone can.
 
 **Live: [aircraftdefects.com](https://aircraftdefects.com/)** · GLM-5.3-Flash, reading the file live · MIT
 **Video (83 s, my own voice):** https://www.youtube.com/watch?v=vDMEKsNj7ss · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)

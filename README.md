@@ -4,7 +4,7 @@
 **Video (83 s, my own voice):** https://www.youtube.com/watch?v=vDMEKsNj7ss · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)
 
 In [*Freefall*](https://www.netflix.com/title/81780118) I watched the father of a crash victim try to read this file.
-What took him hours takes seconds here.
+It took him hours. With this tool it takes seconds.
 
 Every day, mechanics file what they found wrong on an aircraft with the FAA:
 a cracked bracket, a failed sensor, a door that would not open. The reports are

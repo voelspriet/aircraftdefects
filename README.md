@@ -13,7 +13,10 @@ there: its forward passenger door hard to open, aircraft grounded, written up
 five days before the door plug blew out. A different door, and the file does
 not connect the two. Almost nobody has
 read any of it, because the FAA files a landing gear fault as `ZONE 700` and an
-emergency landing as the letter `A`. This site reads it for you.
+emergency landing as the letter `A`. This site reads it for you, and finds the
+patterns hidden in the file: the same part on several aircraft on the same day,
+the same fault returning to one tail, the tick box that contradicts the sentence
+under it.
 
 **GLM-5.3-Flash reads the mechanic's own words, not the codes.** Click one
 report and it says in plain English what happened, whether anyone was in
@@ -33,7 +36,7 @@ shaded by where the trouble sits, nineteen filters, a case sheet, and nine
 research features it chose itself. That page still runs at
 [aircraftdefects.com/z/rebuilt](https://aircraftdefects.com/z/rebuilt). Its
 reasoning, four million characters of it, is committed beside the code. By
-character count, 68.5% of everything this repository serves is the model's.
+character count, 68.2% of everything this repository serves is the model's.
 
 Few have swept the file for any of this, so the ledger grows when somebody
 looks: [the conflicts found so far](https://aircraftdefects.com/conflicts/).
@@ -75,9 +78,11 @@ research features itself and now does every live reading on the page. Total mode
 spend, from the z.ai console: **$1.07**.
 
 Moments after it was built, the [Foundation for Aviation
-Safety](https://www.foundationforaviationsafety.org/) got in touch. That is the
-test of whether a tool like this is worth anything: not the score, but whether
-the people who work on the problem every day find it useful.
+Safety](https://www.foundationforaviationsafety.org/) got in touch. Ed, from
+the Foundation, after a first look: "It looks impressive. I'm hoping to dig
+into it further." They asked for a walkthrough of the tool. That is the test
+of whether a tool like this is worth anything: not the score, but whether the
+people who work on the problem every day want to use it.
 
 That number matters more than it looks. Public-interest tools usually die at the
 funding stage, not the idea stage. At a dollar a project the arithmetic changes:
@@ -341,13 +346,13 @@ inside the page: fifteen endpoints where it reads the FAA's own words live, each
 one listed in [`MODEL_USE.md`](MODEL_USE.md) with its guard and its measured
 cost. The frame around those readings, the page at the root, is hand-written.
 
-By character count of everything this repository serves, **68.5% is the model's
-and 31.5% is not**, counted by
+By character count of everything this repository serves, **68.2% is the model's
+and 31.8% is not**, counted by
 [`build/count_provenance.py`](build/count_provenance.py) rather than claimed.
 Run it with `--check` and it fails if the table has drifted.
 
 **The other contributor.** GitHub lists two. A coding assistant, Claude Code,
-was used for the 31.5% that is not the model's: the frame at the root that holds
+was used for the 31.8% that is not the model's: the frame at the root that holds
 the model's readings, the build and splice scripts, the browser harnesses that
 measure the page, the deployment plumbing, and this documentation. It also wrote
 the guards around the model, the substring check that verifies every quote and

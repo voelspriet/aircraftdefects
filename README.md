@@ -3,6 +3,8 @@
 **Live: [aircraftdefects.com](https://aircraftdefects.com/)** · GLM-5.3-Flash, reading the file live · MIT
 **Video (83 s, my own voice):** https://www.youtube.com/watch?v=vDMEKsNj7ss · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)
 
+Every day, mechanics file what they found wrong on US aircraft. The plane from Freefall is in the file, written up five days before its door plug blew out. Almost nobody reads it: landing gear is ZONE 700, an emergency landing is the letter A. GLM-5.3-Flash reads 1.76M reports in the mechanics' own words, live, per report or fleet. Quotes checked.
+
 > I was watching *Freefall* on Netflix, and I saw families of the victims trying
 > to read what mechanics had written about the planes. They were sent to a very
 > strange governmental website. I went there myself and I was curious and

@@ -2477,6 +2477,110 @@ def plane(reg):
     return jsonify(out)
 
 
+# ---- hand-written, 2 September 2026: a flight number and a date to a tail ---
+# The FAA file never records a flight number, only the airframe. AeroDataBox
+# (RapidAPI, free plan, one year of history) says which registration flew a
+# given number on a given day. That answer never changes once the day has
+# passed, so it is kept for good in flight_cache.json; a miss on a recent date
+# may still fill in and is not remembered for three days.
+_FL_PATH = os.path.join(HERE, "flight_cache.json")
+try:
+    _FL = json.load(open(_FL_PATH))
+except Exception:
+    _FL = {}
+
+
+def _fl_save():
+    try:
+        json.dump(_FL, open(_FL_PATH + ".tmp", "w")); os.replace(_FL_PATH + ".tmp", _FL_PATH)
+    except Exception:
+        pass
+
+
+def _aerodatabox(number, date):
+    k = (os.environ.get("RAPIDAPI_KEY") or "").strip()
+    if not k:
+        raise RuntimeError("no key")
+    url = "https://aerodatabox.p.rapidapi.com/flights/number/%s/%s?dateLocalRole=Both" % (number, date)
+    h = {"x-rapidapi-host": "aerodatabox.p.rapidapi.com", "x-rapidapi-key": k}
+    r = None
+    for _ in range(3):
+        r = requests.get(url, headers=h, timeout=20)
+        if r.status_code != 429:          # the free plan allows one call a second
+            break
+        time.sleep(1.3)
+    if r.status_code in (204, 404):
+        return []
+    r.raise_for_status()
+    d = r.json()
+    return d if isinstance(d, list) else []
+
+
+def _leg_of(f):
+    dep, arr, ac = f.get("departure") or {}, f.get("arrival") or {}, f.get("aircraft") or {}
+    def port(x):
+        a = x.get("airport") or {}
+        return {"iata": a.get("iata"), "name": a.get("name"), "city": a.get("municipalityName"),
+                "time": ((x.get("scheduledTime") or {}).get("local") or "")[:16]}
+    return {"number": f.get("number"), "airline": (f.get("airline") or {}).get("name"),
+            "status": f.get("status"), "from": port(dep), "to": port(arr),
+            "reg": ac.get("reg"), "modeS": ac.get("modeS"), "model": ac.get("model")}
+
+
+@app.get("/z/api/flight")
+def flight():
+    number = re.sub(r"[^A-Z0-9]", "", (request.args.get("number") or "").upper())
+    date = (request.args.get("date") or "").strip()
+    if not re.match(r"^[A-Z0-9]{2,3}\d{1,4}[A-Z]?$", number) or not re.match(r"^\d{4}-\d\d-\d\d$", date):
+        return jsonify(error="Give a flight number like UA1234 and a date."), 400
+    today = time.strftime("%Y-%m-%d")
+    if date > today:
+        return jsonify(error="That day has not happened yet."), 400
+    key_ = number + "|" + date
+    hit = _FL.get(key_)
+    cached = hit is not None
+    if hit is None:
+        try:
+            legs = [_leg_of(f) for f in _aerodatabox(number, date)]
+        except RuntimeError:
+            return jsonify(error="Flight look-up is not switched on for this server."), 503
+        except Exception as e:
+            return jsonify(error="The flight service did not answer (" + str(e)[:100] + ")."), 502
+        hit = {"at": time.time(), "legs": legs}
+        old = time.strftime("%Y-%m-%d", time.gmtime(time.time() - 3 * 86400))
+        if legs or date < old:
+            _FL[key_] = hit
+            _fl_save()
+    legs = hit["legs"]
+    out = {"number": number, "date": date, "legs": legs, "aircraft": [], "source": "AeroDataBox",
+           "cached": cached}
+    seen = set()
+    for lg in legs:
+        reg = (lg.get("reg") or "").upper().strip()
+        bare = reg.replace("-", "")
+        if not bare or bare in seen:
+            continue
+        seen.add(bare)
+        a = {"reg": reg, "model": lg.get("model"), "modeS": lg.get("modeS"), "airline": lg.get("airline"),
+             "us": bare.startswith("N") and bare[1:2].isdigit()}
+        if a["us"]:
+            t = bare[1:]
+            a["tail"] = t
+            try:
+                a["before"] = api("/api/search", tail=t, to=date, limit=1).get("total", 0)
+                a["total"] = api("/api/search", tail=t, limit=1).get("total", 0)
+            except Exception:
+                a["before"] = a["total"] = None
+        out["aircraft"].append(a)
+    if not legs:
+        out["note"] = ("No record of " + number + " on " + date + " at the flight service. It keeps about a "
+                       "year of history; older days, cancelled flights and numbers written differently by the "
+                       "airline come back empty.")
+    elif not out["aircraft"]:
+        out["note"] = "The flight is on file but the service does not say which aircraft flew it."
+    return jsonify(out)
+
+
 # ---- hand-written, 31 August 2026: the registry file, explained -------------
 # One button under Research deeper. The model gets the FAA's own rows for this
 # tail, decoded, plus adsbdb's operator, and says in plain words what the file

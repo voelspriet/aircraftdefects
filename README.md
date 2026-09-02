@@ -3,6 +3,8 @@
 **Live: [aircraftdefects.com](https://aircraftdefects.com/)** · GLM-5.3-Flash, reading the file live · MIT
 **Video (83 s, my own voice):** https://www.youtube.com/watch?v=vDMEKsNj7ss · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)
 
+Every day, mechanics file what they found wrong on US aircraft. The plane from Netflix's *Freefall* is in the file: its passenger door hard to open, five days before a different door, the plug, blew out. GLM-5.3-Flash reads 1.76M reports in the mechanics' words, live, and built a complete working version of this site on its own from specs. $1.07.
+
 In [*Freefall*](https://www.netflix.com/title/81780118) I watched the father of a crash victim try to read this file.
 What took him hours takes seconds here.
 

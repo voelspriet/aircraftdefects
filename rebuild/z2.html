@@ -251,28 +251,27 @@ try{ if(localStorage.getItem("z-seen")) document.documentElement.classList.add("
     <h1>1.76 million aircraft defect reports, <b>in plain English</b></h1>
     <div class="igrid">
       <div class="ilead">
-        <p style="margin-top:0">Every day, aircraft mechanics in the United States write up what they found wrong on a plane. A cracked bracket. A door that would not open. Corrosion behind a panel. They file it with the FAA, and the FAA publishes it. There are 1.76 million of these reports going back to 1995.</p>
-        <p class="mute">Almost nobody reads them, because they were written for inspectors rather than for people. A fault in the landing gear is filed as <em>ZONE 700</em>. An emergency landing is the letter <em>A</em>. The mechanic’s own account sits underneath in trade shorthand.</p>
-        <p class="stand">This site reads all of it for you, and answers in ordinary language.</p>
-        <p class="ibtn"><button type="button" id="introGo">Read the file</button><a href="#view=freefall">The aircraft from <i>Freefall</i></a></p>
+        <p style="margin-top:0">Every day, mechanics in the United States write up what they found wrong on a plane. They file it with the FAA, and the FAA publishes it: 1.76 million reports since 1995.</p>
+        <p class="mute">Almost nobody reads them. They were written for inspectors. Landing gear is <em>ZONE 700</em>. An emergency landing is the letter <em>A</em>.</p>
+        <p class="stand">This site reads all of it for you, in ordinary language.</p>
+        <p class="ibtn"><button type="button" id="introGo">Enter the archive</button><a href="#view=freefall">The aircraft from <i>Freefall</i></a></p>
       </div>
       <div>
         <div class="isec">
           <p class="eyebrow">Why it exists</p>
-          <p>In the Netflix documentary <a href="https://www.netflix.com/title/81780118" target="_blank" rel="noopener"><i>Freefall</i></a>, a father who lost a child in a crash sits at a computer trying to read this same government database. It takes him hours to get anywhere.</p>
-          <p>The aircraft from that story is in here. Five days before its door plug blew out in flight, a mechanic wrote that the forward passenger door was hard to open, and the aircraft was grounded. A different door. Nothing in the database connects the two, because the database connects nothing to anything.</p>
+          <p>In the Netflix documentary <a href="https://www.netflix.com/title/81780118" target="_blank" rel="noopener"><i>Freefall</i></a>, a father who lost a child in a crash tries to read this same database. It takes him hours.</p>
+          <p>That aircraft is in here. Five days before its door plug blew out, a mechanic wrote that the forward passenger door was hard to open. A different door.</p>
         </div>
         <div class="isec imodel">
           <p class="eyebrow">What it does</p>
-          <p>Open any report and an AI model, <b>GLM-5.3-Flash</b>, reads the mechanic’s own words instead of the codes. It says in plain English what happened, whether anyone was in danger, what the mechanics did, and what to check next.</p>
-          <p>Pick an airline, a part of the aircraft, a month, or a single tail number, and it reads up to 300 reports at once. Then it names what no code was built to hold: what keeps coming back, what one aircraft went through from its first entry to its last, how two airlines compare, and where the box a filer ticked contradicts the sentence they wrote underneath it.</p>
-          <p>Ask a question in ordinary words and it turns that into a search.</p>
-          <p>Every quote is checked against the original record before you see it.</p>
+          <p>Open any report and <b>GLM-5.3-Flash</b> reads the mechanic’s own words instead of the codes: what happened, whether anyone was in danger, what the mechanics did, what to check next.</p>
+          <p>Pick an airline, a zone, a month or a tail number and it reads up to 300 reports at once and names what no code holds: what recurs, one aircraft’s whole life, two airlines side by side, where the ticked box contradicts the sentence beneath it.</p>
+          <p>Ask in ordinary words. Every quote is checked against the record before you see it.</p>
         </div>
         <div class="isec">
           <p class="eyebrow">Two things worth knowing</p>
-          <p>Nobody has ever swept this archive for these patterns, so the findings grow as people look. The contradictions found so far are kept in <a href="/conflicts/">a public ledger</a>.</p>
-          <p>The same model also built a complete working version of this site on its own, from 12,000 words of written instructions, with no code handed to it. Everything above cost $1.07 in model calls.</p>
+          <p>Nobody has swept this archive for these patterns, so the findings grow as people look. The contradictions found so far are in <a href="/conflicts/">a public ledger</a>.</p>
+          <p>The same model built a complete working version of this site on its own, from 12,000 words of written instructions. All of it cost $1.07 in model calls.</p>
         </div>
       </div>
     </div>

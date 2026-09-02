@@ -25,9 +25,10 @@ disagrees with the sentence beneath it. Ask in plain words and it maps the
 question to the file. Fifteen endpoints do this live, on the slice you have in
 front of you, and every quote is checked against the record before you see it.
 
-**Before it read a single report, GLM-5.3-Flash built the tool.** From 12,000
-words of written specifications and 52 briefs, with no code handed to it, it
-wrote a working page of 594,000 characters in two days: four rails, an aircraft
+**Before it read a single report, GLM-5.3-Flash built a complete working
+version of this site on its own.** From 12,000 words of written specifications
+and 52 briefs, with no code handed to it, it wrote a page of 594,000 characters
+in two days: four rails, an aircraft
 shaded by where the trouble sits, nineteen filters, a case sheet, and nine
 research features it chose itself. That page still runs at
 [aircraftdefects.com/z/rebuilt](https://aircraftdefects.com/z/rebuilt). Its

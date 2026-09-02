@@ -115,36 +115,31 @@ h1 .here{color:var(--rust)}
    every visit is furniture: a reader who has been here before knows why the
    site exists and gets their screen back. The Freefall page keeps the argument
    for anyone who wants it again. */
-.intro{position:fixed;inset:0;z-index:99;background:var(--paper);display:flex;flex-direction:column;justify-content:flex-start;align-items:center;padding:32px;overflow-y:auto}
-@media(min-height:720px){.intro{justify-content:center}}
-/* hand-written, 2 September 2026: 'safe center' rather than plain centring.
-   A centred flex item taller than its container is clipped at the TOP and the
-   overflow cannot reach it: measured at 1280x600, the box started at y=-60.
-   A centred flex item taller than its container is clipped at the TOP and no
-   amount of overflow can scroll back to it: measured at 1280x600, the box
-   started at y=-61. 'safe center' did not help, Chromium kept the negative
-   offset. The tallest the box gets is 629px, so centring is switched on only
-   where it cannot overflow, and short viewports start at the top and scroll. */
-/* hand-written, 2 September 2026: 34ch was a reading measure applied to 44px
-   display type, so the column came out 293px on a 1440px screen and the
-   headline broke every three words. It also sat under .i3's own 52ch, which
-   therefore never applied. A pixel measure suits both: the serif gets room,
-   and .i3 and .i4 fall back to their own 52ch inside it. */
-.introbox{max-width:420px;width:100%}
-.intro .i1{font:400 44px/1.15 var(--serif);color:var(--ink);margin:0;letter-spacing:-.015em}
-.intro .i2{font:400 44px/1.15 var(--serif);color:var(--rust);margin:6px 0 0;letter-spacing:-.015em}
-.intro .i3{font:400 16px/1.6 var(--sans);color:var(--ash);margin:26px 0 0;max-width:52ch}
-.intro .i4{font:400 16px/1.6 var(--sans);color:var(--model);margin:16px 0 0;max-width:52ch}
-.intro .i5{font:400 14px/1.6 var(--sans);color:var(--ash);margin:14px 0 0;max-width:52ch}
-.intro .i5 a{color:var(--ash)}
-.intro .i4 b{font-weight:600}
-.intro .i4 a{color:var(--model)}
+.intro{position:fixed;inset:0;z-index:99;background:var(--paper);display:flex;flex-direction:column;align-items:center;padding:28px 32px 48px;overflow-y:auto}
+/* hand-written, 2 September: the box was centred with justify-content, and a
+   flex column centred that way pushes its top above the scroll area when the
+   text is taller than the viewport, so the headline was unreachable on short
+   screens. margin:auto centres when there is room and scrolls when there is not. */
+.introbox{max-width:1040px;width:100%;margin:auto}
+.intro .imast{display:flex;justify-content:space-between;gap:20px;font:500 11px/1 var(--mono);letter-spacing:.12em;color:var(--ash);text-transform:uppercase;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.intro h1{font:400 44px/1.1 var(--serif);margin:34px 0 0;letter-spacing:-.015em;color:var(--ink);text-wrap:balance;max-width:20ch}
+.intro h1 b{font:400 1em var(--serif);color:var(--rust)}
+.intro .igrid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:48px;margin-top:30px}
+.intro .ilead p{font:400 17px/1.6 var(--sans);color:var(--ink);margin:0 0 14px;max-width:54ch}
+.intro .ilead p.mute{color:var(--ash)}
+.intro .ilead p.stand{font:400 22px/1.35 var(--serif);color:var(--ink);margin:22px 0 0;max-width:30ch}
+.intro .isec{padding:16px 0 0;border-top:1px solid var(--line);margin-top:0}
+.intro .isec+.isec{margin-top:22px}
+.intro .isec p{font:400 15px/1.6 var(--sans);color:var(--ink);margin:0 0 10px;max-width:56ch}
+.intro .isec.imodel p{color:var(--model)}
+.intro .isec.imodel b{font-weight:600}
+.intro .isec a{color:inherit}
 .intro em{font-style:normal;color:var(--rust);font-family:var(--mono);font-size:.85em}
-.ibtn{display:flex;align-items:center;gap:18px;margin:30px 0 0}
+.ibtn{display:flex;align-items:center;gap:18px;margin:26px 0 0}
 .ibtn button{font:500 15px var(--sans);padding:12px 22px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:100px;cursor:pointer;min-height:24px}
 .ibtn button:hover{background:var(--rust);border-color:var(--rust)}
 .ibtn a{font:400 14px var(--sans);color:var(--ash);min-height:24px;display:inline-block;padding:4px 0}
-@media(max-width:900px){.intro .i1,.intro .i2{font-size:30px}.introbox{max-width:none}}
+@media(max-width:900px){.intro{padding:20px 18px 40px}.intro h1{font-size:30px;margin-top:22px}.intro .igrid{grid-template-columns:1fr;gap:26px}.intro .ilead p.stand{font-size:19px}}
 html.seen .intro{display:none}
 /* Reserved at the height BEFORE the serif arrives, not after. The block is
    taller in the fallback face and shrinks when Instrument Serif loads, and a
@@ -250,14 +245,37 @@ try{ if(localStorage.getItem("z-seen")) document.documentElement.classList.add("
      it. Held in the markup so it is painted with everything else; a returning
      reader never sees it because html.seen is set in the head before the body
      paints. Fixed, so it takes part in no layout and costs no shift. -->
-<div class="intro" id="intro" role="dialog" aria-modal="true" aria-label="Why this site exists">
+<div class="intro" id="intro" role="dialog" aria-modal="true" aria-label="What this site is">
   <div class="introbox">
-    <p class="i1">In <a href="https://www.netflix.com/title/81780118" target="_blank" rel="noopener"><i>Freefall</i></a> I watched the father of a crash victim try to read this file.</p>
-    <p class="i2">What took him hours takes seconds here.</p>
-    <p class="i3">Every day, mechanics file what they found wrong on an aircraft with the FAA. The reports are public, 1.76 million of them since 1995, and the plane from the film is in there: its forward passenger door hard to open, aircraft grounded, written up five days before the door plug blew out. A different door, and the file does not connect the two. Almost nobody has read any of it, because the FAA files a landing gear fault as <em>ZONE 700</em> and an emergency landing as the letter <em>A</em>. This site reads it for you.</p>
-    <p class="i4"><b>GLM-5.3-Flash</b> reads the mechanic’s own words, not the codes. Open one report and it says in plain English what happened, whether anyone was in danger, what the mechanics did and what to check next. Pick an airline, a zone, a month or a tail and it reads up to 300 write-ups at once and names what no code captures: what recurs, what the crew did, one aircraft’s life end to end, two airlines side by side, and where the box a filer ticked disagrees with the sentence beneath it. Ask in plain words and it maps the question to the file. Every quote is checked against the record before you see it.</p>
-    <p class="i5">Nobody has swept the file for any of this, so the ledger grows when somebody looks: <a href="/conflicts/">the conflicts found so far</a>. Building the whole thing cost $1.07 in model calls.</p>
-    <p class="ibtn"><button type="button" id="introGo">Read the file</button><a href="#view=freefall">Why this site exists</a></p>
+    <div class="imast"><span>FAA service difficulty reports · 1995 to today</span><span>aircraftdefects.com</span></div>
+    <h1>1.76 million aircraft defect reports, <b>in plain English</b></h1>
+    <div class="igrid">
+      <div class="ilead">
+        <p style="margin-top:0">Every day, aircraft mechanics in the United States write up what they found wrong on a plane. A cracked bracket. A door that would not open. Corrosion behind a panel. They file it with the FAA, and the FAA publishes it. There are 1.76 million of these reports going back to 1995.</p>
+        <p class="mute">Almost nobody reads them, because they were written for inspectors rather than for people. A fault in the landing gear is filed as <em>ZONE 700</em>. An emergency landing is the letter <em>A</em>. The mechanic’s own account sits underneath in trade shorthand.</p>
+        <p class="stand">This site reads all of it for you, and answers in ordinary language.</p>
+        <p class="ibtn"><button type="button" id="introGo">Read the file</button><a href="#view=freefall">The aircraft from <i>Freefall</i></a></p>
+      </div>
+      <div>
+        <div class="isec">
+          <p class="eyebrow">Why it exists</p>
+          <p>In the Netflix documentary <a href="https://www.netflix.com/title/81780118" target="_blank" rel="noopener"><i>Freefall</i></a>, a father who lost a child in a crash sits at a computer trying to read this same government database. It takes him hours to get anywhere.</p>
+          <p>The aircraft from that story is in here. Five days before its door plug blew out in flight, a mechanic wrote that the forward passenger door was hard to open, and the aircraft was grounded. A different door. Nothing in the database connects the two, because the database connects nothing to anything.</p>
+        </div>
+        <div class="isec imodel">
+          <p class="eyebrow">What it does</p>
+          <p>Open any report and an AI model, <b>GLM-5.3-Flash</b>, reads the mechanic’s own words instead of the codes. It says in plain English what happened, whether anyone was in danger, what the mechanics did, and what to check next.</p>
+          <p>Pick an airline, a part of the aircraft, a month, or a single tail number, and it reads up to 300 reports at once. Then it names what no code was built to hold: what keeps coming back, what one aircraft went through from its first entry to its last, how two airlines compare, and where the box a filer ticked contradicts the sentence they wrote underneath it.</p>
+          <p>Ask a question in ordinary words and it turns that into a search.</p>
+          <p>Every quote is checked against the original record before you see it.</p>
+        </div>
+        <div class="isec">
+          <p class="eyebrow">Two things worth knowing</p>
+          <p>Nobody has ever swept this archive for these patterns, so the findings grow as people look. The contradictions found so far are kept in <a href="/conflicts/">a public ledger</a>.</p>
+          <p>The same model also built a complete working version of this site on its own, from 12,000 words of written instructions, with no code handed to it. Everything above cost $1.07 in model calls.</p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 <a class="skip" href="#leads">Skip to Find leads</a>

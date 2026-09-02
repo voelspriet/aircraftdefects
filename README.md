@@ -142,7 +142,7 @@ model's. Thirteen of them are below.
 
 How each quote is checked is under [Prove it](#prove-it) below.
 
-## What the page does
+## The home page
 
 One screen. Four rails that are always there, WHERE, WHEN, WHO, WHAT IT
 FORCED, and a breadcrumb; a search line that takes a question or a word, a

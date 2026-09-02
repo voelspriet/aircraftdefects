@@ -77,8 +77,10 @@ number so you can look it up at the source and check it.
 
 What is not in the file, so you do not go looking for it:
 
-- no accidents and no causes. The NTSB accident file is a different agency's
-  record, held separately on this site, and begins in January 2008.
+- no accidents and no causes. Accidents are the NTSB's record, a different
+  agency's file that begins in January 2008. This site joins the two: when an
+  aircraft with defect reports also appears in the NTSB file, you see it, on
+  its case page and in the lead "In both files".
 - no fleet sizes and no fleet flying hours, so no rates. The file does carry
   the airframe's own hours on most records (79% of them, see
   [`docs/FINDINGS.md`](docs/FINDINGS.md), F3), but only for aircraft that had

@@ -39,7 +39,7 @@ than from code handed to it. It still runs at
 research features itself and now does every live reading on the page. Total model
 spend, from the z.ai console: **$1.07**.
 
-A day after it was built, the [Foundation for Aviation
+Moments after it was built, the [Foundation for Aviation
 Safety](https://www.foundationforaviationsafety.org/) got in touch. That is the
 test of whether a tool like this is worth anything: not the score, but whether
 the people who work on the problem every day find it useful.

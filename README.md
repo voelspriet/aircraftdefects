@@ -337,19 +337,22 @@ dataset and a free weekend can ship the interface the agency never built. The
 data was always public. What fell is the cost of making it usable.
 
 The dollar is low because the model is cheap and because the site pays for a
-piece of work once and then never pays for it again. Everything a reader lands
-on has already been written. The front page reading is stored under its record
-number and kept. The news readings are redone once a day by a scheduled job,
-not by whoever arrives first. The airline comparison is rebuilt on a timer
-before its six-hour copy runs out, so nobody waits for it. Aircraft panels are
-kept for a week. Each code explanation is written once and kept.
+piece of work once and keeps it. The reading of a report on the front page is
+stored under its record number: the same report reads the same whatever
+selection it was found in. The news readings are held for a day and refreshed
+by a scheduled job three times a day, not by whoever arrives first. The join
+with the NTSB file is rebuilt every five hours by a scheduled job, before its
+six-hour copy runs out, so nobody waits the sixteen seconds it takes. Aircraft
+panels are kept for a week. Code explanations are written once and kept. The
+airline comparison, the questions on a case page and "what recurs here" are
+read fresh each time, because they depend on what you selected.
 
-The whole public site currently runs on 152 stored readings: 62 pre-read
-reports, 77 aircraft, 8 code explanations, 3 comparisons, 2 news topics. That
-is the entire model output behind every page anyone has looked at. The model is
-called only when somebody asks for something new: a question the form cannot
-hold, a report nobody has opened, two airlines nobody has put side by side.
-Those calls cost. Reading the site does not.
+On 2 September 2026 the public site ran on 168 stored readings: 69 pre-read
+reports, 86 aircraft, 8 code explanations, 5 news topics. That is the entire
+model output behind every page anyone has looked at. The model is called only
+when somebody asks for something new: a question the form cannot hold, a
+report nobody has opened, two airlines nobody has put side by side. Those
+calls cost. Reading the site does not.
 
 Measured cost of the reading: 2 to 9 seconds for one report; about 30 seconds
 and 260k tokens for 300 write-ups; the whole file would be 1.52 billion

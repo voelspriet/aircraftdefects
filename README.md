@@ -3,15 +3,6 @@
 **Live: [aircraftdefects.com](https://aircraftdefects.com/)** · GLM-5.3-Flash, reading the file live · MIT
 **Video (83 s, my own voice):** https://www.youtube.com/watch?v=vDMEKsNj7ss · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)
 
-Every day, mechanics file what they found wrong on US aircraft. The plane from Netflix's *Freefall* is in the file: its passenger door hard to open, five days before a different door, the plug, blew out. GLM-5.3-Flash reads 1.76M reports in the mechanics' words, live, and built a complete working version of this site on its own from specs. $1.07.
-
-Moments after it was built, the [Foundation for Aviation
-Safety](https://www.foundationforaviationsafety.org/) got in touch. Ed, from
-the Foundation, after a first look: "It looks impressive. I'm hoping to dig
-into it further." They asked for a walkthrough of the tool. That is the test
-of whether a tool like this is worth anything: not the score, but whether the
-people who work on the problem every day want to use it.
-
 In [*Freefall*](https://www.netflix.com/title/81780118) I watched the father of a crash victim try to read this file.
 What took him hours takes seconds here.
 
@@ -22,10 +13,7 @@ there: its forward passenger door hard to open, aircraft grounded, written up
 five days before the door plug blew out. A different door, and the file does
 not connect the two. Almost nobody has
 read any of it, because the FAA files a landing gear fault as `ZONE 700` and an
-emergency landing as the letter `A`. This site reads it for you, and finds the
-patterns hidden in the file: the same part on several aircraft on the same day,
-the same fault returning to one tail, the tick box that contradicts the sentence
-under it.
+emergency landing as the letter `A`. This site reads it for you, and connects what the file leaves apart.
 
 **GLM-5.3-Flash reads the mechanic's own words, not the codes.** Click one
 report and it says in plain English what happened, whether anyone was in
@@ -46,6 +34,12 @@ research features it chose itself. That page still runs at
 [aircraftdefects.com/z/rebuilt](https://aircraftdefects.com/z/rebuilt). Its
 reasoning, four million characters of it, is committed beside the code. By
 character count, 68.2% of everything this repository serves is the model's.
+
+Moments after it was built, the [Foundation for Aviation
+Safety](https://www.foundationforaviationsafety.org/) wrote to me. Ed, from the
+Foundation, after a first look: "It looks impressive. I'm hoping to dig into it
+further." They asked for a walkthrough. That is the test of a tool like this:
+whether the people who work on the problem every day want to use it.
 
 Few have swept the file for any of this, so the ledger grows when somebody
 looks: [the conflicts found so far](https://aircraftdefects.com/conflicts/).

@@ -340,13 +340,10 @@ is arithmetic, and a computer should be doing it for you.
 
 ## Why it costs almost nothing to run
 
-GLM-5.3-Flash's calls for the whole build, read from the z.ai console, cost
-**$1.07**. The coding assistant that wrote the frame around it is not in that
-figure (see "Who wrote what"). Public-interest tools usually die at the funding
-stage, not the idea stage.
-
-The dollar is low because the model is cheap and because the site pays for a
-piece of work once and keeps it. The reading of a report on the front page is
+The **$1.07** is GLM-5.3-Flash's calls for the whole build, read from the z.ai
+console. The coding assistant that wrote the frame around it is not in that
+figure (see "Who wrote what"). The figure is low because the model is cheap,
+and stays low because the site pays for a piece of work once and keeps it. The reading of a report on the front page is
 stored under its record number: the same report reads the same whatever
 selection it was found in. The news readings are held for a day and refreshed
 by a scheduled job three times a day, not by whoever arrives first. The join

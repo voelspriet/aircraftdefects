@@ -116,30 +116,32 @@ h1 .here{color:var(--rust)}
    site exists and gets their screen back. The Freefall page keeps the argument
    for anyone who wants it again. */
 .intro{position:fixed;inset:0;z-index:99;background:var(--paper);display:flex;flex-direction:column;align-items:center;padding:28px 32px 48px;overflow-y:auto}
-/* hand-written, 2 September: the box was centred with justify-content, and a
-   flex column centred that way pushes its top above the scroll area when the
-   text is taller than the viewport, so the headline was unreachable on short
-   screens. margin:auto centres when there is room and scrolls when there is not. */
-.introbox{max-width:1040px;width:100%;margin:auto}
+/* hand-written, 2 September: centred with margin:auto, not justify-content;
+   a flex column centred that way hides its top on short screens. One column:
+   the two-column version left half the screen empty under the button. */
+.introbox{max-width:960px;width:100%;margin:auto}
 .intro .imast{display:flex;justify-content:space-between;gap:20px;font:500 11px/1 var(--mono);letter-spacing:.12em;color:var(--ash);text-transform:uppercase;padding-bottom:14px;border-bottom:1px solid var(--line)}
-.intro h1{font:400 44px/1.1 var(--serif);margin:34px 0 0;letter-spacing:-.015em;color:var(--ink);text-wrap:balance;max-width:20ch}
-.intro h1 b{font:400 1em var(--serif);color:var(--rust)}
-.intro .igrid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:48px;margin-top:30px}
-.intro .ilead p{font:400 17px/1.6 var(--sans);color:var(--ink);margin:0 0 14px;max-width:54ch}
-.intro .ilead p.mute{color:var(--ash)}
-.intro .ilead p.stand{font:400 22px/1.35 var(--serif);color:var(--ink);margin:22px 0 0;max-width:30ch}
-.intro .isec{padding:16px 0 0;border-top:1px solid var(--line);margin-top:0}
-.intro .isec+.isec{margin-top:22px}
-.intro .isec p{font:400 15px/1.6 var(--sans);color:var(--ink);margin:0 0 10px;max-width:56ch}
-.intro .isec.imodel p{color:var(--model)}
-.intro .isec.imodel b{font-weight:600}
-.intro .isec a{color:inherit}
+.intro h1{font:400 54px/1.05 var(--serif);margin:40px 0 0;letter-spacing:-.02em;color:var(--ink);text-wrap:balance;max-width:24ch}
+.intro h1 b{font:400 1em/1.05 var(--serif);letter-spacing:inherit;color:var(--rust)}
+.intro .isub{font:400 22px/1.35 var(--serif);color:var(--ash);margin:16px 0 0;max-width:40ch}
+.intro .iwhy{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;margin:34px 0 0;padding-top:22px;border-top:1px solid var(--line)}
+.intro .iwhy p{font:400 17px/1.55 var(--sans);color:var(--ink);margin:0 0 12px}
+.intro .iwhy p.mute{color:var(--ash)}
+.intro .iwhy .eyebrow{margin-bottom:12px}
+.intro .iwhy .eyebrow.hot{color:var(--rust)}
 .intro em{font-style:normal;color:var(--rust);font-family:var(--mono);font-size:.85em}
-.ibtn{display:flex;align-items:center;gap:18px;margin:26px 0 0}
-.ibtn button{font:500 15px var(--sans);padding:12px 22px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:100px;cursor:pointer;min-height:24px}
-.ibtn button:hover{background:var(--rust);border-color:var(--rust)}
-.ibtn a{font:400 14px var(--sans);color:var(--ash);min-height:24px;display:inline-block;padding:4px 0}
-@media(max-width:900px){.intro{padding:20px 18px 40px}.intro h1{font-size:30px;margin-top:22px}.intro .igrid{grid-template-columns:1fr;gap:26px}.intro .ilead p.stand{font-size:19px}}
+.ibtn{display:flex;align-items:center;flex-wrap:wrap;gap:18px;margin:26px 0 0}
+.ibtn button{font:500 16px var(--sans);padding:14px 26px;border:1px solid var(--rust);background:var(--rust);color:#fff;border-radius:100px;cursor:pointer;min-height:24px}
+.ibtn button:hover{background:var(--ink);border-color:var(--ink)}
+.ibtn a{font:400 15px var(--sans);color:var(--ink);min-height:24px;display:inline-block;padding:4px 0;white-space:nowrap}
+.intro .irails{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:40px;border-top:1px solid var(--line)}
+.intro .irail{padding:16px 22px 0 0;border-right:1px solid var(--line)}
+.intro .irail+.irail{padding-left:22px}.intro .irail:last-child{border-right:0;padding-right:0}
+.intro .irail .q{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ash);margin:0 0 10px}
+.intro .irail p{font:400 14.5px/1.55 var(--sans);color:var(--ink);margin:0 0 8px}
+.intro .irail.imodel .q,.intro .irail.imodel p{color:var(--model)}.intro .irail.imodel b{font-weight:600}
+.intro .irail a{color:inherit}
+@media(max-width:900px){.intro{padding:20px 18px 40px}.intro h1{font-size:34px;margin-top:22px}.intro .isub{font-size:18px}.intro .iwhy{grid-template-columns:1fr;gap:18px}.intro .irails{grid-template-columns:1fr}.intro .irail{border-right:0;border-bottom:1px solid var(--line);padding:14px 0}.intro .irail+.irail{padding-left:0}.intro .irail:last-child{border-bottom:0}}
 html.seen .intro{display:none}
 /* Reserved at the height BEFORE the serif arrives, not after. The block is
    taller in the fallback face and shrinks when Instrument Serif loads, and a
@@ -237,8 +239,9 @@ a.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--
    later, which would be a layout shift and the thing this page is measured on.
    Wrapped: a private window or blocked storage throws on both calls, and the
    honest default there is to treat the reader as new. */
-try{ if(localStorage.getItem("z-seen")) document.documentElement.classList.add("seen");
-     localStorage.setItem("z-seen","1"); }catch(e){}
+var WELCOME=/\/welcome\/?$/.test(location.pathname);
+try{ if(!WELCOME){ if(localStorage.getItem("z-seen")) document.documentElement.classList.add("seen");
+     localStorage.setItem("z-seen","1"); } }catch(e){}
 </script></head>
 <body>
 <!-- The introduction, on the first visit only, over the page rather than inside
@@ -248,31 +251,34 @@ try{ if(localStorage.getItem("z-seen")) document.documentElement.classList.add("
 <div class="intro" id="intro" role="dialog" aria-modal="true" aria-label="What this site is">
   <div class="introbox">
     <div class="imast"><span>FAA service difficulty reports · 1995 to today</span><span>aircraftdefects.com</span></div>
-    <h1>1.76 million aircraft defect reports, <b>in plain English</b></h1>
-    <div class="igrid">
-      <div class="ilead">
-        <p style="margin-top:0">Every day, mechanics in the United States write up what they found wrong on a plane. They file it with the FAA, and the FAA publishes it: 1.76 million reports since 1995.</p>
-        <p class="mute">Almost nobody reads them. They were written for inspectors. Landing gear is <em>ZONE 700</em>. An emergency landing is the letter <em>A</em>.</p>
-        <p class="stand">This site reads all of it for you, in ordinary language.</p>
-        <p class="ibtn"><button type="button" id="introGo">Enter the archive</button><a href="#view=freefall">The aircraft from <i>Freefall</i></a></p>
+    <h1>The mechanics wrote it down. <b>Almost nobody read it.</b></h1>
+    <p class="isub">1.76 million aircraft defect reports, filed with the FAA since 1995, now in plain English.</p>
+    <div class="iwhy">
+      <div>
+        <p class="eyebrow">What this is</p>
+        <p>Every day, mechanics in the United States write up what they found wrong on a plane and file it with the FAA. The FAA publishes it, for inspectors: landing gear is <em>ZONE 700</em>, an emergency landing is the letter <em>A</em>, and the mechanic’s own words sit underneath in trade shorthand.</p>
+        <p class="mute">This site reads all of it for you, and answers in ordinary language.</p>
       </div>
       <div>
-        <div class="isec">
-          <p class="eyebrow">Why it exists</p>
-          <p>In the Netflix documentary <a href="https://www.netflix.com/title/81780118" target="_blank" rel="noopener"><i>Freefall</i></a>, a father who lost a child in a crash tries to read this same database. It takes him hours.</p>
-          <p>That aircraft is in here. Five days before its door plug blew out, a mechanic wrote that the forward passenger door was hard to open. A different door.</p>
-        </div>
-        <div class="isec imodel">
-          <p class="eyebrow">What it does</p>
-          <p>Open any report and <b>GLM-5.3-Flash</b> reads the mechanic’s own words instead of the codes: what happened, whether anyone was in danger, what the mechanics did, what to check next.</p>
-          <p>Pick an airline, a zone, a month or a tail number and it reads up to 300 reports at once and names what no code holds: what recurs, one aircraft’s whole life, two airlines side by side, where the ticked box contradicts the sentence beneath it.</p>
-          <p>Ask in ordinary words. Every quote is checked against the record before you see it.</p>
-        </div>
-        <div class="isec">
-          <p class="eyebrow">Two things worth knowing</p>
-          <p>Nobody has swept this archive for these patterns, so the findings grow as people look. The contradictions found so far are in <a href="/conflicts/">a public ledger</a>.</p>
-          <p>The same model built a complete working version of this site on its own, from 12,000 words of written instructions. All of it cost $1.07 in model calls.</p>
-        </div>
+        <p class="eyebrow hot">Why you should read it</p>
+        <p>Because the warning is often already in the file. The aircraft from the Netflix documentary <a href="https://www.netflix.com/title/81780118" target="_blank" rel="noopener"><i>Freefall</i></a> was written up five days before its door plug blew out: a different door, hard to open, aircraft grounded. Airlines write up the same part on several aircraft on the same day. Boxes get ticked that contradict the sentence beneath them.</p>
+        <p>If you fly, report, investigate, or lost someone: it is your file too.</p>
+        <p class="ibtn"><button type="button" id="introGo">Read what the mechanics found</button><a href="#view=freefall">Start with the <i>Freefall</i> aircraft</a></p>
+      </div>
+    </div>
+    <div class="irails">
+      <div class="irail">
+        <p class="q">Why it exists</p>
+        <p>In <i>Freefall</i>, a father who lost a child in a crash sits at a computer trying to read this same database. It takes him hours to get anywhere. Here it takes seconds.</p>
+      </div>
+      <div class="irail imodel">
+        <p class="q">What it does</p>
+        <p>Open any report and <b>GLM-5.3-Flash</b> reads the mechanic’s own words instead of the codes: what happened, whether anyone was in danger, what to check next. Pick an airline, a zone, a month or a tail and it reads up to 300 reports at once: what recurs, one aircraft’s whole life, two airlines side by side. Every quote is checked against the record before you see it.</p>
+      </div>
+      <div class="irail">
+        <p class="q">Worth knowing</p>
+        <p>Nobody has swept this archive for these patterns, so the findings grow as people look: <a href="/conflicts/">the contradictions found so far</a>.</p>
+        <p>The same model built a complete working version of this site on its own, from 12,000 words of written instructions. All of it cost $1.07 in model calls.</p>
       </div>
     </div>
   </div>
@@ -445,7 +451,7 @@ var H=null;function render(){if(H)draw()}
 /* The introduction closes on the button, on Escape, or on any navigation away
    from it. It is shown once, so nothing here has to remember a dismissal. */
 (function(){var i=D.getElementById("intro");if(!i)return;
-  function go(){i.remove();try{$("#q")&&$("#q").focus()}catch(e){}}
+  function go(){if(WELCOME){location.href="/";return}i.remove();try{$("#q")&&$("#q").focus()}catch(e){}}
   var b=D.getElementById("introGo");if(b){b.onclick=go;try{b.focus({preventScroll:true})}catch(e){b.focus()}}
   D.addEventListener("keydown",function(e){if(e.key==="Escape"&&D.getElementById("intro"))go()});
   i.querySelectorAll("a").forEach(function(a){a.addEventListener("click",go)})})();

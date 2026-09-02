@@ -782,6 +782,14 @@ def z_img(name):
     return send_from_directory(app.static_folder, name, max_age=86400)
 
 
+@app.get("/z/welcome")
+@app.get("/z/welcome/")
+def welcome():
+    # hand-written, 2 September 2026: the same page, and the head script sees
+    # /welcome in the path and never hides the introduction. For checking it.
+    return send_from_directory(app.static_folder, "index.html", max_age=0)
+
+
 @app.get("/z/")
 @app.get("/z")
 def index():

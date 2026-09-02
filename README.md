@@ -63,7 +63,8 @@ Alaska Airlines 737-9, both filed by the airline. The first, dated 31 December
 aircraft was marked grounded, the door was torque-tested and lubricated, and the
 write-up ends with it passing the door system test with no adjustment needed.
 That is a different door from the plug, the panel fitted where an unused
-emergency exit would be, and the file draws no link between the two. The
+emergency exit would be. The FAA file never puts those two reports side by
+side. This site does, and it does the same for every aircraft in the file. The
 second, dated 5 January 2024, is the blow-out in the operator's own words:
 rapid decompression at about 16,000 feet climbing out of Portland, emergency
 descent, landed twenty minutes after departure. Both open from the red Freefall

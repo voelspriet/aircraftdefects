@@ -1905,8 +1905,11 @@ def specimen_warm():
     for q_, topic in NEWS_TOPICS:
         with app.test_request_context("/z/api/stream/news", query_string={"q": q_, "topic": topic}):
             try:
-                r = stream_news(); body = b"".join(r.response) if hasattr(r, "response") else b""
-                done.append({"state": {"news": topic[:40]}, "ok": b"event: done" in body})
+                r = stream_news()
+                parts = getattr(r, "response", None) or []
+                body = "".join(p.decode("utf-8", "replace") if isinstance(p, (bytes, bytearray))
+                               else str(p) for p in parts)
+                done.append({"state": {"news": topic[:40]}, "ok": "event: done" in body})
             except Exception as e:
                 done.append({"state": {"news": topic[:40]}, "ok": False, "error": str(e)[:80]})
     for st in states:
@@ -1914,7 +1917,10 @@ def specimen_warm():
             try:
                 r = specimen()
                 d = r.get_json() if hasattr(r, "get_json") else {}
-                done.append({"state": st, "ok": bool(d and d.get("plain")), "seconds": (d or {}).get("seconds")})
+                row = {"state": st, "ok": bool(d and d.get("plain")), "seconds": (d or {}).get("seconds")}
+                if not row["ok"] and d and d.get("none"):
+                    row["ok"] = True; row["empty"] = True   # nothing filed for this slice yet
+                done.append(row)
             except Exception as e:
                 done.append({"state": st, "ok": False, "error": str(e)[:80]})
     return jsonify(warmed=done)

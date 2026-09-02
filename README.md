@@ -103,9 +103,10 @@ What is not in the file, so you do not go looking for it:
 
 ## What the model does
 
-**GLM-5.3-Flash reads the mechanic's own words, not the codes.** Click one
-report and it says in plain English what happened, whether anyone was in
-danger, what the mechanics did and what to check next. Pick an airline, a
+**GLM-5.3-Flash reads the codes, the boxes and the mechanic's write-up
+together and makes sense of them, including where they contradict each
+other.** Click one report and it says in plain English what happened, whether
+anyone was in danger, what the mechanics did and what to check next. Pick an airline, a
 numbered part of the aircraft, a month or a single aircraft by its tail number,
 the registration it carries, and it reads up to 300 write-ups at once. It names
 what keeps coming back, what the crew did, one aircraft's life from first

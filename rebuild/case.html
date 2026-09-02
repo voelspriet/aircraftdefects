@@ -34,6 +34,7 @@ table.sheet .undec{font:400 12px/1.5 var(--sans);color:var(--ash);margin-top:4px
 table.sheet .note{margin-top:4px;max-width:66ch}table.sheet .note i{font:500 10px var(--mono);letter-spacing:.08em;font-style:normal;margin-right:6px;color:var(--ash)}
 .links a{display:block;padding:10px 0;border-top:1px solid var(--line);color:var(--ink);text-decoration:none}.links a:hover{color:var(--rust)}.links a b{font-weight:600}.links a span{display:block;font-size:12.5px;color:var(--ash)}
 .pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.pick a,.pick button{font:500 13px/1.3 var(--sans);padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:100px;color:var(--ink);text-decoration:none;cursor:pointer}.pick a:hover,.pick button:hover{border-color:var(--rust);color:var(--rust)}
+.srcs{font:400 12.5px/1.7 var(--mono);color:var(--ash);margin:10px 0 0}.srcs a{color:var(--ash)}
 .cite{font:400 13px/1.6 var(--mono);color:var(--ink);background:#fff;border:1px solid var(--line);padding:12px 14px;max-width:82ch;white-space:pre-wrap}
 /* the model block, as on the main page */
 .mc{margin:10px 0 6px}.mc__go{font:500 13px/1.2 var(--sans);padding:8px 12px;border:1px solid var(--model);background:#fff;color:var(--model);border-radius:3px;cursor:pointer;text-align:left;width:100%}
@@ -131,17 +132,19 @@ function opName(c){return OPS[c]?OPS[c].replace(/\b(INC|LLC|CORP|CORPORATION|CO|
 /* the streaming block */
 function mc(label,sub,url,what){var box=D.createElement("section");what=what||"this report, all fields";box.className="mc";box.dataset.state="idle";
   box.innerHTML='<button type="button" class="mc__go">'+esc(label)+(sub?"<b>"+esc(sub)+"</b>":"")+'</button><div class="mc__meter"><span class="mc__spin"></span><span class="mc__count">reading</span><span class="mc__clock">0.0 s</span><button type="button" class="mc__stop">Stop</button></div><div class="mc__body"><div class="model"><p class="lab">Read by GLM-5.3-Flash</p><p class="out"></p><p class="prov"></p></div></div>';
-  var go=box.querySelector(".mc__go"),out=box.querySelector(".out"),prov=box.querySelector(".prov"),es=null,t0=0,tick=null,got="",chk=null;
+  var go=box.querySelector(".mc__go"),out=box.querySelector(".out"),prov=box.querySelector(".prov"),es=null,t0=0,tick=null,got="",chk=null,srcs=null,web=false;
   function st(s){box.dataset.state=s}
   function fin(kind,d){if(tick)clearInterval(tick);if(es)es.close();go.disabled=false;var secs=d&&d.seconds!=null?d.seconds+" s":((Date.now()-t0)/1000).toFixed(1)+" s";
     if(kind==="done"){st("done");var body=got.replace(/\n?\s*(NEXT|CHECKS):[\s\S]*$/,"").trim();out.textContent=body;
       if(chk&&chk.length){var row=D.createElement("div");row.className="pick";chk.forEach(function(c){if(!c||!c.filters)return;var a=D.createElement("a");var p=new URLSearchParams();Object.keys(c.filters).forEach(function(k){var v=String(c.filters[k]);if(k==="tail")v=v.replace(/^N/i,"");p.set(k,v)});a.href=ROOT+"?"+p.toString();a.textContent=c.label||Object.values(c.filters).join(" ");row.appendChild(a)});out.appendChild(row)}
-      prov.textContent="read by GLM-5.3-Flash, "+what+", "+secs+(d&&d.tokens?", "+num(d.tokens)+" tokens":"")+". Its words, not the FAA’s."}
+      if(srcs&&srcs.length){var sl=D.createElement("p");sl.className="srcs";sl.innerHTML='<b>sources</b> '+srcs.map(function(x){var h=String(x.url||"").replace(/^https?:\/\/(www\.)?/,"").split("/")[0];return '['+x.n+'] <a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(h)+'</a>'}).join(" · ");out.appendChild(sl)}
+      prov.textContent=web?"GLM-5.3-Flash, "+(d&&d.effort?String(d.effort).replace(/^web, /,""):"the web read")+", "+secs+". The web, not the file: nothing here comes from the FAA record above.":"read by GLM-5.3-Flash, "+what+", "+secs+(d&&d.tokens?", "+num(d.tokens)+" tokens":"")+". Its words, not the FAA’s."}
     else if(kind==="abstain"){st("abstain");prov.textContent="GLM-5.3-Flash would not answer."}
     else if(kind==="cancelled"){st("cancelled");prov.textContent="stopped by you at "+secs+". Partial."}
     else{st("error");out.textContent="The call to GLM-5.3-Flash failed"+(d&&d.message?" ("+d.message+")":"")+". Nothing has changed on this page."}}
-  function start(){got="";chk=null;out.textContent="";prov.textContent="";go.disabled=true;st("pending");t0=Date.now();tick=setInterval(function(){box.querySelector(".mc__clock").textContent=((Date.now()-t0)/1000).toFixed(1)+" s"},100);
-    es=new EventSource(url());es.addEventListener("meta",function(){box.querySelector(".mc__count").textContent="reading this report"});
+  function start(){got="";chk=null;srcs=null;web=false;out.textContent="";prov.textContent="";go.disabled=true;st("pending");t0=Date.now();tick=setInterval(function(){box.querySelector(".mc__clock").textContent=((Date.now()-t0)/1000).toFixed(1)+" s"},100);
+    es=new EventSource(url());es.addEventListener("meta",function(e){var m={};try{m=JSON.parse(e.data)}catch(x){}web=/web/.test(m.what||"");box.querySelector(".mc__count").textContent=web?"searching the web":"reading this report"});
+    es.addEventListener("sources",function(e){try{srcs=JSON.parse(e.data)}catch(x){}});
     es.addEventListener("checks",function(e){try{chk=JSON.parse(e.data)}catch(x){}});
     es.addEventListener("delta",function(e){var s;try{s=JSON.parse(e.data)}catch(x){s=e.data}if(box.dataset.state!=="streaming")st("streaming");got+=s;out.textContent=got.replace(/\n?\s*(NEXT|CHECKS):[\s\S]*$/,"")});
     es.addEventListener("abstain",function(e){var d={};try{d=JSON.parse(e.data)}catch(x){}out.textContent=d.text||"The model would not say.";fin("abstain",d)});
@@ -357,6 +360,17 @@ Promise.all([OPS_READY, SHEET_READY]).then(function(a){return a[1]}).then(functi
   if(tail)fetch("/api/aircraft/N"+encodeURIComponent(tail)).then(function(r){return r.json()}).then(function(a){if(a&&a.count!=null)$("#more").insertAdjacentHTML("afterbegin",'<span style="font:400 13px/2.2 var(--sans);color:var(--ash);margin-right:6px">This airframe appears in '+num(a.count)+' report'+(a.count===1?"":"s")+'.</span>')}).catch(function(){});
   var slim={};Object.keys(raw).forEach(function(k){if(k!=="Discrepancy"&&raw[k]!=null&&raw[k]!=="")slim[k]=raw[k]});var recq="rec="+encodeURIComponent(JSON.stringify(slim))+"&text="+encodeURIComponent((raw.Discrepancy||"").slice(0,4000));
   [["explain","What actually happened?","the whole report, explained for a first-time reader"],["danger","Was anyone in danger?","only what the report states, and what it does not"],["repair","What did the mechanics do?","step by step, and what was left unsaid"],["why","Does it say why?","quoted if it does; said plainly if it does not"],["checks","What should we check next?","same aircraft, part, airline or day: each one a click"]].forEach(function(x){$("#mc").appendChild(mc(x[1],x[2],function(){return "/z/api/stream/case?q="+x[0]+"&"+recq}))});
+  /* hand-written, 2 September 2026: the web, on a record. The same endpoint the
+     Freefall page uses (search first, the model may use only the results, one
+     numbered source per sentence, cached a day per topic), pointed at this
+     report. It is kept apart from the five questions above, which read the
+     record and nothing else, and it says so in its own provenance line. */
+  (function(){var who=(tail?"aircraft N"+tail:"")+(opn?(tail?" of ":"")+opn:"")||model||"this aircraft";
+    var topic="What is publicly known about "+who+(model?" ("+model+")":"")+" around "+date+": any incident, grounding, airworthiness directive, NTSB or FAA action, lawsuit or news report? The FAA maintenance report of that date says: "+(d.text||"").slice(0,140);
+    var q=[tail?"N"+tail:"",opn||"",model,date.replace(/^\d+ /,"")].filter(Boolean).join(" ");
+    var box=D.createElement("div");box.innerHTML='<p class="eyebrow" style="margin-top:22px">Search the web about this report</p><p class="sub" style="font-size:13.5px;margin-bottom:8px">Not the file. GLM-5.3-Flash runs a web search for this tail, airline and date, and may use only what the search returns, one numbered source per sentence. What the world wrote, next to what the mechanic wrote.</p>';
+    box.appendChild(mc("What has been reported about this aircraft?","the web, searched for "+q,function(){return "/z/api/stream/news?topic="+encodeURIComponent(topic.slice(0,300))+"&q="+encodeURIComponent(q.slice(0,200))},"the web"));
+    var sheetEl=$("#sheet");sheetEl.parentNode.insertBefore(box,sheetEl.previousElementSibling.previousElementSibling)})();
   $("#foot").textContent=(d.source||"")+" Counts are of reports filed, not of flights; no rate is claimed.";
 }).catch(function(e){$("#h1").textContent="The file did not answer ("+(e&&e.message||e)+"). Reload."});
 </script>

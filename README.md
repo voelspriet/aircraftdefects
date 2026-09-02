@@ -33,7 +33,7 @@ shaded by where the trouble sits, nineteen filters, a case sheet, and nine
 research features it chose itself. That page still runs at
 [aircraftdefects.com/z/rebuilt](https://aircraftdefects.com/z/rebuilt). Its
 reasoning, four million characters of it, is committed beside the code. By
-character count, 68.9% of everything this repository serves is the model's.
+character count, 68.5% of everything this repository serves is the model's.
 
 Nobody has swept the file for any of this, so the ledger grows when somebody
 looks: [the conflicts found so far](https://aircraftdefects.com/conflicts/).
@@ -131,6 +131,7 @@ the model's. Twelve of them are below.
 | **one aircraft, end to end** | its life oldest first, one turning point at a time, each pinned to its record |
 | **compare** | the newest 150 write-ups from each of two airlines: shared, only here, only there |
 | **the Freefall page** | the file's own reports on the door-plug fleet, and beneath them, labelled the web and not the file, what the NTSB found |
+| **the web, on any report** | the same search-first reading, pointed at one record: tail, airline, type and date. What the world wrote, in a separate box that says it is not the file |
 | **the FAA registry file** | "Make this file readable": what the registry says about one aircraft **and what it does not**, in 140 words. That the registered owner holds the paper and may be a bank or a trustee rather than whoever flies it, and that the airworthiness class says what the aircraft is certified to do, not what it did |
 | **before you export** | reads the reports your filters selected and says which of them do not belong to what you seem to have meant, quoting the words and the record number, and what the filters will miss |
 | **a question with no field** | ask it something the form cannot hold, "what plane is the most dangerous", and it says first what the file cannot tell you, then draft filter chips checked against the FAA's own code tables and airline list. |
@@ -340,13 +341,13 @@ inside the page: fifteen endpoints where it reads the FAA's own words live, each
 one listed in [`MODEL_USE.md`](MODEL_USE.md) with its guard and its measured
 cost. The frame around those readings, the page at the root, is hand-written.
 
-By character count of everything this repository serves, **68.9% is the model's
-and 31.1% is not**, counted by
+By character count of everything this repository serves, **68.5% is the model's
+and 31.5% is not**, counted by
 [`build/count_provenance.py`](build/count_provenance.py) rather than claimed.
 Run it with `--check` and it fails if the table has drifted.
 
 **The other contributor.** GitHub lists two. A coding assistant, Claude Code,
-was used for the 31.1% that is not the model's: the frame at the root that holds
+was used for the 31.5% that is not the model's: the frame at the root that holds
 the model's readings, the build and splice scripts, the browser harnesses that
 measure the page, the deployment plumbing, and this documentation. It also wrote
 the guards around the model, the substring check that verifies every quote and

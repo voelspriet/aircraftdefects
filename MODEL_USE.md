@@ -45,6 +45,7 @@ abstains in a sentence when the write-ups do not carry an answer. All at
 | What differs, two airlines | the newest 150 write-ups from each, plus the counted shares by system | three paragraphs: shared, only A, only B | counts are the file's; "never say one is safer or worse" | 22.5 s, 24,400 tokens |
 | How the trade says it | up to 60 write-ups carrying the word | what mechanics mean by it, with records | abstains under 10 uses | 5 to 15 s |
 | The Freefall page, "what the NTSB found" and "what the film says" | a z.ai web search run by the server first (mirrors and translations dropped, .gov and named outlets first); the model sees only those results | 220 words, every fact numbered to a result; sources rendered as named links | labelled "the web, not the file"; on first attempt the model skipped the search tool and insisted the film was *Downfall* (2022), which is why the search is now done server-side and the model is held to it | 10 to 19 s |
+| The case page, "Search the web about this report" | the same call, topic built from the tail, airline, type and date of the record plus the first 140 characters of the write-up | same guard: search first, results only, one numbered source per sentence, cached a day per topic; its provenance line says "the web, not the file" | measured 2 September 2026: 12.1 s, 10 results read, on ASAA2024010547162 |
 | The case page, `/case/<id>` | the sheet endpoint decodes every field with the FAA's wording beside the plain label; the five questions run there too | a citable page per record | quote and citation copy buttons; caveats before publishing | instant, one lookup |
 
 ### Prove it
@@ -170,14 +171,14 @@ rather than a judge, so it agreed with everything. See F1 in
 Counted, not claimed. Run `python3 build/count_provenance.py --check` and it
 fails if this table has drifted from the repository.
 
-    code this repository serves       894,763 characters
-      GLM-5.3-Flash                   616,396   68.9%
-      not the model's                 278,367   31.1%
+    code this repository serves       899,543 characters
+      GLM-5.3-Flash                   616,396   68.5%
+      not the model's                 283,147   31.5%
 
         the model's page, /z/rebuilt        565,458   written whole from the specs
         the service, app/app.py              50,938   the model's share
-        the page at the root                164,580   hand-written
-        the service, app/app.py              85,318   hand-written blocks
+        the page at the root                169,070   hand-written
+        the service, app/app.py              85,608   hand-written blocks
         the seam and later fixes             28,469   hand-written
 
 ### The earlier page, which is kept but not served

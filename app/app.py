@@ -1464,6 +1464,11 @@ def web_search(query, count=10):
         host = re.sub(r"^https?://(www\.)?", "", x["link"]).split("/")[0]
         if host in ("nutanica.com", "wikizero.net", "gwern.net", "newsbreak.com") or "translate.goog" in host or host.endswith((".fr", ".de", ".es", ".it", ".nl", ".cn", ".my")):
             continue
+        # hand-written, 2 September 2026: Wikipedia mirrors on other domains
+        # (wikipedia.<anything>.com) slipped through on the case page; only
+        # wikipedia.org itself is Wikipedia.
+        if "wikipedia" in host and not host.endswith("wikipedia.org"):
+            continue
         rank = 0 if host.endswith(".gov") else 1 if re.search(r"(wikipedia|ntsb|faa|reuters|apnews|nytimes|latimes|usatoday|bbc|theguardian|cnn|cbsnews|nbcnews|seattletimes|netflix|variety|time\.com|hollywoodreporter)", host) else 2
         out.append({"title": title, "url": x["link"], "text": (x.get("content") or "")[:1200],
                     "date": x.get("publish_date") or "", "rank": rank})

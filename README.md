@@ -26,6 +26,10 @@ substring check on the server makes every quote it produces verifiable against
 the record. Total model spend: $1.07. The specifications, the briefs, its
 reasoning and the count of who wrote what are all in this repository.
 
+At a dollar a project, a researcher with a public dataset and a free weekend
+can ship the interface the agency never built. The data was always public.
+What fell is the cost of making it usable.
+
 ## Try it in 30 seconds
 
 1. Open [aircraftdefects.com](https://aircraftdefects.com/). The aircraft at the top is shaded by where the trouble sits: the parts written up most are darker.
@@ -339,9 +343,7 @@ is arithmetic, and a computer should be doing it for you.
 GLM-5.3-Flash's calls for the whole build, read from the z.ai console, cost
 **$1.07**. The coding assistant that wrote the frame around it is not in that
 figure (see "Who wrote what"). Public-interest tools usually die at the funding
-stage, not the idea stage. At a dollar a project, a researcher with a public
-dataset and a free weekend can ship the interface the agency never built. The
-data was always public. What fell is the cost of making it usable.
+stage, not the idea stage.
 
 The dollar is low because the model is cheap and because the site pays for a
 piece of work once and keeps it. The reading of a report on the front page is

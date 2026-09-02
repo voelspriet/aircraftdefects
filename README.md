@@ -8,7 +8,7 @@ It took him hours. With this tool it takes seconds.
 
 Every day, mechanics file what they found wrong on an aircraft with the FAA:
 a cracked bracket, a failed sensor, a door that would not open. The reports are
-public, 1.76 million of them since 1995, and the aircraft from the film is in
+public, 1.76 million of them since 1995, and the aircraft from the documentary is in
 there: its forward passenger door hard to open, aircraft grounded, written up
 five days before the door plug blew out. A different door, and the file does
 not connect the two. Almost nobody has
@@ -172,15 +172,15 @@ They are also close to unreadable. Almost every answer is a code, and the codes
 collide: `A` in one column means the crew made an emergency landing, and `A`
 elsewhere on the same form means an airline filed the report.
 
-The aircraft from the film is in the file. Two reports on N704AL, an Alaska
+The aircraft from the documentary is in the file. Two reports on N704AL, an Alaska
 Airlines 737-9: one filed five days before the door plug blew out, the forward
 passenger door hard to open, aircraft grounded (a different door; the file
 draws no link between the two), and the blow-out itself in the mechanic's own words,
 filed on 5 January 2024. Both open from the red Freefall cell among the leads,
 at [#view=freefall](https://aircraftdefects.com/#view=freefall).
 
-![The Freefall view: the film's own aircraft, in the file](screenshots/freefall.png)
-*The Freefall view: the film's own aircraft, and what was filed about it*
+![The Freefall view: the documentary's own aircraft, in the file](screenshots/freefall.png)
+*The Freefall view: the documentary's own aircraft, and what was filed about it*
 
 ## What the page does
 
@@ -278,7 +278,7 @@ only that. The model invented WN as the code for Southwest; the real FAA
 designator is SWAA, so now it is handed the real list and nothing outside it
 is accepted. Long reports silently broke one of the five questions; the error
 turned out to be a web server rejecting long requests, a limit from 1998,
-raised in one line. Asked cold about the film, the model insisted it was
+raised in one line. Asked cold about the documentary, the model insisted it was
 *Downfall* (2022); now the server searches first and the model is held to the
 results. The good parts of this site were not designed in advance. They exist
 because I used the thing, found it irritating, and complained precisely.

@@ -6,6 +6,12 @@
 In the Netflix documentary [*Freefall*](https://www.netflix.com/title/81780118) I watched the father of a crash victim try to read the database of aircraft defect reports kept by the FAA, the US aviation regulator.
 It took him hours. With this tool it takes seconds.
 
+Moments after it was built, the [Foundation for Aviation
+Safety](https://www.foundationforaviationsafety.org/) wrote to me. Ed, from the
+Foundation, after a first look: "It looks impressive. I'm hoping to dig into it
+further." They asked for a walkthrough. That is the test of a tool like this:
+whether the people who work on the problem every day want to use it.
+
 Every day, mechanics file what they found wrong on an aircraft with the FAA:
 a cracked bracket, a failed sensor, a door that would not open. The reports are
 public, 1.76 million of them since 1995, and the aircraft from the documentary is in
@@ -34,12 +40,6 @@ research features it chose itself. That page still runs at
 [aircraftdefects.com/z/rebuilt](https://aircraftdefects.com/z/rebuilt). Its
 reasoning, four million characters of it, is committed beside the code. By
 character count, 68.2% of everything this repository serves is the model's.
-
-Moments after it was built, the [Foundation for Aviation
-Safety](https://www.foundationforaviationsafety.org/) wrote to me. Ed, from the
-Foundation, after a first look: "It looks impressive. I'm hoping to dig into it
-further." They asked for a walkthrough. That is the test of a tool like this:
-whether the people who work on the problem every day want to use it.
 
 Few have swept the file for any of this, so the ledger grows when somebody
 looks: [the conflicts found so far](https://aircraftdefects.com/conflicts/).

@@ -226,13 +226,13 @@ deleted before you ever see it, and the page prints the score: "32 quotes
 checked, 32 verified". Click any sentence and it opens the records that
 sentence stands on.
 
-Be clear about what that score covers. A quote is text inside quotation marks,
-or the mechanic's capitals directly before a `[record]` tag, three words or
-longer. Only those are tested. A sentence that paraphrases a write-up, or
-states a count in prose, is shown with the records it cites so you can read
-them, but the server has not confirmed the paraphrase. Treat the verified
-quote as the citable unit and everything around it as the model's reading.
-Code: `verify_text()` in [`app/app.py`](app/app.py).
+What that score covers: the check tests quotes only, meaning text inside
+quotation marks or the mechanic's capitals directly before a `[record]` tag,
+three words or longer. When the model paraphrases a write-up or states a
+count in prose, the page shows the records behind it so you can read them,
+but the server has not confirmed the paraphrase. If you are going to cite
+something, cite the verified quote; the sentences around it are the model's
+reading. The code is `verify_text()` in [`app/app.py`](app/app.py).
 
 ![One zone chosen: the count, then the records behind it](screenshots/selection.png)
 *One zone chosen: the count, then the records behind it*

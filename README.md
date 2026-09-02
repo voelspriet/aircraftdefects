@@ -5,6 +5,13 @@
 
 Every day, mechanics file what they found wrong on US aircraft. The plane from Netflix's *Freefall* is in the file: its passenger door hard to open, five days before a different door, the plug, blew out. GLM-5.3-Flash reads 1.76M reports in the mechanics' words, live, and built a complete working version of this site on its own from specs. $1.07.
 
+Moments after it was built, the [Foundation for Aviation
+Safety](https://www.foundationforaviationsafety.org/) got in touch. Ed, from
+the Foundation, after a first look: "It looks impressive. I'm hoping to dig
+into it further." They asked for a walkthrough of the tool. That is the test
+of whether a tool like this is worth anything: not the score, but whether the
+people who work on the problem every day want to use it.
+
 In [*Freefall*](https://www.netflix.com/title/81780118) I watched the father of a crash victim try to read this file.
 What took him hours takes seconds here.
 
@@ -78,13 +85,6 @@ than from code handed to it. It still runs at
 [/z/rebuilt](https://aircraftdefects.com/z/rebuilt). It also designed the nine
 research features itself and now does every live reading on the page. Total model
 spend, from the z.ai console: **$1.07**.
-
-Moments after it was built, the [Foundation for Aviation
-Safety](https://www.foundationforaviationsafety.org/) got in touch. Ed, from
-the Foundation, after a first look: "It looks impressive. I'm hoping to dig
-into it further." They asked for a walkthrough of the tool. That is the test
-of whether a tool like this is worth anything: not the score, but whether the
-people who work on the problem every day want to use it.
 
 That number matters more than it looks. Public-interest tools usually die at the
 funding stage, not the idea stage. At a dollar a project the arithmetic changes:

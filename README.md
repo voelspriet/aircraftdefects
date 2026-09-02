@@ -8,7 +8,7 @@ What took him hours takes seconds here.
 
 Every day, mechanics file what they found wrong on an aircraft with the FAA:
 a cracked bracket, a failed sensor, a door that would not open. The reports are
-public, 1,758,134 of them since 1995, and the aircraft from the film is in
+public, 1.76 million of them since 1995, and the aircraft from the film is in
 there: its forward passenger door hard to open, aircraft grounded, written up
 five days before the door plug blew out. A different door, and the file does
 not connect the two. Almost nobody has
@@ -53,16 +53,15 @@ Building the whole thing cost $1.07 in model calls.
 
 ## In one page
 
-Every day, aircraft mechanics file service difficulty reports with the FAA: a
-cracked bracket, a failed sensor, corrosion found on inspection. The reports are
-public. They are also close to unreadable, buried behind a government query form,
-written in trade shorthand, returned as raw rows with no context.
+The reports are buried behind a government query form, written in trade
+shorthand, and returned as raw rows with no context.
 
 **aircraftdefects.com opens that archive.** You can search thirty years of FAA
 service difficulty reports, 1995 to last week, by airline, tail number, aircraft
-type, part, system code or keyword. The model reads each mechanic's write-up. It finds contradictions.
-It says in plain language what actually happened, so a reporter, a pilot or a
-passenger can follow a maintenance trail without holding a maintenance licence.
+type, part, system code or keyword. The model reads each mechanic's write-up,
+says in plain language what actually happened, and finds where the coded fields
+contradict the words, so a reporter, a pilot or a passenger can follow a
+maintenance trail without holding a maintenance licence.
 It is free and needs no login. Counts reflect reports filed, not incidents, and
 the site calculates no safety rates: the point is to find leads, not to rank
 airlines.
@@ -133,7 +132,7 @@ the model's. Twelve of them are below.
 | **the Freefall page** | the file's own reports on the door-plug fleet, and beneath them, labelled the web and not the file, what the NTSB found |
 | **the FAA registry file** | "Make this file readable": what the registry says about one aircraft **and what it does not**, in 140 words. That the registered owner holds the paper and may be a bank or a trustee rather than whoever flies it, and that the airworthiness class says what the aircraft is certified to do, not what it did |
 | **before you export** | reads the reports your filters selected and says which of them do not belong to what you seem to have meant, quoting the words and the record number, and what the filters will miss |
-| **a question with no field** | ask it something the form cannot hold, "what plane is the most dangerous", and it says first what the file cannot tell you, then draft filter chips checked against the FAA's own code tables and airline list. It invented `WN` for Southwest on the first test; the designator is `SWAA`, so it is handed the real list and nothing outside it is accepted |
+| **a question with no field** | ask it something the form cannot hold, "what plane is the most dangerous", and it says first what the file cannot tell you, then draft filter chips checked against the FAA's own code tables and airline list. |
 
 ![Seventeen leads, and the panels the model reads live](screenshots/leads.png)
 *Seventeen ways into the file. The two marked `model reads` are the model's own*
@@ -163,7 +162,8 @@ number so you can look it up at the source and check it.
 When a technician in the United States finds something wrong
 with an aircraft, a crack in a component, rust under a fitting, a failed seal,
 they file it. Those reports are public: no sign-in, no fee, no records request.
-There are **1,758,134** of them since 1995, on **54,634** aircraft.
+There are **1,758,391** of them since 1995, on **54,642** aircraft, counted on
+2 September 2026; the file refreshes weekly.
 
 They are also close to unreadable. Almost every answer is a code, and the codes
 collide: `A` in one column means the crew made an emergency landing, and `A`
@@ -229,19 +229,6 @@ on whatever slice of the file you have in front of you.
 
 ![The newest crew-action report, told in plain English, with the mechanic's words beneath it](screenshots/plain-english.png)
 *The newest crew-action report, told in plain English, with the mechanic's words beneath it*
-
-
-| You press | The FAA's site | GLM-5.3-Flash here |
-|---|---|---|
-| Nothing: the front page | a form | the newest report where the crew had to act, already read: the whole record decoded by the FAA's own tables, told in about a hundred words for someone who has never seen the form, ending with what the report does not say. Pre-read the moment it arrived, on screen in under a second |
-| Any report | a row | five questions on its case page: what actually happened, was anyone in danger (only what the report states, and what it does not), what did the mechanics do, does it say why, what should we check next. The last answer comes back as searches you can click: same aircraft, same part, same airline, same day |
-| **Read what recurs in these** on any selection | a count | reads up to 300 write-ups and writes prose, not a list: the phrases mechanics reach for, the repairs that repeat, the thing that is quietly becoming a pattern, one verbatim quote per claim with its record number |
-| **Ask** what the form cannot hold ("what plane is the most dangerous") | nothing | says first what the file cannot tell you (danger, injuries, risk), then the closest thing it can carry, most written up, never most dangerous |
-| **Ask** what the form can hold | a form with nineteen boxes | draft filter chips, checked against the FAA's own code tables and airline list, shown before anything runs |
-| **Read this aircraft end to end** on any tail | 419 rows | its life, oldest first, one turning point at a time, each pinned to its record. Where the file goes quiet for more than a year the server inserts a marker, so the model must write "nothing was filed", and the words because, caused, led to and due to are banned: the file records no causes |
-| **Tell me what differs** on Compare | two counts | the newest 150 write-ups from each airline, in the mechanics' own words: shared, only here, only there. The counts stay the file's |
-| Any word in a write-up | a string | what mechanics mean by it, from the write-ups that carry it, each with a record |
-| The Freefall page | nothing | the file's own reports on N704AL and the door-plug fleet inspection, and beneath them, labelled "the web, not the file", what the NTSB found and what the film says: the server runs the web search first and the model may use only those results, one named source per sentence |
 
 ### Prove it
 
@@ -340,7 +327,7 @@ tokens, which is why it is not read whole and
 nothing but written specifications. Not a demo: four rails, an aircraft shaded
 by where the trouble sits, nineteen filters, the record table, a case sheet, a
 phone layout and nine research features it chose itself. The specifications are
-in [`rebuild/specs/`](rebuild/specs/), 12,243 words. Every brief it was given is
+in [`rebuild/specs/`](rebuild/specs/), 12,241 words. Every brief it was given is
 in [`rebuild/*.prompt.txt`](rebuild/), verbatim. Its own reasoning is committed
 too, 4.1 million characters of it. That page is still running, at
 [aircraftdefects.com/z/rebuilt](https://aircraftdefects.com/z/rebuilt), so it can
@@ -357,29 +344,16 @@ and 31.1% is not**, counted by
 [`build/count_provenance.py`](build/count_provenance.py) rather than claimed.
 Run it with `--check` and it fails if the table has drifted.
 
-## On the second assistant
-
-GitHub lists two contributors. This says what the other one did, so nobody has to
-guess.
-
-GLM-5.3-Flash is the subject of this project. It wrote a whole working tool on
-its own from written specifications, it does every live reading on the page now,
-and it designed the nine research features itself. That is 68.9% of the code this
-repository serves, counted by
-[`build/count_provenance.py`](build/count_provenance.py).
-
-A coding assistant, Claude Code, was used for the other 31.1%: the frame at the
-root that holds the model's readings, the build and splice scripts, the browser
-harnesses that measure the page, the deployment plumbing, and this documentation.
-It also wrote the guards around the model, the substring check that verifies every
-quote and the rules that make it abstain.
-
-It reads nothing for a visitor and appears nowhere on the page. Every word a
-reader sees is either the FAA's or GLM-5.3-Flash's.
-
-The split is marked in the source rather than described: blocks headed
-`# ---- hand-written` in [`app/app.py`](app/app.py), and the file-by-file count in
-[`MODEL_USE.md`](MODEL_USE.md), which `--check` will fail on if it drifts.
+**The other contributor.** GitHub lists two. A coding assistant, Claude Code,
+was used for the 31.1% that is not the model's: the frame at the root that holds
+the model's readings, the build and splice scripts, the browser harnesses that
+measure the page, the deployment plumbing, and this documentation. It also wrote
+the guards around the model, the substring check that verifies every quote and
+the rules that make it abstain. It reads nothing for a visitor and appears
+nowhere on the page. Every word a reader sees is either the FAA's or
+GLM-5.3-Flash's. The split is marked in the source rather than described: blocks
+headed `# ---- hand-written` in [`app/app.py`](app/app.py), and the file-by-file
+count in [`MODEL_USE.md`](MODEL_USE.md).
 
 ## Running it
 

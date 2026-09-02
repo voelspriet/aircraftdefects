@@ -35,7 +35,7 @@ research features it chose itself. That page still runs at
 reasoning, four million characters of it, is committed beside the code. By
 character count, 68.5% of everything this repository serves is the model's.
 
-Nobody has swept the file for any of this, so the ledger grows when somebody
+Few have swept the file for any of this, so the ledger grows when somebody
 looks: [the conflicts found so far](https://aircraftdefects.com/conflicts/).
 Building the whole thing cost $1.07 in model calls.
 

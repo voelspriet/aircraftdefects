@@ -83,7 +83,7 @@ h1 .here{color:var(--rust)}
 .cannot b{font:400 12px var(--mono);color:var(--ink)}
 .cannot button{background:none;border:0;padding:0;font:inherit;color:var(--ink);border-bottom:1px dotted var(--ash);cursor:pointer}
 .spec{min-width:0}
-.eyebrow{font:500 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ash);margin:0 0 10px}
+.eyebrow{font:500 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ash);margin:0 0 10px}.eyebrow.hot{color:var(--rust)}
 .who{font:600 13px/1.45 var(--sans);margin:0 0 8px}.who span{color:var(--ash);font-weight:500}
 .raw{font:400 13.5px/1.7 var(--mono);margin:0;padding:0 0 0 14px;border-left:2px solid var(--line);word-break:break-word}
 .raw u{text-decoration:none;border-bottom:1px dotted var(--model);cursor:pointer}
@@ -563,11 +563,11 @@ function px(text,terms){var h=esc(text||"");
     h=h.replace(new RegExp("(^|[^\\w>])("+e+")(?![^<]*>)","i"),function(_,a,b){
       return a+'<a class="px" href="https://www.perplexity.ai/search?q='+encodeURIComponent(t.q)+'" target="_blank" rel="noopener">'+b+'</a>'})});
   return h}
-function spec(d){var s=$("#spec");if(!d||d.none||!d.record){s.innerHTML='<p class="eyebrow">Latest report where the crew had to act</p><p class="cannot">None in this selection.</p>';return}
+function spec(d){var s=$("#spec");if(!d||d.none||!d.record){s.innerHTML='<p class="eyebrow hot">Latest report where the crew had to act</p><p class="cannot">None in this selection.</p>';return}
   var r=d.record,dt=r.date||"";var pretty=(function(){var m=dt.match(/(\d\d)\/(\d\d)\/(\d{4})/);if(!m)return dt;return new Date(+m[3],+m[1]-1,+m[2]).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})})();
   var meta=[r.make&&r.model?((r.make||"")+" "+(r.model||"")).trim():"",r.tail?"N"+r.tail:"",(r.crew||[]).join(", ").toLowerCase(),(r.nature||[]).join(", ").toLowerCase(),(r.stage||"").toLowerCase()].filter(Boolean);
   var raw=esc(r.text).replace(/\b([A-Z][A-Z\/\-]{2,})\b/g,function(m){return /^(THE|AND|WAS|FOR|WITH|FROM|THAT|THIS|WERE|WHEN|AFTER|DURING|FOUND|LEFT|RIGHT|AIRCRAFT|FLIGHT|CREW|NOTED)$/.test(m)?m:"<u>"+m+"</u>"});
-  s.innerHTML='<p class="eyebrow">'+(view()==="freefall"?"The report the documentary turns on":"Latest report where the crew had to act")+' · filed '+esc(pretty)+'</p><p class="who">'+esc(meta[0]+(meta[1]?", "+meta[1]:""))+' <span>· '+esc(meta.slice(2).join(" · "))+'</span></p>'+
+  s.innerHTML='<p class="eyebrow hot">'+(view()==="freefall"?"The report the documentary turns on":"Latest report where the crew had to act")+' · filed '+esc(pretty)+'</p><p class="who">'+esc(meta[0]+(meta[1]?", "+meta[1]:""))+' <span>· '+esc(meta.slice(2).join(" · "))+'</span></p>'+
     (d.plain?'<div class="model"><p class="lab">In plain English, read by GLM-5.3-Flash</p><p>'+px(d.plain,d.terms)+'</p><p class="prov">Read when this report arrived, '+esc(d.read_at)+' · '+esc(d.seconds)+' s · its words, not the FAA’s.'+(d.terms&&d.terms.length?' Linked terms open a Perplexity search in a new tab.':'')+' Underlined words below open the trade’s own meaning.</p></div>':'<div class="model wait"><p class="lab">GLM-5.3-Flash</p><p>'+esc(d.error||"did not answer")+'</p></div>')+
     '<p class="eyebrow" style="margin-top:16px">The mechanic’s words, as filed</p><p class="raw">'+raw+'</p><p class="cannot" style="margin-top:8px"><a href="#" id="specCase">Open the case sheet</a> · every code spelled out, and five questions for the model.</p>';var sc=D.getElementById("specCase");if(sc)sc.onclick=function(e){e.preventDefault();location.href=casePage(r.id)}}
 

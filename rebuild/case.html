@@ -33,6 +33,28 @@ table.sheet .filed{font:600 14px/1.4 var(--mono);letter-spacing:.01em}
 table.sheet .undec{font:400 12px/1.5 var(--sans);color:var(--ash);margin-top:4px;max-width:66ch}table.sheet .undec i{font:500 10px var(--mono);letter-spacing:.08em;font-style:normal;margin-right:6px}
 table.sheet .note{margin-top:4px;max-width:66ch}table.sheet .note i{font:500 10px var(--mono);letter-spacing:.08em;font-style:normal;margin-right:6px;color:var(--ash)}
 .links a{display:block;padding:10px 0;border-top:1px solid var(--line);color:var(--ink);text-decoration:none}.links a:hover{color:var(--rust)}.links a b{font-weight:600}.links a span{display:block;font-size:12.5px;color:var(--ash)}
+/* hand-written, 2 September 2026: the conflicts banner and the free question. */
+.cflag{margin:14px 0 0;padding:12px 14px;border:1px solid var(--rust);border-left-width:4px;border-radius:8px;background:#fdf3ef}
+.cflag b{display:block;font:600 13px/1.4 var(--sans);color:var(--rust);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.cflag p{font:400 14px/1.55 var(--sans);color:var(--ink);margin:0}
+.cflag .cwhy{font:400 12.5px/1.5 var(--sans);color:var(--ash);margin-top:7px}
+.cflag a{color:var(--rust)}
+.askbox{display:flex;gap:8px;margin-top:10px}
+.askbox input{flex:1;font:400 14px var(--sans);color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:100px;padding:10px 16px}
+.askbox input:focus{outline:2px solid var(--rust);outline-offset:1px;border-color:var(--rust)}
+.askbox button{font:500 14px var(--sans);padding:10px 18px;border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:100px;cursor:pointer}
+.askbox button:hover{background:var(--rust);border-color:var(--rust)}
+/* hand-written, 2 September 2026: the note box. */
+.note textarea{width:100%;min-height:96px;font:400 14px/1.55 var(--sans);color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;resize:vertical}
+.note input{width:100%;font:400 13px/1.4 var(--sans);color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:8px}
+.note textarea:focus,.note input:focus{outline:2px solid var(--rust);outline-offset:1px;border-color:var(--rust)}
+.note .row{display:flex;gap:8px;margin-top:8px}
+.note .row input{margin-top:0}
+.note button{margin-top:10px;font:500 14px var(--sans);padding:9px 18px;border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:100px;cursor:pointer}
+.note button:hover{background:var(--rust);border-color:var(--rust)}
+.note button[disabled]{opacity:.5;cursor:default}
+.note .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.note .said{font:400 13px/1.6 var(--sans);color:var(--ash);margin-top:8px}
 .pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.pick a,.pick button{font:500 13px/1.3 var(--sans);padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:100px;color:var(--ink);text-decoration:none;cursor:pointer}.pick a:hover,.pick button:hover{border-color:var(--rust);color:var(--rust)}
 .srcs{font:400 12.5px/1.7 var(--mono);color:var(--ash);margin:10px 0 0}.srcs a{color:var(--ash)}
 .cite{font:400 13px/1.6 var(--mono);color:var(--ink);background:#fff;border:1px solid var(--line);padding:12px 14px;max-width:82ch;white-space:pre-wrap}
@@ -91,6 +113,7 @@ table.sheet .note i{display:block;font:600 10px/1.5 var(--mono);letter-spacing:.
   <div class="crumb" id="crumb"></div>
   <h1 id="h1">Reading the file…</h1>
   <p class="sub" id="sub"></p>
+  <div id="cflag"></div>
   <div class="grid">
     <div>
       <p class="eyebrow">The mechanic’s words, as filed</p>
@@ -103,6 +126,30 @@ table.sheet .note i{display:block;font:600 10px/1.5 var(--mono);letter-spacing:.
       <table class="sheet" id="sheet"></table>
     </div>
     <div>
+      <!-- hand-written, 2 September 2026: This aircraft moved above How to cite
+           it, and the citation sits between the links and the aircraft. The
+           four links are what a reader does next; the citation is what they
+           copy once they know they have the right report. It used to stand in
+           front of both on every one of the 1.76 million case pages. -->
+      <p class="eyebrow">This aircraft</p>
+      <div class="pick" id="more"></div>
+      <!-- hand-written, 2 September 2026: what the file cannot hold. A reader who
+           knows why one report matters is the only source for that, and there was
+           nowhere to say it. Goes to a person, not onto the page. -->
+      <div id="notewrap">
+      <p class="eyebrow">See something interesting, or know more?</p>
+      <form class="note" id="note" autocomplete="off">
+        <p class="sub" style="font-size:13.5px;margin-bottom:8px">Let us know. It reaches a person, and is not published on this page.</p>
+        <textarea id="nbody" required maxlength="4000" placeholder="This aircraft was written up twice that week&hellip;" aria-label="Your note about this report"></textarea>
+        <div class="row">
+          <input id="nname" maxlength="120" placeholder="Your name, if you like" aria-label="Your name">
+          <input id="nmail" type="email" maxlength="160" placeholder="Email, only if you want an answer" aria-label="Your email">
+        </div>
+        <div class="hp" aria-hidden="true"><label>Leave this empty<input id="nhp" tabindex="-1"></label></div>
+        <button type="submit" id="nsend">Send it</button>
+        <p class="said" id="nsaid" role="status" aria-live="polite"></p>
+      </form>
+      </div>
       <p class="eyebrow">How to cite it</p>
       <div class="cite" id="cite"></div>
       <div id="planebox" hidden>
@@ -113,11 +160,13 @@ table.sheet .note i{display:block;font:600 10px/1.5 var(--mono);letter-spacing:.
       <div class="warn" id="warn"></div>
       <p class="eyebrow">Check it against the source</p>
       <div class="links" id="links"></div>
-      <p class="eyebrow">This aircraft</p>
-      <div class="pick" id="more"></div>
     </div>
   </div>
   <div class="foot" id="foot"></div>
+  <!-- hand-written, 2 September 2026: a case page is a citable address, so it
+       carries its own credit. The copyright covers the writing and the code
+       only: the FAA file itself is a work of the US government. -->
+  <div class="foot" style="border-top:0;margin-top:8px;padding-top:0">&copy; 2026 the author &bull; <a href="https://github.com/voelspriet/aircraftdefects">source</a> &bull; the writing and the code are the author&rsquo;s; the FAA Service Difficulty Reports are public domain</div>
 </div>
 <script>
 var D=document,$=function(s){return D.querySelector(s)};
@@ -357,7 +406,18 @@ Promise.all([OPS_READY, SHEET_READY]).then(function(a){return a[1]}).then(functi
     $("#plane").innerHTML='<p class="note">The aircraft details did not load. Nothing above has changed.</p>';
     $("#planebox").hidden=false;});
   if(!tail){$("#plane").innerHTML='<p class="note">This report names no tail number: it was filed on a part, not on an identified aircraft. There is no aircraft to look up.</p>';$("#planebox").hidden=false}
-  if(tail)fetch("/api/aircraft/N"+encodeURIComponent(tail)).then(function(r){return r.json()}).then(function(a){if(a&&a.count!=null)$("#more").insertAdjacentHTML("afterbegin",'<span style="font:400 13px/2.2 var(--sans);color:var(--ash);margin-right:6px">This airframe appears in '+num(a.count)+' report'+(a.count===1?"":"s")+'.</span>')}).catch(function(){});
+  if(tail)fetch("/api/aircraft/N"+encodeURIComponent(tail)).then(function(r){return r.json()}).then(function(a){if(a&&a.count!=null)$("#more").insertAdjacentHTML("afterbegin",'<span style="font:400 13px/2.2 var(--sans);color:var(--ash);margin-right:6px">This airframe appears in '+num(a.count)+' report'+(a.count===1?"":"s")+'.</span>');
+    /* hand-written, 3 September 2026: the last time this airframe came down
+       unscheduled. Code A in any of the four crew-action boxes is the FAA's
+       UNSCHED LANDING. Newest first by the FAA date; the current report is
+       named as such when it is the latest. */
+    var rows=(a&&a.rows)||[];function dt(r){var m=(r.DifficultyDate||"").match(/(\d\d)\/(\d\d)\/(\d{4})/);return m?m[3]+m[1]+m[2]:""}
+    var land=rows.filter(function(r){return ["A","B","C","D"].some(function(c){return (r["PrecautionaryProcedure"+c]||"").trim()==="A"})}).sort(function(x,y){return dt(y)<dt(x)?-1:dt(y)>dt(x)?1:0});
+    var el=D.createElement("div");el.className="note";el.style.cssText="margin:8px 0 0;font:400 13.5px/1.55 var(--sans)";
+    if(!land.length){el.innerHTML='<b>Last unscheduled landing:</b> none on file for N'+esc(tail)+'.'}
+    else{var L=land[0],lid=L.OperatorControlNumber||"",ltxt=(L.Discrepancy||"").trim().replace(/\s+/g," ");
+      el.innerHTML='<b>Last unscheduled landing of N'+esc(tail)+':</b> '+esc(L.DifficultyDate||"undated")+(lid===id?' <span style="color:var(--rust)">(this report)</span>':(lid?' · <a href="'+ROOT+'case/'+encodeURIComponent(lid)+'">'+esc(lid)+'</a>':""))+(ltxt?'<br><span style="color:var(--ash)">“'+esc(ltxt.slice(0,160))+(ltxt.length>160?"…":"")+'”</span>':"")+(a.capped?'<br><span style="color:var(--ash)">Only the newest reports were checked; this airframe has more.</span>':"")}
+    $("#more").insertAdjacentElement("afterend",el)}).catch(function(){});
   var slim={};Object.keys(raw).forEach(function(k){if(k!=="Discrepancy"&&raw[k]!=null&&raw[k]!=="")slim[k]=raw[k]});var recq="rec="+encodeURIComponent(JSON.stringify(slim))+"&text="+encodeURIComponent((raw.Discrepancy||"").slice(0,4000));
   [["explain","What actually happened?","the whole report, explained for a first-time reader"],["danger","Was anyone in danger?","only what the report states, and what it does not"],["repair","What did the mechanics do?","step by step, and what was left unsaid"],["why","Does it say why?","quoted if it does; said plainly if it does not"],["checks","What should we check next?","same aircraft, part, airline or day: each one a click"]].forEach(function(x){$("#mc").appendChild(mc(x[1],x[2],function(){return "/z/api/stream/case?q="+x[0]+"&"+recq}))});
   /* hand-written, 2 September 2026: the web, on a record. The same endpoint the
@@ -370,9 +430,56 @@ Promise.all([OPS_READY, SHEET_READY]).then(function(a){return a[1]}).then(functi
     var q=[tail?"N"+tail:"",opn||"",model,date.replace(/^\d+ /,"")].filter(Boolean).join(" ");
     var box=D.createElement("div");box.innerHTML='<p class="eyebrow" style="margin-top:22px">Search the web about this report</p><p class="sub" style="font-size:13.5px;margin-bottom:8px">Not the file. GLM-5.3-Flash runs a web search for this tail, airline and date, and may use only what the search returns, one numbered source per sentence. What the world wrote, next to what the mechanic wrote.</p>';
     box.appendChild(mc("What has been reported about this aircraft?","the web, searched for "+q,function(){return "/z/api/stream/news?topic="+encodeURIComponent(topic.slice(0,300))+"&q="+encodeURIComponent(q.slice(0,200))},"the web"));
-    var sheetEl=$("#sheet");sheetEl.parentNode.insertBefore(box,sheetEl.previousElementSibling.previousElementSibling)})();
+    var sheetEl=$("#sheet");sheetEl.parentNode.insertBefore(box,sheetEl.previousElementSibling.previousElementSibling);
+    /* hand-written, 2 September 2026: the reader's own question, under the same
+       rules as the five: this record only, and abstain when it does not say. */
+    var ab=D.createElement("div");
+    ab.innerHTML='<p class="eyebrow" style="margin-top:22px">Ask anything about this report</p>'+
+      '<p class="sub" style="font-size:13.5px;margin-bottom:8px">Your own question, answered from this one record. If the report does not carry the answer, it will say so rather than guess.</p>'+
+      '<form class="askbox" id="askbox"><input id="askq" maxlength="300" placeholder="Was this the same part as last time?" aria-label="Your question about this report"><button type="submit">Ask</button></form>';
+    var holder=D.createElement("div");ab.appendChild(holder);
+    box.parentNode.insertBefore(ab,box.nextSibling);
+    /* hand-written, 3 September 2026: the note to a person sits under the
+       reader's own question, where somebody who has just asked something the
+       file cannot answer is standing. */
+    var nw=$("#notewrap");if(nw){nw.querySelector(".eyebrow").style.marginTop="22px";ab.parentNode.insertBefore(nw,ab.nextSibling)}
+    ab.querySelector("#askbox").addEventListener("submit",function(e){e.preventDefault();
+      var qq=ab.querySelector("#askq").value.trim();if(qq.length<3)return;
+      holder.innerHTML="";
+      var m=mc(qq,"this report only",function(){return "/z/api/stream/case?q=free&ask="+encodeURIComponent(qq)+"&text="+encodeURIComponent((d.text||"").slice(0,4000))+"&rec="+encodeURIComponent(JSON.stringify(raw))},"this report, all fields");
+      holder.appendChild(m);var g=m.querySelector(".mc__go");if(g)g.click()})})();
+  /* hand-written, 2 September 2026: if this record sits in the conflicts ledger,
+     the page that shows the record has to say so. The ledger page linked here;
+     nothing linked back. */
+  fetch("/z/api/conflicts/one/"+encodeURIComponent(id))   /* the z service is at /z/ on every host; ROOT is for page links, not the API */.then(function(r){return r.json()}).then(function(c){
+    if(!c||!c.conflict)return;
+    $("#cflag").innerHTML='<div class="cflag"><b>The codes on this report disagree with the write-up</b>'+
+      '<p>'+esc(c.note||"")+'</p>'+
+      '<p class="cwhy">Noticed by GLM-5.3-Flash, and only kept because two independent readings named the same field and the quote appears in the write-up above. Not verified. Judge it yourself, then say so on <a href="/conflicts/">the ledger</a>.</p></div>'}).catch(function(){});
   $("#foot").textContent=(d.source||"")+" Counts are of reports filed, not of flights; no rate is claimed.";
 }).catch(function(e){$("#h1").textContent="The file did not answer ("+(e&&e.message||e)+"). Reload."});
+/* hand-written, 2 September 2026: the note box. The record id comes from the
+   URL the page is already keyed on, so a note can never be filed against a
+   report the reader was not looking at. */
+(function(){var f=document.getElementById("note");if(!f)return;
+  var say=document.getElementById("nsaid"),btn=document.getElementById("nsend");
+  f.addEventListener("submit",function(e){e.preventDefault();
+    var body=document.getElementById("nbody").value.trim();
+    if(body.length<4){say.textContent="Write a line or two first.";return}
+    btn.disabled=true;say.textContent="Sending\u2026";
+    fetch("/z/api/note",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({id:id,text:body,
+        name:document.getElementById("nname").value,
+        email:document.getElementById("nmail").value,
+        website:document.getElementById("nhp").value})})
+     .then(function(r){return r.json()})
+     .then(function(d){
+        if(d&&d.ok){f.innerHTML='<p class="said">Thank you. It has been passed on'+
+          '. If you left an address you may get an answer.</p>'}
+        else{btn.disabled=false;say.textContent=(d&&d.error)||"That did not go through."}})
+     .catch(function(){btn.disabled=false;say.textContent="That did not go through."})})
+})();
+
 </script>
 </body>
 </html>

@@ -91,6 +91,7 @@ h1 .here{color:var(--rust)}
 .model .lab{font:500 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--model);margin:0 0 8px}
 .model p{font:400 17px/1.55 var(--serif);margin:0;white-space:pre-wrap}
 .model .prov{font:400 11.5px/1.5 var(--mono);color:var(--ash);margin:10px 0 0;white-space:normal}
+.model .rs{margin-top:14px}.model .rs input{background:#fff;font-size:14px}.model .rs button{white-space:nowrap}.model .rsl a{color:var(--ink);border-bottom:1px dotted var(--ash);text-decoration:none}
 .model.wait p{color:var(--ash);font-family:var(--sans);font-size:14px}
 .mc{margin:12px 0 0}
 .mc__go{font:500 13px/1.2 var(--sans);padding:8px 12px;min-height:36px;border:1px solid var(--model);background:transparent;color:var(--model);border-radius:3px;cursor:pointer;text-align:left}
@@ -563,12 +564,30 @@ function px(text,terms){var h=esc(text||"");
     h=h.replace(new RegExp("(^|[^\\w>])("+e+")(?![^<]*>)","i"),function(_,a,b){
       return a+'<a class="px" href="https://www.perplexity.ai/search?q='+encodeURIComponent(t.q)+'" target="_blank" rel="noopener">'+b+'</a>'})});
   return h}
+/* hand-written, 3 September 2026: the reading used to link three or four
+   words the model picked to Perplexity searches. The picks were arbitrary and
+   the reader could not steer them. Now one editable question, built from the
+   report's own fields, goes to Perplexity in a new tab, and beside it the
+   same case narrows this site: the year it was filed, the airframe, the
+   airline, the type. The operator code comes from the raw row; the decoded
+   record only carries the name. */
+function research(d,pretty){var r=d.record||{},raw=d.raw||{};var opc=raw.OperatorDesignator||"";var op=opName(opc)||r.operator||"";
+  var type=((r.make||"")+" "+(r.model||"")).trim();var tail=r.tail?"N"+r.tail:"";
+  var what=[(r.part||"").toLowerCase(),(r.nature||[]).join(", ").toLowerCase(),(r.crew||[]).join(", ").toLowerCase()].filter(Boolean).join(", ");
+  var qs=[op,type,tail,pretty,what].filter(Boolean).join(" ");
+  var m=(r.date||"").match(/(\d\d)\/(\d\d)\/(\d{4})/);var yr=m?m[3]:"";var base=ROOT.replace(/\/$/,"")+"/?";
+  var links=[];if(yr)links.push('<a href="'+base+'from='+yr+'-01-01&to='+yr+'-12-31">every report filed in '+yr+'</a>');
+  if(r.tail)links.push('<a href="'+base+'tail='+encodeURIComponent(r.tail)+'">this airframe, '+esc(tail)+'</a>');
+  if(opc)links.push('<a href="'+base+'operator='+encodeURIComponent(opc)+'">'+esc(op||opc)+'</a>');
+  if(r.model)links.push('<a href="'+base+'model='+encodeURIComponent(r.model)+'">every '+esc(type||r.model)+'</a>');
+  return '<form class="ask rs" onsubmit="var v=this.q.value.trim();if(v)window.open(\'https://www.perplexity.ai/search?q=\'+encodeURIComponent(v),\'_blank\',\'noopener\');return false"><input name="q" value="'+esc(qs)+'" aria-label="Question for Perplexity"><button type="submit">Research this case further via Perplexity</button></form>'+
+    (links.length?'<p class="prov rsl">Or stay in the file: '+links.join(' · ')+'</p>':'')}
 function spec(d){var s=$("#spec");if(!d||d.none||!d.record){s.innerHTML='<p class="eyebrow hot">Latest report where the crew had to act</p><p class="cannot">None in this selection.</p>';return}
   var r=d.record,dt=r.date||"";var pretty=(function(){var m=dt.match(/(\d\d)\/(\d\d)\/(\d{4})/);if(!m)return dt;return new Date(+m[3],+m[1]-1,+m[2]).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})})();
   var meta=[r.make&&r.model?((r.make||"")+" "+(r.model||"")).trim():"",r.tail?"N"+r.tail:"",(r.crew||[]).join(", ").toLowerCase(),(r.nature||[]).join(", ").toLowerCase(),(r.stage||"").toLowerCase()].filter(Boolean);
   var raw=esc(r.text).replace(/\b([A-Z][A-Z\/\-]{2,})\b/g,function(m){return /^(THE|AND|WAS|FOR|WITH|FROM|THAT|THIS|WERE|WHEN|AFTER|DURING|FOUND|LEFT|RIGHT|AIRCRAFT|FLIGHT|CREW|NOTED)$/.test(m)?m:"<u>"+m+"</u>"});
   s.innerHTML='<p class="eyebrow hot">'+(view()==="freefall"?"The report the documentary turns on":"Latest report where the crew had to act")+' · filed '+esc(pretty)+'</p><p class="who">'+esc(meta[0]+(meta[1]?", "+meta[1]:""))+' <span>· '+esc(meta.slice(2).join(" · "))+'</span></p>'+
-    (d.plain?'<div class="model"><p class="lab">In plain English, read by GLM-5.3-Flash</p><p>'+px(d.plain,d.terms)+'</p><p class="prov">Read when this report arrived, '+esc(d.read_at)+' · '+esc(d.seconds)+' s · its words, not the FAA’s.'+(d.terms&&d.terms.length?' Linked terms open a Perplexity search in a new tab.':'')+' Underlined words below open the trade’s own meaning.</p></div>':'<div class="model wait"><p class="lab">GLM-5.3-Flash</p><p>'+esc(d.error||"did not answer")+'</p></div>')+
+    (d.plain?'<div class="model"><p class="lab">In plain English, read by GLM-5.3-Flash</p><p>'+esc(d.plain)+'</p><p class="prov">Read when this report arrived, '+esc(d.read_at)+' · '+esc(d.seconds)+' s · its words, not the FAA’s. Underlined words below open the trade’s own meaning.</p>'+research(d,pretty)+'</div>':'<div class="model wait"><p class="lab">GLM-5.3-Flash</p><p>'+esc(d.error||"did not answer")+'</p></div>')+
     '<p class="eyebrow" style="margin-top:16px">The mechanic’s words, as filed</p><p class="raw">'+raw+'</p><p class="cannot" style="margin-top:8px"><a href="#" id="specCase">Open the case sheet</a> · every code spelled out, and five questions for the model.</p>';var sc=D.getElementById("specCase");if(sc)sc.onclick=function(e){e.preventDefault();location.href=casePage(r.id)}}
 
 /* ---- view engine: any lead becomes the hero ---- */

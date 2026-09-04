@@ -43,9 +43,27 @@ def nat_str(r):
     ks=[k for k in ks if k and k.strip()]
     return ",".join("%s (%s)"%(k,NATURE.get(k,"other")) for k in ks) or "none set"
 
-def candidates(year, per=40):
+# 2 September 2026: the sweep looked at six phrases in two years and had found 48.
+# A conflict can only be found where the write-up says something loud enough to
+# contradict a box, so the phrase list is the whole reach of this scan. Widened
+# to the vocabulary mechanics actually use for the events the codes cover:
+# diversions, shutdowns, fire and smoke, pressurisation, separation, evacuation.
+QUERIES = ["DECLARED+EMERGENCY","DIVERTED","RETURNED+TO+THE+GATE","AIR+TURNBACK",
+           "SMOKE+IN+THE+CABIN","EVACUAT","RETURNED+TO+FIELD","EMERGENCY+DESCENT",
+           "RAPID+DECOMPRESSION","LOSS+OF+PRESSURIZATION","OXYGEN+MASKS",
+           "ENGINE+SHUTDOWN","SHUT+DOWN+THE+ENGINE","IFSD","FLAMEOUT",
+           "FIRE+WARNING","ENGINE+FIRE","BURNING+ODOR","BURNING+SMELL","FUMES",
+           "ABORTED+TAKEOFF","REJECTED+TAKEOFF","HIGH+SPEED+ABORT","GO+AROUND",
+           "DEPARTED+THE+AIRCRAFT","SEPARATED+IN+FLIGHT","FOD+FOUND",
+           "PRECAUTIONARY+LANDING","UNSCHEDULED+LANDING","LANDED+OVERWEIGHT",
+           "FUEL+DUMP","DUMPED+FUEL","EXTINGUISHER+DISCHARGED","MAYDAY","PAN+PAN"]
+
+# 2 September 2026: 'per' is how deep each of the 35 queries reaches into its
+# own results. At 40 the scan only ever saw the top of every list; SWEEP_PER
+# raises it for an unattended run.
+def candidates(year, per=int(os.environ.get('SWEEP_PER', 40))):
     out=[]
-    for qq in ["DECLARED+EMERGENCY","DIVERTED","RETURNED+TO+THE+GATE","AIR+TURNBACK","SMOKE+IN+THE+CABIN","EVACUAT"]:
+    for qq in QUERIES:
         d=get("/api/search?q=%s&from=%d-01-01&to=%d-12-31&limit=%d"%(qq,year,year,per))
         out+= d.get("rows") or []
     seen=set(); uniq=[]
@@ -82,4 +100,5 @@ def scan(year, cap):
 
 if __name__=="__main__":
     cap=int(sys.argv[1]) if sys.argv[1:] else 60
-    for y in (2026,2025): scan(y,cap)
+    years=[int(x) for x in sys.argv[2:]] or [2026,2025]
+    for y in years: scan(y,cap)

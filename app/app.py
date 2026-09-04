@@ -1288,7 +1288,7 @@ def conflicts():
                         ORDER BY found_at DESC LIMIT 500""").fetchall()
     n = c.execute("SELECT COUNT(*) FROM conflicts").fetchone()[0]
     c.close()
-    return jsonify(
+    return _nostore(jsonify(
         total=n,
         entries=[{"id": r[0], "tail": r[1], "date": r[2], "operator": r[3], "note": r[4],
                   "discrepancy": r[5], "found_at": r[6], "confirmed": r[7], "disputed": r[8],
@@ -1310,7 +1310,7 @@ def conflicts():
             "boring explanation and almost certainly the right one.",
             "Not verified. A model noticed each of these. Open the record and judge it "
             "yourself; the record number is on every row.",
-            "Not a safety signal about any operator or aircraft."])
+            "Not a safety signal about any operator or aircraft."]))
 
 
 @app.get("/z/api/conflicts/one/<rid>")
@@ -1326,8 +1326,8 @@ def conflict_one(rid):
         return jsonify(conflict=False)
     if not r:
         return jsonify(conflict=False)
-    return jsonify(conflict=True, note=r[0], found_at=r[1], source=r[2],
-                   confirmed=r[3] or 0, disputed=r[4] or 0)
+    return _nostore(jsonify(conflict=True, note=r[0], found_at=r[1], source=r[2],
+                            confirmed=r[3] or 0, disputed=r[4] or 0))
 
 
 @app.post("/z/api/conflicts/add")
@@ -1428,7 +1428,7 @@ def judge(cid):
     c.commit()
     row = c.execute("SELECT confirmed, disputed FROM conflicts WHERE id=?", (cid,)).fetchone()
     c.close()
-    return jsonify(id=cid, confirmed=row[0] if row else 0, disputed=row[1] if row else 0)
+    return _nostore(jsonify(id=cid, confirmed=row[0] if row else 0, disputed=row[1] if row else 0))
 
 
 # ---- hand-written, 5 September 2026: a human measurement of the conflicts ledger.

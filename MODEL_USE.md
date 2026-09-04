@@ -16,7 +16,7 @@ side: it is served, unlinked, at
 [aircraftdefects.com/z/rebuilt](https://aircraftdefects.com/z/rebuilt). Its provenance is counted by `build/count_provenance.py` and recorded
 at the end of this file.
 
-**The service**, `app/app.py`, is 109,501 bytes, of which 59,833 (54.6%) sit in
+**The service**, `app/app.py`, is 143,105 bytes, of which 87,717 (61.3%) sit in
 blocks headed `# ---- hand-written` and the rest is the model's. Count it:
 
     python3 - <<'EOF'
@@ -171,14 +171,14 @@ rather than a judge, so it agreed with everything. See F1 in
 Counted, not claimed. Run `python3 build/count_provenance.py --check` and it
 fails if this table has drifted from the repository.
 
-    code this repository serves       899,543 characters
-      GLM-5.3-Flash                   616,396   68.5%
-      not the model's                 283,147   31.5%
+    code this repository serves       927,426 characters
+      GLM-5.3-Flash                   620,846   66.9%
+      not the model's                 306,580   33.1%
 
         the model's page, /z/rebuilt        565,458   written whole from the specs
-        the service, app/app.py              50,938   the model's share
-        the page at the root                169,070   hand-written
-        the service, app/app.py              85,608   hand-written blocks
+        the service, app/app.py              55,388   the model's share
+        the page at the root                190,394   hand-written
+        the service, app/app.py              87,717   hand-written blocks
         the seam and later fixes             28,469   hand-written
 
 ### The earlier page, which is kept but not served

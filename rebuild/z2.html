@@ -227,7 +227,7 @@ a.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--
 @media(max-width:560px){.grid{grid-template-columns:1fr}}
 
 /* ---- hand-written, 31 August 2026: verified sentences, records rail, next clicks, web sources ---- */
-.model p .s.has{cursor:pointer}.model p .s.has:hover{background:#fff}.model p .s.un{color:var(--ash)}
+.model p .s.has{cursor:pointer}.model p .s.has:hover{background:#fff}.model p .s.un{color:var(--ash)}.cut{margin-top:10px;font:400 12.5px/1.5 var(--mono);color:var(--ash);white-space:normal}.cut summary{cursor:pointer}.cut p{margin:8px 0 0}.cut s{color:var(--ash)}.cut q{font-style:normal;color:inherit}
 .model p .s .r,.model p a[data-rec]{font:500 11px/1 var(--mono);color:var(--model);text-decoration:none;vertical-align:super;margin-left:2px;border-bottom:1px dotted var(--model)}
 .model .rail{display:block;margin:8px 0 10px 12px;border-left:1px solid #c6dbd8;padding:4px 12px;font:400 12.5px/1.6 var(--mono);color:var(--ink);white-space:normal}.model .rail i{font-style:normal;color:var(--ash)}.model .rail q{quotes:none;background:#fff;padding:0 3px}.model .rail a{color:var(--model)}
 .model .next{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.model .next button{border:1px solid var(--line);background:#fff;padding:8px 12px;text-align:left;font:400 13px/1.4 var(--sans);color:var(--ink);cursor:pointer;flex:1;min-width:200px}.model .next button b{display:block;font:500 12px/1 var(--mono);color:var(--rust);margin-bottom:4px}.model .nb{font:400 11px/1.4 var(--mono);color:var(--ash);margin-top:6px;display:block;white-space:normal}
@@ -358,6 +358,59 @@ function go(p){var skip={hero:1,v:1,from:1,to:1};function sig(sp){var out=[];sp.
 function setRail(r){var p=q();p.set("hero",r);go(p)}
 var ZLABEL={"7379":"Boeing 737-9 (MAX 9)","7878":"Boeing 787-8","7879":"Boeing 787-9","ZONE 100":"lower fuselage","ZONE 200":"upper fuselage","ZONE 300":"stabilisers","ZONE 400":"engines","ZONE 500":"left wing","ZONE 600":"right wing","ZONE 700":"landing gear","ZONE 800":"doors","ZONE 900":"lavatories, galleys"};
 var ZPOS={"ZONE 200":[334,80,300,130],"ZONE 100":[334,252,300,176],"ZONE 300":[572,36,528,76],"ZONE 800":[4,252,60,170],"ZONE 400":[130,278,270,214],"ZONE 700":[60,278,150,214],"ZONE 500":[470,214,560,150],"ZONE 600":[470,232,560,150],"ZONE 900":[404,252,420,160]};
+
+/* A selection that matches nothing used to paint an empty table, which reads as
+   "this aircraft never had a defect" rather than "that is not how the FAA spells
+   it". The search endpoint returns the values that do exist; this turns them
+   into one click each. */
+var LAST_SUGGEST=null;
+function zeroHTML(sug){
+  var h='<p class="cannot"><b>No report matches this selection.</b> '
+       +'That is not the same as nothing having happened: a filter can miss because '
+       +'the FAA spells a value differently.</p>';
+  if(!sug)return h;
+  if(sug.model&&sug.model.near&&sug.model.near.length){
+    h+='<p class="cannot">No aircraft is filed as <b>'+esc(sug.model.typed)+'</b>. '
+      +'The FAA files a model as one squashed code. These exist:</p><div class="next">';
+    sug.model.near.forEach(function(m){
+      h+='<button type="button" data-k="model" data-v="'+esc(m.model)+'"><b>'
+        +esc(m.model)+' · '+num(m.reports)+' reports</b></button>'});
+    h+='</div>';
+  }
+  ["operator","tail"].forEach(function(k){
+    var s=sug[k];if(!s||!s.near||!s.near.length)return;
+    h+='<p class="cannot">Nothing is filed under <b>'+esc(s.typed)+'</b>. Closest in the file:</p><div class="next">';
+    s.near.forEach(function(m){
+      h+='<button type="button" data-k="'+k+'" data-v="'+esc(m.value)+'"><b>'
+        +esc(m.value)+' · '+num(m.reports)+' reports</b></button>'});
+    h+='</div>';
+  });
+  return h;
+}
+
+
+/* Offer the type when the airframe itself is not in the FAA file. */
+function typeFallback(model){
+  api("/api/type-reports?type="+encodeURIComponent(model)).then(function(d){
+    var slot=D.getElementById("typeFallback");if(!slot)return;
+    if(!d||!d.match||!d.reports){
+      slot.innerHTML='<p class="cannot">No aircraft of this type is in the FAA file either.</p>';
+      return}
+    var vs=(d.variants||[]).slice(0,4).map(function(v){
+      return '<button type="button" data-k="model" data-v="'+esc(v.model)+'"><b>'
+        +esc(v.model)+' · '+num(v.reports)+'</b></button>'}).join("");
+    slot.innerHTML='<p style="margin:10px 0 0">But the type is here. <b>'+num(d.reports)
+      +'</b> report'+(d.reports===1?"":"s")+' on '+esc(model)
+      +' aircraft flown by US operators, filed since 1995.</p>'
+      +'<div class="pick" style="margin-top:8px"><button type="button" data-k="model" data-v="'
+      +esc(d.prefix)+'">Read what goes wrong with the '+esc(model)+'</button></div>'
+      +(vs?'<p class="cannot" style="margin-top:8px">Or one variant at a time:</p><div class="next">'+vs+'</div>':'')
+      +'<p class="cannot">A defect filed on another airframe of the same type says nothing '
+      +'about the flight you looked up. It is the type\u2019s history, not this aircraft\u2019s.</p>';
+    wireBars(slot);
+  }).catch(function(){});
+}
+
 var PRETTY={ata:"system",from:"from",to:"to",q:"words",operator:"airline",tail:"tail",model:"type",enginemodel:"engine",make:"make",part:"part",jasc:"system",zone:"zone",crew:"crew action",nature:"nature",stage:"stage"};
 
 /* ---- desk ---- */
@@ -391,7 +444,13 @@ function flightLookup(numb,date){var d=$("#draft");if(!date){d.innerHTML='<div c
     var h='<div class="draft"><span class="lab">'+esc(f.number)+' on '+esc(fmtDay(f.date))+(legs[0]&&legs[0].airline?", "+esc(legs[0].airline):"")+(route?", "+esc(route):"")+'</span>';
     if(f.note)h+='<p style="margin:8px 0 0">'+esc(f.note)+'</p>';
     (f.aircraft||[]).forEach(function(a){
-      if(!a.us){h+='<p style="margin:8px 0 0">Flown by <b>'+esc(a.reg)+'</b>'+(a.model?", "+esc(a.model):"")+'. That aircraft is not on the US register, and the FAA file only holds US-registered aircraft, so there is nothing here to open.</p>';return}
+      if(!a.us){h+='<p style="margin:8px 0 0">Flown by <b>'+esc(a.reg)+'</b>'+(a.model?", "+esc(a.model):"")+'. That aircraft is not on the US register, and the FAA file only holds US-registered aircraft, so this airframe has no record here.</p><div id="typeFallback"></div>';
+        /* Hand-written, 4 September 2026: a foreign airframe used to end the
+           trail at "nothing here to open". The type is in the file in its
+           thousands, flown by US operators, so the question "what goes wrong
+           with this kind of aircraft" is still answerable. */
+        if(a.model)typeFallback(a.model);
+        return}
       h+='<p style="margin:8px 0 0">Flown by <b>N'+esc(a.tail)+'</b>'+(a.model?", "+esc(a.model):"")+'. '+(a.before==null?"":(a.before?"<b>"+num(a.before)+"</b> report"+(a.before===1?"":"s")+" filed on this airframe before that day":"No report on this airframe before that day")+(a.total?", "+num(a.total)+" in all":"")+".")+'</p>'+
          '<div class="pick" style="margin-top:8px"><button type="button" data-tail="'+esc(a.tail)+'">Open the record of N'+esc(a.tail)+' up to '+esc(fmtDay(f.date))+'</button></div>'});
     h+='<p class="cannot" style="margin:8px 0 0">Which aircraft flew is from AeroDataBox, not the FAA. A report filed before the flight was, by its nature, found and written up; it says what this airframe has been through, not whether that flight was unsafe. Reports reach the FAA weeks late, so a defect found on that very day may not be on file yet.</p></div>';
@@ -425,8 +484,10 @@ function mc(label,sub,url){var box=D.createElement("section");box.className="mc"
   var go_=box.querySelector(".mc__go"),out=box.querySelector(".out"),prov=box.querySelector(".prov"),es=null,t0=0,tick=null,meta=null,got="",ver=null,nxt=null,srcs=null,chk=null;
   function recLink(id){return '<a class="r" href="'+casePage(id)+'" data-rec="'+esc(id)+'">'+esc(id)+'</a>'}
   function wireRecs(root){root.querySelectorAll("a[data-rec]").forEach(function(a){a.onclick=function(e){e.stopPropagation();var m=ver&&ver.records&&ver.records[a.dataset.rec];if(m&&m.raw){e.preventDefault();openCase(a.dataset.rec,decorateRow(m.raw),m.raw)}}})}
+  /* hand-written, 5 September 2026: what the check removed is shown, not hidden. A sentence goes when a quote in it is not a literal substring of the record it cites. */
+  function cutHTML(sents){var cut=sents.filter(function(x){return x.drop});if(!cut.length)return "";return '\n\n<details class="cut"><summary>'+cut.length+' sentence'+(cut.length===1?"":"s")+' removed by the check: a quote in '+(cut.length===1?"it":"them")+' is not in the record '+(cut.length===1?"it":"they")+' cite'+(cut.length===1?"s":"")+'. Show what was cut.</summary>'+cut.map(function(x){var bad=[];x.recs.forEach(function(r){if(r.ok===false&&r.quote)bad.push(r.quote)});return '<p><s>'+esc(x.t.replace(/\s*\[[A-Z0-9]{8,24}\]/g,""))+'</s>'+(bad.length?'<br><i>not found in the record:</i> <q>'+bad.map(esc).join('</q>, <q>')+'</q>':'')+'</p>'}).join("")+'</details>'}
   function renderVerified(){var v=ver,h="",lastP=-1;v.sentences.forEach(function(x,i){if(x.drop)return;if(x.para!==lastP&&lastP>=0)h+="\n\n";lastP=x.para;var ids=[];x.recs.forEach(function(r){if(r.id&&ids.indexOf(r.id)<0)ids.push(r.id)});var un=!ids.length&&x.para>0&&Object.keys(v.records||{}).length>1;
-      h+='<span class="s'+(ids.length?" has":"")+(un?" un":"")+'" data-i="'+i+'"'+(un?' title="no record cited: the model\u2019s own words"':'')+'>'+esc(x.t.replace(/\s*\[[A-Z0-9]{8,24}\]/g,""))+ids.map(recLink).join("")+'</span> '});out.innerHTML=h;
+      h+='<span class="s'+(ids.length?" has":"")+(un?" un":"")+'" data-i="'+i+'"'+(un?' title="no record cited: the model\u2019s own words"':'')+'>'+esc(x.t.replace(/\s*\[[A-Z0-9]{8,24}\]/g,""))+ids.map(recLink).join("")+'</span> '});h+=cutHTML(v.sentences);out.innerHTML=h;
     out.querySelectorAll(".s.has").forEach(function(sp){sp.onclick=function(){var old=sp.nextElementSibling;if(old&&old.classList.contains("rail")){old.remove();return}var x=v.sentences[+sp.dataset.i],d=D.createElement("div");d.className="rail";var seen={};var hh='<i>this sentence rests on</i><br>';x.recs.forEach(function(r){if(!r.id||seen[r.id]&&!r.quote)return;seen[r.id]=1;var m=(v.records||{})[r.id]||{};hh+='<a href="'+casePage(r.id)+'" data-rec="'+esc(r.id)+'">'+esc(r.id)+'</a> · '+esc(m.op||"")+(m.tail?" · N"+esc(m.tail):"")+(m.date?" · "+esc(m.date):"")+(r.quote?' · <q>'+esc(r.quote)+'</q>':'')+'<br>'});d.innerHTML=hh;sp.after(d);wireRecs(d)}});wireRecs(out)}
   function renderNext(){if(!nxt||!nxt.length)return;var d=D.createElement("div");d.className="next";nxt.forEach(function(n){var b=D.createElement("button");b.type="button";var lab=Object.keys(n.filters).map(function(k){return (PRETTY[k]||k)+" "+(ZLABEL[n.filters[k]]||n.filters[k])}).join(", ");b.innerHTML='<b>'+esc(lab)+' · '+num(n.n)+' reports</b>'+esc(n.why||"");b.onclick=function(){var p=q();Object.keys(n.filters).forEach(function(k){p.set(k,n.filters[k])});go(p)};d.appendChild(b)});out.after(d);var nb=D.createElement("span");nb.className="nb";nb.textContent="the model\u2019s suggestions, not a ranking · counts are real";d.after(nb)}
   function st(s){box.dataset.state=s;box.setAttribute("aria-busy",s==="pending"||s==="streaming"?"true":"false")}
@@ -841,12 +902,13 @@ function summary(h){var box=$("#sum");var s=sel().toString();if(!s){box.innerHTM
     function rowHTML(a){return '<tr class="rec" data-case="'+esc(a.id)+'"><td>'+esc(a.date)+'</td><td>'+(a.tail?"N"+esc(a.tail):"")+'</td><td title="'+esc(a.op)+'">'+esc(opName(a.op))+'</td><td>'+esc(a.model)+'</td><td>'+esc(a.found)+'</td><td>'+esc(crewWords(a.crew))+'</td></tr>'}
     function paint(){var rows=raws.map(decorateRow);if(sort!=="date")rows.sort(function(a,b){var x=key(a),y=key(b);return x>y?1:x<y?-1:0});shown=Math.min(shown+25,rows.length);
       var hh='<div class="tblwrap"><table class="tbl"><tr><th>date</th><th>tail</th><th>airline</th><th>aircraft</th><th>what was found</th><th>crew did</th></tr>';rows.slice(0,shown).forEach(function(a){hh+=rowHTML(a)});
+      if(!rows.length){r.innerHTML=zeroHTML(LAST_SUGGEST);return}
       r.innerHTML=hh+'</table></div><p class="cannot" id="recsFoot">'+num(shown)+' of '+num(total)+'.'+(shown<total?' <button type="button" id="recsMore" class="mc__again" style="font:inherit;min-height:24px;padding:3px 8px">Show 25 more</button>':' That is all of them.')+'</p>';
       r.querySelectorAll("tr.rec").forEach(function(tr){tr.onclick=function(){openCase(tr.dataset.case,rows.find(function(a){return a.id===tr.dataset.case}),raws.find(function(x){return x.OperatorControlNumber===tr.dataset.case}))}});
       var mb=r.querySelector("#recsMore");if(mb)mb.onclick=function(){if(shown<raws.length||done){paint()}else{mb.disabled=true;mb.textContent="Reading…";load()}}}
     function load(){var first=(fetched===0&&FIRST_RECS);var got0=first?FIRST_RECS:fetch("/api/search?limit=100&offset="+fetched+"&"+s).then(function(x){return x.json()});
       if(first)FIRST_RECS=null;
-      return Promise.resolve(got0).then(function(d){if(!d)return fetch("/api/search?limit=100&offset="+fetched+"&"+s).then(function(x){return x.json()});return d}).then(function(d){var got=d.rows||[];fetched+=got.length;total=d.total||total;if(!got.length)done=true;raws=raws.concat(got);paint()}).catch(function(e){r.innerHTML=fail(e)})}
+      return Promise.resolve(got0).then(function(d){if(!d)return fetch("/api/search?limit=100&offset="+fetched+"&"+s).then(function(x){return x.json()});return d}).then(function(d){var got=d.rows||[];fetched+=got.length;total=d.total||total;LAST_SUGGEST=d.suggestions||null;if(!got.length)done=true;raws=raws.concat(got);paint()}).catch(function(e){r.innerHTML=fail(e)})}
     load()}
   box.querySelectorAll("[data-s]").forEach(function(b){b.onclick=function(){box.querySelectorAll("[data-s]").forEach(function(x){x.classList.toggle("on",x===b)});recs(b.dataset.s)}});recs("date");
   var dp=box.querySelector("#dropPeriod");if(dp)dp.onclick=function(){var p=q();p.delete("from");p.delete("to");go(p)};

@@ -60,9 +60,10 @@ click.
   tail.
 - **Seventeen leads** sort the file by what a journalist would actually chase:
   smoke in the cabin, cracks, engines shut down in flight, same-day clusters
-  across a fleet, old airframes, new defects, the paperwork gap, and the 44
+  across a fleet, old airframes, new defects, the paperwork gap, and the
   reports where the box a mechanic ticked disagrees with the sentence the
-  same mechanic wrote beneath it ([/conflicts/](https://aircraftdefects.com/conflicts/)).
+  same mechanic wrote beneath it (106 on 5 September 2026, found by a scan
+  and by readers, and growing) ([/conflicts/](https://aircraftdefects.com/conflicts/)).
 
 That act produced a database you can finally see. It also produced the
 objection that shaped everything after it: the tool was accurate and still
@@ -210,5 +211,5 @@ Inspired by Rory Kennedy's *Freefall: A Reckoning for Boeing*. Built by Henk
 van Ess, 2026. GLM-5.3-Flash wrote
 the tool at /z/rebuilt from written specifications, and does all the live
 reading on the page you land on. By character count of everything this
-repository serves, 74.3% is the model's, counted by
+repository serves, 66.9% is the model's, counted by
 `build/count_provenance.py` rather than claimed.

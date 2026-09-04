@@ -385,13 +385,13 @@ endpoints where it reads the FAA's own words live, each one listed in
 [`MODEL_USE.md`](MODEL_USE.md) with its guard and its measured cost. The frame
 around those readings, the page at the root, was not written by GLM-5.3-Flash.
 
-By character count of everything this repository serves, **68.2% is the model's
-and 31.8% is not**, counted by
+By character count of everything this repository serves, **66.9% is the model's
+and 33.1% is not**, counted by
 [`build/count_provenance.py`](build/count_provenance.py). Run it with `--check`
 and it fails if the table has drifted.
 
 **The other contributor.** GitHub lists two authors. A coding assistant, Claude
-Code, directed by me, wrote the 31.8% that is not GLM's: the frame at the root
+Code, directed by me, wrote the 33.1% that is not GLM's: the frame at the root
 that holds the model's readings, the build and splice scripts, the browser
 harnesses that measure the page, the deployment plumbing, and this
 documentation. It also wrote the guards around the model, the substring check

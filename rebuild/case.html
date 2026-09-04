@@ -55,7 +55,7 @@ table.sheet .note{margin-top:4px;max-width:66ch}table.sheet .note i{font:500 10p
 .note button[disabled]{opacity:.5;cursor:default}
 .note .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .note .said{font:400 13px/1.6 var(--sans);color:var(--ash);margin-top:8px}
-.pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.pick a,.pick button{font:500 13px/1.3 var(--sans);padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:100px;color:var(--ink);text-decoration:none;cursor:pointer}.pick a:hover,.pick button:hover{border-color:var(--rust);color:var(--rust)}
+.pick{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.cut{margin-top:10px;font:400 12.5px/1.5 var(--mono);color:var(--ash);white-space:normal}.cut summary{cursor:pointer}.cut p{margin:8px 0 0}.cut s{color:var(--ash)}.cut q{font-style:normal;color:inherit}.pick a,.pick button{font:500 13px/1.3 var(--sans);padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:100px;color:var(--ink);text-decoration:none;cursor:pointer}.pick a:hover,.pick button:hover{border-color:var(--rust);color:var(--rust)}
 .srcs{font:400 12.5px/1.7 var(--mono);color:var(--ash);margin:10px 0 0}.srcs a{color:var(--ash)}
 .cite{font:400 13px/1.6 var(--mono);color:var(--ink);background:#fff;border:1px solid var(--line);padding:12px 14px;max-width:82ch;white-space:pre-wrap}
 /* the model block, as on the main page */
@@ -181,20 +181,25 @@ function opName(c){return OPS[c]?OPS[c].replace(/\b(INC|LLC|CORP|CORPORATION|CO|
 /* the streaming block */
 function mc(label,sub,url,what){var box=D.createElement("section");what=what||"this report, all fields";box.className="mc";box.dataset.state="idle";
   box.innerHTML='<button type="button" class="mc__go">'+esc(label)+(sub?"<b>"+esc(sub)+"</b>":"")+'</button><div class="mc__meter"><span class="mc__spin"></span><span class="mc__count">reading</span><span class="mc__clock">0.0 s</span><button type="button" class="mc__stop">Stop</button></div><div class="mc__body"><div class="model"><p class="lab">Read by GLM-5.3-Flash</p><p class="out"></p><p class="prov"></p></div></div>';
-  var go=box.querySelector(".mc__go"),out=box.querySelector(".out"),prov=box.querySelector(".prov"),es=null,t0=0,tick=null,got="",chk=null,srcs=null,web=false;
+  var go=box.querySelector(".mc__go"),out=box.querySelector(".out"),prov=box.querySelector(".prov"),es=null,t0=0,tick=null,got="",chk=null,srcs=null,web=false,ver=null;
   function st(s){box.dataset.state=s}
   function fin(kind,d){if(tick)clearInterval(tick);if(es)es.close();go.disabled=false;var secs=d&&d.seconds!=null?d.seconds+" s":((Date.now()-t0)/1000).toFixed(1)+" s";
-    if(kind==="done"){st("done");var body=got.replace(/\n?\s*(NEXT|CHECKS):[\s\S]*$/,"").trim();out.textContent=body;
+    if(kind==="done"){st("done");var body=got.replace(/\n?\s*(NEXT|CHECKS):[\s\S]*$/,"").trim();
+      /* hand-written, 5 September 2026: the server checks every quote against this record and sends the result as a "verify" event. Until now this page never listened and showed the raw stream. Kept sentences are shown; what was cut is shown under them. */
+      if(ver&&ver.sentences){var h="",lastP=-1;ver.sentences.forEach(function(x){if(x.drop)return;if(x.para!==lastP&&lastP>=0)h+="\n\n";lastP=x.para;h+=esc(x.t.replace(/\s*\[[A-Z0-9]{8,24}\]/g,""))+" "});var cut=ver.sentences.filter(function(x){return x.drop});
+        if(cut.length)h+='\n\n<details class="cut"><summary>'+cut.length+' sentence'+(cut.length===1?"":"s")+' removed by the check: a quote in '+(cut.length===1?"it":"them")+' is not in this record. Show what was cut.</summary>'+cut.map(function(x){var bad=[];x.recs.forEach(function(r){if(r.ok===false&&r.quote)bad.push(r.quote)});return '<p><s>'+esc(x.t.replace(/\s*\[[A-Z0-9]{8,24}\]/g,""))+'</s>'+(bad.length?'<br><i>not found in the record:</i> <q>'+bad.map(esc).join('</q>, <q>')+'</q>':'')+'</p>'}).join("")+'</details>';
+        out.innerHTML=h}else out.textContent=body;
       if(chk&&chk.length){var row=D.createElement("div");row.className="pick";chk.forEach(function(c){if(!c||!c.filters)return;var a=D.createElement("a");var p=new URLSearchParams();Object.keys(c.filters).forEach(function(k){var v=String(c.filters[k]);if(k==="tail")v=v.replace(/^N/i,"");p.set(k,v)});a.href=ROOT+"?"+p.toString();a.textContent=c.label||Object.values(c.filters).join(" ");row.appendChild(a)});out.appendChild(row)}
       if(srcs&&srcs.length){var sl=D.createElement("p");sl.className="srcs";sl.innerHTML='<b>sources</b> '+srcs.map(function(x){var h=String(x.url||"").replace(/^https?:\/\/(www\.)?/,"").split("/")[0];return '['+x.n+'] <a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(h)+'</a>'}).join(" · ");out.appendChild(sl)}
-      prov.textContent=web?"GLM-5.3-Flash, "+(d&&d.effort?String(d.effort).replace(/^web, /,""):"the web read")+", "+secs+". The web, not the file: nothing here comes from the FAA record above.":"read by GLM-5.3-Flash, "+what+", "+secs+(d&&d.tokens?", "+num(d.tokens)+" tokens":"")+". Its words, not the FAA’s."}
+      prov.textContent=web?"GLM-5.3-Flash, "+(d&&d.effort?String(d.effort).replace(/^web, /,""):"the web read")+", "+secs+". The web, not the file: nothing here comes from the FAA record above.":"read by GLM-5.3-Flash, "+what+", "+secs+(d&&d.tokens?", "+num(d.tokens)+" tokens":"")+". Its words, not the FAA’s."+(ver&&ver.stats&&ver.stats.checked?" "+ver.stats.checked+" quote"+(ver.stats.checked===1?"":"s")+" checked against this record, "+ver.stats.ok+" verified"+(ver.stats.removed?", "+ver.stats.removed+" sentence"+(ver.stats.removed===1?"":"s")+" removed":"")+".":"")}
     else if(kind==="abstain"){st("abstain");prov.textContent="GLM-5.3-Flash would not answer."}
     else if(kind==="cancelled"){st("cancelled");prov.textContent="stopped by you at "+secs+". Partial."}
     else{st("error");out.textContent="The call to GLM-5.3-Flash failed"+(d&&d.message?" ("+d.message+")":"")+". Nothing has changed on this page."}}
-  function start(){got="";chk=null;srcs=null;web=false;out.textContent="";prov.textContent="";go.disabled=true;st("pending");t0=Date.now();tick=setInterval(function(){box.querySelector(".mc__clock").textContent=((Date.now()-t0)/1000).toFixed(1)+" s"},100);
+  function start(){got="";chk=null;srcs=null;web=false;ver=null;out.textContent="";prov.textContent="";go.disabled=true;st("pending");t0=Date.now();tick=setInterval(function(){box.querySelector(".mc__clock").textContent=((Date.now()-t0)/1000).toFixed(1)+" s"},100);
     es=new EventSource(url());es.addEventListener("meta",function(e){var m={};try{m=JSON.parse(e.data)}catch(x){}web=/web/.test(m.what||"");box.querySelector(".mc__count").textContent=web?"searching the web":"reading this report"});
     es.addEventListener("sources",function(e){try{srcs=JSON.parse(e.data)}catch(x){}});
     es.addEventListener("checks",function(e){try{chk=JSON.parse(e.data)}catch(x){}});
+    es.addEventListener("verify",function(e){try{ver=JSON.parse(e.data)}catch(x){}});
     es.addEventListener("delta",function(e){var s;try{s=JSON.parse(e.data)}catch(x){s=e.data}if(box.dataset.state!=="streaming")st("streaming");got+=s;out.textContent=got.replace(/\n?\s*(NEXT|CHECKS):[\s\S]*$/,"")});
     es.addEventListener("abstain",function(e){var d={};try{d=JSON.parse(e.data)}catch(x){}out.textContent=d.text||"The model would not say.";fin("abstain",d)});
     es.addEventListener("done",function(e){var d={};try{d=JSON.parse(e.data)}catch(x){}fin("done",d)});

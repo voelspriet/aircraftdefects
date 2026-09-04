@@ -229,6 +229,22 @@ write-ups at the moment you click.
 ![The newest crew-action report, told in plain English, with the mechanic's words beneath it](screenshots/plain-english.png)
 *The newest crew-action report, told in plain English, with the mechanic's words beneath it*
 
+### Chase this lead
+
+Everything above hands the model what the server chose. This is the reverse.
+On any aircraft page, and on every report, "Chase this lead" gives GLM-5.3-Flash
+five tools over the file, search, open a record, count, the FAA registry and the
+conflicts ledger, and a lead. It works the file itself, one call at a time, at
+most twelve calls and about a minute, and every call appears on the page as it
+happens with a link to the same view, so the reader can retrace each step. The
+closing text goes through the same quote check as every other reading, plus one
+more: a number the file did not return is cut, and the reader is shown which.
+On N704AL it looked up the registry, searched the tail, opened both reports and
+wrote the two dated paragraphs and the four questions in 32 seconds; on a
+Pilatus report from 2014 it ran nine calls, found the report in the conflicts
+ledger, and had one sentence cut for a year the file had not returned. Six
+chases an hour per reader. Endpoint: `/z/api/stream/chase?tail=` or `?id=`.
+
 ### Prove it
 
 Every quote the model makes is checked by the server against the record it
@@ -385,13 +401,13 @@ endpoints where it reads the FAA's own words live, each one listed in
 [`MODEL_USE.md`](MODEL_USE.md) with its guard and its measured cost. The frame
 around those readings, the page at the root, was not written by GLM-5.3-Flash.
 
-By character count of everything this repository serves, **66.9% is the model's
-and 33.1% is not**, counted by
+By character count of everything this repository serves, **65.0% is the model's
+and 35.0% is not**, counted by
 [`build/count_provenance.py`](build/count_provenance.py). Run it with `--check`
 and it fails if the table has drifted.
 
 **The other contributor.** GitHub lists two authors. A coding assistant, Claude
-Code, directed by me, wrote the 33.1% that is not GLM's: the frame at the root
+Code, directed by me, wrote the 35.0% that is not GLM's: the frame at the root
 that holds the model's readings, the build and splice scripts, the browser
 harnesses that measure the page, the deployment plumbing, and this
 documentation. It also wrote the guards around the model, the substring check

@@ -211,5 +211,5 @@ Inspired by Rory Kennedy's *Freefall: A Reckoning for Boeing*. Built by Henk
 van Ess, 2026. GLM-5.3-Flash wrote
 the tool at /z/rebuilt from written specifications, and does all the live
 reading on the page you land on. By character count of everything this
-repository serves, 66.9% is the model's, counted by
+repository serves, 65.0% is the model's, counted by
 `build/count_provenance.py` rather than claimed.

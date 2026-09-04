@@ -171,14 +171,14 @@ rather than a judge, so it agreed with everything. See F1 in
 Counted, not claimed. Run `python3 build/count_provenance.py --check` and it
 fails if this table has drifted from the repository.
 
-    code this repository serves       927,426 characters
-      GLM-5.3-Flash                   620,846   66.9%
-      not the model's                 306,580   33.1%
+    code this repository serves       965,345 characters
+      GLM-5.3-Flash                   627,581   65.0%
+      not the model's                 337,764   35.0%
 
         the model's page, /z/rebuilt        565,458   written whole from the specs
-        the service, app/app.py              55,388   the model's share
-        the page at the root                190,394   hand-written
-        the service, app/app.py              87,717   hand-written blocks
+        the service, app/app.py              62,123   the model's share
+        the page at the root                194,844   hand-written
+        the service, app/app.py             114,451   hand-written blocks
         the seam and later fixes             28,469   hand-written
 
 ### The earlier page, which is kept but not served

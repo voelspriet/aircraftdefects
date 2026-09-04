@@ -1431,6 +1431,276 @@ def judge(cid):
     return _nostore(jsonify(id=cid, confirmed=row[0] if row else 0, disputed=row[1] if row else 0))
 
 
+# ---- hand-written, 5 September 2026: chase a lead. Until now every model call
+# on the page read what the server chose to hand it. Here the model chooses:
+# it is given five tools over the file (search, open a record, count, the
+# registry, the conflicts ledger) and a lead, and it works the file itself,
+# one call at a time, at most twelve calls, at most sixty seconds, each call
+# shown to the reader as it happens with a link to the same view. The closing
+# text goes through the same quote check as every other reading, plus one
+# more: a number the file did not return is cut, with the number shown.
+_CHASE_TOOLS = [
+ {"type": "function", "function": {"name": "search", "description":
+   "Search the FAA file. Returns the total count and up to 25 newest matching reports with their write-ups. Filters combine with AND.",
+   "parameters": {"type": "object", "properties": {
+     "q": {"type": "string", "description": "words to find in the mechanic's write-up"},
+     "tail": {"type": "string", "description": "US registration without the leading N, e.g. 704AL"},
+     "part": {"type": "string", "description": "part number or part name"},
+     "operator": {"type": "string", "description": "FAA operator code, e.g. CALA"},
+     "model": {"type": "string", "description": "aircraft model as the FAA files it, e.g. 7379"},
+     "ata": {"type": "string", "description": "two-digit ATA/JASC chapter, e.g. 52 for doors"},
+     "from": {"type": "string", "description": "YYYY-MM-DD"}, "to": {"type": "string", "description": "YYYY-MM-DD"}}}}},
+ {"type": "function", "function": {"name": "open_record", "description":
+   "Read one report in full: every coded box decoded, and the mechanic's write-up verbatim.",
+   "parameters": {"type": "object", "properties": {"id": {"type": "string", "description": "the operator control number"}}, "required": ["id"]}}},
+ {"type": "function", "function": {"name": "count", "description":
+   "Count matching reports grouped by one field: ata, operator, year, model, zone or crew. Same filters as search.",
+   "parameters": {"type": "object", "properties": {
+     "by": {"type": "string", "enum": ["ata", "operator", "year", "model", "zone", "crew"]},
+     "q": {"type": "string"}, "tail": {"type": "string"}, "part": {"type": "string"}, "operator": {"type": "string"},
+     "model": {"type": "string"}, "ata": {"type": "string"}, "from": {"type": "string"}, "to": {"type": "string"}}, "required": ["by"]}}},
+ {"type": "function", "function": {"name": "aircraft", "description":
+   "The FAA registry row for a tail number: today's owner, year built, manufacturer, model, or that it was deregistered and when.",
+   "parameters": {"type": "object", "properties": {"tail": {"type": "string", "description": "registration without the N"}}, "required": ["tail"]}}},
+ {"type": "function", "function": {"name": "ledger", "description":
+   "Whether a report sits in the conflicts ledger, where a coded box disagrees with the write-up.",
+   "parameters": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]}}},
+]
+from urllib.parse import urlencode
+_CHASE_FILTERS = ("q", "tail", "part", "operator", "model", "ata", "from", "to")
+_CHASE_IP = {}
+_CHASE_MAX_STEPS, _CHASE_MAX_SECONDS, _CHASE_PER_HOUR = 12, 60, 6
+
+def _glm_tools(msgs, tools, effort="low", max_tokens=1500):
+    """One streamed call that keeps the tool calls glm() throws away.
+    Returns (text, [{id, name, args}])."""
+    body = {"model": MODEL, "temperature": 1, "top_p": 0.95,
+            "thinking": {"type": "enabled", "clear_thinking": False},
+            "reasoning_effort": effort, "max_tokens": max_tokens, "stream": True, "messages": msgs}
+    if tools:
+        body["tools"] = tools; body["tool_stream"] = True
+    r = requests.post(ZAI, json=body, timeout=600, stream=True, headers={
+        "Authorization": "Bearer " + key(), "Content-Type": "application/json"})
+    if r.status_code != 200:
+        raise RuntimeError("z.ai %s %s" % (r.status_code, r.text[:200]))
+    text, calls = [], {}
+    for line in r.iter_lines(decode_unicode=True):
+        if not line or not line.startswith("data:"):
+            continue
+        c = line[5:].strip()
+        if c == "[DONE]":
+            break
+        try:
+            d = json.loads(c)
+        except ValueError:
+            continue
+        for ch in d.get("choices", []):
+            delta = ch.get("delta") or {}
+            if delta.get("content"):
+                text.append(delta["content"])
+            for tc in (delta.get("tool_calls") or []):
+                slot = calls.setdefault(tc.get("index", 0), {"id": "", "name": "", "args": ""})
+                if tc.get("id"): slot["id"] = tc["id"]
+                fn = tc.get("function") or {}
+                if fn.get("name"): slot["name"] = fn["name"]
+                if fn.get("arguments"): slot["args"] += fn["arguments"]
+    return "".join(text), [calls[k] for k in sorted(calls)]
+
+def _chase_filters(a):
+    f = {}
+    for k in _CHASE_FILTERS:
+        v = a.get(k)
+        if v is None or not str(v).strip():
+            continue
+        v = str(v).strip()
+        if k == "tail":
+            v = re.sub(r"[^A-Z0-9]", "", v.upper()).lstrip("N")
+        if k == "ata":
+            v = re.sub(r"\D", "", v)[:2]
+        f[k] = v
+    return f
+
+def _chase_row(r):
+    return {"id": r.get("OperatorControlNumber"), "date": r.get("DifficultyDate"),
+            "tail": r.get("RegistryNNumber"), "operator": r.get("OperatorDesignator"),
+            "operator_name": dec("operator", r.get("OperatorDesignator")),
+            "model": r.get("AircraftModel"), "part": r.get("PartName"), "condition": r.get("PartCondition"),
+            "crew_action": dec("precaution", r.get("PrecautionaryProcedureA")) or "none",
+            "stage": dec("stage", r.get("StageOfOperationCode")),
+            "write_up": (r.get("Discrepancy") or "")[:300]}
+
+def _chase_tool(name, a, recs):
+    """Run one tool. Returns (result, label for the reader, link)."""
+    if name == "search":
+        f = _chase_filters(a)
+        if not f:
+            return {"error": "give at least one filter"}, "Searched with no filter, refused", None
+        d = api("/api/search", limit=25, **f)
+        rows = d.get("rows") or []
+        for r in rows:
+            if r.get("OperatorControlNumber"):
+                recs[r["OperatorControlNumber"]] = r.get("Discrepancy") or ""
+        lab = "Searched " + ", ".join("%s %s" % (k, v) for k, v in f.items()) + ": %s reports, read the newest %d" % (fmt_n(d.get("total")), len(rows))
+        return {"total": d.get("total"), "shown": len(rows), "reports": [_chase_row(r) for r in rows]}, lab, "?" + urlencode(f)
+    if name == "open_record":
+        rid = re.sub(r"[^A-Z0-9]", "", str(a.get("id") or "").upper())
+        if not rid:
+            return {"error": "no id"}, "Tried to open a record without a number", None
+        try:
+            r = api("/api/case/" + rid)
+        except Exception:
+            return {"error": "no such record"}, "Opened %s: no such record" % rid, None
+        if not r.get("OperatorControlNumber"):
+            return {"error": "no such record"}, "Opened %s: no such record" % rid, None
+        recs[rid] = r.get("Discrepancy") or ""
+        out = _chase_row(r)
+        out.update({"write_up": r.get("Discrepancy") or "",
+                    "crew_actions": [x.get("label") for x in (r.get("_crew_all") or []) if x.get("label")] or ["none"],
+                    "nature": [x.get("label") for x in (r.get("_nature_all") or []) if x.get("label")] or ["none set"],
+                    "how_found": (r.get("_discovered") or {}).get("label"),
+                    "system": (r.get("_jasc") or {}).get("label"),
+                    "part_number": r.get("PartNumber"), "serial": r.get("AircraftSerialNumber"),
+                    "aircraft_total_time_hours": r.get("AircraftTotalTime"), "aircraft_total_cycles": r.get("AircraftTotalCycles"),
+                    "filed": (r.get("SubmissionDate") or "")[:10]})
+        return out, "Opened report %s, %s, %s" % (rid, r.get("DifficultyDate"), ("N" + r["RegistryNNumber"]) if r.get("RegistryNNumber") else "no tail filed"), "/case/" + rid
+    if name == "count":
+        by = a.get("by") if a.get("by") in ("ata", "operator", "year", "model", "zone", "crew") else "ata"
+        f = _chase_filters(a)
+        d = api("/api/breakdown", by=by, **f)
+        rows = (d.get("rows") or [])[:15]
+        lab = "Counted by %s%s: %s reports in %s groups" % (by, (" for " + ", ".join("%s %s" % kv for kv in f.items())) if f else "", fmt_n(d.get("reports_shown")), fmt_n(d.get("categories")))
+        return {"by": by, "reports": d.get("reports_shown"), "groups": d.get("categories"),
+                "top": [{"key": r.get("key"), "label": r.get("label"), "n": r.get("n")} for r in rows]}, lab, "?" + urlencode(f) if f else None
+    if name == "aircraft":
+        n = re.sub(r"[^A-Z0-9]", "", str(a.get("tail") or "").upper()).lstrip("N")
+        if not n:
+            return {"error": "no tail"}, "Registry lookup without a tail number", None
+        r = _registry_of(n) or {}
+        r.pop("full", None)
+        return (r or {"note": "not on the US register today and no deregistration record found"}), "Looked up N%s in the FAA registry" % n, "?tail=" + n
+    if name == "ledger":
+        rid = re.sub(r"[^A-Z0-9]", "", str(a.get("id") or "").upper())
+        c = db()
+        row = c.execute("SELECT note, source, confirmed, disputed FROM conflicts WHERE id=?", (rid,)).fetchone()
+        c.close()
+        if not row:
+            return {"in_ledger": False}, "Checked the conflicts ledger for %s: not in it" % rid, "/conflicts/"
+        return {"in_ledger": True, "note": row[0], "found_by": row[1], "held": row[2], "disputed": row[3]}, "Checked the conflicts ledger for %s: listed" % rid, "/conflicts/"
+    return {"error": "no such tool"}, "Called a tool that does not exist", None
+
+def fmt_n(n):
+    try:
+        return "{:,}".format(int(n))
+    except (TypeError, ValueError):
+        return str(n)
+
+_NUM = re.compile(r"\d[\d,]*")
+
+def _numbers_in(obj):
+    """Every number a tool returned, in the forms a writer would use: 20240711
+    also counts as 2024, 7 and 11; 03/31/2007 as 3, 31 and 2007; 1,303 as 1303."""
+    out = set()
+    for t in _NUM.findall(json.dumps(obj)):
+        t = t.replace(",", "")
+        out.add(t); out.add(t.lstrip("0") or "0")
+        if len(t) == 8 and t[:2] in ("19", "20"):
+            out.update({t[:4], t[4:6], t[6:8], t[4:6].lstrip("0"), t[6:8].lstrip("0")})
+    return out
+
+def _cut_unreturned_numbers(sents, seen):
+    """A number in the closing text that no tool returned is a number the model
+    made up. The sentence goes, and the reader sees which number."""
+    cut = 0
+    for x in sents:
+        if x.get("drop"):
+            continue
+        bad = [t for t in _NUM.findall(x["t"]) if len(t.replace(",", "")) >= 2
+               and t.replace(",", "") not in seen and t.replace(",", "").lstrip("0") not in seen]
+        if bad:
+            x["drop"] = True; cut += 1
+            x.setdefault("recs", []).append({"id": None, "quote": "number " + ", ".join(bad[:3]), "ok": False})
+    return cut
+
+_CHASE_PROMPT = (
+ "You are working a lead in the FAA Service Difficulty Reporting System for a journalist, using tools. "
+ "The lead: %s.\n\n"
+ "Work the file yourself, one tool call at a time, at most %d calls in all. Establish what the file says: what was "
+ "reported, when, how often, whether the same thing recurs on this aircraft, part or fleet, and what the registry says "
+ "about the aircraft. Open at least two records in full before you conclude. When you have enough, or when told to stop, "
+ "write for the journalist in British English, no bullet points, no em dashes:\n"
+ "1. What the file shows: dated sentences, each resting on a record you opened, citing it as [RECORDNUMBER] at the end "
+ "of the sentence, quoting the mechanic's capitals verbatim in double quotation marks where the wording matters. Plain text, no markdown.\n"
+ "2. A short paragraph headed 'What to ask the airline' with at most four questions the file cannot answer.\n"
+ "Rules: every number you write must have come back from a tool; never estimate, never compare rates or rank operators, "
+ "never call anything dangerous or a pattern; filing a report is the system working. If the file is thin, say so plainly.")
+
+@app.get("/z/api/stream/chase")
+def stream_chase():
+    lead = {k: (request.args.get(k) or "").strip() for k in ("tail", "id", "part", "q")}
+    lead = {k: v for k, v in lead.items() if v}
+    if not lead:
+        return jsonify(error="give a tail, id, part or q"), 400
+    if "tail" in lead:
+        lead["tail"] = re.sub(r"[^A-Z0-9]", "", lead["tail"].upper()).lstrip("N")
+    ip = (request.headers.get("X-Forwarded-For") or request.remote_addr or "").split(",")[0].strip()
+    now = time.time()
+    hist = [t for t in _CHASE_IP.get(ip, []) if now - t < 3600]
+    if len(hist) >= _CHASE_PER_HOUR:
+        def busy():
+            yield _sse("meta", {"what": "chase"})
+            yield _sse("error", {"message": "six chases an hour per reader; try again later", "seconds": 0})
+        return Response(stream_with_context(busy()), mimetype="text/event-stream",
+                        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+    _CHASE_IP[ip] = hist + [now]
+    desc = ", ".join({"tail": "aircraft N%s", "id": "report %s", "part": "part %s", "q": "the words '%s'"}[k] % v for k, v in lead.items())
+    t0 = time.time()
+    def gen():
+        yield _sse("meta", {"what": "the file, worked by tool calls on " + desc, "read": None, "of": None})
+        msgs = [{"role": "user", "content": _CHASE_PROMPT % (desc, _CHASE_MAX_STEPS)}]
+        recs, seen, steps, tokens = {}, set(), 0, None
+        try:
+            while True:
+                stop = steps >= _CHASE_MAX_STEPS or time.time() - t0 > _CHASE_MAX_SECONDS
+                if stop:
+                    msgs.append({"role": "user", "content": "Stop searching now. Write your conclusion from what you have, in the form asked for."})
+                text, calls = _glm_tools(msgs, None if stop else _CHASE_TOOLS)
+                if calls and not stop:
+                    msgs.append({"role": "assistant", "content": text or "",
+                                 "tool_calls": [{"id": c["id"], "type": "function",
+                                                 "function": {"name": c["name"], "arguments": c["args"]}} for c in calls]})
+                    for i, c in enumerate(calls):
+                        if i > 0:
+                            msgs.append({"role": "tool", "tool_call_id": c["id"], "content": json.dumps({"error": "one tool per step; call it again next step"})})
+                            continue
+                        try:
+                            a = json.loads(c["args"] or "{}")
+                        except ValueError:
+                            a = {}
+                        steps += 1
+                        try:
+                            res, label, link = _chase_tool(c["name"], a, recs)
+                        except Exception as e:
+                            res, label, link = {"error": str(e)[:160]}, "%s failed" % c["name"], None
+                        seen |= _numbers_in(res) | _numbers_in(a)
+                        yield _sse("step", {"n": steps, "tool": c["name"], "args": a, "label": label, "link": link,
+                                            "said": (text or "").strip()[:240], "seconds": round(time.time() - t0, 1)})
+                        msgs.append({"role": "tool", "tool_call_id": c["id"], "content": json.dumps(res)[:6000]})
+                    continue
+                final = re.sub(r"\*\*|__|^#+ ", "", (text or "").strip(), flags=re.M)
+                break
+            yield _sse("delta", final)
+            sents, stats = verify_text(final, recs)
+            stats["numbers_cut"] = _cut_unreturned_numbers(sents, seen)
+            stats["removed"] += stats["numbers_cut"]
+            yield _sse("verify", {"sentences": sents, "stats": stats, "records": {}})
+            yield _sse("done", {"seconds": round(time.time() - t0, 1), "tokens": tokens, "model": MODEL,
+                                "effort": "low", "steps": steps, "records_read": len(recs)})
+        except Exception as e:
+            yield _sse("error", {"message": str(e)[:200], "seconds": round(time.time() - t0, 1)})
+    return Response(stream_with_context(gen()), mimetype="text/event-stream",
+                    headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
 # ---- hand-written, 5 September 2026: a human measurement of the conflicts ledger.
 # Two attempts to put a number on the ledger failed (docs/FINDINGS.md): no human
 # had labelled anything. This is the labelling. build/make_label_set.py fills a
@@ -1640,6 +1910,10 @@ def verify_text(text, recs, meta_of=None):
             # a quote is text inside quotation marks, or the capitals that sit
             # directly before a [record]; counted facts like "(AALA, 514)" are not quotes.
             quotes = [q.strip(" ,.") for q in re.findall(r'["\u201c]([^"\u201d]{8,}?)["\u201d]', sent)]
+            # 5 September 2026: a quote in single quotation marks counts too, when it
+            # is in the mechanics' capitals; an apostrophe inside a word is not one.
+            quotes += [q.strip(" ,.") for q in re.findall(r"(?<![A-Za-z])['\u2018]([A-Z0-9][^'\u2019]{8,}?)['\u2019](?![A-Za-z])", sent)
+                       if re.search(r"[A-Z]{2}", q)]
             for m in re.finditer(r"([A-Z0-9][A-Z0-9 ,./#&'\-()]{10,})\s*\[[A-Z0-9]{8,24}\]", sent):
                 q = m.group(1).strip(" ,.\"\u201c\u201d")
                 if q and q not in quotes:

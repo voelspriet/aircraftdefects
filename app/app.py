@@ -721,6 +721,134 @@ KNOWN_API = ("hero", "facets", "trend", "glossary", "breakdown", "search", "clus
              "explain", "resolve", "fleet", "inspection", "case", "aircraft")
 
 
+
+# ---- 4 September 2026: make every selection a page a crawler can read -------
+# The page is built in the browser, so /?ata=57 and /?from=..&to=.. used to
+# return the identical shell: one title, one description, one canonical for
+# 1.76 million reports. A crawler saw a single page and indexed it once. The
+# selection is knowable on the server, so the head is written there, and a
+# <noscript> summary carries the real counts and a handful of real reports.
+# The interactive page is untouched; this only fills the head and one hidden
+# block before the shell is sent.
+import html as _html
+from urllib.parse import urlencode as _urlencode
+
+_ATA_NAMES = {}
+
+
+def _ata_names():
+    global _ATA_NAMES
+    if not _ATA_NAMES:
+        try:
+            r = requests.get(SDR + "/api/search", params={"limit": 1}, timeout=30)
+            _ATA_NAMES = (r.json() or {}).get("ata", {}) or {}
+        except Exception:
+            _ATA_NAMES = {}
+    return _ATA_NAMES
+
+
+def _seo_facts(args):
+    """Ask the data layer what this selection actually holds."""
+    keep = {k: v for k, v in args.items()
+            if k in ("ata", "make", "model", "operator", "tail", "part", "q",
+                     "from", "to", "nature", "stage", "crew", "jasc", "zone")
+            and str(v).strip()}
+    if not keep:
+        return None
+    try:
+        r = requests.get(SDR + "/api/search", params=dict(keep, limit=5), timeout=45)
+        d = r.json()
+    except Exception:
+        return None
+    return {"filters": keep, "total": d.get("total", 0), "rows": d.get("rows") or []}
+
+
+def _seo_phrase(f):
+    """The selection in words, for a title a person would click."""
+    bits = []
+    if f.get("ata"):
+        name = _ata_names().get(str(f["ata"]))
+        bits.append(("%s (ATA %s)" % (name, f["ata"])) if name else "ATA chapter %s" % f["ata"])
+    if f.get("model"):
+        bits.append("%s aircraft" % f["model"].upper())
+    if f.get("make"):
+        bits.append(f["make"].upper())
+    if f.get("operator"):
+        bits.append("operator %s" % f["operator"].upper())
+    if f.get("tail"):
+        bits.append("tail N%s" % f["tail"].upper().lstrip("N"))
+    if f.get("part"):
+        bits.append("part %s" % f["part"])
+    if f.get("q"):
+        bits.append('reports mentioning "%s"' % f["q"])
+    if f.get("from") and f.get("to"):
+        bits.append("%s" % f["from"] if f["from"] == f["to"] else "%s to %s" % (f["from"], f["to"]))
+    elif f.get("from"):
+        bits.append("from %s" % f["from"])
+    elif f.get("to"):
+        bits.append("up to %s" % f["to"])
+    return ", ".join(bits) or "a selection"
+
+
+def _seo_head(title, desc, canonical, body=""):
+    t = _html.escape(title, quote=True)
+    d = _html.escape(desc, quote=True)
+    return (t, d, canonical, body)
+
+
+def _render_indexable(path_html, args, canonical_path):
+    """Serve the shell with a head and a noscript summary written for this URL."""
+    try:
+        with open(os.path.join(app.static_folder, path_html), encoding="utf-8") as fh:
+            page = fh.read()
+    except OSError:
+        return None
+    facts = _seo_facts(args)
+    if not facts:
+        return None
+    phrase = _seo_phrase(facts["filters"])
+    n = facts["total"]
+    title = "%s · %s FAA report%s · aircraftdefects.com" % (
+        phrase[:1].upper() + phrase[1:], "{:,}".format(n), "" if n == 1 else "s")
+    desc = ("%s FAA service difficulty report%s for %s, from 1995 on. Each one is a defect a "
+            "mechanic found and wrote up; a model restates the write-up in plain English. "
+            "No safety ranking: the file carries no fleet sizes and no flying hours."
+            % ("{:,}".format(n), "" if n == 1 else "s", phrase))
+    canon = "https://aircraftdefects.com" + canonical_path
+    if args:
+        qs = _urlencode(sorted(facts["filters"].items()))
+        canon += "?" + qs
+
+    rows = []
+    for r in facts["rows"][:5]:
+        d = (r.get("DifficultyDate") or "")[:10]
+        ac = " ".join(x for x in (r.get("AircraftMake"), r.get("AircraftModel")) if x)
+        txt = (r.get("Discrepancy") or "").strip()
+        rows.append("<li><b>%s</b> %s: %s</li>" % (_html.escape(d), _html.escape(ac),
+                                                   _html.escape(txt[:280])))
+    note = ("<noscript><section><h1>%s</h1><p>%s</p><ul>%s</ul>"
+            "<p>These reports are read in the interactive page above, which needs JavaScript. "
+            "The underlying data is a work of the US government, in the public domain.</p>"
+            "</section></noscript>") % (_html.escape(title), _html.escape(desc), "".join(rows))
+
+    page = re.sub(r"<title>.*?</title>", "<title>%s</title>" % _html.escape(title),
+                  page, count=1, flags=re.S)
+    page = re.sub(r'<meta name="description" content="[^"]*">',
+                  '<meta name="description" content="%s">' % _html.escape(desc, quote=True),
+                  page, count=1)
+    page = re.sub(r'<link rel="canonical" href="[^"]*">',
+                  '<link rel="canonical" href="%s">' % _html.escape(canon, quote=True),
+                  page, count=1)
+    page = re.sub(r'<meta property="og:title" content="[^"]*">',
+                  '<meta property="og:title" content="%s">' % _html.escape(title, quote=True),
+                  page, count=1)
+    page = re.sub(r'<meta property="og:url" content="[^"]*">',
+                  '<meta property="og:url" content="%s">' % _html.escape(canon, quote=True),
+                  page, count=1)
+    page = page.replace("</body>", note + "</body>", 1)
+    return Response(page, mimetype="text/html")
+
+
 @app.route("/z/<name>", methods=["GET"])
 def bare_api(name):
     if name not in KNOWN_API:
@@ -746,8 +874,72 @@ def conflicts_page():
 
 @app.get("/z/case/<rid>")
 def case_page(rid):
-    """Hand-written, 31 August 2026: one report on its own page."""
+    """Hand-written, 31 August 2026: one report on its own page.
+
+    4 September 2026: the head is written on the server. Every case URL used to
+    return the same title and the same canonical, so 1.76 million distinct
+    reports looked to a crawler like one page.
+    """
+    rendered = _render_case(rid)
+    if rendered is not None:
+        return rendered
     return send_from_directory(app.static_folder, "case.html", max_age=0)
+
+
+def _render_case(rid):
+    """Title, description, canonical and a noscript copy of one report."""
+    if not re.fullmatch(r"[A-Za-z0-9._-]{4,64}", rid or ""):
+        return None
+    try:
+        with open(os.path.join(app.static_folder, "case.html"), encoding="utf-8") as fh:
+            page = fh.read()
+        raw = (requests.get("http://127.0.0.1:8211/z/api/sheet/" + rid, timeout=30).json()
+               or {}).get("raw") or {}
+    except Exception:
+        return None
+    if not raw:
+        return None
+
+    date = (raw.get("DifficultyDate") or "")[:10]
+    ac = " ".join(x for x in (raw.get("AircraftMake"), raw.get("AircraftModel")) if x)
+    tail = (raw.get("RegistryNNumber") or "").strip()
+    part = (raw.get("PartName") or "").strip()
+    text = " ".join((raw.get("Discrepancy") or "").split())
+
+    who = ("N" + tail) if tail else "an unregistered airframe"
+    title = "%s on %s%s%s · FAA report %s" % (
+        (part.title() if part else "Defect"), ac or "an aircraft",
+        (", " + who) if tail else "", (", " + date) if date else "", rid)
+    desc = (text[:280] or "A defect a mechanic reported to the FAA.")
+    canon = "https://aircraftdefects.com/case/" + rid
+
+    body = ("<noscript><article><h1>%s</h1>"
+            "<p><b>Date:</b> %s &middot; <b>Aircraft:</b> %s &middot; <b>Tail:</b> %s"
+            "%s</p><p>%s</p>"
+            "<p>Filed with the US Federal Aviation Administration as a service difficulty "
+            "report. Quoted as filed. The FAA file records what was found, not why. "
+            "Public domain.</p></article></noscript>") % (
+        _html.escape(title), _html.escape(date or "not recorded"),
+        _html.escape(ac or "not recorded"), _html.escape(who),
+        (" &middot; <b>Part:</b> " + _html.escape(part)) if part else "",
+        _html.escape(text or "No write-up in the record."))
+
+    page = re.sub(r"<title>.*?</title>", "<title>%s</title>" % _html.escape(title),
+                  page, count=1, flags=re.S)
+    if re.search(r'<meta name="description"', page):
+        page = re.sub(r'<meta name="description" content="[^"]*">',
+                      '<meta name="description" content="%s">' % _html.escape(desc, quote=True),
+                      page, count=1)
+    else:
+        page = page.replace("</title>", "</title>\n<meta name=\"description\" content=\"%s\">"
+                            % _html.escape(desc, quote=True), 1)
+    if re.search(r'<link rel="canonical"', page):
+        page = re.sub(r'<link rel="canonical" href="[^"]*">',
+                      '<link rel="canonical" href="%s">' % canon, page, count=1)
+    else:
+        page = page.replace("</title>", '</title>\n<link rel="canonical" href="%s">' % canon, 1)
+    page = page.replace("</body>", body + "</body>", 1)
+    return Response(page, mimetype="text/html")
 
 
 # ---- hand-written, 31 August 2026: the three files a crawler and a language
@@ -765,6 +957,20 @@ def robots():
 def sitemap():
     return send_from_directory(app.static_folder, "sitemap.xml", max_age=3600,
                                mimetype="application/xml")
+
+
+@app.get("/sitemaps/<name>")
+def sitemap_part(name):
+    """The sitemap is an index now: 1.76 million report pages cannot sit in one
+    file (Google caps a sitemap at 50,000 URLs), so the parts live here, gzipped."""
+    if not re.fullmatch(r"[a-z]+-\d{3,4}\.xml(\.gz)?", name or ""):
+        return jsonify(error="no such sitemap"), 404
+    resp = send_from_directory(os.path.join(app.static_folder, "sitemaps"), name,
+                               max_age=3600, mimetype="application/xml")
+    if name.endswith(".gz"):
+        # a stored gzip file, not transfer encoding: say so or crawlers see bytes
+        resp.headers["Content-Encoding"] = "gzip"
+    return resp
 
 
 @app.get("/llms.txt")
@@ -793,6 +999,10 @@ def welcome():
 @app.get("/z/")
 @app.get("/z")
 def index():
+    if request.args:
+        rendered = _render_indexable("index.html", request.args.to_dict(), "/")
+        if rendered is not None:
+            return rendered
     return send_from_directory(app.static_folder, "index.html", max_age=0)
 
 
@@ -1040,6 +1250,14 @@ def db():
         c.execute("ALTER TABLE conflicts ADD COLUMN source TEXT DEFAULT 'reading'")
     except Exception:
         pass
+    # 2 September 2026: a reader who knows why a report matters is the one thing
+    # the file cannot supply. Notes are held here and mailed on; they are never
+    # shown on the page, because anything a stranger can publish on 1.76 million
+    # public records is a place to dump abuse, and moderating that is a job
+    # nobody here is doing.
+    c.execute("""CREATE TABLE IF NOT EXISTS notes(
+        n INTEGER PRIMARY KEY AUTOINCREMENT, rid TEXT, body TEXT, who TEXT,
+        reply_to TEXT, ip TEXT, ua TEXT, at TEXT)""")
     return c
 
 
@@ -1095,6 +1313,23 @@ def conflicts():
             "Not a safety signal about any operator or aircraft."])
 
 
+@app.get("/z/api/conflicts/one/<rid>")
+def conflict_one(rid):
+    """Does this one report sit in the conflicts ledger? The case page asks per
+    record; pulling the whole ledger to answer it would be 70 rows and growing."""
+    try:
+        c = db()
+        r = c.execute("SELECT note, found_at, source, confirmed, disputed "
+                      "FROM conflicts WHERE id=?", (rid,)).fetchone()
+        c.close()
+    except Exception:
+        return jsonify(conflict=False)
+    if not r:
+        return jsonify(conflict=False)
+    return jsonify(conflict=True, note=r[0], found_at=r[1], source=r[2],
+                   confirmed=r[3] or 0, disputed=r[4] or 0)
+
+
 @app.post("/z/api/conflicts/add")
 def conflict_add():
     """Used by the sweep. A single pass is one model's opinion, so the sweep only
@@ -1116,6 +1351,71 @@ def conflict_add():
         return jsonify(error=str(e)[:200]), 500
 
 
+@app.post("/z/api/note")
+def note():
+    """A message from a reader about one report: why it matters, what they know,
+    what we got wrong. Kept, and mailed on. Three guards, all cheap: a honeypot
+    field a person never sees, a length cap, and one note per address per minute.
+    None of them stop a determined spammer; they stop the undetermined ones, and
+    the mailbox is a person's inbox, not a public page."""
+    d = request.get_json(force=True, silent=True) or request.form or {}
+    if not isinstance(d, dict):
+        return jsonify(error="unreadable"), 400
+    if (d.get("website") or "").strip():          # honeypot: hidden, must stay empty
+        return jsonify(ok=True), 200              # answer as if accepted, store nothing
+    rid = (d.get("id") or "").strip()[:40]
+    body = (d.get("text") or "").strip()
+    if not rid or len(body) < 4:
+        return jsonify(error="say something about a report"), 400
+    if len(body) > 4000:
+        return jsonify(error="4000 characters is the limit"), 400
+    ip = request.headers.get("X-Real-IP") or request.remote_addr or "?"
+    now = time.time()
+    last = _NOTE_SEEN.get(ip, 0)
+    if now - last < 60:
+        return jsonify(error="one note a minute, please"), 429
+    _NOTE_SEEN[ip] = now
+    who = (d.get("name") or "").strip()[:120]
+    reply_to = (d.get("email") or "").strip()[:160]
+    stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    try:
+        c = db()
+        c.execute("INSERT INTO notes(rid, body, who, reply_to, ip, ua, at) VALUES (?,?,?,?,?,?,?)",
+                  (rid, body, who, reply_to, ip,
+                   (request.headers.get("User-Agent") or "")[:300], stamp))
+        c.commit(); c.close()
+    except Exception as e:
+        return jsonify(error=str(e)[:200]), 500
+    _mail_note(rid, body, who, reply_to, stamp)
+    return jsonify(ok=True)
+
+
+_NOTE_SEEN = {}
+
+
+def _mail_note(rid, body, who, reply_to, stamp):
+    """Sent from admin@imagewhisperer.org, which is the only domain on this server
+    that passes DMARC; the reader's own address goes in Reply-To so an answer goes
+    to them and not into a machine account."""
+    import subprocess
+    from email.mime.text import MIMEText
+    m = MIMEText(("Report:   https://aircraftdefects.com/case/%s\n"
+                  "From:     %s\n"
+                  "Reply to: %s\n"
+                  "At:       %s\n\n%s\n") % (rid, who or "(no name)",
+                                               reply_to or "(none given)", stamp, body),
+                 "plain", "utf-8")
+    m["Subject"] = "aircraftdefects: a note on %s" % rid
+    m["From"] = "aircraftdefects <admin@imagewhisperer.org>"
+    m["To"] = "contact@aircraftdefects.com"
+    if reply_to and "@" in reply_to:
+        m["Reply-To"] = reply_to
+    try:
+        subprocess.run(["/usr/sbin/sendmail", "-t"], input=m.as_bytes(), timeout=20)
+    except Exception:
+        pass          # the note is already stored; a mail failure must not lose it
+
+
 @app.post("/z/api/conflicts/<cid>/judge")
 def judge(cid):
     """A reader who opened the record can say whether it holds. Both directions are
@@ -1129,6 +1429,135 @@ def judge(cid):
     row = c.execute("SELECT confirmed, disputed FROM conflicts WHERE id=?", (cid,)).fetchone()
     c.close()
     return jsonify(id=cid, confirmed=row[0] if row else 0, disputed=row[1] if row else 0)
+
+
+# ---- hand-written, 5 September 2026: a human measurement of the conflicts ledger.
+# Two attempts to put a number on the ledger failed (docs/FINDINGS.md): no human
+# had labelled anything. This is the labelling. build/make_label_set.py fills a
+# queue with every ledger entry and an equal-sized set of unflagged reports drawn
+# from the same searches the sweep uses, shuffled. The labeller sees one report
+# at a time, codes decoded beside the write-up, and never sees whether the sweep
+# flagged it. /z/api/conflicts/eval joins the labels back to the ledger and
+# reports precision and recall over the sample. The page prints those numbers
+# with the sample size and the date, and says what the denominator is.
+LABEL_KEY = (os.environ.get("LABEL_KEY") or "").strip()
+
+def _label_tables(c):
+    c.execute("""CREATE TABLE IF NOT EXISTS label_queue(
+        pos INTEGER PRIMARY KEY, id TEXT UNIQUE, rec TEXT, flagged INTEGER)""")
+    c.execute("""CREATE TABLE IF NOT EXISTS labels(
+        id TEXT PRIMARY KEY, verdict TEXT, field TEXT, note TEXT, who TEXT, at TEXT)""")
+
+def _nostore(resp):
+    """The after_request hook lets browsers keep any read for five minutes. A
+    labelling queue and a live measurement change on every save, so never."""
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+def _label_ok():
+    k = request.headers.get("X-Label-Key") or request.args.get("key") or ""
+    return bool(LABEL_KEY) and k == LABEL_KEY
+
+def _label_item(c, pos):
+    r = c.execute("SELECT pos, id, rec FROM label_queue WHERE pos=?", (pos,)).fetchone()
+    if not r:
+        return None
+    rec = json.loads(r[2] or "{}")
+    lab = c.execute("SELECT verdict, field, note FROM labels WHERE id=?", (r[1],)).fetchone()
+    crew = [x.get("label") for x in (rec.get("_crew_all") or []) if x.get("label")]
+    nat = [x.get("label") for x in (rec.get("_nature_all") or []) if x.get("label")]
+    return {"pos": r[0], "id": r[1],
+            "date": rec.get("DifficultyDate"), "tail": rec.get("RegistryNNumber"),
+            "operator": rec.get("OperatorDesignator"),
+            "operator_name": dec("operator", rec.get("OperatorDesignator")),
+            "aircraft": " ".join(x for x in (rec.get("_aircraft_make") or rec.get("AircraftMake"), rec.get("AircraftModel")) if x),
+            "crew": crew or ["None (the ordinary case)"],
+            "nature": nat or ["none set"],
+            "discovered": (rec.get("_discovered") or {}).get("label"),
+            "stage": (rec.get("_stage") or {}).get("label"),
+            "system": (rec.get("_jasc") or {}).get("label"),
+            "part": " ".join(x for x in (rec.get("PartName"), rec.get("PartCondition")) if x and x.strip()),
+            "text": rec.get("Discrepancy") or "",
+            "label": {"verdict": lab[0], "field": lab[1], "note": lab[2]} if lab else None}
+
+@app.get("/z/label")
+@app.get("/z/label/")
+def label_page():
+    return send_from_directory(app.static_folder, "label.html", max_age=0)
+
+@app.get("/z/api/label/next")
+def label_next():
+    if not _label_ok():
+        return jsonify(error="no"), 403
+    c = db(); _label_tables(c)
+    total = c.execute("SELECT COUNT(*) FROM label_queue").fetchone()[0]
+    done = c.execute("SELECT COUNT(*) FROM labels l JOIN label_queue q ON q.id=l.id").fetchone()[0]
+    pos = request.args.get("pos", type=int)
+    if pos is None:
+        r = c.execute("""SELECT MIN(pos) FROM label_queue q
+                         WHERE NOT EXISTS (SELECT 1 FROM labels l WHERE l.id=q.id)""").fetchone()
+        pos = r[0]
+    item = _label_item(c, pos) if pos is not None else None
+    c.close()
+    return _nostore(jsonify(total=total, done=done, item=item))
+
+@app.post("/z/api/label/save")
+def label_save():
+    if not _label_ok():
+        return jsonify(error="no"), 403
+    d = request.get_json(force=True, silent=True) or {}
+    if d.get("verdict") not in ("conflict", "no_conflict", "unsure") or not d.get("id"):
+        return jsonify(error="verdict must be conflict, no_conflict or unsure"), 400
+    c = db(); _label_tables(c)
+    c.execute("INSERT OR REPLACE INTO labels(id, verdict, field, note, who, at) VALUES (?,?,?,?,?,?)",
+              (d["id"], d["verdict"], (d.get("field") or "")[:40], (d.get("note") or "")[:500],
+               (d.get("who") or "labeller")[:40], time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())))
+    c.commit(); c.close()
+    return _nostore(jsonify(ok=True))
+
+def _wilson(k, n, z=1.96):
+    if not n:
+        return None
+    p = k / n; d = 1 + z * z / n
+    centre = (p + z * z / (2 * n)) / d
+    half = z * ((p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5) / d
+    return [round(100 * max(0, centre - half), 1), round(100 * min(1, centre + half), 1)]
+
+@app.get("/z/api/conflicts/eval")
+def conflicts_eval():
+    """Precision and recall of the ledger over the labelled sample. Nothing here is
+    about the whole file: the controls come from the same 35 searches the sweep
+    reads, so recall is recall within the sweep's reach."""
+    c = db(); _label_tables(c)
+    rows = c.execute("""SELECT l.verdict, q.flagged, COALESCE(k.source,''), l.at
+                        FROM labels l JOIN label_queue q ON q.id=l.id
+                        LEFT JOIN conflicts k ON k.id=l.id""").fetchall()
+    c.close()
+    n = len(rows); unsure = sum(1 for r in rows if r[0] == "unsure")
+    dec_rows = [r for r in rows if r[0] != "unsure"]
+    flagged = [r for r in dec_rows if r[1]]
+    controls = [r for r in dec_rows if not r[1]]
+    tp = sum(1 for r in flagged if r[0] == "conflict")
+    fn = sum(1 for r in controls if r[0] == "conflict")
+    scan = [r for r in flagged if r[2] == "scan"]; scan_tp = sum(1 for r in scan if r[0] == "conflict")
+    reading = [r for r in flagged if r[2] == "reading"]; read_tp = sum(1 for r in reading if r[0] == "conflict")
+    out = {"labelled": n, "unsure": unsure, "decided": len(dec_rows),
+           "flagged_read": len(flagged), "flagged_held": tp,
+           "controls_read": len(controls), "controls_with_conflict": fn,
+           "precision": round(100 * tp / len(flagged), 1) if flagged else None,
+           "precision_ci": _wilson(tp, len(flagged)),
+           "precision_scan": round(100 * scan_tp / len(scan), 1) if scan else None,
+           "precision_scan_n": len(scan),
+           "precision_reading": round(100 * read_tp / len(reading), 1) if reading else None,
+           "precision_reading_n": len(reading),
+           "recall": round(100 * tp / (tp + fn), 1) if (tp + fn) else None,
+           "recall_ci": _wilson(tp, tp + fn) if (tp + fn) else None,
+           "last_label": max((r[3] for r in rows), default=None),
+           "labeller": "one person, the site's author, reading each report blind to whether it was flagged",
+           "denominator": ("Controls are unflagged reports drawn from the same 35 searches the sweep reads, "
+                           "not from the whole file. Recall is recall within that reach."),
+           "enough": len(dec_rows) >= 20}
+    return _nostore(jsonify(out))
 
 # ============================================================================
 # hand-written, 30 August 2026, counted in MODEL_USE.md. The panel of twenty
@@ -1865,8 +2294,14 @@ SIMPLE = ("Write for a curious member of the public, in short everyday sentences
           "part does in a few plain words, what the crew did, and what the mechanic did about it. No part "
           "numbers, no manual references, no codes. Expand every abbreviation into words. End with one short "
           "sentence naming what the report does not say. Then, on a last line of its own, write TERMS: followed by "
-          "a JSON list of up to eight technical terms or part names from your text, exactly as you wrote them, that "
-          "a reader might want to look up.")
+          "a JSON list of at most four objects, each {\"text\": ..., \"q\": ...}. \"text\" is a phrase copied "
+          "verbatim from what you just wrote, the most specific one available: the part or the system as this "
+          "report names it, never a bare everyday word and never something the sentence has already explained. "
+          "\"q\" is the search that phrase should run, built from the aircraft type, that part or system, and "
+          "what went wrong, so the search returns this kind of failure on this kind of aircraft rather than a "
+          "dictionary definition. For example {\"text\": \"probe heat computer\", \"q\": \"Airbus A319 probe "
+          "heat computer failure\"}. If nothing in the text is specific enough to be worth looking up, write "
+          "TERMS: [].")
 
 @app.get("/z/api/specimen")
 def specimen():
@@ -1892,7 +2327,17 @@ def specimen():
         m = re.search(r"\n?\s*TERMS:\s*(\[[\s\S]*\])\s*$", plain)
         if m:
             try:
-                terms = [str(t) for t in json.loads(m.group(1))][:8]
+                # 2 Sep 2026: terms used to be bare strings and the page searched
+                # the word itself plus "aircraft", which sent a reader to a
+                # dictionary. They are now {text, q} so the anchor stays the
+                # phrase in the sentence while the search is specific. Cached
+                # readings still hold the old shape, so both are accepted.
+                raw = json.loads(m.group(1))
+                for t in raw[:4]:
+                    if isinstance(t, dict) and t.get("text"):
+                        terms.append({"text": str(t["text"]), "q": str(t.get("q") or t["text"])})
+                    elif isinstance(t, str) and t.strip():
+                        terms.append({"text": t, "q": t + " aircraft"})
             except Exception:
                 terms = []
             plain = plain[:m.start()].rstrip()
@@ -1952,8 +2397,21 @@ ASKS = {
 def stream_case():
     which = (request.args.get("q") or "explain").strip()
     text = (request.args.get("text") or "").strip()
-    if which not in ASKS or not text:
+    # 2 September 2026: the five questions were the only questions. A reader who
+    # wants to ask their own now can, under the same rules: this record only,
+    # abstain when it does not say, and the same 140-word ceiling.
+    free = (request.args.get("ask") or "").strip()[:300]
+    if which == "free":
+        if not free or not text:
+            return jsonify(error="no question"), 400
+        task = ("A reader has asked this about the single report below: \"%s\"\n"
+                "Answer only from this report. If the report does not carry the answer, "
+                "say so in one plain sentence and stop; do not reason about what is "
+                "likely, and do not use anything you know from outside this record." % free)
+    elif which not in ASKS or not text:
         return jsonify(error="no question"), 400
+    else:
+        task = ASKS[which]
     facts = {}
     try:
         raw = json.loads(request.args.get("rec") or "{}")
@@ -1961,7 +2419,7 @@ def stream_case():
             rec = decorate(raw); facts = {k: v for k, v in rec.items() if v and k not in ("text", "id")}
     except Exception:
         facts = {}
-    prompt = (ASKS[which] + "\n" + NOVICE.split("End with")[0] + "\n" + ABSTAIN +
+    prompt = (task + "\n" + NOVICE.split("End with")[0] + "\n" + ABSTAIN +
               "\nDo not print the record number, part numbers, model codes or the registration; say the aircraft type and airline in plain words. "
               "\nPlain prose, no JSON, at most 140 words.\n\nEvery coded field on this report, decoded:\n"
               + json.dumps(facts, ensure_ascii=False) + "\n\nThe write-up, verbatim:\n" + text)

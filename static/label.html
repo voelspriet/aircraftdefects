@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Label a report · aircraftdefects.com</title>
+<style>
+:root{--ink:#1b1b1b;--ash:#6b6b6b;--line:#dcd8d0;--paper:#f7f5f0;--rust:#a63a1e;--mono:"SF Mono",Menlo,Consolas,monospace;--serif:Georgia,"Times New Roman",serif}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.5 var(--serif)}
+.wrap{max-width:860px;margin:0 auto;padding:28px 20px 80px}
+h1{font:600 20px/1.3 var(--mono);margin:0 0 4px}
+.sub{font:400 12.5px/1.5 var(--mono);color:var(--ash);margin:0 0 22px}
+.prog{font:400 12.5px/1.5 var(--mono);color:var(--ash);display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:18px}
+.codes{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font:400 13.5px/1.5 var(--mono);margin:0 0 18px}
+.codes b{color:var(--ash);font-weight:400}
+.codes .hot{color:var(--rust)}
+.verb{font:400 15px/1.55 var(--mono);background:#fff;border:1px solid var(--line);padding:14px 16px;white-space:pre-wrap;word-break:break-word;margin:0 0 18px}
+.q{font:600 15px/1.4 var(--mono);margin:0 0 10px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+button{font:500 14px/1.2 var(--mono);padding:11px 14px;border:1px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;border-radius:3px}
+button:hover{background:var(--ink);color:#fff}
+button.on{background:var(--ink);color:#fff}
+button[disabled]{opacity:.4;cursor:default}
+kbd{font:400 11px var(--mono);border:1px solid var(--line);padding:1px 5px;border-radius:3px;margin-left:6px;color:var(--ash)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 10px;font:400 13px var(--mono)}
+select,input{font:400 13px var(--mono);padding:8px;border:1px solid var(--line);background:#fff}
+input{flex:1;min-width:240px}
+.nav{display:flex;justify-content:space-between;margin-top:22px}
+.nav button{padding:8px 12px;font-size:12.5px}
+.msg{font:400 12.5px var(--mono);color:var(--rust);min-height:18px;margin-top:8px}
+.done{font:400 15px var(--serif);padding:30px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Does the write-up contradict the boxes?</h1>
+<p class="sub">One report at a time. You are not told whether the sweep flagged it. A conflict is a plain, quotable contradiction between a coded box and the mechanic's own words. Missing detail is not a conflict.</p>
+<div class="prog"><span id="prog">loading</span><span id="rid"></span></div>
+<div id="item"></div>
+<div class="msg" id="msg"></div>
+<div class="nav"><button type="button" id="prev">&larr; previous</button><button type="button" id="skip">skip for now &rarr;</button></div>
+</div>
+<script>
+var KEY=new URLSearchParams(location.search).get("key")||"";
+var D=document,cur=null,total=0,done=0;
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function api(u,opt){opt=opt||{};opt.headers=Object.assign({"X-Label-Key":KEY,"Content-Type":"application/json"},opt.headers||{});return fetch(u,opt).then(function(r){if(r.status===403)throw new Error("wrong key");return r.json()})}
+function show(d){total=d.total;done=d.done;cur=d.item;
+  D.getElementById("prog").textContent=done+" of "+total+" labelled"+(cur?" · report "+(cur.pos)+" of "+total:"");
+  if(!cur){D.getElementById("item").innerHTML='<p class="done">Every report in the queue has a label. The measurement is live at <a href="/conflicts/">/conflicts/</a>.</p>';D.getElementById("rid").textContent="";return}
+  D.getElementById("rid").innerHTML='<a href="/case/'+encodeURIComponent(cur.id)+'" target="_blank" rel="noopener">'+esc(cur.id)+'</a>';
+  var L=cur.label||{};
+  var h='<div class="codes">'
+   +'<b>date</b><span>'+esc(cur.date||"")+'</span>'
+   +'<b>aircraft</b><span>'+esc(cur.aircraft||"")+(cur.tail?" · N"+esc(cur.tail):"")+'</span>'
+   +'<b>filed by</b><span>'+esc(cur.operator_name||cur.operator||"")+'</span>'
+   +'<b class="hot">crew action code</b><span class="hot">'+cur.crew.map(esc).join("; ")+'</span>'
+   +'<b class="hot">nature codes</b><span class="hot">'+cur.nature.map(esc).join("; ")+'</span>'
+   +'<b>how found</b><span>'+esc(cur.discovered||"")+'</span>'
+   +'<b>stage</b><span>'+esc(cur.stage||"")+'</span>'
+   +'<b>system</b><span>'+esc(cur.system||"")+'</span>'
+   +(cur.part?'<b>part</b><span>'+esc(cur.part)+'</span>':'')
+   +'</div>'
+   +'<div class="verb">'+esc(cur.text)+'</div>'
+   +'<p class="q">Do the words contradict a coded box?</p>'
+   +'<div class="btns">'
+   +'<button type="button" data-v="conflict"'+(L.verdict==="conflict"?' class="on"':'')+'>Yes, a real conflict<kbd>1</kbd></button>'
+   +'<button type="button" data-v="no_conflict"'+(L.verdict==="no_conflict"?' class="on"':'')+'>No conflict<kbd>2</kbd></button>'
+   +'<button type="button" data-v="unsure"'+(L.verdict==="unsure"?' class="on"':'')+'>Cannot tell<kbd>3</kbd></button>'
+   +'</div>'
+   +'<div class="row"><label>which box <select id="field"><option value="">(choose if yes)</option><option'+(L.field==="crew action"?" selected":"")+'>crew action</option><option'+(L.field==="nature"?" selected":"")+'>nature</option><option'+(L.field==="other"?" selected":"")+'>other</option></select></label>'
+   +'<input id="note" placeholder="optional: the words that contradict the box" value="'+esc(L.note||"")+'"></div>';
+  D.getElementById("item").innerHTML=h;
+  D.querySelectorAll(".btns button").forEach(function(b){b.onclick=function(){save(b.dataset.v)}});
+  D.getElementById("msg").textContent="";
+  window.scrollTo(0,0)}
+function load(pos){api("/z/api/label/next?t="+Date.now()+(pos!=null?"&pos="+pos:"")).then(show).catch(function(e){D.getElementById("msg").textContent=e.message})}
+function save(v){if(!cur)return;var body={id:cur.id,verdict:v,field:D.getElementById("field").value,note:D.getElementById("note").value,who:"henk"};
+  if(v==="conflict"&&!body.field){D.getElementById("msg").textContent="Say which box: crew action, nature, or other.";return}
+  D.querySelectorAll(".btns button").forEach(function(b){b.disabled=true});
+  api("/z/api/label/save",{method:"POST",body:JSON.stringify(body)}).then(function(){load()}).catch(function(e){D.getElementById("msg").textContent=e.message;D.querySelectorAll(".btns button").forEach(function(b){b.disabled=false})})}
+D.getElementById("prev").onclick=function(){if(cur&&cur.pos>1)load(cur.pos-1)};
+D.getElementById("skip").onclick=function(){if(cur)load(cur.pos+1)};
+D.addEventListener("keydown",function(e){if(e.target.tagName==="INPUT"||e.target.tagName==="SELECT")return;if(e.key==="1")save("conflict");if(e.key==="2")save("no_conflict");if(e.key==="3")save("unsure")});
+load();
+</script>
+</body>
+</html>

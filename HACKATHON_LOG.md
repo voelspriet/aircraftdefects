@@ -160,3 +160,43 @@ plus the model's text, and composes each sentence as a frame-exact slide with
 a push-in and a paced reveal. Those cuts carried a synthesised narration and are
 not published. The 83-second introduction that is published is narrated by me:
 https://www.youtube.com/watch?v=vDMEKsNj7ss.
+
+## After the deadline, 5 September 2026
+
+The hackathon closed on 1 September. Winners were promised for the 2nd and are
+still "coming soon". An audit of my own entry against the brief, "push the
+model into new territory", found that most of what the brief asked for was in
+the build folder and not on the page: a 24-step tool-calling agent had built
+the site and never ran on it, the quote check dropped sentences silently, and
+the case page did not check at all. Three things were built and deployed in
+one day, none for this hackathon's judges, all for the next one and for the
+site.
+
+**The cuts are shown.** Both pages print what the quote check removed under a
+"Show what was cut" toggle, struck through, with the phrase that was not in the
+record. The case page's five questions now pass the check. Proven by
+intercepting a stream in a headless browser and marking a sentence as failed.
+
+**A blind measurement of the conflicts ledger.** `/z/label`: every ledger
+entry plus an equal number of unflagged reports from the same searches,
+shuffled; one report at a time, codes decoded beside the write-up, no sign of
+which was flagged. `/z/api/conflicts/eval` reports precision and recall with
+Wilson intervals; the conflicts page prints them at 20 decided. Found on the
+way: the five-minute cache hook replayed the queue and the judge counts, so
+those responses are now no-store.
+
+**Chase this lead.** The model gets five tools over the file and works a
+tail or a record itself, one call per step, twelve at most, each step on the
+page with a link. The closing text passes the quote check and a number check.
+Measured: N704AL in four steps and 32 seconds; a 2014 Pilatus report in nine
+steps and 68 seconds with one sentence cut for a year the file had not
+returned.
+
+**Also found in production:** two synchronous gunicorn workers meant any two
+open streams hung the whole site with 504s. The service now runs threaded
+workers; four parallel streams and a page load together answered in a fifth
+of a second.
+
+**Not built:** image input. The model is multimodal and the site never sends
+it a pixel. That waits on photographs of placards and data plates that are
+mine to use.

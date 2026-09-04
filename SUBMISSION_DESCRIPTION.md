@@ -116,6 +116,34 @@ sentence removed". Click any sentence and the records it stands on open
 beneath it, with the quoted fragment beside the record number, airline, tail
 and date. The check costs no tokens and cannot be argued with.
 
+Since 5 September the cut is shown, not hidden. Under every reading, "Show
+what was cut" opens the removed sentences struck through, with the phrase that
+was not in the record beside each. The case page's five questions, which had
+streamed unchecked, now pass the same check and print the same score.
+
+**Chase this lead.** Everything above hands the model what the server chose.
+This is the reverse. On any aircraft view and on every report, the model is
+given five tools over the file, search, open a record, count, the FAA registry
+and the conflicts ledger, and a lead. It works the file itself, one call at a
+time, at most twelve calls and about a minute. Every call appears on the page
+as it happens with a link to the same view, so the reader can retrace each
+step. The closing text passes the quote check and one more: a number the file
+did not return is cut, and the reader is shown which number. On N704AL it
+looked up the registry, searched the tail, opened both reports and wrote the
+dated paragraphs and four questions for the airline in 32 seconds. On a 2014
+Pilatus report it ran nine calls, found the report in the conflicts ledger,
+and had one sentence cut for a year the file had not returned.
+
+**The conflicts ledger, measured by hand.** Two earlier attempts to put a
+number on the ledger failed for want of human labels and are written up in
+the repository. There is now a blind labelling queue: every ledger entry and
+an equal number of unflagged reports from the same 35 searches the sweep
+reads, shuffled, shown one at a time with the codes decoded beside the
+write-up and no sign of which the sweep flagged. Once 20 are decided the
+conflicts page prints precision and recall with their intervals, the sample
+size, the date, and what the denominator is. The labelling is one person's
+afternoon and is in progress.
+
 **Next three clicks.** After a reading, the model proposes three narrower
 slices worth opening, with a reason from what it just read. The server
 resolves each against the file first and prints the real count; a suggestion

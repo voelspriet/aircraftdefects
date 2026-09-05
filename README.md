@@ -245,6 +245,20 @@ Pilatus report from 2014 it ran nine calls, found the report in the conflicts
 ledger, and had one sentence cut for a year the file had not returned. Six
 chases an hour per reader. Endpoint: `/z/api/stream/chase?tail=` or `?id=`.
 
+### Read a photo
+
+Choose "a photo of a placard or data plate" in the search box and point the
+phone at a data plate, a placard, a logbook page or a part label. The browser
+shrinks it to 1600 pixels, the server strips its metadata and sends it once to
+GLM-5.3-Flash, which is multimodal, with one instruction: transcribe what is
+printed and nothing else. Every field it names must be verbatim in the lines it
+says it read, or it is left out and the page says so. The server then asks the
+file what it holds for that registration, serial, part or model and offers each
+as a click with its count, and shows today's FAA registry row for the tail.
+Photographs of people are refused. Nothing is stored. A test plate reading
+N704AL came back in 3 seconds with all five fields verbatim. Ten photos an hour
+per reader. Endpoint: `POST /z/api/read-image`.
+
 ### Prove it
 
 Every quote the model makes is checked by the server against the record it
@@ -401,13 +415,13 @@ endpoints where it reads the FAA's own words live, each one listed in
 [`MODEL_USE.md`](MODEL_USE.md) with its guard and its measured cost. The frame
 around those readings, the page at the root, was not written by GLM-5.3-Flash.
 
-By character count of everything this repository serves, **65.0% is the model's
-and 35.0% is not**, counted by
+By character count of everything this repository serves, **64.3% is the model's
+and 35.7% is not**, counted by
 [`build/count_provenance.py`](build/count_provenance.py). Run it with `--check`
 and it fails if the table has drifted.
 
 **The other contributor.** GitHub lists two authors. A coding assistant, Claude
-Code, directed by me, wrote the 35.0% that is not GLM's: the frame at the root
+Code, directed by me, wrote the 35.7% that is not GLM's: the frame at the root
 that holds the model's readings, the build and splice scripts, the browser
 harnesses that measure the page, the deployment plumbing, and this
 documentation. It also wrote the guards around the model, the substring check

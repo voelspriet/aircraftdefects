@@ -1701,6 +1701,143 @@ def stream_chase():
                     headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
+# ---- hand-written, 5 September 2026: a photo, read into the file. GLM-5.3-Flash
+# is multimodal and until now the site never sent it a pixel. A reader photographs
+# a data plate, a placard, a logbook page or a part label; the model reads only
+# what is printed, returns it as fields, and every field must be verbatim in the
+# lines it says it saw or it is blanked. The server then asks the file what it
+# holds for that tail, part or model, and the page offers those as clicks. The
+# photo is resized in memory, stripped of its metadata, sent once, and dropped.
+_IMG_IP = {}
+_IMG_PER_HOUR = 10
+_IMG_PROMPT = (
+ "Read this photograph of an aircraft data plate, placard, logbook or maintenance record page, or part label. "
+ "Transcribe only what is printed or written on it. Do not guess, complete, or normalise anything. "
+ "Answer JSON only:\n"
+ '{"lines": ["every line of text you can read, verbatim, in order"], '
+ '"tail": "US registration exactly as printed (like N704AL) or null", '
+ '"serial": "aircraft serial or manufacturer serial number exactly as printed, or null", '
+ '"part_number": "part number exactly as printed, or null", "part_name": "part name as printed, or null", '
+ '"manufacturer": "as printed or null", "model": "aircraft or part model as printed or null", '
+ '"date": "any date as printed, or null", "kind": "data plate|placard|logbook|part label|other", '
+ '"person": true if a person is the subject of the photograph, else false, '
+ '"legible": "good|poor"}'
+)
+
+def _norm_img(t):
+    return re.sub(r"[^A-Z0-9]", "", (t or "").upper())
+
+def _glm_image(data_url, prompt):
+    body = {"model": MODEL, "temperature": 1, "top_p": 0.95,
+            "thinking": {"type": "enabled", "clear_thinking": False},
+            "reasoning_effort": "low", "max_tokens": 1200, "stream": True,
+            "response_format": {"type": "json_object"},
+            "messages": [{"role": "user", "content": [
+                {"type": "image_url", "image_url": {"url": data_url}},
+                {"type": "text", "text": prompt}]}]}
+    r = requests.post(ZAI, json=body, timeout=180, stream=True, headers={
+        "Authorization": "Bearer " + key(), "Content-Type": "application/json"})
+    if r.status_code != 200:
+        raise RuntimeError("z.ai %s %s" % (r.status_code, r.text[:200]))
+    out = []
+    for line in r.iter_lines(decode_unicode=True):
+        if not line or not line.startswith("data:"):
+            continue
+        c = line[5:].strip()
+        if c == "[DONE]":
+            break
+        try:
+            d = json.loads(c)
+        except ValueError:
+            continue
+        for ch in d.get("choices", []):
+            piece = (ch.get("delta") or {}).get("content")
+            if piece:
+                out.append(piece)
+    txt = "".join(out)
+    m = re.search(r"\{.*\}", txt, re.S)
+    return json.loads(m.group(0)) if m else {}
+
+@app.post("/z/api/read-image")
+def read_image():
+    ip = (request.headers.get("X-Forwarded-For") or request.remote_addr or "").split(",")[0].strip()
+    now = time.time()
+    hist = [t for t in _IMG_IP.get(ip, []) if now - t < 3600]
+    if len(hist) >= _IMG_PER_HOUR:
+        return jsonify(error="ten photos an hour per reader; try again later"), 429
+    d = request.get_json(force=True, silent=True) or {}
+    src = d.get("image") or ""
+    m = re.match(r"data:image/(png|jpeg|jpg|webp);base64,(.+)$", src, re.S)
+    if not m or len(src) > 9_000_000:
+        return jsonify(error="send a JPEG, PNG or WebP under 6 MB"), 400
+    import base64, io
+    from PIL import Image, ImageOps
+    try:
+        im = Image.open(io.BytesIO(base64.b64decode(m.group(2))))
+        im = ImageOps.exif_transpose(im).convert("RGB")
+    except Exception:
+        return jsonify(error="that is not an image this server can open"), 400
+    im.thumbnail((1600, 1600))
+    buf = io.BytesIO(); im.save(buf, "JPEG", quality=85)   # no EXIF survives a re-save
+    data_url = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+    _IMG_IP[ip] = hist + [now]
+    t0 = time.time()
+    try:
+        r = _glm_image(data_url, _IMG_PROMPT)
+    except Exception as e:
+        return jsonify(error="the model did not answer: " + str(e)[:120]), 502
+    del data_url, buf, im
+    if r.get("person"):
+        return jsonify(error="this reads placards and plates, not people; nothing was kept"), 400
+    lines = [str(x) for x in (r.get("lines") or []) if str(x).strip()][:60]
+    seen = _norm_img(" ".join(lines))
+    fields, blanked = {}, []
+    for k in ("tail", "serial", "part_number", "part_name", "manufacturer", "model", "date"):
+        v = r.get(k)
+        v = str(v).strip() if v not in (None, "", "null") else None
+        if v and _norm_img(v) and _norm_img(v) in seen:
+            fields[k] = v
+        elif v:
+            blanked.append(k)      # the model named a value it did not transcribe: not verbatim, so not shown
+    matches = []
+    tail = re.sub(r"[^A-Z0-9]", "", (fields.get("tail") or "").upper()).lstrip("N")
+    if tail and 1 <= len(tail) <= 5:
+        try:
+            n = api("/api/search", tail=tail, limit=1).get("total") or 0
+            matches.append({"filters": {"tail": tail}, "label": "N" + tail, "total": n})
+        except Exception:
+            pass
+        reg = _registry_of(tail) or {}
+        reg.pop("full", None)
+        if reg:
+            matches[-1]["registry"] = reg
+    if fields.get("part_number"):
+        try:
+            n = api("/api/search", part=fields["part_number"], limit=1).get("total") or 0
+            matches.append({"filters": {"part": fields["part_number"]}, "label": "part " + fields["part_number"], "total": n})
+        except Exception:
+            pass
+    if fields.get("serial"):
+        try:
+            n = api("/api/search", q=fields["serial"], limit=1).get("total") or 0
+            matches.append({"filters": {"q": fields["serial"]}, "label": "serial " + fields["serial"] + " in the write-ups", "total": n})
+        except Exception:
+            pass
+    if fields.get("model"):
+        try:
+            d2 = api("/api/search", model=fields["model"], limit=1)
+            n = d2.get("total") or 0
+            near = ((d2.get("suggestions") or {}).get("model") or {}).get("near") or []
+            if n:
+                matches.append({"filters": {"model": fields["model"]}, "label": "model " + fields["model"], "total": n})
+            for x in near[:3]:
+                matches.append({"filters": {"model": x.get("model")}, "label": "model as the FAA files it: " + str(x.get("model")), "total": x.get("reports")})
+        except Exception:
+            pass
+    return _nostore(jsonify(fields=fields, blanked=blanked, lines=lines, kind=r.get("kind"), legible=r.get("legible"),
+                            matches=matches, seconds=round(time.time() - t0, 1), model=MODEL,
+                            note="Only what is printed. A field the model named but did not transcribe verbatim is left out. The photo was resized in memory, stripped of its metadata, sent once, and not kept."))
+
 # ---- hand-written, 5 September 2026: a human measurement of the conflicts ledger.
 # Two attempts to put a number on the ledger failed (docs/FINDINGS.md): no human
 # had labelled anything. This is the labelling. build/make_label_set.py fills a

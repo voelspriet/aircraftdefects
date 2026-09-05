@@ -134,6 +134,16 @@ dated paragraphs and four questions for the airline in 32 seconds. On a 2014
 Pilatus report it ran nine calls, found the report in the conflicts ledger,
 and had one sentence cut for a year the file had not returned.
 
+**Read a photo.** The model is multimodal and until 5 September the site
+never sent it a pixel. Now the search box takes a photograph of a data plate,
+placard, logbook page or part label. The model transcribes what is printed;
+every field must be verbatim in the lines it says it read or it is left out,
+and the page says which were left out. The file is then asked what it holds
+for that registration, serial, part or model, each offered as a click with its
+count, with today's registry row for the tail. Photographs of people are
+refused, nothing is stored. A test plate reading N704AL came back in 3 seconds
+with all five fields verbatim.
+
 **The conflicts ledger, measured by hand.** Two earlier attempts to put a
 number on the ledger failed for want of human labels and are written up in
 the repository. There is now a blind labelling queue: every ledger entry and
@@ -239,5 +249,5 @@ Inspired by Rory Kennedy's *Freefall: A Reckoning for Boeing*. Built by Henk
 van Ess, 2026. GLM-5.3-Flash wrote
 the tool at /z/rebuilt from written specifications, and does all the live
 reading on the page you land on. By character count of everything this
-repository serves, 65.0% is the model's, counted by
+repository serves, 64.3% is the model's, counted by
 `build/count_provenance.py` rather than claimed.

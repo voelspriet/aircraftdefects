@@ -47,6 +47,7 @@ abstains in a sentence when the write-ups do not carry an answer. All at
 | The Freefall page, "what the NTSB found" and "what the film says" | a z.ai web search run by the server first (mirrors and translations dropped, .gov and named outlets first); the model sees only those results | 220 words, every fact numbered to a result; sources rendered as named links | labelled "the web, not the file"; on first attempt the model skipped the search tool and insisted the film was *Downfall* (2022), which is why the search is now done server-side and the model is held to it | 10 to 19 s |
 | The case page, "Search the web about this report" | the same call, topic built from the tail, airline, type and date of the record plus the first 140 characters of the write-up | same guard: search first, results only, one numbered source per sentence, cached a day per topic; its provenance line says "the web, not the file" | measured 2 September 2026: 12.1 s, 10 results read, on ASAA2024010547162 |
 | Chase this lead, `/z/api/stream/chase` | a tail or record number, and five tools: search, open a record, count, registry, conflicts ledger | one tool call per step, at most 12 steps and 60 s, each streamed to the page with a link; then dated paragraphs citing opened records and four questions for the airline | quote check as everywhere, plus a number no tool returned is cut and shown; six chases an hour per reader | N704AL 4 steps 32 s; CA141106001 9 steps 68 s, 1 sentence cut |
+| Read a photo, `POST /z/api/read-image` | one photograph, shrunk to 1600px and stripped of metadata, with the instruction to transcribe only what is printed | JSON: the lines read, registration, serial, part number, part name, maker, model, date | a field not verbatim in the lines is left out and named; people refused; nothing stored; ten an hour per reader; the file and the registry are then asked, not the model | test plate 3.1 s, 5 of 5 fields verbatim |
 | The case page, `/case/<id>` | the sheet endpoint decodes every field with the FAA's wording beside the plain label; the five questions run there too | a citable page per record | quote and citation copy buttons; caveats before publishing | instant, one lookup |
 
 ### Prove it
@@ -172,14 +173,14 @@ rather than a judge, so it agreed with everything. See F1 in
 Counted, not claimed. Run `python3 build/count_provenance.py --check` and it
 fails if this table has drifted from the repository.
 
-    code this repository serves       965,345 characters
-      GLM-5.3-Flash                   627,581   65.0%
-      not the model's                 337,764   35.0%
+    code this repository serves       976,682 characters
+      GLM-5.3-Flash                   627,581   64.3%
+      not the model's                 349,101   35.7%
 
         the model's page, /z/rebuilt        565,458   written whole from the specs
         the service, app/app.py              62,123   the model's share
-        the page at the root                194,844   hand-written
-        the service, app/app.py             114,451   hand-written blocks
+        the page at the root                199,170   hand-written
+        the service, app/app.py             121,462   hand-written blocks
         the seam and later fixes             28,469   hand-written
 
 ### The earlier page, which is kept but not served

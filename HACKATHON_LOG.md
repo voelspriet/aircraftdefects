@@ -197,6 +197,11 @@ open streams hung the whole site with 504s. The service now runs threaded
 workers; four parallel streams and a page load together answered in a fifth
 of a second.
 
-**Not built:** image input. The model is multimodal and the site never sends
-it a pixel. That waits on photographs of placards and data plates that are
-mine to use.
+**Read a photo.** The model is multimodal and the site had never sent it a
+pixel. The search box now takes a photograph of a data plate, placard, logbook
+page or part label; the model transcribes what is printed, every field must be
+verbatim in the lines it read or it is left out, and the file is asked what it
+holds for the tail, serial, part and model. Tested with a rendered plate, since
+no photograph of a real plate was mine to use: 3 seconds, five of five fields
+verbatim, two reports on the tail, the registry row beside them. Real
+photographs are the next test.

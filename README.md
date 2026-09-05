@@ -1,6 +1,9 @@
 # Five days before the door blew out, a mechanic wrote up a door that would not open. Only insiders could read the report. Now anyone can.
 
 **Live: [aircraftdefects.com](https://aircraftdefects.com/)** · GLM-5.3-Flash, reading the file live · MIT
+
+**For the hackathon jury:** the entry as it stood at the deadline is tagged [`hackathon-deadline`](https://github.com/voelspriet/aircraftdefects/releases/tag/hackathon-deadline). Everything after that tag is later work, kept in the open.
+
 **Video (83 s, my own voice):** https://www.youtube.com/watch?v=vDMEKsNj7ss · **the build, written up:** [Digital Digging](https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with)
 
 In the Netflix documentary [*Freefall*](https://www.netflix.com/title/81780118) I watched the father of a crash victim try to read the database of aircraft defect reports kept by the FAA, the US aviation regulator.

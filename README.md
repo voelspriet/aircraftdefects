@@ -19,12 +19,17 @@ several aircraft of one airline on one day, or a box ticked that contradicts
 the write-up under it. A researcher gets 1.76 million reports readable at once,
 and can ask them questions in plain words.
 
-**The model story, in four lines.** GLM-5.3-Flash built the first version of
+**The model story, in six lines.** GLM-5.3-Flash built the first version of
 this site from written specifications alone, with no code handed to it. Then it
-moved inside the page, where it reads the reports live on every click. A
-substring check on the server makes every quote it produces verifiable against
-the record. Total model spend: $1.07. The specifications, the briefs, its
-reasoning and the count of who wrote what are all in this repository.
+moved inside the page, where it reads the reports live on every click. Then it
+was given tools over the file and a lead, and works the file itself, every call
+on screen with a link; and a camera, reading a data plate or placard straight
+into the file. A substring check on the server makes every quote it produces
+verifiable against the record, every removed sentence is shown, and a number
+the file did not return is cut and named. A blind human labelling of its
+conflicts ledger is under way, precision and recall on the page. Total model
+spend to the deadline: $1.07. The specifications, the briefs, its reasoning
+and the count of who wrote what are all in this repository.
 
 At a dollar a project, a researcher with a public dataset and a free weekend
 can ship the interface the agency never built. The data was always public.

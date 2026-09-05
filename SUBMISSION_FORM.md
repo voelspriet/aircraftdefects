@@ -63,6 +63,27 @@ record it cites, as a literal substring, not by another model. A sentence whose
 quote fails is deleted, and the page prints the score. Click any sentence and it
 opens the records it stands on.
 
+**The model works the file itself.** "Chase this lead", on every aircraft view
+and every report, gives GLM-5.3-Flash five tools over the file: search, open a
+record, count, the FAA registry, the conflicts ledger. It works the lead one call
+at a time, twelve at most, about a minute, and every call appears on the page as
+it happens with a link, so a reader can retrace each step. The closing text passes
+the quote check, and a number the file did not return is cut and named.
+
+**It reads a photograph.** In the search box choose "a photo of a placard or data
+plate" and point the phone at a data plate, placard, logbook page or part label.
+The model transcribes what is printed; every field must be verbatim in the lines
+it read or it is left out; the file and the registry are then asked what they hold
+for that tail, serial, part or model. Nothing is stored.
+
+**The cuts are on screen.** Under every reading, "Show what was cut" opens the
+sentences the check removed, struck through, with the phrase that was not in the
+record.
+
+**It is being measured by hand.** A blind labelling of the conflicts ledger, 212
+reports half flagged and half not, is under way; precision and recall print on
+the conflicts page with their intervals once 20 are decided.
+
 **It says what it cannot answer, first.** Ask which aircraft is most dangerous and
 it refuses: the file records what mechanics found and fixed, not accidents and not
 danger. Counts are of reports filed, not incidents. The FAA file carries no fleet
@@ -75,7 +96,7 @@ Over two days, GLM-5.3-Flash wrote a complete interface to this file on its own,
 from written specifications rather than from code handed to it. It still runs at
 aircraftdefects.com/z/rebuilt, so it can be used rather than described. It also
 designed the nine research features itself, wrote them, and now does every live
-reading on the page. That is 74.3% of the code this repository serves, counted by
+reading on the page. That is 64.3% of the code this repository serves, counted by
 a script rather than claimed.
 
 The corpus behind it is one CSV per year from

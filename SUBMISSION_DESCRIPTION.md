@@ -4,6 +4,33 @@
 **Video (83 s, my own voice):** https://www.youtube.com/watch?v=vDMEKsNj7ss
 **The build, written up:** https://www.digitaldigging.org/p/lets-fix-chaotic-public-data-with
 
+## Where the model is pushed, in the brief's own words
+
+The brief asked for GLM-5.3-Flash pushed into new territory. This is where it is
+on the page, each one live, each one checkable:
+
+- **It works the file itself, with tools.** Give it a tail number or a report
+  and it searches, opens records, counts, reads the FAA registry and the
+  conflicts ledger, one call at a time, twelve at most, every call on the page
+  as it happens with a link to the same view. Then it writes what the file
+  shows and what to ask the airline. ("Chase this lead", on every aircraft view
+  and every report.)
+- **It reads a photograph.** A data plate, a placard, a logbook page or a part
+  label, transcribed verbatim, every field checked against the lines it read,
+  then matched to the file and the registry. ("A photo of a placard or data
+  plate", in the search box.)
+- **It reads long.** Up to 300 write-ups, about 260,000 tokens, in one call,
+  and names what keeps coming back. ("What recurs here.")
+- **Its errors are on screen.** Every quote is checked against the record as a
+  literal substring, every removed sentence is shown under "Show what was cut",
+  and a number the file did not return is cut and named.
+- **It is being measured.** A blind human labelling of the conflicts ledger is
+  under way: 212 reports, half flagged, half not, shuffled. Precision and
+  recall print on the conflicts page with their intervals at 20 decided.
+- **Who wrote what is counted, not claimed.** 64.3% of the code this
+  repository serves is the model's, by `build/count_provenance.py`. The rest,
+  and which parts, is in "Who wrote what" below.
+
 ## The problem
 
 I was watching *Freefall: A Reckoning for Boeing* on Netflix and saw relatives
@@ -28,9 +55,11 @@ plug blow-out of 5 January 2024, in the mechanic's own words, and, five days
 earlier, a door that was hard to open, aircraft grounded. Both open from the red
 Freefall cell among the leads, at aircraftdefects.com/#view=freefall.
 
-The work fell into two acts. First we had to rebuild the original database
+The work fell into three acts. First we had to rebuild the original database
 into something a human can read at all. Then we had to make sense of it,
-which is where GLM-5.3-Flash stopped being a builder and became a reader.
+which is where GLM-5.3-Flash stopped being a builder and became a reader. Then,
+after the deadline, the model was let loose on the file with tools and a
+camera, with every move on screen.
 
 ## Act one: rebuild the database so a human can read it
 
@@ -116,7 +145,13 @@ sentence removed". Click any sentence and the records it stands on open
 beneath it, with the quoted fragment beside the record number, airline, tail
 and date. The check costs no tokens and cannot be argued with.
 
-Since 5 September the cut is shown, not hidden. Under every reading, "Show
+## Act three: let the model work the file itself
+
+The two acts above hand the model what the server chose. On 5 September, after
+the deadline, the reverse was built: the model chooses, and everything it
+chooses is shown.
+
+**The cuts are shown.** Under every reading, "Show
 what was cut" opens the removed sentences struck through, with the phrase that
 was not in the record beside each. The case page's five questions, which had
 streamed unchecked, now pass the same check and print the same score.
@@ -135,8 +170,9 @@ Pilatus report it ran nine calls, found the report in the conflicts ledger,
 and had one sentence cut for a year the file had not returned.
 
 **Read a photo.** The model is multimodal and until 5 September the site
-never sent it a pixel. Now the search box takes a photograph of a data plate,
-placard, logbook page or part label. The model transcribes what is printed;
+never sent it a pixel. In the search box, choose "a photo of a placard or data
+plate": the picker opens, on a phone the camera. It takes a photograph of a
+data plate, placard, logbook page or part label. The model transcribes what is printed;
 every field must be verbatim in the lines it says it read or it is left out,
 and the page says which were left out. The file is then asked what it holds
 for that registration, serial, part or model, each offered as a click with its

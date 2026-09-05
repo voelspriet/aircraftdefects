@@ -36,6 +36,8 @@ What fell is the cost of making it usable.
 2. Click a dark part. That zone becomes the selection, in red type, with a counted sentence and the records beneath it, 25 at a time.
 3. Click one report. It opens on its own page, `/case/<control number>`, where GLM-5.3-Flash answers five questions: what actually happened, was anyone in danger, what did the mechanics do, does it say why, and what to check next.
 4. Or start from the documentary: [#view=freefall](https://aircraftdefects.com/#view=freefall) opens the two reports on N704AL, the aircraft whose door plug blew out.
+5. Or let the model work the file: on [?tail=704AL](https://aircraftdefects.com/?tail=704AL) press "Chase this lead" and watch it search, open records and read the registry, one call at a time, each with a link.
+6. Or photograph a data plate: in the search box choose "a photo of a placard or data plate", pick the photo, and the fields it read become clicks into the file.
 
 Free, no login. Any panel marked `model reads` is the model reading the FAA's write-ups live, and every quote is checked against the record before you see it. Counts are counts of reports filed, not of incidents, and the site calculates no safety rates: the point is to find leads, not to rank airlines.
 
